@@ -250,7 +250,7 @@ app.put("/api/time-entries/:id", async (req, res) => {
     try {
       const { id } = req.params;
       const { taskId, hours, minutes, project, location, remarks, entry_date } = req.body;
-  
+        console.log(req.body)
       const result = await pool.query(
         `
         UPDATE time_entries
@@ -277,6 +277,81 @@ app.put("/api/time-entries/:id", async (req, res) => {
       res.status(500).json({ error: "Failed to update time entry" });
     }
   });
+  
+
+  // get all user time enteries report
+
+  app.get('/api/reports/time-entries', async (req, res) => {
+    const { startDate, endDate } = req.query
+    if (!startDate || !endDate) {
+      return res.status(400).json({ message: 'startDate and endDate are required' })
+    }
+  
+    try {
+      const result = await pool.query(
+        `
+        SELECT 
+          user_name,
+          entry_date,
+          task_id,
+          project_name,
+          location,
+          remarks,
+          hours,
+          minutes,
+          (hours * 60 + minutes) AS total_minutes
+        FROM time_entries
+        WHERE entry_date BETWEEN $1 AND $2
+        ORDER BY user_name, entry_date ASC
+        `,
+        [startDate, endDate]
+      )
+  
+      // ---- Group by user and calculate totals ----
+      const users = {}
+  
+      result.rows.forEach(row => {
+        const user = row.user_name
+  
+        if (!users[user]) {
+          users[user] = {
+            user_name: user,
+            total_minutes: 0,
+            entries: []
+          }
+        }
+  
+        users[user].entries.push({
+          date: row.entry_date,
+          task_id: row.task_id,
+          project: row.project_name,
+          hours: row.hours,
+          minutes: row.minutes,
+          location: row.location,
+          remarks: row.remarks
+        })
+  
+        users[user].total_minutes += row.total_minutes
+      })
+  
+      // Convert minutes → hours
+      const response = Object.values(users).map(user => ({
+        user_name: user.user_name,
+        total_hours: Math.floor(user.total_minutes / 60),
+        total_minutes: user.total_minutes % 60,
+        entries: user.entries
+      }))
+  
+      res.json({
+        startDate,
+        endDate,
+        users: response
+      })
+    } catch (err) {
+      console.error(err)
+      res.status(500).json({ message: 'Server error' })
+    }
+  })
   
 
 app.get("/health", (req, res) => {

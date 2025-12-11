@@ -1,4 +1,4 @@
-import { useState,useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { IoChevronBack, IoChevronForward, IoCalendar, IoTime, IoCheckmarkCircle, IoDocumentText, IoPerson, IoTrash } from 'react-icons/io5'
 import { formatDate, formatTime } from '../utils/formatters'
@@ -26,19 +26,19 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
     progress: undefined,
     theme: "colored",
     transition: Zoom,
-    });
+  });
 
-    const SubmitNotify = () => toast.success('Timesheet submitted successfully!', {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-      transition: Zoom,
-      });
+  const SubmitNotify = () => toast.success('Timesheet submitted successfully!', {
+    position: "top-center",
+    autoClose: 3000,
+    hideProgressBar: true,
+    closeOnClick: true,
+    pauseOnHover: true,
+    draggable: true,
+    progress: undefined,
+    theme: "colored",
+    transition: Zoom,
+  });
 
   const [currentWeek, setCurrentWeek] = useState(() => {
     const today = new Date()
@@ -51,15 +51,15 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
 
   const normalizeDateStr = (date) => {
     if (!date) return '';
-    
+
     // If it's already a YYYY-MM-DD string, return it
     if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}/.test(date)) {
       return date.split('T')[0];
     }
-    
+
     // If it's a Date object or needs conversion
     const d = date instanceof Date ? date : new Date(date);
-    
+
     // Make sure we're using local date, not UTC
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
@@ -106,26 +106,25 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
       : users
     : []
 
-    const handleOpenAddTimeModal = (dateStr) => {
-      if (!selectedUser && users) {
-        toast.error('Please select your name first before adding time entries.', {
-          position: "top-center",
-          autoClose: 3000,
-          hideProgressBar: true,
-          theme: "colored",
-        })
-        setShowUserDropdown(true)
-        return
-      }
-      setSelectedDateForModal(dateStr)
-      setShowAddTimeModal(true)
+  const handleOpenAddTimeModal = (dateStr) => {
+    if (!selectedUser && users) {
+      toast.error('Please select your name first before adding time entries.', {
+        position: "top-center",
+        autoClose: 3000,
+        hideProgressBar: true,
+        theme: "colored",
+      })
+      setShowUserDropdown(true)
+      return
     }
+    setSelectedDateForModal(dateStr)
+    setShowAddTimeModal(true)
+  }
 
-    const addTimeEntry = (dateStr, taskId, hours, minutes, metadata = {}) => {
-      // Normalize dateStr to YYYY-MM-DD format to match database format
+  const addTimeEntry = async (dateStr, taskId, hours, minutes, metadata = {}) => {
+    try {
       const normalizedDate = normalizeDateStr(dateStr);
-      console.log('Adding time entry - Input dateStr:', dateStr, 'Normalized:', normalizedDate); // Debug log
-  
+
       const payload = {
         taskId,
         user: selectedUser || metadata.user || '',
@@ -136,8 +135,19 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
         hours: parseInt(hours) || 0,
         minutes: parseInt(minutes) || 0,
       }
-  
-      // Optimistically update UI first
+
+      // Send to API
+      const response = await fetch('http://localhost:4000/api/time-entries', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      if (!response.ok) throw new Error('Failed to save time entry');
+
+      const newEntry = await response.json();
+
+      // Update UI with the new entry (including ID from database)
       setTimeEntries((prev) => {
         const dateEntries = prev[normalizedDate] || []
         return {
@@ -145,6 +155,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
           [normalizedDate]: [
             ...dateEntries,
             {
+              id: newEntry.id, // Use the ID from database response
               taskId,
               hours: parseInt(hours) || 0,
               minutes: parseInt(minutes) || 0,
@@ -155,16 +166,15 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
             },
           ],
         }
-      })
-  
-      // Persist to API (non-blocking)
-      fetch('http://localhost:4000/api/time-entries', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      })
-      .catch((err) => console.error('Failed to save time entry', err))
+      });
+
+      return newEntry;
+
+    } catch (err) {
+      console.error('Failed to save time entry', err);
+      throw err;
     }
+  }
 
   const handleSubmitTimesheet = () => {
     // Here you would typically send the data to an API
@@ -172,40 +182,89 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
     SubmitNotify();
   }
 
-  const deleteTimeEntry = async (dateStr, entryId) => {
-    // If no ID (very old entry), just delete locally
-    if (!entryId) {
-      setTimeEntries(prev => {
-        const updated = { ...prev }
-        updated[dateStr] = updated[dateStr].filter(e => e !== entryId)
-        if (updated[dateStr]?.length === 0) delete updated[dateStr]
-        return updated
-      })
+  const deleteTimeEntry = async (dateStr, entryId, entryIndex) => {
+    // If we have an entryId (from database), use it
+    // Otherwise use entryIndex for local entries
+    if (!entryId && entryIndex === undefined) {
+      console.error('Cannot delete: No entryId or index provided')
       return
     }
-  
+
     if (!window.confirm('Delete this time entry?')) return
-  
-    // Optimistic UI delete
-    setTimeEntries(prev => {
-      const updated = { ...prev }
-      updated[dateStr] = updated[dateStr].filter(e => e.id !== entryId)
-      if (updated[dateStr]?.length === 0) delete updated[dateStr]
-      return updated
-    })
-  
+
     try {
-      const res = await fetch(`http://localhost:4000/api/time-entries/${entryId}`, {
-        method: 'DELETE',
+      // If it's a database entry (has entryId), make API call
+      if (entryId) {
+        const res = await fetch(`http://localhost:4000/api/time-entries/${entryId}`, {
+          method: 'DELETE',
+        })
+
+        if (!res.ok) throw new Error('Delete failed')
+      }
+
+      // Optimistic update
+      setTimeEntries(prev => {
+        const updated = { ...prev }
+
+        if (!updated[dateStr]) return updated
+
+        // Filter out the entry
+        updated[dateStr] = updated[dateStr].filter((entry, index) => {
+          if (entryId) {
+            // Match by database ID
+            return entry.id !== entryId
+          } else {
+            // Match by index for local entries
+            return index !== entryIndex
+          }
+        })
+
+        // Clean up empty date
+        if (updated[dateStr].length === 0) {
+          delete updated[dateStr]
+        }
+
+        return updated
       })
-  
-      if (!res.ok) throw new Error()
-  
-      toast.success('Deleted successfully', { theme: 'colored' })
+
+      toast.success('Entry deleted', { theme: 'colored' })
     } catch (err) {
-      toast.error('Failed to delete')
-      // Revert on error (optional – you can skip if you want)
-      window.location.reload() // simple way, or refetch data
+      toast.error('Failed to delete from server')
+      console.error(err)
+      // Optional: refetch entries to recover state
+      if (selectedUser) {
+        // Trigger a refetch
+        const fetchUserEntries = async (userName) => {
+          try {
+            const res = await fetch(`http://localhost:4000/api/time-entries/user/${userName}`);
+            if (!res.ok) throw new Error('Failed to fetch');
+            const data = await res.json();
+
+            const entriesByDate = {};
+            data.forEach((entry) => {
+              const dateStr = entry.entry_date.split('T')[0];
+              if (!entriesByDate[dateStr]) entriesByDate[dateStr] = [];
+
+              entriesByDate[dateStr].push({
+                id: entry.id, // Ensure ID is included
+                taskId: entry.task_id,
+                hours: entry.hours,
+                minutes: entry.minutes,
+                project: entry.project_name,
+                user: entry.user_name,
+                location: entry.location,
+                remarks: entry.remarks,
+              });
+            });
+
+            setTimeEntries(entriesByDate);
+          } catch (err) {
+            console.error('Failed to fetch time entries', err);
+            toast.error('Failed to refresh data', { theme: 'colored' });
+          }
+        };
+        fetchUserEntries()
+      }
     }
   }
 
@@ -226,24 +285,84 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
     setCurrentWeek(monday)
   }
 
+  const updateTimeEntry = async (entryId, updatedData) => {
+    try {
+      // Send update to API
+      const response = await fetch(`http://localhost:4000/api/time-entries/${entryId}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          taskId: updatedData.taskId,
+          hours: updatedData.hours,
+          minutes: updatedData.minutes,
+          project: updatedData.project,
+          location: updatedData.location,
+          remarks: updatedData.remarks,
+          entry_date: updatedData.entry_date || dateStr, // Use entry_date field
+        }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update entry');
+      }
+
+      const updatedEntry = await response.json();
+
+      // Update the local state with the updated entry
+      setTimeEntries(prev => {
+        const updated = { ...prev };
+
+        // Find and update the entry in state
+        Object.keys(updated).forEach(dateKey => {
+          if (updated[dateKey]) {
+            updated[dateKey] = updated[dateKey].map(entry => {
+              if (entry.id === entryId) {
+                return {
+                  ...entry,
+                  taskId: updatedData.taskId,
+                  hours: updatedData.hours,
+                  minutes: updatedData.minutes,
+                  project: updatedData.project || '',
+                  location: updatedData.location || '',
+                  remarks: updatedData.remarks || '',
+                };
+              }
+              return entry;
+            });
+          }
+        });
+
+        return updated;
+      });
+
+      return updatedEntry;
+
+    } catch (error) {
+      console.error('Error updating time entry:', error);
+      throw error; // Re-throw so modal can handle it
+    }
+  };
+
   useEffect(() => {
     if (!selectedUser) return
-  
+
     const fetchUserEntries = async () => {
       try {
         const res = await fetch(`http://localhost:4000/api/time-entries/user/${selectedUser}`)
         if (!res.ok) throw new Error('Failed to fetch')
         const data = await res.json()
-        console.log(data)
+        console.log('Fetched data:', data) // Check what data looks like
+
         const entriesByDate = {}
         data.forEach((entry) => {
-          // Use the date string directly from the database
-          // Most SQL databases return dates as 'YYYY-MM-DD' string
-          const dateStr = entry.entry_date.split('T')[0] // Handle both date and datetime formats
-          console.log(dateStr)
+          const utcDate = new Date(entry.entry_date)
+          const dateStr = normalizeDateStr(utcDate)
           if (!entriesByDate[dateStr]) entriesByDate[dateStr] = []
-  
+
           entriesByDate[dateStr].push({
+            id: entry.id, // ← ADD THIS
+            // OR id: entry.entry_id, // depending on your API response
             taskId: entry.task_id,
             hours: entry.hours,
             minutes: entry.minutes,
@@ -253,16 +372,15 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
             remarks: entry.remarks,
           })
         })
-  
+
         setTimeEntries(entriesByDate)
       } catch (err) {
         console.error('Failed to fetch time entries', err)
       }
     }
-  
+
     fetchUserEntries()
   }, [selectedUser, setTimeEntries])
-  
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm mt-4">
       <ToastContainer
@@ -328,7 +446,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
                   onClick={() => {
                     setSelectedUser('')
                     setSearchUser('')
-                    setTimeEntries({}) 
+                    setTimeEntries({})
                   }}
                   className="text-indigo-500 hover:text-indigo-700 ml-2"
                 >
@@ -374,8 +492,8 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
           </div>
           <div
             className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${exceedsLimit
-                ? 'bg-red-50 border-red-300'
-                : 'bg-indigo-50 border-indigo-200'
+              ? 'bg-red-50 border-red-300'
+              : 'bg-indigo-50 border-indigo-200'
               }`}
           >
             <IoTime className={`w-4 h-4 ${exceedsLimit ? 'text-red-600' : 'text-indigo-600'}`} />
@@ -435,51 +553,45 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
                 {dayEntries.map((entry, entryIndex) => {
                   const task = tasks.find((t) => t.id === entry.taskId)
                   return (
-                    <div
-                      key={entryIndex}
-                      className="p-2 bg-white border border-gray-200 rounded-lg space-y-1 flex-shrink-0"
-                    >
-                      <div className="flex justify-between items-start gap-2">
+                    <div key={entry.id || entryIndex} className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow transition">
+                      <div className="flex justify-between items-start gap-3">
                         <div className="flex-1 min-w-0">
-                          <p className="text-xs font-semibold text-gray-900 truncate">
-                            {task?.title || 'Unknown Task'}
-                          </p>
-                          <p className="text-xs text-gray-500">
-                            {entry.hours}h {entry.minutes}m
-                          </p>
-                          {entry.project && (
-                            <p className="text-xs text-gray-600 mt-0.5">Project: {entry.project}</p>
-                          )}
-                          {entry.location && (
-                            <p className="text-xs text-gray-600">📍 {entry.location}</p>
-                          )}
-                          {entry.user && (
-                            <p className="text-xs text-indigo-600 mt-0.5">👤 {entry.user}</p>
+                          <p className="font-semibold text-sm truncate">{task?.title || 'Task'}</p>
+                          <p className="text-xs text-gray-600">{entry.hours}h {entry.minutes}m</p>
+                          {entry.project && <p className="text-xs text-gray-500">Project: {entry.project}</p>}
+                          {entry.location && <p className="text-xs text-gray-500">Location: {entry.location}</p>}
+                          {entry.remarks && (
+                            <p className="text-xs text-gray-600 italic mt-1 flex items-start gap-1">
+                              <IoDocumentText className="w-3 h-3 mt-0.5" />
+                              {entry.remarks}
+                            </p>
                           )}
                         </div>
-                        {/* <button
-                          className="bg-transparent border-none text-red-500 text-xl leading-none cursor-pointer p-1 rounded hover:bg-red-50 transition-all flex-shrink-0"
-                          onClick={() => deleteTimeEntry(dateStr, entry.id)}
-                          title="delete"
-                        >
-                          ×
-                        </button> */}
-                        <button
-  onClick={() => deleteTimeEntry(dateStr, entry.id)}  // ← make sure entry.id exists
-  className="text-red-500 hover:bg-red-50 p-1 rounded transition"
-  title="Delete"
->
-  <IoTrash className="w-4 h-4" />
-</button>
                       </div>
-                      {entry.remarks && (
-                        <div className="mt-1 pt-1 border-t border-gray-100">
-                          <div className="flex items-start gap-1">
-                            <IoDocumentText className="w-3 h-3 text-gray-400 mt-0.5 flex-shrink-0" />
-                            <p className="text-xs text-gray-600 italic">{entry.remarks}</p>
-                          </div>
-                        </div>
-                      )}
+
+                      {/* Action buttons at the end */}
+                      <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-gray-100">
+                        {/* Edit Button */}
+                        <button
+                          onClick={() => {
+                            setEditingEntry(entry)
+                            setSelectedDateForModal(dateStr)
+                            setShowAddTimeModal(true)
+                          }}
+                          className="text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded text-xs font-medium  transition-colors"
+                        >
+                          Edit
+                        </button>
+
+                        {/* Delete Button */}
+                        <button
+                          onClick={() => deleteTimeEntry(dateStr, entry.id, entryIndex)}
+                          className="text-red-600 hover:bg-red-50 px-3 py-1.5 rounded text-xs font-medium   transition-colors flex items-center gap-1"
+                        >
+                          <IoTrash className="w-3.5 h-3.5" />
+
+                        </button>
+                      </div>
                     </div>
                   )
                 })}
@@ -500,12 +612,18 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
       />
       <AddTimeModal
         isOpen={showAddTimeModal}
-        onClose={() => setShowAddTimeModal(false)}
+        onClose={() => {
+          setShowAddTimeModal(false)
+          setEditingEntry(null)
+        }}
         dateStr={selectedDateForModal}
         tasks={tasks}
         projects={projects}
         selectedUser={selectedUser}
+        entry={editingEntry}
         onAdd={addTimeEntry}
+        onUpdate={updateTimeEntry}        // ← add this
+        onDelete={deleteTimeEntry}        // ← add this
       />
     </div>
   )
