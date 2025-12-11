@@ -13,6 +13,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
   const [showAddTimeModal, setShowAddTimeModal] = useState(false)
   const [selectedDateForModal, setSelectedDateForModal] = useState('')
   const [selectedUser, setSelectedUser] = useState('')
+  const [userDetails, setUserDetails] = useState({ email: "", dept: "" });
   const [searchUser, setSearchUser] = useState('')
   const [showUserDropdown, setShowUserDropdown] = useState(false);
   const [editingEntry, setEditingEntry] = useState(null) // ← ADD THIS LINE
@@ -27,7 +28,6 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
     theme: "colored",
     transition: Zoom,
   });
-
   const SubmitNotify = () => toast.success('Timesheet submitted successfully!', {
     position: "top-center",
     autoClose: 3000,
@@ -128,7 +128,10 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
       const payload = {
         taskId,
         user: selectedUser || metadata.user || '',
+        email: userDetails.email,
+        dept: userDetails.dept,
         project: metadata.project || '',
+        project_code: metadata.project_code,
         location: metadata.location || '',
         remarks: metadata.remarks || '',
         date: normalizedDate,
@@ -415,6 +418,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
                 setSearchUser(value)
                 if (selectedUser && value !== selectedUser) {
                   setSelectedUser('')
+                  setUserDetails({ email: "", dept: "" });
                 }
               }}
               onFocus={() => setShowUserDropdown(true)}
@@ -428,6 +432,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
                     type="button"
                     onClick={() => {
                       setSelectedUser(user.name)
+                      setUserDetails({ email: user.email, dept: user.dept });
                       setSearchUser('')
                       setShowUserDropdown(false)
                     }}
@@ -445,6 +450,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
                   type="button"
                   onClick={() => {
                     setSelectedUser('')
+                    setUserDetails({ email: "", dept: "" });
                     setSearchUser('')
                     setTimeEntries({})
                   }}
@@ -536,8 +542,18 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
             >
               <div className="flex justify-between items-start mb-3 pb-3 border-b border-gray-200 flex-shrink-0">
                 <div>
-                  <p className="text-xs text-gray-500 uppercase tracking-wide">{dayName}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{dayNumber}</p>
+                  <p
+                    className={`text-xs uppercase tracking-wide ${dayName.toLowerCase() === "sat" || dayName.toLocaleLowerCase() === "sun"
+                        ? "text-red-500"
+                        : "text-gray-500"
+                      }`}
+                  >
+                    {dayName}
+                  </p>
+                  <p className={`text-2xl font-bold text-gray-900 mt-1 ${dayName.toLowerCase() === "sat" || dayName.toLowerCase() === "sun"
+                        ? "text-red-500"
+                        : "text-gray-500"
+                      }`}>{dayNumber}</p>
                 </div>
                 <div className="text-right">
                   <span className="text-xs text-gray-500">Total:</span>

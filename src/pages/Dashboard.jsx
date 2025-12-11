@@ -9,6 +9,7 @@ import TasksList from '../components/TasksList'
 import Calendar from '../components/Calendar'
 import CreateTaskModal from '../components/CreateTaskModal'
 import CreateProjectModal from '../components/CreateProjectModal'
+import TimeReport from '../components/TimeReport'
 
 export default function Dashboard() {
   const [showTaskModal, setShowTaskModal] = useState(false)
@@ -110,6 +111,7 @@ export default function Dashboard() {
           <TasksList tasks={currentTasks} timers={timers} getElapsed={getElapsed} toggleTimer={toggleTimer} />
           <Calendar calendarEvents={calendarEvents} />
         </div>
+        <TimeReport/>
       </div>
       <CreateTaskModal
         isOpen={showTaskModal}

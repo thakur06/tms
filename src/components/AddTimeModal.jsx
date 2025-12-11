@@ -18,6 +18,7 @@ export default function AddTimeModal({
 
   const [selectedTask, setSelectedTask] = useState('')
   const [selectedProject, setSelectedProject] = useState('')
+  const [selectedProjectCode, setSelectedProjectCode] = useState('')
   const [location, setLocation] = useState('')
   const [remarks, setRemarks] = useState('')
   const [hours, setHours] = useState('')
@@ -33,7 +34,7 @@ export default function AddTimeModal({
 
   // Get the current task details
   const currentTask = tasks?.find(t => t.id === selectedTask)
-
+  console.log(projects)
   // Reset form when modal opens
   // Reset form when modal opens
   useEffect(() => {
@@ -41,6 +42,7 @@ export default function AddTimeModal({
       // Pre-fill form with existing entry data
       setSelectedTask(entry.taskId || '')
       setSelectedProject(entry.project || '')
+      setSelectedProjectCode(entry.project_code)
       setLocation(entry.location || '')
       setRemarks(entry.remarks || '')
 
@@ -67,6 +69,7 @@ export default function AddTimeModal({
       // Reset for new entry
       setSelectedTask('')
       setSelectedProject('')
+      setSelectedProjectCode("");
       setLocation('')
       setRemarks('')
       setHours('')
@@ -134,6 +137,7 @@ export default function AddTimeModal({
       hours: totalHours,
       minutes: totalMinutesValue,
       project: selectedProject,
+      project_code:selectedProjectCode,
       location,
       remarks,
       entry_date: dateStr,
@@ -174,6 +178,7 @@ export default function AddTimeModal({
   const handleClose = () => {
     setSelectedTask('')
     setSelectedProject('')
+    setSelectedProjectCode('')
     setLocation('')
     setRemarks('')
     setHours('')
@@ -191,8 +196,9 @@ export default function AddTimeModal({
     setShowTaskDropdown(false)
   }
 
-  const handleProjectSelect = (projectName, projectLocation) => {
+  const handleProjectSelect = (projectName, projectLocation,projectCode) => {
     setSelectedProject(projectName)
+    setSelectedProjectCode(projectCode)
     setLocation(projectLocation || location)
     setSearchProject(projectName)
     setShowProjectDropdown(false)
@@ -346,6 +352,7 @@ export default function AddTimeModal({
                 setShowProjectDropdown(true)
                 if (selectedProject && e.target.value !== selectedProject) {
                   setSelectedProject('')
+                  setSelectedProjectCode('')
                 }
               }}
               onFocus={() => setShowProjectDropdown(true)}
@@ -357,6 +364,7 @@ export default function AddTimeModal({
                 type="button"
                 onClick={() => {
                   setSelectedProject('')
+                  setSelectedProjectCode('');
                   setSearchProject('')
                 }}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -386,7 +394,7 @@ export default function AddTimeModal({
                       onMouseDown={(e) => {
                         e.preventDefault()
                         e.stopPropagation()
-                        handleProjectSelect(project.name, project.location)
+                        handleProjectSelect(project.name, project.location,project.code)
                       }}
                       disabled={isSubmitting}
                       className={`w-full text-left px-4 py-3 transition-all ${selectedProject === project.name
