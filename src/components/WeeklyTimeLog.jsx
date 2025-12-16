@@ -16,7 +16,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
   const [userDetails, setUserDetails] = useState({ email: "", dept: "" });
   const [searchUser, setSearchUser] = useState('')
   const [showUserDropdown, setShowUserDropdown] = useState(false);
-  const [editingEntry, setEditingEntry] = useState(null) // ← ADD THIS LINE
+  const [editingEntry, setEditingEntry] = useState(null)
   const notify = () => toast.error('Please select your name first before adding time entries.', {
     position: "top-center",
     autoClose: 3000,
@@ -66,6 +66,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
+  
   const getWeekDays = () => {
     const days = []
     const start = new Date(currentWeek)
@@ -121,12 +122,14 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
     setShowAddTimeModal(true)
   }
 
-  const addTimeEntry = async (dateStr, taskId, hours, minutes, metadata = {}) => {
+  const addTimeEntry = async (dateStr, taskName, hours, minutes, metadata = {}) => {
+    console.log(taskName + " " + metadata)
     try {
       const normalizedDate = normalizeDateStr(dateStr);
-
+  
+      // Send task name directly - no need to find task
       const payload = {
-        taskId,
+        taskId: taskName, // Send task name directly
         user: selectedUser || metadata.user || '',
         email: userDetails.email,
         dept: userDetails.dept,
@@ -138,18 +141,18 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
         hours: parseInt(hours) || 0,
         minutes: parseInt(minutes) || 0,
       }
-
+  
       // Send to API
       const response = await fetch('http://localhost:4000/api/time-entries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-
+  
       if (!response.ok) throw new Error('Failed to save time entry');
-
+  
       const newEntry = await response.json();
-
+  
       // Update UI with the new entry (including ID from database)
       setTimeEntries((prev) => {
         const dateEntries = prev[normalizedDate] || []
@@ -158,11 +161,12 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
           [normalizedDate]: [
             ...dateEntries,
             {
-              id: newEntry.id, // Use the ID from database response
-              taskId,
+              id: newEntry.id,
+              taskName: taskName, // Use taskName directly
               hours: parseInt(hours) || 0,
               minutes: parseInt(minutes) || 0,
               project: metadata.project || '',
+              project_code: metadata.project_code,
               user: selectedUser || metadata.user || '',
               location: metadata.location || '',
               remarks: metadata.remarks || '',
@@ -170,9 +174,9 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
           ],
         }
       });
-
+  
       return newEntry;
-
+  
     } catch (err) {
       console.error('Failed to save time entry', err);
       throw err;
@@ -250,10 +254,12 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
 
               entriesByDate[dateStr].push({
                 id: entry.id, // Ensure ID is included
-                taskId: entry.task_id,
+                
+                taskName: entry.task_id,
                 hours: entry.hours,
                 minutes: entry.minutes,
                 project: entry.project_name,
+                project_code: entry.project_code,
                 user: entry.user_name,
                 location: entry.location,
                 remarks: entry.remarks,
@@ -290,32 +296,34 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
 
   const updateTimeEntry = async (entryId, updatedData) => {
     try {
+      // Send task name directly - no need to find task
       // Send update to API
       const response = await fetch(`http://localhost:4000/api/time-entries/${entryId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          taskId: updatedData.taskId,
+          taskId: updatedData.taskName, // Send taskName directly
           hours: updatedData.hours,
           minutes: updatedData.minutes,
           project: updatedData.project,
+          project_code: updatedData.project_code,
           location: updatedData.location,
           remarks: updatedData.remarks,
-          entry_date: updatedData.entry_date || dateStr, // Use entry_date field
+          entry_date: updatedData.entry_date,
         }),
       });
-
+  
       if (!response.ok) {
         const errorData = await response.json();
         throw new Error(errorData.error || 'Failed to update entry');
       }
-
+  
       const updatedEntry = await response.json();
-
+  
       // Update the local state with the updated entry
       setTimeEntries(prev => {
         const updated = { ...prev };
-
+  
         // Find and update the entry in state
         Object.keys(updated).forEach(dateKey => {
           if (updated[dateKey]) {
@@ -323,10 +331,11 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
               if (entry.id === entryId) {
                 return {
                   ...entry,
-                  taskId: updatedData.taskId,
+                  taskName: updatedData.taskName, // Update taskName
                   hours: updatedData.hours,
                   minutes: updatedData.minutes,
                   project: updatedData.project || '',
+                  project_code: updatedData.project_code,
                   location: updatedData.location || '',
                   remarks: updatedData.remarks || '',
                 };
@@ -335,15 +344,15 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
             });
           }
         });
-
+  
         return updated;
       });
-
+  
       return updatedEntry;
-
+  
     } catch (error) {
       console.error('Error updating time entry:', error);
-      throw error; // Re-throw so modal can handle it
+      throw error;
     }
   };
 
@@ -364,12 +373,12 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
           if (!entriesByDate[dateStr]) entriesByDate[dateStr] = []
 
           entriesByDate[dateStr].push({
-            id: entry.id, // ← ADD THIS
-            // OR id: entry.entry_id, // depending on your API response
-            taskId: entry.task_id,
+            id: entry.id,
+            taskName: entry.task_id,
             hours: entry.hours,
             minutes: entry.minutes,
             project: entry.project_name,
+            project_code: entry.project_code,
             user: entry.user_name,
             location: entry.location,
             remarks: entry.remarks,
@@ -384,6 +393,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
 
     fetchUserEntries()
   }, [selectedUser, setTimeEntries])
+  
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm mt-4">
       <ToastContainer
@@ -567,12 +577,11 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
               </div>
               <div className="flex-1 flex flex-col gap-2 mb-3 min-h-0 overflow-y-auto pr-1 time-entries-container">
                 {dayEntries.map((entry, entryIndex) => {
-                  const task = tasks.find((t) => t.id === entry.taskId)
                   return (
                     <div key={entry.id || entryIndex} className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow transition">
-                      <div className="flex justify-between items-start gap-3">
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-sm truncate">{task?.title || 'Task'}</p>
+      <div className="flex justify-between items-start gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="font-semibold text-sm truncate">{entry.taskName || 'Task'}</p>
                           <p className="text-xs text-gray-600">{entry.hours}h {entry.minutes}m</p>
                           {entry.project && <p className="text-xs text-gray-500">Project: {entry.project}</p>}
                           {entry.location && <p className="text-xs text-gray-500">Location: {entry.location}</p>}
@@ -638,10 +647,8 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
         selectedUser={selectedUser}
         entry={editingEntry}
         onAdd={addTimeEntry}
-        onUpdate={updateTimeEntry}        // ← add this
-        onDelete={deleteTimeEntry}        // ← add this
+        onUpdate={updateTimeEntry}
       />
     </div>
   )
 }
-

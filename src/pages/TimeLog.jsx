@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { tasks } from '../data/mockData'
 import Header from '../components/Header'
 import WeeklyTimeLog from '../components/WeeklyTimeLog'
 
 export default function TimeLog() {
   const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [tasks, setTasks] = useState([]);
   const [timeEntries, setTimeEntries] = useState(() => {
     const entries = {}
     const sampleDate = '2025-03-03'
@@ -52,8 +52,18 @@ export default function TimeLog() {
         console.error('Failed to fetch projects', err)
       }
     }
+    const fetchTasks = async () => {
+      try {
+        const res = await fetch('http://localhost:4000/api/tasks')
+        const data = await res.json()
+        setTasks(data)
+      } catch (err) {
+        console.error('Failed to fetch tasks', err)
+      }
+    }
     fetchUsers()
     fetchProjects()
+    fetchTasks()
   }, [])
 
   return (
@@ -61,7 +71,7 @@ export default function TimeLog() {
       <div className="max-w-7xl mx-auto">
         <Header />
         <WeeklyTimeLog
-          tasks={tasks}
+          tasks={tasks} // ✅ backend tasks
           projects={projects}
           users={users}              // ✅ backend users
           timeEntries={timeEntries}
