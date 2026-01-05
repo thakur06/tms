@@ -1,160 +1,176 @@
 import { useState } from 'react'
-import { IoAddCircle, IoCalendar, IoPerson, IoFlag } from 'react-icons/io5'
-import Modal from './Modal'
+import { IoAddCircle, IoClose, IoFlagOutline, IoPersonOutline, IoDocumentTextOutline } from 'react-icons/io5'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
-export default function CreateTaskModal({ isOpen, onClose, projects, onCreateTask }) {
+export default function CreateTaskModal({ isOpen, onClose, onCreateTask,depts }) {
   const [formData, setFormData] = useState({
-    title: '',
-    project: '',
-    assignee: '',
-    due: '',
-    estimate: '',
-    tags: '',
-    status: 'Not Started',
+    task_name: '',
+    task_dept: '',
+    priority: 'medium'
   })
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+
+  const priorities = [
+    { value: 'low', label: 'Low', icon: '⬇️', color: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
+    { value: 'medium', label: 'Medium', icon: '⏸️', color: 'border-amber-200 bg-amber-50 text-amber-700' },
+    { value: 'high', label: 'High', icon: '⬆️', color: 'border-rose-200 bg-rose-50 text-rose-700' },
+    { value: 'critical', label: 'Critical', icon: '🚨', color: 'border-red-200 bg-red-50 text-red-700' }
+  ]
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (formData.title && formData.project) {
-      onCreateTask({
-        ...formData,
-        tags: formData.tags.split(',').map((t) => t.trim()).filter(Boolean),
-        estimate: parseInt(formData.estimate) || 0,
-      })
-      setFormData({
-        title: '',
-        project: '',
-        assignee: '',
-        due: '',
-        estimate: '',
-        tags: '',
-        status: 'Not Started',
-      })
+    
+    if (!formData.task_name.trim()) {
+      toast.error('Please enter a task name')
+      return
+    }
+    
+    if (!formData.task_dept) {
+      toast.error('Please select a department')
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      await onCreateTask(formData)
+      setFormData({ task_name: '', task_dept: '', priority: 'medium' })
       onClose()
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
+  const handleClose = () => {
+    setFormData({ task_name: '', task_dept: '', priority: 'medium' })
+    onClose()
+  }
+
+  if (!isOpen) return null
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create New Task">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Task Title</label>
-          <input
-            type="text"
-            required
-            value={formData.title}
-            onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-            placeholder="Enter task title"
-          />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div 
+        className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                <IoAddCircle className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-white">New Task</h2>
+                <p className="text-sm text-slate-300">Add a task to your workflow</p>
+              </div>
+            </div>
+            <button
+              onClick={handleClose}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <IoClose className="w-5 h-5 text-white" />
+            </button>
+          </div>
         </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-            <IoFlag className="w-4 h-4" />
-            Project
-          </label>
-          <select
-            required
-            value={formData.project}
-            onChange={(e) => setFormData({ ...formData, project: e.target.value })}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-          >
-            <option value="">Select project...</option>
-            {projects.map((project) => (
-              <option key={project.id} value={project.name}>
-                {project.name}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div className="grid grid-cols-2 gap-4">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+          {/* Task Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <IoPerson className="w-4 h-4" />
-              Assignee
-            </label>
+            <div className="flex items-center gap-2 mb-2">
+              <IoFlagOutline className="w-4 h-4 text-slate-600" />
+              <label className="text-sm font-medium text-slate-700">Task Name</label>
+            </div>
             <input
               type="text"
-              value={formData.assignee}
-              onChange={(e) => setFormData({ ...formData, assignee: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-              placeholder="Name"
+              value={formData.task_name}
+              onChange={(e) => setFormData({ ...formData, task_name: e.target.value })}
+              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:border-slate-400 focus:ring-2 focus:ring-slate-200 outline-none transition-all bg-slate-50/50"
+              placeholder="Enter task name"
+              disabled={isLoading}
+              autoFocus
             />
           </div>
 
+          {/* Department */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <IoCalendar className="w-4 h-4" />
-              Due Date
-            </label>
-            <input
-              type="date"
-              value={formData.due}
-              onChange={(e) => setFormData({ ...formData, due: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-            />
-          </div>
-        </div>
+            <div className="flex items-center gap-2 mb-2">
+              <IoPersonOutline className="w-4 h-4 text-slate-600" />
+              <label className="text-sm font-medium text-slate-700">Department</label>
+            </div>
+            <div className="relative">
+              <select
+                value={formData.task_dept}
+                onChange={(e) => setFormData({ ...formData, task_dept: e.target.value })}
+                className={`max-w-fit w-full px-3 py-2 border rounded text-sm border-gray-300`}
+                disabled={isLoading}
+              >
+                <option value="" className="text-slate-400">Select department</option>
+                {depts.map((dept) => (
+                  <option key={dept} value={dept} className="text-slate-700">
+                    {dept}
+                  </option>
+                ))}
+              </select>
 
-        <div className="grid grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Estimate (hours)</label>
-            <input
-              type="number"
-              min="0"
-              value={formData.estimate}
-              onChange={(e) => setFormData({ ...formData, estimate: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-              placeholder="8"
-            />
+            </div>
           </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5">Status</label>
-            <select
-              value={formData.status}
-              onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+          {/* Priority */}
+          {/* <div>
+            <div className="flex items-center gap-2 mb-3">
+              <IoDocumentTextOutline className="w-4 h-4 text-slate-600" />
+              <label className="text-sm font-medium text-slate-700">Priority Level</label>
+            </div>
+            <div className="grid grid-cols-4 gap-2">
+              {priorities.map((priority) => (
+                <button
+                  key={priority.value}
+                  type="button"
+                  onClick={() => setFormData({ ...formData, priority: priority.value })}
+                  className={`px-3 py-3 rounded-lg border-2 flex flex-col items-center justify-center gap-1 transition-all ${
+                    formData.priority === priority.value
+                      ? `${priority.color} border-current`
+                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
+                  disabled={isLoading}
+                >
+                  <span className="text-lg">{priority.icon}</span>
+                  <span className="text-xs font-medium">{priority.label}</span>
+                </button>
+              ))}
+            </div>
+          </div> */}
+
+          {/* Actions */}
+          <div className="pt-4 border-t border-slate-100">
+            <button
+              type="submit"
+              disabled={isLoading || !formData.task_name || !formData.task_dept}
+              className="w-full px-4 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-lg font-medium hover:from-slate-800 hover:to-slate-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              <option value="Not Started">Not Started</option>
-              <option value="In Progress">In Progress</option>
-              <option value="Review">Review</option>
-              <option value="Blocked">Blocked</option>
-            </select>
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating Task...
+                </>
+              ) : (
+                <>
+                  <IoAddCircle className="w-5 h-5" />
+                  Create Task
+                </>
+              )}
+            </button>
           </div>
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Tags (comma separated)</label>
-          <input
-            type="text"
-            value={formData.tags}
-            onChange={(e) => setFormData({ ...formData, tags: e.target.value })}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-            placeholder="UX, Priority, Frontend"
-          />
-        </div>
-
-        <div className="flex gap-3 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 px-4 py-2.5 border border-gray-300 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="flex-1 px-4 py-2.5 bg-gradient-to-br from-indigo-500 to-cyan-400 text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
-          >
-            <IoAddCircle className="w-5 h-5" />
-            Create Task
-          </button>
-        </div>
-      </form>
-    </Modal>
+        </form>
+      </div>
+    </div>
   )
 }
-

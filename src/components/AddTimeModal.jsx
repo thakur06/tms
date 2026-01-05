@@ -332,10 +332,7 @@ export default function AddTimeModal({
                   >
                     {departmentOptions.map((dept) => (
                       <option key={dept.value} value={dept.value}>
-                        {dept.label}{" "}
-                        {dept.value === "all"
-                          ? `(${tasks.length})`
-                          : `(${filteredTasks.length})`}
+                        {dept.label}
                       </option>
                     ))}
                   </select>

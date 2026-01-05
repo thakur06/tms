@@ -1,103 +1,163 @@
 import { useState } from 'react'
-import { IoAddCircle, IoPerson, IoCalendar } from 'react-icons/io5'
-import Modal from './Modal'
+import { IoAddCircle, IoClose, IoLocationOutline, IoDocumentTextOutline, IoCodeSlash } from 'react-icons/io5'
+import { toast } from 'react-toastify'
+import 'react-toastify/dist/ReactToastify.css'
 
 export default function CreateProjectModal({ isOpen, onClose, onCreateProject }) {
   const [formData, setFormData] = useState({
     name: '',
-    owner: '',
-    due: '',
-    automation: '',
+    code: '',
+    location: '',
+    status: 'planning'
   })
+  const [isLoading, setIsLoading] = useState(false)
 
-  const handleSubmit = (e) => {
+  const statuses = [
+    { value: 'planning', label: 'Planning', color: 'text-blue-600 bg-blue-50' },
+    { value: 'active', label: 'Active', color: 'text-emerald-600 bg-emerald-50' },
+    { value: 'on_hold', label: 'On Hold', color: 'text-amber-600 bg-amber-50' },
+    { value: 'completed', label: 'Completed', color: 'text-slate-600 bg-slate-50' }
+  ]
+
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    if (formData.name && formData.owner) {
-      onCreateProject({
-        ...formData,
-        automation: formData.automation.split(',').map((a) => a.trim()).filter(Boolean),
-        progress: 0,
-        health: 'on-track',
-      })
-      setFormData({ name: '', owner: '', due: '', automation: '' })
+    
+    if (!formData.name.trim()) {
+      toast.error('Project name is required')
+      return
+    }
+    
+    if (!formData.code.trim()) {
+      toast.error('Project code is required')
+      return
+    }
+    
+    if (!formData.location.trim()) {
+      toast.error('Location is required')
+      return
+    }
+
+    setIsLoading(true)
+    try {
+      await onCreateProject(formData)
+      setFormData({ name: '', code: '', location: '', status: 'planning' })
       onClose()
+    } catch (error) {
+      console.error('Error:', error)
+    } finally {
+      setIsLoading(false)
     }
   }
 
+  const handleClose = () => {
+    setFormData({ name: '', code: '', location: '', status: 'planning' })
+    onClose()
+  }
+
+  if (!isOpen) return null
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="Create New Project">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Project Name</label>
-          <input
-            type="text"
-            required
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-            placeholder="Enter project name"
-          />
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+      <div 
+        className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
+                <IoAddCircle className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h2 className="text-xl font-semibold text-white">New Project</h2>
+                <p className="text-sm text-slate-300">Add project to your portfolio</p>
+              </div>
+            </div>
+            <button
+              onClick={handleClose}
+              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+            >
+              <IoClose className="w-5 h-5 text-white" />
+            </button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="p-6 space-y-3">
+          {/* Project Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <IoPerson className="w-4 h-4" />
-              Owner
-            </label>
+            <div className="flex items-center gap-2 mb-2">
+              <IoDocumentTextOutline className="w-4 h-4 text-slate-600" />
+              <label className="text-sm font-medium text-slate-700">Project Name</label>
+            </div>
             <input
               type="text"
-              required
-              value={formData.owner}
-              onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-              placeholder="Name"
+              value={formData.name}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:border-slate-400 focus:ring-2 focus:ring-slate-200 outline-none transition-all bg-slate-50/50"
+              placeholder="Enter project name"
+              disabled={isLoading}
+              autoFocus
             />
           </div>
 
+          {/* Project Code */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1.5 flex items-center gap-2">
-              <IoCalendar className="w-4 h-4" />
-              Due Date
-            </label>
+            <div className="flex items-center gap-2 mb-2">
+              <IoCodeSlash className="w-4 h-4 text-slate-600" />
+              <label className="text-sm font-medium text-slate-700">Project Code</label>
+            </div>
             <input
-              type="date"
-              value={formData.due}
-              onChange={(e) => setFormData({ ...formData, due: e.target.value })}
-              className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+              type="text"
+              value={formData.code}
+              onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:border-slate-400 focus:ring-2 focus:ring-slate-200 outline-none transition-all bg-slate-50/50 font-mono"
+              placeholder="PRJ-001"
+              disabled={isLoading}
             />
           </div>
-        </div>
 
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1.5">Automation Rules (comma separated)</label>
-          <input
-            type="text"
-            value={formData.automation}
-            onChange={(e) => setFormData({ ...formData, automation: e.target.value })}
-            className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
-            placeholder="Daily digest, Overdue pings"
-          />
-        </div>
-
-        <div className="flex gap-3 pt-4">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex-1 px-4 py-2.5 border border-gray-300 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            className="flex-1 px-4 py-2.5 bg-gradient-to-br from-indigo-500 to-cyan-400 text-white rounded-lg font-semibold hover:shadow-lg transition-all flex items-center justify-center gap-2"
-          >
-            <IoAddCircle className="w-5 h-5" />
-            Create Project
-          </button>
-        </div>
-      </form>
-    </Modal>
+          {/* Location */}
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <IoLocationOutline className="w-4 h-4 text-slate-600" />
+              <label className="text-sm font-medium text-slate-700">Location</label>
+            </div>
+            <input
+              type="text"
+              value={formData.location}
+              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:border-slate-400 focus:ring-2 focus:ring-slate-200 outline-none transition-all bg-slate-50/50"
+              placeholder="City, Country"
+              disabled={isLoading}
+            />
+          </div>
+          {/* Actions */}
+          <div className="pt-2 border-t border-slate-100">
+            <button
+              type="submit"
+              disabled={isLoading || !formData.name || !formData.code || !formData.location}
+              className="w-full px-4 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-lg font-medium hover:from-slate-800 hover:to-slate-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Creating Project...
+                </>
+              ) : (
+                <>
+                  <IoAddCircle className="w-5 h-5" />
+                  Create Project
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
   )
 }
-
