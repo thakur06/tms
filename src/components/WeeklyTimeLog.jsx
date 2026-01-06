@@ -201,7 +201,7 @@ const addTimeEntry = async (dateStr, taskName, hours, minutes, metadata = {}) =>
       return
     }
 
-    if (!window.confirm('Delete this time entry?')) return
+    // if (!window.confirm('Delete this time entry?')) return
 
     try {
       // If it's a database entry (has entryId), make API call
