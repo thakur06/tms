@@ -76,7 +76,7 @@ export default function CreateUserModal({ isOpen, onClose, onCreateUser ,depts})
       >
         {/* Header */}
   
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-5">
+        <div className="bg-linear-to-r from-slate-900 to-slate-800 px-6 py-5 rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm">

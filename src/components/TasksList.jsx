@@ -17,14 +17,14 @@ export default function TasksList({ tasks, onDeleteTask }) {
 
   // Professional color palette for departments
 const deptColors = {
-  'Engineering': 'bg-blue-100 text-blue-800 border border-blue-200',
-  'Design': 'bg-violet-100 text-violet-800 border border-violet-200',
-  'Marketing': 'bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200',
-  'Sales': 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-  'Support': 'bg-amber-100 text-amber-800 border border-amber-200',
-  'HR': 'bg-rose-100 text-rose-800 border border-rose-200',
-  'Finance': 'bg-indigo-100 text-indigo-800 border border-indigo-200',
-  'Operations': 'bg-slate-100 text-slate-800 border border-slate-200',
+  'Process': 'bg-blue-100 text-blue-800 border border-blue-200',
+  'Product Development': 'bg-violet-100 text-violet-800 border border-violet-200',
+  'Business Development': 'bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200',
+  'Document Controls': 'bg-emerald-100 text-emerald-800 border border-emerald-200',
+  'Project Controls': 'bg-amber-100 text-amber-800 border border-amber-200',
+  'Electrical': 'bg-rose-100 text-rose-800 border border-rose-200',
+  'Mechanical': 'bg-indigo-100 text-indigo-800 border border-indigo-200',
+  'Controls': 'bg-slate-100 text-slate-800 border border-slate-200',
   'IT': 'bg-cyan-100 text-cyan-800 border border-cyan-200',
   'Management': 'bg-purple-100 text-purple-800 border border-purple-200',
   'default': 'bg-gray-100 text-gray-800 border border-gray-200'
