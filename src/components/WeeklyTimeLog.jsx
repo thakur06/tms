@@ -7,7 +7,7 @@ import SubmitTimesheetModal from './SubmitTimesheetModal'
 import AddTimeModal from './AddTimeModal'
 import { ToastContainer, toast, Zoom } from 'react-toastify';
 
-export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, setTimeEntries }) {
+export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, setTimeEntries, clients }) {
 
   const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [showAddTimeModal, setShowAddTimeModal] = useState(false)
@@ -122,8 +122,8 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
     setShowAddTimeModal(true)
   }
 
-  const addTimeEntry = async (dateStr, taskName, hours, minutes, metadata = {}) => {
-    console.log(taskName + " " + metadata)
+const addTimeEntry = async (dateStr, taskName, hours, minutes, metadata = {}) => {
+    console.log(taskName + " " + JSON.stringify(metadata))
     try {
       const normalizedDate = normalizeDateStr(dateStr);
   
@@ -134,14 +134,16 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
         email: userDetails.email,
         dept: userDetails.dept,
         project: metadata.project || '',
-        project_code: metadata.project_code,
+        project_code: metadata.project_code || '',
+        client: metadata.client || '', // Added client field
+        country: metadata.country || 'US', // Added country field with default
         location: metadata.location || '',
         remarks: metadata.remarks || '',
         date: normalizedDate,
         hours: parseInt(hours) || 0,
         minutes: parseInt(minutes) || 0,
       }
-  
+  console.log(payload);
       // Send to API
       const response = await fetch('http://localhost:4000/api/time-entries', {
         method: 'POST',
@@ -166,7 +168,9 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
               hours: parseInt(hours) || 0,
               minutes: parseInt(minutes) || 0,
               project: metadata.project || '',
-              project_code: metadata.project_code,
+              project_code: metadata.project_code || '',
+              client: metadata.client || '', // Added client field
+              country: metadata.country || 'US', // Added country field
               user: selectedUser || metadata.user || '',
               location: metadata.location || '',
               remarks: metadata.remarks || '',
@@ -294,7 +298,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
     setCurrentWeek(monday)
   }
 
-  const updateTimeEntry = async (entryId, updatedData) => {
+ const updateTimeEntry = async (entryId, updatedData) => {
     try {
       // Send task name directly - no need to find task
       // Send update to API
@@ -307,6 +311,8 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
           minutes: updatedData.minutes,
           project: updatedData.project,
           project_code: updatedData.project_code,
+          client: updatedData.client || '', // Added client field
+          country: updatedData.country || 'US', // Added country field with default
           location: updatedData.location,
           remarks: updatedData.remarks,
           entry_date: updatedData.entry_date,
@@ -335,7 +341,9 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
                   hours: updatedData.hours,
                   minutes: updatedData.minutes,
                   project: updatedData.project || '',
-                  project_code: updatedData.project_code,
+                  project_code: updatedData.project_code || '',
+                  client: updatedData.client || '', // Added client field
+                  country: updatedData.country || 'US', // Added country field
                   location: updatedData.location || '',
                   remarks: updatedData.remarks || '',
                 };
@@ -648,6 +656,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
         entry={editingEntry}
         onAdd={addTimeEntry}
         onUpdate={updateTimeEntry}
+        clients={clients}
       />
     </div>
   )

@@ -119,10 +119,10 @@ export default function TimeReport() {
       sheet.columns = [
         { width: 25 }, // User
         { width: 30 }, // User Email
-        { width: 20 }, // User Dept
+        { width: 40 }, // User Dept
         { width: 15 }, // Date
-        { width: 20 }, // Task ID
-        { width: 30 }, // Project
+        { width: 50 }, // Task ID
+        { width: 50 }, // Project
         { width: 20 }, // Project Code
         { width: 25 }, // Hours
         { width: 15 }, // Minutes

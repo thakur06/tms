@@ -6,6 +6,7 @@ export default function TimeLog() {
   const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [clients,setClients]= useState([]);
   const [timeEntries, setTimeEntries] = useState(() => {
     const entries = {}
     const sampleDate = '2025-03-03'
@@ -61,9 +62,21 @@ export default function TimeLog() {
         console.error('Failed to fetch tasks', err)
       }
     }
+
+    const fetchClients = async () => {
+      try {
+        const res = await fetch('http://localhost:4000/api/client')
+        const data = await res.json()
+        setClients(data)
+      } catch (err) {
+        console.error('Failed to fetch clients', err)
+      }
+    }
+
     fetchUsers()
     fetchProjects()
     fetchTasks()
+    fetchClients()
   }, [])
 
   return (
@@ -76,6 +89,7 @@ export default function TimeLog() {
           users={users}              // ✅ backend users
           timeEntries={timeEntries}
           setTimeEntries={setTimeEntries}
+          clients={clients}
         />
       </div>
     </div>
