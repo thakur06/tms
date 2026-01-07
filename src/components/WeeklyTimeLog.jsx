@@ -507,7 +507,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
               </div>
 
               {/* Entries Body */}
-              <div className="p-3 flex-1 space-y-3 max-h-[320px] overflow-y-auto hide-y-scroll">
+              <div className="p-3 flex-1 space-y-3 max-h-[300px] overflow-y-auto hide-y-scroll">
                 {dayEntries.length === 0 ? (
                   <div className="py-10 flex flex-col items-center justify-center opacity-20 italic text-sm text-slate-500">
                     <IoCalendar size={32} className="mb-2" />
