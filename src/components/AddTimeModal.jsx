@@ -169,7 +169,7 @@ export default function AddTimeModal({
               <IoFolder className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             </div>
             {dropdowns.task && (
-              <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-900 rounded-xl shadow-2xl max-h-48 overflow-y-auto z-50">
+              <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-900 rounded-xl shadow-2xl max-h-48 overflow-y-auto  hide-y-scroll z-50">
                 {fTasks.map(t => (
                   <div key={t.task_id} className="p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 text-xs font-bold" onClick={() => handleSelect('task', t.task_name)}>
                     {t.task_name}
@@ -186,7 +186,7 @@ export default function AddTimeModal({
               <input className="w-full px-3 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all"
                 placeholder="Search..." value={search.project} onFocus={() => setDropdowns(p => ({ ...p, project: true }))} onChange={(e) => setSearch(p => ({ ...p, project: e.target.value }))} />
               {dropdowns.project && (
-                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-900 rounded-xl shadow-2xl max-h-40 overflow-y-auto z-50">
+                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-900 rounded-xl shadow-2xl max-h-40 overflow-y-auto hide-y-scroll z-50">
                   {fProjects.map(p => (
                     <div key={p.id} className="p-2.5 hover:bg-indigo-50 text-xs font-bold cursor-pointer" onClick={() => handleSelect('project', p.name, p.code)}>
                       {p.name} <span className="text-[9px] opacity-40 block">{p.code}</span>
