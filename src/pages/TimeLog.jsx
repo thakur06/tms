@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import Header from '../components/Header'
 import WeeklyTimeLog from '../components/WeeklyTimeLog'
 
 export default function TimeLog() {
@@ -80,18 +79,15 @@ export default function TimeLog() {
   }, [])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50 p-4 sm:p-8 lg:p-12">
-      <div className="max-w-7xl mx-auto">
-        <Header />
-        <WeeklyTimeLog
-          tasks={tasks} // ✅ backend tasks
-          projects={projects}
-          users={users}              // ✅ backend users
-          timeEntries={timeEntries}
-          setTimeEntries={setTimeEntries}
-          clients={clients}
-        />
-      </div>
+    <div className="w-full">
+      <WeeklyTimeLog
+        tasks={tasks} // ✅ backend tasks
+        projects={projects}
+        users={users}              // ✅ backend users
+        timeEntries={timeEntries}
+        setTimeEntries={setTimeEntries}
+        clients={clients}
+      />
     </div>
   )
 }

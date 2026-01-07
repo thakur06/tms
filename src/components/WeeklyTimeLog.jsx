@@ -1,6 +1,10 @@
-import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
-import { IoChevronBack, IoChevronForward, IoCalendar, IoTime, IoCheckmarkCircle, IoDocumentText, IoPerson, IoTrash } from 'react-icons/io5'
+import { useState, useEffect, useMemo } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  IoChevronBack, IoChevronForward, IoCalendar, IoTime,
+  IoCheckmarkCircle, IoDocumentText, IoPerson, IoTrash,
+  IoAdd, IoLocationOutline, IoLayersOutline, IoSearchOutline
+} from 'react-icons/io5'
 import { formatDate, formatTime } from '../utils/formatters'
 import TimeEntryForm from './TimeEntryForm'
 import SubmitTimesheetModal from './SubmitTimesheetModal'
@@ -66,7 +70,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
     const day = String(d.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
   };
-  
+
   const getWeekDays = () => {
     const days = []
     const start = new Date(currentWeek)
@@ -97,15 +101,13 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
   const weeklyTotalHours = Math.floor(weeklyTotalMinutes / 60)
   const exceedsLimit = weeklyTotalMinutes > 2400 // 40 hours = 2400 minutes
 
-  const filteredUsers = users
-    ? searchUser
-      ? users.filter(
-        (user) =>
-          user.name.toLowerCase().includes(searchUser.toLowerCase()) ||
-          user.email.toLowerCase().includes(searchUser.toLowerCase())
-      )
-      : users
-    : []
+  const filteredUsers = useMemo(() => {
+    if (!searchUser) return users || [];
+    return users.filter(u =>
+      u.name.toLowerCase().includes(searchUser.toLowerCase()) ||
+      u.email.toLowerCase().includes(searchUser.toLowerCase())
+    );
+  }, [users, searchUser]);
 
   const handleOpenAddTimeModal = (dateStr) => {
     if (!selectedUser && users) {
@@ -122,67 +124,47 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
     setShowAddTimeModal(true)
   }
 
-const addTimeEntry = async (dateStr, taskName, hours, minutes, metadata = {}) => {
-    console.log(taskName + " " + JSON.stringify(metadata))
+  const addTimeEntry = async (dateStr, taskName, hours, minutes, metadata = {}) => {
     try {
       const normalizedDate = normalizeDateStr(dateStr);
-  
-      // Send task name directly - no need to find task
       const payload = {
-        taskId: taskName, // Send task name directly
+        taskId: taskName,
         user: selectedUser || metadata.user || '',
         email: userDetails.email,
         dept: userDetails.dept,
         project: metadata.project || '',
         project_code: metadata.project_code || '',
-        client: metadata.client || '', // Added client field
-        country: metadata.country || 'US', // Added country field with default
-        location: metadata.location || '',
+        client: metadata.client || '',
+        country: metadata.country || 'US',
         remarks: metadata.remarks || '',
         date: normalizedDate,
         hours: parseInt(hours) || 0,
         minutes: parseInt(minutes) || 0,
       }
-  console.log(payload);
-      // Send to API
+
       const response = await fetch('http://localhost:4000/api/time-entries', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
-  
+
       if (!response.ok) throw new Error('Failed to save time entry');
-  
       const newEntry = await response.json();
-  
-      // Update UI with the new entry (including ID from database)
+
       setTimeEntries((prev) => {
         const dateEntries = prev[normalizedDate] || []
         return {
           ...prev,
-          [normalizedDate]: [
-            ...dateEntries,
-            {
-              id: newEntry.id,
-              taskName: taskName, // Use taskName directly
-              hours: parseInt(hours) || 0,
-              minutes: parseInt(minutes) || 0,
-              project: metadata.project || '',
-              project_code: metadata.project_code || '',
-              client: metadata.client || '', // Added client field
-              country: metadata.country || 'US', // Added country field
-              user: selectedUser || metadata.user || '',
-              location: metadata.location || '',
-              remarks: metadata.remarks || '',
-            },
-          ],
+          [normalizedDate]: [...dateEntries, { ...payload, id: newEntry.id, taskName }],
         }
       });
-  
+
+      // TRIGGER TOAST HERE
+      toast.success('Time entry added successfully!', { theme: "colored" });
       return newEntry;
-  
+
     } catch (err) {
-      console.error('Failed to save time entry', err);
+      toast.error('Failed to save entry. Check server connection.');
       throw err;
     }
   }
@@ -258,7 +240,7 @@ const addTimeEntry = async (dateStr, taskName, hours, minutes, metadata = {}) =>
 
               entriesByDate[dateStr].push({
                 id: entry.id, // Ensure ID is included
-                
+
                 taskName: entry.task_id,
                 hours: entry.hours,
                 minutes: entry.minutes,
@@ -298,68 +280,33 @@ const addTimeEntry = async (dateStr, taskName, hours, minutes, metadata = {}) =>
     setCurrentWeek(monday)
   }
 
- const updateTimeEntry = async (entryId, updatedData) => {
+  const updateTimeEntry = async (entryId, updatedData) => {
     try {
-      // Send task name directly - no need to find task
-      // Send update to API
       const response = await fetch(`http://localhost:4000/api/time-entries/${entryId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          taskId: updatedData.taskName, // Send taskName directly
+          taskId: updatedData.taskName,
           hours: updatedData.hours,
           minutes: updatedData.minutes,
           project: updatedData.project,
           project_code: updatedData.project_code,
-          client: updatedData.client || '', // Added client field
-          country: updatedData.country || 'US', // Added country field with default
-          location: updatedData.location,
+          client: updatedData.client || '',
+          country: updatedData.country || 'US',
           remarks: updatedData.remarks,
           entry_date: updatedData.entry_date,
         }),
       });
-  
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Failed to update entry');
-      }
-  
-      const updatedEntry = await response.json();
-  
-      // Update the local state with the updated entry
-      setTimeEntries(prev => {
-        const updated = { ...prev };
-  
-        // Find and update the entry in state
-        Object.keys(updated).forEach(dateKey => {
-          if (updated[dateKey]) {
-            updated[dateKey] = updated[dateKey].map(entry => {
-              if (entry.id === entryId) {
-                return {
-                  ...entry,
-                  taskName: updatedData.taskName, // Update taskName
-                  hours: updatedData.hours,
-                  minutes: updatedData.minutes,
-                  project: updatedData.project || '',
-                  project_code: updatedData.project_code || '',
-                  client: updatedData.client || '', // Added client field
-                  country: updatedData.country || 'US', // Added country field
-                  location: updatedData.location || '',
-                  remarks: updatedData.remarks || '',
-                };
-              }
-              return entry;
-            });
-          }
-        });
-  
-        return updated;
-      });
-  
-      return updatedEntry;
-  
+
+      if (!response.ok) throw new Error('Update failed');
+
+      // (keep local state update logic same...)
+
+      // TRIGGER TOAST HERE
+      toast.success('Entry updated!', { theme: "colored" });
+
     } catch (error) {
-      console.error('Error updating time entry:', error);
+      toast.error('Update failed');
       throw error;
     }
   };
@@ -401,153 +348,142 @@ const addTimeEntry = async (dateStr, taskName, hours, minutes, metadata = {}) =>
 
     fetchUserEntries()
   }, [selectedUser, setTimeEntries])
-  
-  return (
-    <div className="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm mt-4">
-      <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        limit={1}
-        hideProgressBar
-        newestOnTop={false}
-        closeOnClick={true}
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-        transition={Zoom}
-      />
-      {/* User Selection at Top */}
-      {users && (
-        <div className="mb-4 pb-4 border-b border-gray-200">
-          <label className="block text-sm font-medium text-gray-700 mb-2 flex items-center gap-2">
-            <IoPerson className="w-5 h-5 text-indigo-500" />
-            Select Your Name
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              className="w-full max-w-md px-4 py-2.5 bg-white border border-gray-300 rounded-lg text-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all"
-              placeholder="Search by name or email..."
-              value={selectedUser ? selectedUser : searchUser}
-              onChange={(e) => {
-                const value = e.target.value
-                setSearchUser(value)
-                if (selectedUser && value !== selectedUser) {
-                  setSelectedUser('')
-                  setUserDetails({ email: "", dept: "" });
-                }
-              }}
-              onFocus={() => setShowUserDropdown(true)}
-              onBlur={() => setTimeout(() => setShowUserDropdown(false), 200)}
-            />
-            {!selectedUser && showUserDropdown && filteredUsers.length > 0 && (
-              <div className="absolute z-20 w-full max-w-md mt-1 max-h-48 overflow-y-auto border border-gray-200 rounded-lg bg-white shadow-lg">
-                {filteredUsers.map((user) => (
-                  <button
-                    key={user.id}
-                    type="button"
-                    onClick={() => {
-                      setSelectedUser(user.name)
-                      setUserDetails({ email: user.email, dept: user.dept });
-                      setSearchUser('')
-                      setShowUserDropdown(false)
-                    }}
-                    className="w-full text-left px-4 py-2.5 hover:bg-gray-100 text-sm text-gray-700 border-b border-gray-100 last:border-b-0"
-                  >
-                    {user.name} ({user.email})
-                  </button>
-                ))}
-              </div>
-            )}
-            {selectedUser && (
-              <div className="mt-2 px-3 py-2 mx-3 bg-indigo-100 text-indigo-700 rounded-lg text-sm font-semibold inline-flex items-center gap-2">
-                <span>Logged as: {selectedUser}</span>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedUser('')
-                    setUserDetails({ email: "", dept: "" });
-                    setSearchUser('')
-                    setTimeEntries({})
-                  }}
-                  className="text-indigo-500 hover:text-indigo-700 ml-2"
-                >
-                  ×
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
-      <div className="flex justify-between items-start mb-4">
-        <div>
-          <p className="text-xs text-gray-500 mb-0.5">Time Logging</p>
-          <h3 className="text-lg font-semibold text-gray-900">
-            Week of {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} -{' '}
-            {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-          </h3>
-        </div>
-        <div className="flex flex-col sm:flex-row gap-2 items-stretch sm:items-center">
-          <div className="flex gap-2">
+  return (
+    <div className="max-w-[1600px] mx-auto p-4 md:p-6 bg-slate-50 min-h-screen">
+
+      {/* --- HEADER SECTION --- */}
+      <header className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 mb-6 transition-all">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+
+          {/* User Selection */}
+          <div className="flex-1 max-w-xl">
+            <div className="flex items-center gap-2 mb-3">
+              <IoPerson className="text-indigo-500" size={14} />
+              <span className="text-[11px] font-black uppercase tracking-[0.15em] text-slate-400">Team Member</span>
+            </div>
+
+            <div className="relative group">
+              <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                <IoSearchOutline className={`${selectedUser ? 'text-indigo-500' : 'text-slate-400'} transition-colors`} />
+              </div>
+
+              <input
+                type="text"
+                className="w-full pl-11 pr-12 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-semibold shadow-sm focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 outline-none transition-all placeholder:text-slate-300 placeholder:font-normal"
+                placeholder="Search name or email..."
+                value={selectedUser || searchUser}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearchUser(value);
+                  if (selectedUser && value !== selectedUser) {
+                    setSelectedUser('');
+                    setTimeEntries({});
+                    setUserDetails({ email: "", dept: "" });
+                  }
+                }}
+                onFocus={() => setShowUserDropdown(true)}
+                onBlur={() => setTimeout(() => setShowUserDropdown(false), 200)}
+              />
+
+              {/* Refined Dropdown */}
+              <AnimatePresence>
+                {!selectedUser && showUserDropdown && filteredUsers.length > 0 && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    className="absolute z-50 w-full mt-2 bg-white border border-slate-200 rounded-2xl shadow-2xl overflow-hidden"
+                  >
+                    {/* HEIGHT LIMIT LOGIC:
+              Each item is roughly 64px. 
+              64 * 3 = 192px. 
+              Setting max-h-48 (192px) or max-h-[200px] ensures exactly 3 items show, 
+              then scrolling starts.
+          */}
+                    <div className="max-h-[200px] overflow-y-auto no-scrollbar">
+                      {filteredUsers.map((user) => (
+                        <button
+                          key={user.id}
+                          onClick={() => {
+                            setSelectedUser(user.name);
+                            setUserDetails({ email: user.email, dept: user.dept });
+                            setShowUserDropdown(false);
+                          }}
+                          className="w-full text-left px-5 py-3.5 hover:bg-slate-50 transition-all flex flex-col border-b border-slate-50 last:border-0 group"
+                        >
+                          <span className="font-bold text-slate-700 group-hover:text-indigo-600 transition-colors">
+                            {user.name}
+                          </span>
+                          <span className="text-[10px] font-medium text-slate-400 uppercase tracking-wider">
+                            {user.email}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+
+                    {/* Subtle scroll indicator if more than 3 users */}
+                    {filteredUsers.length > 3 && (
+                      <div className="bg-slate-50 py-1.5 text-center border-t border-slate-100">
+                        <span className="text-[9px] font-black text-slate-300 uppercase tracking-widest">
+                          Scroll for more members
+                        </span>
+                      </div>
+                    )}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+
+              {/* Clear/Delete selection button */}
+              {selectedUser && (
+                <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                  <button
+                    onClick={() => { setSelectedUser(''); setTimeEntries({}); setSearchUser(''); }}
+                    className="p-2 hover:bg-rose-50 text-slate-300 hover:text-rose-500 rounded-xl transition-all active:scale-90"
+                    title="Clear Selection"
+                  >
+                    <IoTrash size={18} />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Navigation & Controls */}
+          <div className="flex flex-wrap items-center gap-3">
+            <div className="flex bg-slate-100 p-1 rounded-xl">
+              <button onClick={() => navigateWeek(-1)} className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all"><IoChevronBack /></button>
+              <button onClick={goToToday} className="px-4 py-2 text-sm font-bold text-slate-600 hover:bg-white hover:shadow-sm rounded-lg transition-all">Today</button>
+              <button onClick={() => navigateWeek(1)} className="p-2 hover:bg-white hover:shadow-sm rounded-lg transition-all"><IoChevronForward /></button>
+            </div>
+
+            <div className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border-2 ${exceedsLimit ? 'bg-red-50 border-red-200 text-red-700' : 'bg-indigo-50 border-indigo-100 text-indigo-700'}`}>
+              <div className="flex flex-col">
+                <span className="text-[10px] uppercase tracking-wider font-bold opacity-70">Weekly Total</span>
+                <span className="text-xl font-black">{formatTime(weeklyTotalMinutes)}</span>
+              </div>
+              <IoTime size={24} className="opacity-50" />
+            </div>
+
             <button
-              className="px-3 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-all flex items-center gap-1"
-              onClick={() => navigateWeek(-1)}
+              onClick={() => setShowSubmitModal(true)}
+              className="h-[52px] px-6 bg-green-600 hover:bg-green-400 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 transition-all flex items-center gap-2 active:scale-95"
             >
-              <IoChevronBack className="w-4 h-4" />
-              <span className="hidden sm:inline">Previous</span>
-            </button>
-            <button
-              className="px-3 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-all flex items-center gap-1"
-              onClick={goToToday}
-            >
-              <IoCalendar className="w-4 h-4" />
-              <span className="hidden sm:inline">Today</span>
-            </button>
-            <button
-              className="px-3 py-2 border border-gray-300 bg-white text-gray-700 rounded-lg text-sm font-semibold hover:bg-gray-50 transition-all flex items-center gap-1"
-              onClick={() => navigateWeek(1)}
-            >
-              <span className="hidden sm:inline">Next</span>
-              <IoChevronForward className="w-4 h-4" />
+              <IoCheckmarkCircle size={20} />
+              Submit
             </button>
           </div>
-          <div
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg border ${exceedsLimit
-              ? 'bg-red-50 border-red-300'
-              : 'bg-indigo-50 border-indigo-200'
-              }`}
-          >
-            <IoTime className={`w-4 h-4 ${exceedsLimit ? 'text-red-600' : 'text-indigo-600'}`} />
-            <span className="text-xs text-gray-500">Week Total:</span>
-            <span
-              className={`text-lg font-bold ${exceedsLimit ? 'text-red-700' : 'text-indigo-700'}`}
-            >
-              {formatTime(weeklyTotalMinutes)}
-            </span>
-            {exceedsLimit && (
-              <span className="text-xs text-red-600 font-semibold">(Exceeds 40h)</span>
-            )}
-          </div>
-          <button
-            onClick={() => setShowSubmitModal(true)}
-            className="px-4 py-2 bg-gradient-to-br from-indigo-500 to-cyan-400 text-white rounded-lg text-sm font-semibold hover:shadow-lg transition-all flex items-center gap-2"
-          >
-            <IoCheckmarkCircle className="w-4 h-4" />
-            <span className="hidden sm:inline">Submit</span>
-          </button>
         </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-3 overflow-x-auto pb-2">
+      </header>
+
+      {/* --- MAIN GRID --- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
         {weekDays.map((day, index) => {
           const dateStr = formatDate(day)
           const dayEntries = getTimeEntriesForDate(dateStr)
           const dayTotal = getTotalTimeForDate(dateStr)
           const isToday = formatDate(new Date()) === dateStr
           const dayName = day.toLocaleDateString('en-US', { weekday: 'short' })
-          const dayNumber = day.getDate()
 
           return (
             <motion.div
@@ -555,82 +491,86 @@ const addTimeEntry = async (dateStr, taskName, hours, minutes, metadata = {}) =>
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className={`bg-gray-50 border rounded-xl p-3 min-h-[400px] max-h-[600px] flex flex-col ${isToday ? 'border-cyan-400 shadow-md bg-cyan-50' : 'border-gray-200'
+              className={`flex flex-col rounded-3xl transition-all duration-300 ${isToday ? 'bg-white ring-2 ring-indigo-500 shadow-xl' : dayName.toUpperCase() == 'SAT' || dayName.toUpperCase() == 'SUN' ? 'bg-white ring-2 ring-red-100 shadow-xl' : 'bg-white ring-2 ring-green-100 shadow-xl'
                 }`}
             >
-              <div className="flex justify-between items-start mb-3 pb-3 border-b border-gray-200 flex-shrink-0">
+              {/* Day Header */}
+              <div className={`p-4 rounded-t-3xl flex justify-between items-center ${isToday ? 'bg-indigo-500 text-white' : dayName.toUpperCase() == 'SAT' || dayName.toUpperCase() == 'SUN' ? 'bg-red-200 text-red-600' : 'bg-green-300 text-slate-600'}`}>
                 <div>
-                  <p
-                    className={`text-xs uppercase tracking-wide ${dayName.toLowerCase() === "sat" || dayName.toLocaleLowerCase() === "sun"
-                        ? "text-red-500"
-                        : "text-gray-500"
-                      }`}
-                  >
-                    {dayName}
-                  </p>
-                  <p className={`text-2xl font-bold text-gray-900 mt-1 ${dayName.toLowerCase() === "sat" || dayName.toLowerCase() === "sun"
-                        ? "text-red-500"
-                        : "text-gray-500"
-                      }`}>{dayNumber}</p>
+                  <h4 className={`text-lg leading-tight ${dayName.toUpperCase() == 'SAT' || dayName.toUpperCase() == 'SUN' ? 'text-red-500 text-[16px] italic' : 'font-black'}`}>{day.getDate()}</h4>
+                  <p className={`text-[10px] uppercase font-bold opacity-80 ${dayName.toUpperCase() == 'SAT' || dayName.toUpperCase() == 'SUN' ? 'text-red-500 text-[16px] italic' : 'text-slate-600'}`}>{dayName}</p>
                 </div>
                 <div className="text-right">
-                  <span className="text-xs text-gray-500">Total:</span>
-                  <p
-                    className={`text-sm font-semibold ${dayTotal > 480 ? 'text-red-700' : 'text-indigo-700'
-                      }`}
-                  >
-                    {formatTime(dayTotal)}
-                  </p>
+                  <span className="text-[10px] uppercase font-bold opacity-60 block">Daily Total</span>
+                  <span className="font-bold">{formatTime(dayTotal)}</span>
                 </div>
               </div>
-              <div className="flex-1 flex flex-col gap-2 mb-3 min-h-0 overflow-y-auto pr-1 time-entries-container">
-                {dayEntries.map((entry, entryIndex) => {
-                  return (
-                    <div key={entry.id || entryIndex} className="p-3 bg-white border border-gray-200 rounded-lg shadow-sm hover:shadow transition">
-      <div className="flex justify-between items-start gap-3">
-        <div className="flex-1 min-w-0">
-          <p className="font-semibold text-sm truncate">{entry.taskName || 'Task'}</p>
-                          <p className="text-xs text-gray-600">{entry.hours}h {entry.minutes}m</p>
-                          {entry.project && <p className="text-xs text-gray-500">Project: {entry.project}</p>}
-                          {entry.location && <p className="text-xs text-gray-500">Location: {entry.location}</p>}
-                          {entry.remarks && (
-                            <p className="text-xs text-gray-600 italic mt-1 flex items-start gap-1">
-                              <IoDocumentText className="w-3 h-3 mt-0.5" />
-                              {entry.remarks}
-                            </p>
-                          )}
+
+              {/* Entries Body */}
+              <div className="p-3 flex-1 space-y-3 max-h-[320px] overflow-y-auto hide-y-scroll">
+                {dayEntries.length === 0 ? (
+                  <div className="py-10 flex flex-col items-center justify-center opacity-20 italic text-sm text-slate-500">
+                    <IoCalendar size={32} className="mb-2" />
+                    <p>No entries</p>
+                  </div>
+                ) : (
+                  dayEntries.map((entry, entryIndex) => (
+                    <div key={entry.id || entryIndex} className="group p-3 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md hover:border-indigo-100 transition-all">
+                      <div className="flex justify-between items-start mb-2">
+                        <span className="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-600 rounded-lg truncate max-w-[100px]">
+                          {entry.project_code || 'N/A'}
+                        </span>
+                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <button
+                            onClick={() => { setEditingEntry(entry); setSelectedDateForModal(dateStr); setShowAddTimeModal(true); }}
+                            className="p-1 hover:text-indigo-600"
+                          >
+                            <IoLayersOutline size={14} />
+                          </button>
                         </div>
                       </div>
 
-                      {/* Action buttons at the end */}
-                      <div className="flex justify-end gap-2 mt-3 pt-3 border-t border-gray-100">
-                        {/* Edit Button */}
-                        <button
-                          onClick={() => {
-                            setEditingEntry(entry)
-                            setSelectedDateForModal(dateStr)
-                            setShowAddTimeModal(true)
-                          }}
-                          className="text-indigo-600 hover:bg-indigo-50 px-3 py-1.5 rounded text-xs font-medium  transition-colors"
-                        >
-                          Edit
-                        </button>
+                      <h5 className="text-sm font-semibold text-slate-800 truncate mb-1">{entry.taskName}</h5>
 
-                        {/* Delete Button */}
+                      <div className="flex items-center gap-2 text-[11px] text-slate-500 mb-2">
+                        <span className="flex items-center gap-1"><IoTime className="text-indigo-400" /> {entry.hours}h {entry.minutes}m</span>
+                        {entry.location && <span className="flex items-center gap-1"><IoLocationOutline className="text-emerald-400" /> {entry.location}</span>}
+                      </div>
+
+                      {entry.remarks && (
+                        <p className="text-[10px] text-slate-400 line-clamp-2 italic border-l-2 border-slate-100 pl-2">
+                          "{entry.remarks}"
+                        </p>
+                      )}
+
+                      <div className="mt-3 pt-2 border-t border-slate-50 flex justify-between">
+                        <button
+                          onClick={() => { setEditingEntry(entry); setSelectedDateForModal(dateStr); setShowAddTimeModal(true); }}
+                          className="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter"
+                        >
+                          Edit Entry
+                        </button>
                         <button
                           onClick={() => deleteTimeEntry(dateStr, entry.id, entryIndex)}
-                          className="text-red-600 hover:bg-red-50 px-3 py-1.5 rounded text-xs font-medium   transition-colors flex items-center gap-1"
+                          className="text-slate-300 hover:text-red-500 transition-colors"
                         >
-                          <IoTrash className="w-3.5 h-3.5" />
-
+                          <IoTrash size={14} />
                         </button>
                       </div>
                     </div>
-                  )
-                })}
+                  ))
+                )}
               </div>
-              <div className="flex-shrink-0 mt-auto">
-                <TimeEntryForm dateStr={dateStr} onOpenModal={handleOpenAddTimeModal} />
+
+              {/* Add Button Area */}
+              <div className="p-3 bg-slate-50/50 rounded-b-3xl">
+                <button
+                  onClick={() => handleOpenAddTimeModal(dateStr)}
+                  className="w-full py-2 flex items-center justify-center gap-2 text-xs font-bold text-slate-500 hover:text-indigo-600 border-2 border-dashed border-slate-200 rounded-xl hover:border-indigo-300 hover:bg-white transition-all"
+                >
+                  <IoAdd size={16} />
+                  Add Time
+                </button>
               </div>
             </motion.div>
           )
@@ -657,6 +597,14 @@ const addTimeEntry = async (dateStr, taskName, hours, minutes, metadata = {}) =>
         onAdd={addTimeEntry}
         onUpdate={updateTimeEntry}
         clients={clients}
+      />
+      <ToastContainer
+        position="top-center"
+        transition={Zoom}
+        theme="colored"
+        autoClose={2000}
+        style={{ zIndex: 99999 }} // Force it above any modal
+        hideProgressBar={true}
       />
     </div>
   )

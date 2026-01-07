@@ -1,176 +1,187 @@
-import { useState } from 'react'
-import { IoAddCircle, IoClose, IoFlagOutline, IoPersonOutline, IoDocumentTextOutline } from 'react-icons/io5'
+import { useState, useRef, useEffect } from 'react'
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion' // Added LayoutGroup
+import { 
+  IoAddCircle, IoClose, IoFlagOutline, 
+  IoLayersOutline, IoChevronDown, IoSearchOutline,
+  IoCheckmarkCircle
+} from 'react-icons/io5'
 import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
 
-export default function CreateTaskModal({ isOpen, onClose, onCreateTask,depts }) {
+export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts = [] }) {
   const [formData, setFormData] = useState({
     task_name: '',
     task_dept: '',
     priority: 'medium'
   })
+  const [isDeptOpen, setIsDeptOpen] = useState(false)
+  const [deptSearch, setDeptSearch] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-
-  const priorities = [
-    { value: 'low', label: 'Low', icon: '⬇️', color: 'border-emerald-200 bg-emerald-50 text-emerald-700' },
-    { value: 'medium', label: 'Medium', icon: '⏸️', color: 'border-amber-200 bg-amber-50 text-amber-700' },
-    { value: 'high', label: 'High', icon: '⬆️', color: 'border-rose-200 bg-rose-50 text-rose-700' },
-    { value: 'critical', label: 'Critical', icon: '🚨', color: 'border-red-200 bg-red-50 text-red-700' }
-  ]
+  const filteredDepts = depts.filter(d => 
+    d.toLowerCase().includes(deptSearch.toLowerCase())
+  )
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
-    if (!formData.task_name.trim()) {
-      toast.error('Please enter a task name')
-      return
-    }
-    
-    if (!formData.task_dept) {
-      toast.error('Please select a department')
-      return
-    }
+    if (!formData.task_name.trim()) return toast.error('Task name is required')
+    if (!formData.task_dept) return toast.error('Select a department')
 
     setIsLoading(true)
     try {
       await onCreateTask(formData)
-      setFormData({ task_name: '', task_dept: '', priority: 'medium' })
-      onClose()
+      handleClose()
     } catch (error) {
-      console.error('Error:', error)
+      // toast.error('Failed to create task')
     } finally {
       setIsLoading(false)
     }
   }
+
   const handleClose = () => {
     setFormData({ task_name: '', task_dept: '', priority: 'medium' })
+    setDeptSearch('')
+    setIsDeptOpen(false)
     onClose()
   }
 
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div 
-        className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden"
-        onClick={(e) => e.stopPropagation()}
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+      {/* 1. Added 'layout' to the container so it animates its size */}
+      <motion.div 
+        layout 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        transition={{ type: 'spring', damping: 25, stiffness: 300 }}
+        className="bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.1)] w-full max-w-md border border-slate-100 overflow-hidden"
       >
         {/* Header */}
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                <IoAddCircle className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl font-semibold text-white">New Task</h2>
-                <p className="text-sm text-slate-300">Add a task to your workflow</p>
-              </div>
-            </div>
+        <div className="relative px-8 pt-8 pb-4">
+          <div className="flex items-start justify-between">
+            <motion.div layout="position">
+              <h2 className="text-2xl font-black text-slate-900 tracking-tight">Create Task</h2>
+              <p className="text-sm font-medium text-slate-400 mt-1">Define new workspace objectives</p>
+            </motion.div>
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              className="p-2 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-full transition-all duration-300"
             >
-              <IoClose className="w-5 h-5 text-white" />
+              <IoClose size={20} />
             </button>
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Task Name */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <IoFlagOutline className="w-4 h-4 text-slate-600" />
-              <label className="text-sm font-medium text-slate-700">Task Name</label>
-            </div>
+        <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-5">
+          {/* Input: Task Name */}
+          <motion.div layout className="space-y-2">
+            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">
+              <IoFlagOutline size={14} className="text-indigo-600" />
+              Identification
+            </label>
             <input
               type="text"
               value={formData.task_name}
               onChange={(e) => setFormData({ ...formData, task_name: e.target.value })}
-              className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:border-slate-400 focus:ring-2 focus:ring-slate-200 outline-none transition-all bg-slate-50/50"
-              placeholder="Enter task name"
+              className="w-full px-5 py-4 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-bold text-slate-700 focus:ring-4 focus:ring-indigo-500/10 focus:border-indigo-500 focus:bg-white outline-none transition-all placeholder:text-slate-300"
+              placeholder="e.g. System Architecture Audit"
               disabled={isLoading}
-              autoFocus
             />
-          </div>
+          </motion.div>
 
-          {/* Department */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <IoPersonOutline className="w-4 h-4 text-slate-600" />
-              <label className="text-sm font-medium text-slate-700">Department</label>
-            </div>
+          {/* Custom Select: Department */}
+          <motion.div layout className="space-y-2">
+            <label className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 ml-1">
+              <IoLayersOutline size={14} className="text-indigo-600" />
+              Ownership
+            </label>
+            
             <div className="relative">
-              <select
-                value={formData.task_dept}
-                onChange={(e) => setFormData({ ...formData, task_dept: e.target.value })}
-                className={`max-w-fit w-full px-3 py-2 border rounded text-sm border-gray-300`}
-                disabled={isLoading}
+              <button
+                type="button"
+                onClick={() => setIsDeptOpen(!isDeptOpen)}
+                className={`w-full flex items-center justify-between px-5 py-4 bg-slate-50 border rounded-2xl text-sm font-bold transition-all duration-300 ${
+                  isDeptOpen 
+                    ? 'ring-4 ring-indigo-500/10 border-indigo-500 bg-white' 
+                    : 'border-slate-200 text-slate-700'
+                }`}
               >
-                <option value="" className="text-slate-400">Select department</option>
-                {depts.map((dept) => (
-                  <option key={dept} value={dept} className="text-slate-700">
-                    {dept}
-                  </option>
-                ))}
-              </select>
+                <span className={formData.task_dept ? 'text-slate-900' : 'text-slate-300'}>
+                  {formData.task_dept || 'Select department...'}
+                </span>
+                <IoChevronDown className={`text-indigo-500 transition-transform duration-500 ${isDeptOpen ? 'rotate-180' : ''}`} />
+              </button>
 
-            </div>
-          </div>
+              <AnimatePresence>
+                {isDeptOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="overflow-hidden mt-2 bg-slate-50/50 border border-slate-200 rounded-2xl"
+                  >
+                    {/* Inline Search */}
+                    <div className="p-3 border-b border-slate-200">
+                      <div className="relative">
+                        <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={14} />
+                        <input 
+                          autoFocus
+                          className="w-full pl-9 pr-4 py-2 bg-white rounded-xl text-xs font-bold outline-none border border-slate-200 focus:border-indigo-400 transition-all"
+                          placeholder="Search..."
+                          value={deptSearch}
+                          onChange={(e) => setDeptSearch(e.target.value)}
+                        />
+                      </div>
+                    </div>
 
-          {/* Priority */}
-          {/* <div>
-            <div className="flex items-center gap-2 mb-3">
-              <IoDocumentTextOutline className="w-4 h-4 text-slate-600" />
-              <label className="text-sm font-medium text-slate-700">Priority Level</label>
+                    {/* Scrollable Area */}
+                    <div className="max-h-[160px] overflow-y-auto no-scrollbar hide-y-scroll py-1">
+                      {filteredDepts.map((dept) => (
+                        <button
+                          key={dept}
+                          type="button"
+                          onClick={() => {
+                            setFormData({...formData, task_dept: dept})
+                            setIsDeptOpen(false)
+                            setDeptSearch('')
+                          }}
+                          className="w-full px-5 py-3 text-left text-xs font-black text-slate-600 hover:bg-white hover:text-indigo-600 transition-all flex items-center justify-between group"
+                        >
+                          {dept}
+                          {formData.task_dept === dept && (
+                            <IoCheckmarkCircle className="text-indigo-500" size={16} />
+                          )}
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
-            <div className="grid grid-cols-4 gap-2">
-              {priorities.map((priority) => (
-                <button
-                  key={priority.value}
-                  type="button"
-                  onClick={() => setFormData({ ...formData, priority: priority.value })}
-                  className={`px-3 py-3 rounded-lg border-2 flex flex-col items-center justify-center gap-1 transition-all ${
-                    formData.priority === priority.value
-                      ? `${priority.color} border-current`
-                      : 'border-slate-200 text-slate-600 hover:bg-slate-50'
-                  }`}
-                  disabled={isLoading}
-                >
-                  <span className="text-lg">{priority.icon}</span>
-                  <span className="text-xs font-medium">{priority.label}</span>
-                </button>
-              ))}
-            </div>
-          </div> */}
+          </motion.div>
 
-          {/* Actions */}
-          <div className="pt-4 border-t border-slate-100">
+          {/* Submit Button */}
+          <motion.div layout className="pt-2">
             <button
               type="submit"
               disabled={isLoading || !formData.task_name || !formData.task_dept}
-              className="w-full px-4 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-lg font-medium hover:from-slate-800 hover:to-slate-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="group relative w-full h-[64px] bg-slate-900 hover:bg-indigo-600 text-white rounded-[22px] font-black text-sm uppercase tracking-widest shadow-xl shadow-slate-100 transition-all duration-500 active:scale-[0.97] disabled:opacity-30 overflow-hidden"
             >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating Task...
-                </>
-              ) : (
-                <>
-                  <IoAddCircle className="w-5 h-5" />
-                  Create Task
-                </>
-              )}
+              <div className="flex items-center justify-center gap-3">
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <IoAddCircle size={22} className="group-hover:rotate-180 transition-transform duration-700 text-indigo-400 group-hover:text-white" />
+                    <span>Initialize Task</span>
+                  </>
+                )}
+              </div>
             </button>
-          </div>
+          </motion.div>
         </form>
-      </div>
+      </motion.div>
     </div>
   )
 }

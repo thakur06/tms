@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { ToastContainer, toast, Zoom } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import Header from "../components/Header";
 import StatsCards from "../components/StatsCards";
 import ProjectsList from "../components/ProjectsList";
 import Timeline from "../components/Timeline";
@@ -10,7 +9,6 @@ import Calendar from "../components/Calendar";
 import CreateTaskModal from "../components/CreateTaskModal";
 import CreateProjectModal from "../components/CreateProjectModal";
 import CreateUserModal from "../components/CreateUserModal";
-import TimeReport from "../components/TimeReport";
 
 export default function Dashboard() {
   const [showTaskModal, setShowTaskModal] = useState(false);
@@ -428,12 +426,7 @@ export default function Dashboard() {
   }, [tick, timers, tasks]);
 
   return (
-    <div className="min-h-screen bg-slate-50 p-4 sm:p-6 lg:p-8 relative overflow-hidden">
-      {/* Subtle background accent */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-gradient-to-bl from-blue-50 to-transparent rounded-full blur-3xl -z-10 opacity-40"></div>
-      <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-200/10 rounded-full blur-3xl -z-10"></div>
-      <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-200/10 rounded-full blur-3xl -z-10"></div>
-
+    <div className="w-full relative">
       <ToastContainer
         position="top-center"
         autoClose={2000}
@@ -449,13 +442,33 @@ export default function Dashboard() {
         transition={Zoom}
       />
 
-      <div className="max-w-7xl mx-auto relative">
-        <Header
-          onCreateTask={() => setShowTaskModal(true)}
-          onCreateProject={() => setShowProjectModal(true)}
-          onCreateUser={() => setShowUserModal(true)}
-          onDelete={handleDelete}
-        />
+      <div className="w-full relative space-y-6">
+        {/* Local quick actions for creating items */}
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold text-slate-900">
+            Dashboard Overview
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setShowTaskModal(true)}
+              className="px-3 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              + Task
+            </button>
+            <button
+              onClick={() => setShowProjectModal(true)}
+              className="px-3 py-2 bg-emerald-600 text-white rounded-lg text-sm font-medium hover:bg-emerald-700 transition-colors"
+            >
+              + Project
+            </button>
+            <button
+              onClick={() => setShowUserModal(true)}
+              className="px-3 py-2 bg-amber-600 text-white rounded-lg text-sm font-medium hover:bg-amber-700 transition-colors"
+            >
+              + User
+            </button>
+          </div>
+        </div>
 
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
@@ -464,24 +477,17 @@ export default function Dashboard() {
         ) : (
           <>
             <StatsCards stats={stats} />
-            <div className="">
-              <ProjectsList
-                projects={projects}
-                onDeleteProject={handleDeleteProject}
-              />
-              {/* <Timeline timeline={timeline} /> */}
-            </div>
-            <div className="">
-              <TasksList
-                tasks={tasks}
-                timers={timers}
-                getElapsed={getElapsed}
-                toggleTimer={toggleTimer}
-                onDeleteTask={handleDeleteTask}
-              />
-              {/* <Calendar calendarEvents={calendarEvents} /> */}
-            </div>
-            <TimeReport />
+            <ProjectsList
+              projects={projects}
+              onDeleteProject={handleDeleteProject}
+            />
+            <TasksList
+              tasks={tasks}
+              timers={timers}
+              getElapsed={getElapsed}
+              toggleTimer={toggleTimer}
+              onDeleteTask={handleDeleteTask}
+            />
           </>
         )}
       </div>

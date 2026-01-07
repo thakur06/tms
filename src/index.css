@@ -111,3 +111,34 @@ button, a {
 .smooth-transition {
   transition: all 0.3s ease-in-out;
 }
+
+/* Ensure the calendar is responsive on small mobile screens */
+.react-datepicker-popper {
+  z-index: 9999 !important;
+}
+
+.react-datepicker {
+  font-family: inherit;
+  border-radius: 1.5rem !important;
+  border: none !important;
+  shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
+  overflow: hidden;
+}
+
+@media (max-width: 450px) {
+  .react-datepicker__calendar-container {
+    width: 280px !important;
+  }
+  .react-datepicker__month-container {
+    width: 100% !important;
+  }
+}
+.hide-y-scroll {
+  overflow-y: scroll; /* Allow vertical scrolling */
+  scrollbar-width: none; /* Firefox */
+}
+
+.hide-y-scroll::-webkit-scrollbar {
+  width: 0px; /* Hide vertical scrollbar width */
+  background: transparent; /* Optional */
+}

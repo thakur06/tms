@@ -29,6 +29,7 @@ export default function TimeReport() {
   const [exporting, setExporting] = useState(false);
   const [expandedUsers, setExpandedUsers] = useState({});
   const [sortedUsers, setSortedUsers] = useState([]);
+  const [today] = useState(new Date()); // Store today's date
 
   // Sort users by name in ascending order
   useEffect(() => {
@@ -59,6 +60,12 @@ export default function TimeReport() {
   const fetchReport = async () => {
     if (!startDate || !endDate) {
       alert("Please select both start and end dates");
+      return;
+    }
+
+    // Additional validation: end date shouldn't be before start date
+    if (endDate < startDate) {
+      alert("End date cannot be before start date");
       return;
     }
 
@@ -105,6 +112,26 @@ export default function TimeReport() {
       day: 'numeric'
     });
   };
+
+  // Handle start date change - also adjust end date if needed
+  const handleStartDateChange = (date) => {
+    setStartDate(date);
+    // If end date is earlier than new start date, reset end date
+    if (endDate && date > endDate) {
+      setEndDate(date);
+    }
+  };
+
+  // Custom input component for DatePicker to fix styling issues
+  const CustomInput = ({ value, onClick, placeholder }) => (
+    <button 
+      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none font-semibold text-slate-700 hover:bg-slate-100/50 text-left"
+      onClick={onClick}
+      type="button"
+    >
+      {value || placeholder}
+    </button>
+  );
 
   // Export to Excel with enhanced formatting
   const exportToExcel = async () => {
@@ -420,324 +447,326 @@ export default function TimeReport() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className="mb-8">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+    <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8 font-sans text-slate-900 relative">
+      {/* Add custom styles for react-datepicker to fix positioning issues */}
+      <style jsx>{`
+        :global(.react-datepicker) {
+          font-family: inherit !important;
+          border: 1px solid #e2e8f0 !important;
+          border-radius: 1rem !important;
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
+          z-index: 1000 !important;
+        }
+        
+        :global(.react-datepicker__triangle) {
+          display: none !important;
+        }
+        
+        :global(.react-datepicker__header) {
+          background: white !important;
+          border-bottom: 1px solid #e2e8f0 !important;
+          border-radius: 1rem 1rem 0 0 !important;
+          padding-top: 1rem !important;
+        }
+        
+        :global(.react-datepicker__current-month) {
+          font-weight: 600 !important;
+          color: #1e293b !important;
+        }
+        
+        :global(.react-datepicker__day--selected) {
+          background: #3b82f6 !important;
+          border-radius: 0.5rem !important;
+        }
+        
+        :global(.react-datepicker__day:hover) {
+          background: #eff6ff !important;
+          border-radius: 0.5rem !important;
+        }
+        
+        /* Fix for mobile devices */
+        @media (max-width: 768px) {
+          :global(.react-datepicker) {
+            position: fixed !important;
+            top: 50% !important;
+            left: 50% !important;
+            transform: translate(-50%, -50%) !important;
+            width: 90% !important;
+            max-width: 320px !important;
+          }
+        }
+        
+        /* Fix for medium to large devices */
+        @media (min-width: 768px) {
+          :global(.react-datepicker-popper) {
+            z-index: 9999 !important;
+            position: absolute !important;
+          }
+          
+          :global(.react-datepicker__month-container) {
+            margin-top: 0.5rem !important;
+          }
+        }
+        
+        /* Ensure date picker appears above other content */
+        :global(.react-datepicker-popper[data-placement^="bottom"]) {
+          padding-top: 0 !important;
+        }
+        
+        :global(.react-datepicker__navigation) {
+          top: 1rem !important;
+        }
+      `}</style>
+      
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* --- Header Section --- */}
+        <header className="relative flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <nav className="flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-widest mb-3">
+              <span className="bg-blue-100 px-2 py-1 rounded">Analytics</span>
+              <span className="text-slate-300">/</span>
+              <span className="text-slate-400">Reports</span>
+            </nav>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight italic">
+              Time Tracking <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Reports</span>
+            </h1>
+            <p className="text-slate-500 mt-2 font-medium">Detailed workspace activity and productivity export.</p>
+          </div>
+
+          {/* Real-time Status Badge */}
+          <div className="flex items-center gap-3 px-5 py-3 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl border border-slate-100">
+            <div className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-600"></span>
+            </div>
+            <span className="text-sm font-bold text-slate-700">
+              {reportData ? `${reportData.users.length} Active Users` : 'System Ready'}
+            </span>
+          </div>
+        </header>
+
+        {/* --- Configuration Bento Card --- */}
+        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white p-8 relative overflow-hidden">
+            {/* Abstract Background Decoration */}
+            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-blue-50 rounded-full blur-3xl opacity-50" />
+            
+            <div className="relative flex flex-col h-full">
+              <div className="flex items-center gap-4 mb-8">
+                <div className="p-3.5 bg-slate-900 rounded-2xl shadow-xl">
+                  <MdOutlineDateRange className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-900">Range Settings</h2>
+                  <p className="text-sm text-slate-500 font-medium">Filter workspace data by date</p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-tighter ml-1">Start Date</label>
+                  <div className="relative group">
+                    <DatePicker
+                      selected={startDate}
+                      onChange={handleStartDateChange}
+                      selectsStart
+                      startDate={startDate}
+                      endDate={endDate}
+                      maxDate={today} // Can't select future dates
+                      placeholderText={today.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                      dateFormat="MMMM d, yyyy"
+                      className="react-datepicker-custom"
+                      customInput={<CustomInput placeholder="Select start date" />}
+                      popperPlacement="bottom-start"
+                      popperModifiers={[
+                        {
+                          name: 'offset',
+                          options: {
+                            offset: [0, 10],
+                          },
+                        },
+                        {
+                          name: 'preventOverflow',
+                          options: {
+                            rootBoundary: 'viewport',
+                            tether: false,
+                            altAxis: true,
+                          },
+                        },
+                      ]}
+                    />
+                    <FiCalendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors pointer-events-none" />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="text-xs font-black text-slate-400 uppercase tracking-tighter ml-1">End Date</label>
+                  <div className="relative group">
+                    <DatePicker
+                      selected={endDate}
+                      onChange={(date) => setEndDate(date)}
+                      selectsEnd
+                      startDate={startDate}
+                      endDate={endDate}
+                      minDate={startDate} // Can't select before start date
+                      maxDate={today} // Can't select future dates
+                      placeholderText={today.toLocaleDateString('en-US', { 
+                        year: 'numeric', 
+                        month: 'short', 
+                        day: 'numeric' 
+                      })}
+                      dateFormat="MMMM d, yyyy"
+                      className="react-datepicker-custom"
+                      customInput={<CustomInput placeholder="Select end date" />}
+                      popperPlacement="bottom-start"
+                      popperModifiers={[
+                        {
+                          name: 'offset',
+                          options: {
+                            offset: [0, 10],
+                          },
+                        },
+                        {
+                          name: 'preventOverflow',
+                          options: {
+                            rootBoundary: 'viewport',
+                            tether: false,
+                            altAxis: true,
+                          },
+                        },
+                      ]}
+                    />
+                    <FiCalendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors pointer-events-none" />
+                  </div>
+                  <p className="text-xs text-slate-400 ml-1 mt-1">
+                    Cannot select dates after {today.toLocaleDateString('en-US', { 
+                      year: 'numeric', 
+                      month: 'short', 
+                      day: 'numeric' 
+                    })}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-auto flex gap-4">
+                <button
+                  onClick={fetchReport}
+                  disabled={loading || !startDate || !endDate}
+                  className="flex-1 bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold shadow-2xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-[0.98] disabled:opacity-20 flex items-center justify-center gap-3"
+                >
+                  {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <FiFilter />}
+                  Generate Report
+                </button>
+              </div>
+            </div>
+          </div>
+
+          {/* Quick Action Card */}
+          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[32px] p-8 text-white shadow-2xl shadow-blue-200 flex flex-col justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Time Tracking Reports</h1>
-              <p className="text-gray-600 mt-2">Generate and export detailed time tracking reports</p>
+              <h3 className="text-2xl font-bold mb-2">Export Data</h3>
+              <p className="text-blue-100 text-sm leading-relaxed">
+                Download your report in .xlsx format for external accounting and payroll management.
+              </p>
             </div>
-            <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-100">
-              <MdOutlineCheckCircle className="w-5 h-5 text-blue-600" />
-              <span className="text-sm font-medium text-blue-700">
-                {reportData ? `${reportData.users.length} users, ${reportData.users.reduce((acc, user) => acc + user.entries.length, 0)} entries` : 'No report loaded'}
-              </span>
-            </div>
+            <button
+              onClick={exportToExcel}
+              disabled={!reportData || exporting}
+              className="w-full py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-white hover:text-blue-600 transition-all active:scale-[0.98] disabled:opacity-50"
+            >
+              {exporting ? (
+                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              ) : (
+                <>
+                  <FiDownload className="text-lg" />
+                  Export to Excel
+                </>
+              )}
+            </button>
           </div>
+        </section>
 
-          {/* Date Selection Card - Improved Styling */}
-          <div className="bg-white rounded-2xl border border-gray-200 shadow-lg p-6 mb-8">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-3 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl">
-                <MdOutlineDateRange className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h2 className="text-xl font-bold text-gray-900">Select Date Range</h2>
-                <p className="text-gray-600">Choose start and end dates for your report</p>
-              </div>
+        {/* --- Data Display Section --- */}
+        {reportData && (
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <div className="flex items-center justify-between mb-6">
+                <h3 className="text-2xl font-black text-slate-900 tracking-tight">Report Results</h3>
+                <div className="flex gap-2">
+                    <div className="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-xs font-bold uppercase tracking-widest">
+                        Total: {reportData.users.reduce((sum, user) => sum + user.total_hours, 0)} Hours
+                    </div>
+                    <div className="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-100 rounded-xl text-xs font-bold uppercase tracking-widest">
+                        {formatDateNoTime(reportData.startDate)} - {formatDateNoTime(reportData.endDate)}
+                    </div>
+                </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <FiCalendar className="w-4 h-4" />
-                  Start Date
-                </label>
-                <div className="relative">
-                  <DatePicker
-                    selected={startDate}
-                    onChange={(date) => setStartDate(date)}
-                    className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all cursor-pointer hover:border-blue-300"
-                    dateFormat="MMMM d, yyyy"
-                    placeholderText="Select start date"
-                    maxDate={endDate || new Date()}
-                    isClearable
-                  />
-                  <FiCalendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <FiCalendar className="w-4 h-4" />
-                  End Date
-                </label>
-                <div className="relative">
-                  <DatePicker
-                    selected={endDate}
-                    onChange={(date) => setEndDate(date)}
-                    className="w-full pl-12 pr-4 py-3.5 bg-white border-2 border-gray-200 rounded-xl focus:outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-100 transition-all cursor-pointer hover:border-blue-300"
-                    dateFormat="MMMM d, yyyy"
-                    placeholderText="Select end date"
-                    minDate={startDate}
-                    maxDate={new Date()}
-                    isClearable
-                  />
-                  <FiCalendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
-                </div>
-              </div>
-            </div>
-
-            {/* Action Buttons - Improved Styling */}
-            <div className="flex flex-col sm:flex-row gap-3 pt-4 border-t border-gray-100">
-              <button
-                onClick={fetchReport}
-                disabled={loading || !startDate || !endDate}
-                className={`flex-1 px-6 py-3.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-3 shadow-sm ${
-                  loading || !startDate || !endDate
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:from-blue-700 hover:to-blue-800 hover:shadow-lg transform hover:-translate-y-0.5'
-                }`}
-              >
-                {loading ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Generating Report...
-                  </>
-                ) : (
-                  <>
-                    <FiFilter className="w-5 h-5" />
-                    Generate Report
-                  </>
-                )}
-              </button>
-
-              <button
-                onClick={exportToExcel}
-                disabled={exporting || !reportData}
-                className={`flex-1 px-6 py-3.5 rounded-xl font-semibold transition-all flex items-center justify-center gap-3 shadow-sm ${
-                  exporting || !reportData
-                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700 hover:shadow-lg transform hover:-translate-y-0.5'
-                }`}
-              >
-                {exporting ? (
-                  <>
-                    <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Exporting...
-                  </>
-                ) : (
-                  <>
-                    <FiDownload className="w-5 h-5" />
-                    Export to Excel
-                  </>
-                )}
-              </button>
-            </div>
-          </div>
-
-          {/* Report Display - Improved Styling */}
-          {reportData && sortedUsers.length > 0 && (
-            <div className="bg-white rounded-2xl border border-gray-200 shadow-lg overflow-hidden">
-              {/* Report Header */}
-              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-gray-200 p-6">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div>
-                    <h2 className="text-2xl font-bold text-gray-900">Time Report</h2>
-                    <div className="flex items-center gap-4 mt-2">
-                      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
-                        <FiCalendar className="w-4 h-4" />
-                        <span className="font-medium">{formatDateNoTime(reportData.startDate)}</span>
-                      </div>
-                      <span className="text-gray-400">→</span>
-                      <div className="flex items-center gap-2 text-sm text-gray-600 bg-white px-3 py-1.5 rounded-lg border border-gray-200">
-                        <FiCalendar className="w-4 h-4" />
-                        <span className="font-medium">{formatDateNoTime(reportData.endDate)}</span>
-                      </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {sortedUsers.map((user, index) => (
+                <div 
+                  key={user.user_name}
+                  onClick={() => toggleUser(user.user_name)}
+                  className="group bg-white border border-slate-100 rounded-[28px] p-6 hover:shadow-[0_30px_60px_rgba(0,0,0,0.08)] transition-all cursor-pointer relative overflow-hidden"
+                >
+                  {/* Profile Section */}
+                  <div className="flex items-center gap-4 mb-6">
+                    <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-xl font-black text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
+                      {user.user_name.charAt(0)}
                     </div>
-                  </div>
-                  <div className="flex items-center gap-4">
-                    <div className="text-center bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-sm">
-                      <div className="text-2xl font-bold text-blue-700">{sortedUsers.length}</div>
-                      <div className="text-xs text-gray-600">Users</div>
-                    </div>
-                    <div className="text-center bg-white px-4 py-3 rounded-xl border border-gray-200 shadow-sm">
-                      <div className="text-2xl font-bold text-emerald-700">
-                        {reportData.users.reduce((sum, user) => sum + user.total_hours, 0)}h
-                      </div>
-                      <div className="text-xs text-gray-600">Total Hours</div>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 rounded-lg border border-blue-100">
-                      <MdOutlineSortByAlpha className="w-5 h-5 text-blue-600" />
-                      <span className="text-sm font-medium text-blue-700">Sorted A-Z</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* User Summary Cards - Sorted Alphabetically */}
-              <div className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                  <div>
-                    <h3 className="text-lg font-semibold text-gray-900">User Summary</h3>
-                    <p className="text-sm text-gray-600 mt-1">Sorted alphabetically by name</p>
-                  </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-600 bg-gray-50 px-3 py-2 rounded-lg">
-                    <FiHash className="w-4 h-4" />
-                    <span>Total: <span className="font-bold text-blue-700">{sortedUsers.length}</span> users</span>
-                  </div>
-                </div>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-                  {sortedUsers.map((user, index) => (
-                    <div 
-                      key={user.user_name} 
-                      className={`bg-white border-2 rounded-xl p-5 hover:shadow-md transition-all cursor-pointer transform hover:-translate-y-1 ${
-                        index % 3 === 0 ? 'border-blue-100' : 
-                        index % 3 === 1 ? 'border-green-100' : 
-                        'border-purple-100'
-                      }`}
-                      onClick={() => toggleUser(user.user_name)}
-                    >
-                      <div className="flex items-center justify-between mb-3">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-md ${
-                            index % 3 === 0 ? 'bg-gradient-to-br from-blue-500 to-blue-600' : 
-                            index % 3 === 1 ? 'bg-gradient-to-br from-emerald-500 to-green-600' : 
-                            'bg-gradient-to-br from-purple-500 to-purple-600'
-                          }`}>
-                            <span className="text-white font-bold text-lg">
-                              {user.user_name.charAt(0)}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2">
-                              <h4 className="font-bold text-gray-900 truncate">{user.user_name}</h4>
-                              <span className={`text-xs px-2 py-1 rounded-full flex-shrink-0 ${
-                                index % 3 === 0 ? 'bg-blue-100 text-blue-800' : 
-                                index % 3 === 1 ? 'bg-green-100 text-green-800' : 
-                                'bg-purple-100 text-purple-800'
-                              }`}>
-                                #{index + 1}
-                              </span>
-                            </div>
-                            <div className="flex flex-col gap-1 mt-1">
-                              {user.user_email && (
-                                <div className="flex items-center gap-1 text-xs text-gray-600 truncate">
-                                  <FiMail className="w-3 h-3 flex-shrink-0" />
-                                  <span className="truncate">{user.user_email}</span>
-                                </div>
-                              )}
-                              {user.user_dept && (
-                                <div className="flex items-center gap-1 text-xs text-gray-600 truncate">
-                                  <FiBriefcase className="w-3 h-3 flex-shrink-0" />
-                                  <span className="truncate">{user.user_dept}</span>
-                                </div>
-                              )}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="flex-shrink-0">
-                          {expandedUsers[user.user_name] ? (
-                            <FiChevronUp className="w-5 h-5 text-gray-400" />
-                          ) : (
-                            <FiChevronDown className="w-5 h-5 text-gray-400" />
-                          )}
-                        </div>
-                      </div>
-
-                      {/* User Stats Bar */}
-                      <div className="mt-3 p-3 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg border border-gray-200">
-                        <div className="grid grid-cols-3 gap-2 text-center">
-                          <div className="p-2 bg-white rounded-lg shadow-sm">
-                            <div className="text-lg font-bold text-gray-900">{user.entries.length}</div>
-                            <div className="text-xs text-gray-600">Entries</div>
-                          </div>
-                          <div className="p-2 bg-white rounded-lg shadow-sm">
-                            <div className="text-lg font-bold text-emerald-600">
-                              {user.total_hours}h
-                            </div>
-                            <div className="text-xs text-gray-600">Hours</div>
-                          </div>
-                          <div className="p-2 bg-white rounded-lg shadow-sm">
-                            <div className="text-lg font-bold text-blue-600">
-                              {user.total_minutes}m
-                            </div>
-                            <div className="text-xs text-gray-600">Minutes</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Detailed Entries (Collapsible) */}
-                      {expandedUsers[user.user_name] && (
-                        <div className="mt-4 pt-4 border-t border-gray-100">
-                          <div className="mb-3 flex items-center justify-between">
-                            <h5 className="font-medium text-gray-900">Time Entries</h5>
-                            <span className="text-sm text-gray-600 bg-gray-100 px-2 py-1 rounded">
-                              {user.entries.length} records
-                            </span>
-                          </div>
-                          <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                            {user.entries.map((entry, entryIndex) => (
-                              <div key={entryIndex} className="bg-gray-50 border border-gray-200 rounded-lg p-4 hover:bg-white transition-colors">
-                                <div className="flex justify-between items-start mb-2">
-                                  <div className="flex-1">
-                                    <div className="font-medium text-gray-900">{entry.project || "No Project"}</div>
-                                    <div className="text-sm text-gray-600 mt-1 flex items-center gap-2">
-                                      <span>{entry.task_id}</span>
-                                      {entry.project_code && (
-                                        <span className="text-xs px-2 py-0.5 bg-blue-100 text-blue-800 rounded">
-                                          {entry.project_code}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </div>
-                                  <div className="px-2.5 py-1 bg-gradient-to-r from-blue-100 to-blue-50 rounded-lg border border-blue-200">
-                                    <span className="font-bold text-blue-700">
-                                      {entry.hours}h {entry.minutes}m
-                                    </span>
-                                  </div>
-                                </div>
-                                <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                                  <div className="flex items-center gap-1">
-                                    <FiCalendar className="w-3 h-3" />
-                                    {formatDateNoTime(entry.date)}
-                                  </div>
-                                  {entry.location && (
-                                    <div className="flex items-center gap-1">
-                                      <FiMapPin className="w-3 h-3" />
-                                      {entry.location}
-                                    </div>
-                                  )}
-                                </div>
-                                {entry.remarks && (
-                                  <div className="mt-2 text-sm text-gray-700 bg-white p-2 rounded border border-gray-200">
-                                    <div className="flex items-start gap-2">
-                                      <FiFileText className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" />
-                                      <span className="italic">{entry.remarks}</span>
-                                    </div>
-                                  </div>
-                                )}
-                              </div>
-                            ))}
-                          </div>
-                        </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">{user.user_name}</h4>
+                      <p className="text-xs font-medium text-slate-500 truncate">{user.user_dept || 'General Dept'}</p>
+                      {user.user_email && (
+                        <p className="text-xs text-slate-400 truncate mt-1">{user.user_email}</p>
                       )}
                     </div>
-                  ))}
+                    <div className={`p-2 rounded-xl transition-colors ${expandedUsers[user.user_name] ? 'bg-blue-50 text-blue-600' : 'text-slate-300'}`}>
+                      {expandedUsers[user.user_name] ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
+                    </div>
+                  </div>
+
+                  {/* Stat Pills */}
+                  <div className="flex gap-2 mb-2">
+                    <div className="flex-1 bg-slate-50 rounded-xl p-3 text-center border border-slate-100 group-hover:bg-white transition-colors">
+                      <div className="text-xs font-black text-slate-400 uppercase tracking-tighter">Hours</div>
+                      <div className="text-lg font-black text-slate-900">{user.total_hours}h</div>
+                    </div>
+                    <div className="flex-1 bg-slate-50 rounded-xl p-3 text-center border border-slate-100 group-hover:bg-white transition-colors">
+                      <div className="text-xs font-black text-slate-400 uppercase tracking-tighter">Entries</div>
+                      <div className="text-lg font-black text-slate-900">{user.entries.length}</div>
+                    </div>
+                  </div>
+
+                  {/* Expandable Entries Area */}
+                  {expandedUsers[user.user_name] && (
+                    <div className="mt-6 space-y-3 pt-6 border-t border-slate-50 animate-in zoom-in-95 duration-200">
+                       {user.entries.map((entry, i) => (
+                         <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div className="flex justify-between items-start">
+                                <span className="text-xs font-bold text-blue-600">{entry.project_code || 'PRJ'}</span>
+                                <span className="text-xs font-black text-slate-900">{entry.hours}h {entry.minutes}m</span>
+                            </div>
+                            <p className="text-sm font-bold text-slate-800 mt-1">{entry.project}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <FiCalendar className="w-3 h-3 text-slate-400" />
+                              <span className="text-[11px] text-slate-500">
+                                {formatDateNoTime(entry.date)}
+                              </span>
+                            </div>
+                            <p className="text-[11px] text-slate-500 mt-2 italic line-clamp-1">"{entry.remarks || 'No remarks provided'}"</p>
+                         </div>
+                       ))}
+                    </div>
+                  )}
                 </div>
-              </div>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

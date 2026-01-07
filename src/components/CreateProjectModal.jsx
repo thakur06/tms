@@ -1,7 +1,10 @@
 import { useState } from 'react'
-import { IoAddCircle, IoClose, IoLocationOutline, IoDocumentTextOutline, IoCodeSlash } from 'react-icons/io5'
+import { motion, AnimatePresence } from 'framer-motion'
+import { 
+  IoAddCircle, IoClose, IoLocationOutline, 
+  IoDocumentTextOutline, IoCodeSlash, IoRocketOutline 
+} from 'react-icons/io5'
 import { toast } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
 
 export default function CreateProjectModal({ isOpen, onClose, onCreateProject }) {
   const [formData, setFormData] = useState({
@@ -12,38 +15,22 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject })
   })
   const [isLoading, setIsLoading] = useState(false)
 
-  const statuses = [
-    { value: 'planning', label: 'Planning', color: 'text-blue-600 bg-blue-50' },
-    { value: 'active', label: 'Active', color: 'text-emerald-600 bg-emerald-50' },
-    { value: 'on_hold', label: 'On Hold', color: 'text-amber-600 bg-amber-50' },
-    { value: 'completed', label: 'Completed', color: 'text-slate-600 bg-slate-50' }
-  ]
-
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (!formData.name.trim()) {
-      toast.error('Project name is required')
-      return
-    }
-    
-    if (!formData.code.trim()) {
-      toast.error('Project code is required')
-      return
-    }
-    
-    if (!formData.location.trim()) {
-      toast.error('Location is required')
+    if (!formData.name.trim() || !formData.code.trim() || !formData.location.trim()) {
+      toast.error('Please fill in all required fields')
       return
     }
 
     setIsLoading(true)
     try {
       await onCreateProject(formData)
-      setFormData({ name: '', code: '', location: '', status: 'planning' })
-      onClose()
+      // toast.success('Project initialized successfully')
+      handleClose()
     } catch (error) {
       console.error('Error:', error)
+      // toast.error('Failed to create project')
     } finally {
       setIsLoading(false)
     }
@@ -57,107 +44,110 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject })
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div 
-        className="bg-white rounded-xl shadow-2xl w-full max-w-sm overflow-hidden"
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md">
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.9, y: 20 }}
+        animate={{ opacity: 1, scale: 1, y: 0 }}
+        exit={{ opacity: 0, scale: 0.9, y: 20 }}
+        className="bg-white rounded-[32px] shadow-2xl w-full max-w-md overflow-hidden border border-slate-100"
         onClick={(e) => e.stopPropagation()}
       >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 px-6 py-5">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center backdrop-blur-sm">
-                <IoAddCircle className="w-6 h-6 text-white" />
+        {/* Header Section */}
+        <div className="relative px-8 pt-8 pb-6">
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-4">
+              <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-lg shadow-indigo-200">
+                <IoRocketOutline className="w-6 h-6 text-white" />
               </div>
               <div>
-                <h2 className="text-xl font-semibold text-white">New Project</h2>
-                <p className="text-sm text-slate-300">Add project to your portfolio</p>
+                <h2 className="text-2xl font-black text-slate-900 tracking-tight">New Project</h2>
+                <p className="text-sm font-medium text-slate-400">Expand your production portfolio</p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+              className="p-2 bg-slate-50 hover:bg-rose-50 text-slate-400 hover:text-rose-500 rounded-full transition-all active:scale-90"
             >
-              <IoClose className="w-5 h-5 text-white" />
+              <IoClose size={20} />
             </button>
           </div>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="p-6 space-y-3">
+        {/* Form Body */}
+        <form onSubmit={handleSubmit} className="px-8 pb-8 space-y-5">
+          
           {/* Project Name */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <IoDocumentTextOutline className="w-4 h-4 text-slate-600" />
-              <label className="text-sm font-medium text-slate-700">Project Name</label>
-            </div>
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
+              <IoDocumentTextOutline size={14} className="text-indigo-500" />
+              Project Title
+            </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:border-slate-400 focus:ring-2 focus:ring-slate-200 outline-none transition-all bg-slate-50/50"
-              placeholder="Enter project name"
+              className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-semibold focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white outline-none transition-all placeholder:text-slate-300"
+              placeholder="e.g. Global Expansion Phase I"
               disabled={isLoading}
               autoFocus
             />
           </div>
 
-          {/* Project Code */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <IoCodeSlash className="w-4 h-4 text-slate-600" />
-              <label className="text-sm font-medium text-slate-700">Project Code</label>
+          <div className="grid grid-cols-2 gap-4">
+            {/* Project Code */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
+                <IoCodeSlash size={14} className="text-indigo-500" />
+                Identifier
+              </label>
+              <input
+                type="text"
+                value={formData.code}
+                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white outline-none transition-all placeholder:text-slate-300 font-mono tracking-widest text-indigo-600"
+                placeholder="PRJ-01"
+                disabled={isLoading}
+              />
             </div>
-            <input
-              type="text"
-              value={formData.code}
-              onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:border-slate-400 focus:ring-2 focus:ring-slate-200 outline-none transition-all bg-slate-50/50 font-mono"
-              placeholder="PRJ-001"
-              disabled={isLoading}
-            />
+
+            {/* Location */}
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 ml-1">
+                <IoLocationOutline size={14} className="text-indigo-500" />
+                Region
+              </label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                className="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-sm font-semibold focus:ring-4 focus:ring-indigo-500/5 focus:border-indigo-500 focus:bg-white outline-none transition-all placeholder:text-slate-300"
+                placeholder="London, UK"
+                disabled={isLoading}
+              />
+            </div>
           </div>
 
-          {/* Location */}
-          <div>
-            <div className="flex items-center gap-2 mb-2">
-              <IoLocationOutline className="w-4 h-4 text-slate-600" />
-              <label className="text-sm font-medium text-slate-700">Location</label>
-            </div>
-            <input
-              type="text"
-              value={formData.location}
-              onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-              className="w-full px-4 py-2 border border-slate-200 rounded-lg focus:border-slate-400 focus:ring-2 focus:ring-slate-200 outline-none transition-all bg-slate-50/50"
-              placeholder="City, Country"
-              disabled={isLoading}
-            />
-          </div>
-          {/* Actions */}
-          <div className="pt-2 border-t border-slate-100">
+          {/* Action Button */}
+          <div className="pt-4">
             <button
               type="submit"
               disabled={isLoading || !formData.name || !formData.code || !formData.location}
-              className="w-full px-4 py-3 bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-lg font-medium hover:from-slate-800 hover:to-slate-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="group relative w-full h-[60px] bg-slate-900 hover:bg-slate-800 text-white rounded-[20px] font-bold shadow-xl shadow-slate-200 transition-all active:scale-[0.98] disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed overflow-hidden"
             >
-              {isLoading ? (
-                <>
-                  <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  Creating Project...
-                </>
-              ) : (
-                <>
-                  <IoAddCircle className="w-5 h-5" />
-                  Create Project
-                </>
-              )}
+              <div className="flex items-center justify-center gap-3">
+                {isLoading ? (
+                  <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                ) : (
+                  <>
+                    <IoAddCircle size={22} className="text-indigo-400 group-hover:text-white transition-colors" />
+                    <span>Deploy Project</span>
+                  </>
+                )}
+              </div>
             </button>
           </div>
         </form>
-      </div>
+      </motion.div>
     </div>
   )
 }

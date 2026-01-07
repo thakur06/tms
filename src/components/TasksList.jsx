@@ -1,347 +1,254 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  IoFilter, 
-  IoPerson, 
-  IoTrash,
-  IoClose,
-  IoChevronDown,
-  IoChevronUp
+  IoPerson, IoTrash, IoChevronBack, IoChevronForward, 
+  IoSearchOutline, IoLayersOutline 
 } from 'react-icons/io5';
-import { useState } from 'react';
+import { useState, useMemo, useRef } from 'react';
 
-export default function TasksList({ tasks, onDeleteTask }) {
+export default function TasksList({ tasks = [], onDeleteTask }) {
   const [filterDept, setFilterDept] = useState('All');
-  const [showAllTasks, setShowAllTasks] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [taskToDelete, setTaskToDelete] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  
+  const tasksPerPage = 6;
+  const listTopRef = useRef(null); // Reference for smart scrolling
 
-  // Professional color palette for departments
-const deptColors = {
-  'Process': 'bg-blue-100 text-blue-800 border border-blue-200',
-  'Product Development': 'bg-violet-100 text-violet-800 border border-violet-200',
-  'Business Development': 'bg-fuchsia-100 text-fuchsia-800 border border-fuchsia-200',
-  'Document Controls': 'bg-emerald-100 text-emerald-800 border border-emerald-200',
-  'Project Controls': 'bg-amber-100 text-amber-800 border border-amber-200',
-  'Electrical': 'bg-rose-100 text-rose-800 border border-rose-200',
-  'Mechanical': 'bg-indigo-100 text-indigo-800 border border-indigo-200',
-  'Controls': 'bg-slate-100 text-slate-800 border border-slate-200',
-  'IT': 'bg-cyan-100 text-cyan-800 border border-cyan-200',
-  'Management': 'bg-purple-100 text-purple-800 border border-purple-200',
-  'default': 'bg-gray-100 text-gray-800 border border-gray-200'
-};
-
-  const getDeptColor = (dept) => {
-    return deptColors[dept] || deptColors.default;
+  const deptStyles = {
+    'Process': 'text-blue-600 bg-blue-50',
+    'Product Development': 'text-violet-600 bg-violet-50',
+    'Business Development': 'text-rose-600 bg-rose-50',
+    'Document Controls': 'text-emerald-600 bg-emerald-50',
+    'default': 'text-slate-600 bg-slate-50'
   };
 
-  // Get unique departments for filter
-  const uniqueDepts = ['All', ...new Set(tasks.map(task => task.task_dept).filter(Boolean))];
+  // 1. Get ALL unique departments
+  const uniqueDepts = useMemo(() => 
+    ['All', ...new Set(tasks.map(t => t.task_dept).filter(Boolean))]
+  , [tasks]);
 
-  // Filter tasks based on selected department
-  const filteredTasks = filterDept === 'All' 
-    ? tasks 
-    : tasks.filter(task => task.task_dept === filterDept);
+  // 2. Multi-stage filtering (Search + Department)
+  const filteredTasks = useMemo(() => {
+    return tasks.filter(t => {
+      const matchesDept = filterDept === 'All' || t.task_dept === filterDept;
+      const matchesSearch = (t.task_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                            (t.task_id || '').toString().includes(searchQuery);
+      return matchesDept && matchesSearch;
+    });
+  }, [tasks, filterDept, searchQuery]);
 
-  // Limit tasks to 6 by default (2 rows of 3)
-  const initialTasksCount = 6;
-  const displayedTasks = showAllTasks ? filteredTasks : filteredTasks.slice(0, initialTasksCount);
+  // 3. Pagination Logic
+  const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
+  const currentTasks = filteredTasks.slice((currentPage - 1) * tasksPerPage, currentPage * tasksPerPage);
 
-  const handleDeleteClick = (task) => {
-    setTaskToDelete(task);
-    setShowDeleteModal(true);
-  };
-
-  const confirmDelete = () => {
-    if (taskToDelete && onDeleteTask) {
-      onDeleteTask(taskToDelete.task_id || taskToDelete.id);
-    }
-    setShowDeleteModal(false);
-    setTaskToDelete(null);
-  };
-
-  const cancelDelete = () => {
-    setShowDeleteModal(false);
-    setTaskToDelete(null);
+  const handlePageChange = (page) => {
+    setCurrentPage(page);
+    // Smart Scroll: Only scrolls the tasks container into view
+    listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
   return (
-    <>
-      <div className="bg-white border border-gray-100 rounded-2xl p-6 shadow-sm">
-        {/* Header */}
-        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-6">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl flex items-center justify-center">
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <div>
-                <p className="text-xs text-slate-500 font-medium tracking-wider uppercase">Task Management</p>
-                <h2 className="text-2xl font-bold text-slate-900">Active Tasks</h2>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 mt-2">
-              <span className="px-3 py-1 bg-slate-100 text-slate-700 rounded-full text-sm font-medium">
-                {filteredTasks.length} tasks
-              </span>
-              {filterDept !== 'All' && (
-                <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">
-                  Filtered by: {filterDept}
-                </span>
-              )}
-            </div>
-          </div>
-
-          {/* Filter Dropdown */}
-          <div className="relative">
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <select
-                  value={filterDept}
-                  onChange={(e) => setFilterDept(e.target.value)}
-                  className="appearance-none px-4 py-2.5 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-300 pl-10 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                >
-                  {uniqueDepts.map(dept => (
-                    <option key={dept} value={dept}>{dept}</option>
-                  ))}
-                </select>
-                <IoFilter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                <IoChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Tasks Grid */}
-        <div className="mb-6">
-          {filteredTasks.length === 0 ? (
-            <div className="text-center py-16">
-              <div className="w-20 h-20 mx-auto bg-gradient-to-br from-slate-100 to-slate-200 rounded-2xl flex items-center justify-center mb-6">
-                <svg className="w-10 h-10 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
-              </div>
-              <h3 className="text-lg font-semibold text-slate-700 mb-2">No tasks found</h3>
-              <p className="text-sm text-slate-500 max-w-md mx-auto">
-                {filterDept === 'All' 
-                  ? 'No tasks available. Create your first task to get started.'
-                  : `No tasks found in ${filterDept} department. Try a different filter.`
-                }
+    <div className="space-y-6" ref={listTopRef}>
+      {/* --- Header & Control Panel --- */}
+      <div className="bg-white rounded-[32px] p-6 lg:p-8 border border-slate-100 shadow-sm">
+        <div className="flex flex-col gap-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h2 className="text-3xl font-black text-slate-900 tracking-tight">Active Tasks</h2>
+              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
+                Management & Progress Tracking
               </p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {displayedTasks.map((task, index) => (
-                <motion.div
-                  key={task.task_id || task.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  whileHover={{ 
-                    y: -2,
-                    boxShadow: "0 8px 20px rgba(0, 0, 0, 0.06)"
-                  }}
-                  className="group relative bg-white border border-slate-200 rounded-xl hover:border-slate-300 transition-all duration-300"
-                >
-                  <div className="p-5">
-                    <div className="flex items-start justify-between gap-4">
-                      <div className="flex-1 min-w-0">
-                        {/* Task Name */}
-                        <h4 className="text-base font-semibold text-slate-900 mb-3 line-clamp-2 leading-tight">
-                          {task.task_name || task.name}
-                        </h4>
-                        
-                        {/* Department Badge */}
-                        <div className="flex items-center gap-2 mb-4">
-                          <div className={`px-3 py-1.5 rounded-lg text-xs font-medium ${getDeptColor(task.task_dept)}`}>
-                            <div className="flex items-center gap-1.5">
-                              <IoPerson className="w-3 h-3" />
-                              {task.task_dept}
-                            </div>
-                          </div>
-                          
-                          {task.status && (
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                              task.status === 'active' 
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : task.status === 'pending'
-                                ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                                : 'bg-slate-50 text-slate-700 border border-slate-200'
-                            }`}>
-                              {task.status}
-                            </span>
-                          )}
-                        </div>
-                        
-                        {/* Task ID */}
-                        {task.task_id && (
-                          <p className="text-xs text-slate-500">
-                            ID: {task.task_id}
-                          </p>
-                        )}
-                      </div>
-                      
-                      {/* Delete Button */}
-                      <button 
-                        onClick={() => handleDeleteClick(task)}
-                        className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 flex-shrink-0"
-                        title="Delete Task"
-                      >
-                        <IoTrash className="w-4 h-4" />
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
+
+            {/* Search Bar */}
+            <div className="relative group min-w-[280px]">
+              <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+              <input 
+                type="text"
+                placeholder="Search task or ID..."
+                value={searchQuery}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white focus:border-blue-200 transition-all font-medium"
+              />
             </div>
-          )}
+          </div>
+
+          {/* Department Chips (Full list, wraps to next line if needed) */}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-2">Filters:</span>
+            {uniqueDepts.map((dept) => (
+              <button
+                key={dept}
+                onClick={() => { setFilterDept(dept); setCurrentPage(1); }}
+                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
+                  filterDept === dept 
+                    ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200' 
+                    : 'bg-white text-slate-500 border-slate-100 hover:border-slate-300'
+                }`}
+              >
+                {dept}
+              </button>
+            ))}
+          </div>
         </div>
-
-        {/* View All Toggle */}
-        {filteredTasks.length > initialTasksCount && (
-          <div className="flex justify-center mt-6">
-            <button 
-              onClick={() => setShowAllTasks(!showAllTasks)}
-              className="px-5 py-3 bg-white border border-slate-200 text-slate-700 rounded-lg text-sm font-medium hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-300 flex items-center gap-2 group"
-            >
-              {showAllTasks ? (
-                <>
-                  <IoChevronUp className="w-4 h-4 group-hover:-translate-y-0.5 transition-transform" />
-                  Show Less
-                </>
-              ) : (
-                <>
-                  View All Tasks ({filteredTasks.length - initialTasksCount} more)
-                  <IoChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-                </>
-              )}
-            </button>
-          </div>
-        )}
-
-        {/* Department Statistics */}
-        {filteredTasks.length > 0 && (
-          <div className="mt-8 pt-6 border-t border-slate-200">
-            <h3 className="text-sm font-semibold text-slate-900 mb-4">Tasks by Department</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {Object.entries(
-                filteredTasks.reduce((acc, task) => {
-                  const dept = task.task_dept || 'Unassigned';
-                  acc[dept] = (acc[dept] || 0) + 1;
-                  return acc;
-                }, {})
-              )
-              .sort((a, b) => b[1] - a[1])
-              .slice(0, 8)
-              .map(([dept, count]) => (
-                <div key={dept} className="bg-gradient-to-br from-slate-50 to-white p-4 rounded-xl border border-slate-200">
-                  <div className="flex items-center justify-between mb-2">
-                    <div className={`w-8 h-8 rounded-lg ${getDeptColor(dept)} flex items-center justify-center`}>
-                      <IoPerson className="w-4 h-4" />
-                    </div>
-                    <span className="text-lg font-bold text-slate-900">{count}</span>
-                  </div>
-                  <p className="text-xs text-slate-700 font-medium truncate">{dept}</p>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
-      {/* Delete Confirmation Modal */}
-      <AnimatePresence>
-        {showDeleteModal && taskToDelete && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-          >
-            <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+      {/* --- Tasks Grid --- */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 min-h-[400px]">
+        <AnimatePresence mode='popLayout'>
+          {currentTasks.length > 0 ? (
+            currentTasks.map((task, index) => (
+              <motion.div
+                key={task.task_id || index}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="group bg-white border border-slate-100 rounded-[24px] p-6 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] transition-all flex flex-col"
+              >
+                <div className="flex justify-between items-start mb-4">
+                  <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${deptStyles[task.task_dept] || deptStyles.default}`}>
+                    {task.task_dept}
+                  </span>
+                  <button 
+                    onClick={() => setTaskToDelete(task)}
+                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                  >
+                    <IoTrash size={16} />
+                  </button>
+                </div>
+
+                <h4 className="text-lg font-bold text-slate-800 leading-snug mb-6 flex-grow line-clamp-2">
+                  {task.task_name}
+                </h4>
+
+                <div className="flex items-center justify-between pt-4 border-t border-slate-50 mt-auto">
+                  <div className="flex items-center gap-2 text-slate-400">
+                    <IoPerson size={14} />
+                    <span className="text-xs font-bold uppercase tracking-tighter">ID: {task.task_id}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
+                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">In Progress</span>
+                  </div>
+                </div>
+              </motion.div>
+            ))
+          ) : (
+            <motion.div 
+              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
+              className="col-span-full py-20 bg-slate-50/50 rounded-[32px] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center"
             >
-              <div className="p-6 border-b border-slate-200">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
-                      <IoTrash className="w-5 h-5 text-red-600" />
-                    </div>
-                    <div>
-                      <h3 className="text-lg font-semibold text-slate-900">Delete Task</h3>
-                      <p className="text-sm text-slate-600">This action cannot be undone</p>
-                    </div>
-                  </div>
-                  <button
-                    onClick={cancelDelete}
-                    className="p-2 hover:bg-slate-100 rounded-lg transition-colors"
-                  >
-                    <IoClose className="w-5 h-5 text-slate-400" />
-                  </button>
-                </div>
+              <div className="p-4 bg-white rounded-2xl shadow-sm mb-4">
+                <IoLayersOutline size={32} className="text-slate-300" />
               </div>
+              <p className="text-slate-500 font-bold">No tasks found matching your criteria</p>
+              <button 
+                onClick={() => {setFilterDept('All'); setSearchQuery('');}}
+                className="mt-4 text-blue-600 font-bold text-xs uppercase tracking-widest hover:underline"
+              >
+                Clear all filters
+              </button>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-              <div className="p-6">
-                <div className="mb-6">
-                  <p className="text-slate-700 mb-3">
-                    Are you sure you want to delete this task?
-                  </p>
-                  <div className="bg-slate-50 border border-slate-200 rounded-lg p-4">
-                    <div className="flex items-center gap-3">
-                      <div className={`w-12 h-12 rounded-lg ${getDeptColor(taskToDelete.task_dept)} flex items-center justify-center`}>
-                        <IoPerson className="w-6 h-6" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="font-semibold text-slate-900 truncate">
-                          {taskToDelete.task_name || taskToDelete.name}
-                        </p>
-                        <div className="flex items-center gap-2 mt-1">
-                          <span className="text-sm text-slate-600">{taskToDelete.task_dept}</span>
-                          {taskToDelete.task_id && (
-                            <span className="text-xs text-slate-500">• ID: {taskToDelete.task_id}</span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+      {totalPages > 1 && (
+  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-[28px] border border-slate-100 shadow-sm mt-8">
+    
+    {/* Page Status: Minimalist on Mobile, Descriptive on Desktop */}
+    <div className="order-2 sm:order-1">
+      <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-2">
+        <span className="hidden sm:inline">Viewing</span>
+        <span className="text-slate-900 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
+          {currentPage}
+        </span>
+        <span className="text-slate-300">/</span>
+        <span className="text-slate-500">{totalPages}</span>
+        <span className="hidden sm:inline text-slate-400">Pages</span>
+      </p>
+    </div>
 
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                  <div className="flex items-start gap-3">
-                    <div className="w-5 h-5 text-red-600 mt-0.5">⚠️</div>
-                    <div>
-                      <p className="text-sm font-medium text-red-800 mb-1">Important Notice</p>
-                      <p className="text-sm text-red-700">
-                        This task will be permanently deleted along with all associated time entries and data.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+    {/* Navigation Controls */}
+    <div className="flex items-center gap-2 order-1 sm:order-2 w-full sm:w-auto">
+      {/* PREVIOUS BUTTON */}
+      <button
+        disabled={currentPage === 1}
+        onClick={() => handlePageChange(currentPage - 1)}
+        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-2xl border border-slate-100 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all active:scale-95 group"
+      >
+        <IoChevronBack className="text-slate-400 group-hover:text-blue-600 transition-colors" />
+        <span className="text-sm font-bold text-slate-700">Prev</span>
+      </button>
 
-                <div className="flex gap-3">
-                  <button
-                    onClick={cancelDelete}
-                    className="flex-1 px-4 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-all duration-200 font-medium"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={confirmDelete}
-                    className="flex-1 px-4 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 font-medium shadow-sm hover:shadow flex items-center justify-center"
-                  >
-                    <IoTrash className="w-4 h-4 mr-2" />
-                    Delete Task
-                  </button>
-                </div>
+      {/* PAGE NUMBERS: Hidden on extra small mobile devices to prevent wrapping */}
+      <div className="hidden md:flex items-center gap-1.5 mx-2">
+        {Array.from({ length: totalPages }, (_, i) => i + 1)
+          .filter(page => {
+            // Logic to show: First, Last, and 1 neighbor around Current
+            return page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1;
+          })
+          .map((page, index, array) => (
+            <div key={page} className="flex items-center gap-1.5">
+              {/* Add ellipses if there is a gap in page numbers */}
+              {index > 0 && array[index - 1] !== page - 1 && (
+                <span className="text-slate-300 font-bold px-1">...</span>
+              )}
+              <button
+                onClick={() => handlePageChange(page)}
+                className={`w-10 h-10 rounded-xl text-xs font-black transition-all active:scale-90 ${
+                  currentPage === page
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-100 border border-blue-500'
+                    : 'bg-white text-slate-400 border border-transparent hover:border-slate-200 hover:text-slate-600'
+                }`}
+              >
+                {page}
+              </button>
+            </div>
+          ))}
+      </div>
+
+      {/* NEXT BUTTON */}
+      <button
+        disabled={currentPage === totalPages}
+        onClick={() => handlePageChange(currentPage + 1)}
+        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-2xl border border-slate-100 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all active:scale-95 group"
+      >
+        <span className="text-sm font-bold text-slate-700">Next</span>
+        <IoChevronForward className="text-slate-400 group-hover:text-blue-600 transition-colors" />
+      </button>
+    </div>
+  </div>
+)}
+      {/* Minimal Delete Confirmation */}
+      <AnimatePresence>
+        {taskToDelete && (
+          <motion.div 
+            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div 
+              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
+              className="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl"
+            >
+              <h3 className="text-xl font-black text-slate-900 mb-2">Delete Task?</h3>
+              <p className="text-slate-500 text-sm mb-8 leading-relaxed">
+                You're about to remove <span className="font-bold text-slate-700">{taskToDelete.task_name}</span>. This action is permanent.
+              </p>
+              <div className="grid grid-cols-2 gap-3">
+                <button onClick={() => setTaskToDelete(null)} className="py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 transition-all">Cancel</button>
+                <button 
+                  onClick={() => { onDeleteTask(taskToDelete.task_id); setTaskToDelete(null); }} 
+                  className="py-4 rounded-2xl font-bold bg-red-500 text-white shadow-lg shadow-red-100 hover:bg-red-600 transition-all"
+                >
+                  Delete
+                </button>
               </div>
             </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 }
