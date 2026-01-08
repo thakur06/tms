@@ -1,455 +1,268 @@
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  IoFolderOutline, 
-  IoLocationOutline, 
-  IoCodeOutline, 
+  IoSearchOutline, 
   IoTrashOutline, 
-  IoClose,
-  IoTimeOutline,
-  IoPeopleOutline,
-  IoStatsChartOutline,
-  IoAdd,
+  IoAdd, 
+  IoChevronBackOutline, 
   IoChevronForwardOutline,
-  IoChevronBackOutline,
-  IoEllipsisVertical,
-  IoArrowForward,
-  IoGlobeOutline
+  IoLocationOutline,
+  IoEllipsisHorizontal
 } from 'react-icons/io5'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 
 export default function ProjectsList({ projects, onDeleteProject, onAddProject }) {
-  // Enhanced Logo Component with responsive sizing
-  const Logo = () => (
-    <div className="relative group cursor-pointer">
-      {/* Animated Background Effect */}
-      <div className="absolute -inset-2 bg-gradient-to-r from-blue-500/20 via-cyan-400/20 to-emerald-400/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-all duration-700"></div>
-      
-      {/* Main Logo Container */}
-      <div className="relative flex items-center justify-center w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-white to-slate-50 rounded-xl sm:rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-        {/* Logo Image */}
-        <img 
-          src='./fav.png' 
-          alt='logo' 
-          className='w-6 h-6 sm:w-8 sm:h-8 object-contain transition-all duration-500 group-hover:scale-110 group-hover:rotate-3' 
-        />
-        
-        {/* Interactive Effects */}
-        <div className="absolute inset-0 bg-gradient-to-tr from-white/40 via-transparent to-transparent opacity-60" />
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-cyan-400/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-        
-        {/* Corner Accents */}
-        <div className="absolute top-0 left-0 w-3 h-3 border-t border-l border-blue-400/20 rounded-tl-xl" />
-        <div className="absolute bottom-0 right-0 w-3 h-3 border-b border-r border-cyan-400/20 rounded-br-xl" />
-      </div>
-      
-      {/* Floating Particles on Hover */}
-      <div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping" />
-      <div className="absolute -bottom-1 -left-1 w-1.5 h-1.5 bg-cyan-400 rounded-full opacity-0 group-hover:opacity-100 animate-ping delay-150" />
-    </div>
-  )
-
+  const [searchQuery, setSearchQuery] = useState('')
   const [projectToDelete, setProjectToDelete] = useState(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
   const [page, setPage] = useState(1)
-  const [isMobile, setIsMobile] = useState(false)
-  const pageSize = 6
-  const containerRef = useRef(null)
+  const pageSize = 8 // Increased for full-screen layout
 
-  // Detect mobile screen size
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
+  const filteredProjects = useMemo(() => {
+    return projects.filter(p => 
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.code?.toLowerCase().includes(searchQuery.toLowerCase())
+    )
+  }, [projects, searchQuery])
 
-  // Project Color Logic
-  const getProjectTheme = (projectName) => {
-    const themes = [
-      { 
-        bg: 'bg-blue-50', 
-        text: 'text-blue-600', 
-        icon: 'bg-gradient-to-br from-blue-500 to-blue-600', 
-        border: 'border-blue-100',
-        progress: 'from-blue-400 to-blue-500'
-      },
-      { 
-        bg: 'bg-indigo-50', 
-        text: 'text-indigo-600', 
-        icon: 'bg-gradient-to-br from-indigo-500 to-purple-600', 
-        border: 'border-indigo-100',
-        progress: 'from-indigo-400 to-purple-500'
-      },
-      { 
-        bg: 'bg-emerald-50', 
-        text: 'text-emerald-600', 
-        icon: 'bg-gradient-to-br from-emerald-500 to-teal-600', 
-        border: 'border-emerald-100',
-        progress: 'from-emerald-400 to-teal-500'
-      },
-      { 
-        bg: 'bg-violet-50', 
-        text: 'text-violet-600', 
-        icon: 'bg-gradient-to-br from-violet-500 to-purple-600', 
-        border: 'border-violet-100',
-        progress: 'from-violet-400 to-purple-500'
-      },
-      { 
-        bg: 'bg-rose-50', 
-        text: 'text-rose-600', 
-        icon: 'bg-gradient-to-br from-rose-500 to-pink-600', 
-        border: 'border-rose-100',
-        progress: 'from-rose-400 to-pink-500'
-      },
-    ]
-    const index = projectName ? projectName.length % themes.length : 0
-    return themes[index]
-  }
+  useEffect(() => setPage(1), [searchQuery])
 
-  // Responsive page size
-  const responsivePageSize = isMobile ? 4 : pageSize
-  const displayedProjects = projects.slice((page - 1) * responsivePageSize, page * responsivePageSize)
-  const totalPages = Math.ceil(projects.length / responsivePageSize)
-
-  // Improved pagination logic for mobile
-  const getVisiblePages = () => {
-    if (totalPages <= 5) {
-      return Array.from({ length: totalPages }, (_, i) => i + 1)
-    }
-    
-    let start = Math.max(2, page - 1)
-    let end = Math.min(totalPages - 1, page + 1)
-    
-    if (page <= 3) {
-      start = 2
-      end = 4
-    } else if (page >= totalPages - 2) {
-      start = totalPages - 3
-      end = totalPages - 1
-    }
-    
-    const pages = [1]
-    if (start > 2) pages.push('...')
-    for (let i = start; i <= end; i++) pages.push(i)
-    if (end < totalPages - 1) pages.push('...')
-    if (totalPages > 1) pages.push(totalPages)
-    
-    return pages
-  }
-
-  const visiblePages = getVisiblePages()
+  const totalPages = Math.ceil(filteredProjects.length / pageSize)
+  const displayedProjects = filteredProjects.slice((page - 1) * pageSize, page * pageSize)
 
   return (
-    <div className="max-w-7xl mx-auto space-y-6 md:space-y-8 pb-8 md:pb-12 px-3 md:px-6">
-      
-      {/* --- REFINED HEADER & STATS --- */}
-      <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4 md:gap-6">
-        <div className="space-y-2">
-          <div className="flex items-center gap-3">
-        
-            <div className="space-y-1">
-              
-              <h1 className="text-2xl md:text-3xl font-black text-slate-900 tracking-tight">
-                Active Projects <span className="text-slate-400 font-light">({projects.length})</span>
-              </h1>
+    <div className="w-full min-h-screen bg-white">
+      {/* --- REFINED FULL-WIDTH HEADER --- */}
+      <header className="w-full border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-[2000px] mx-auto px-6 py-8 md:py-12 flex flex-col md:flex-row md:items-center justify-between gap-8">
+          <div className="space-y-2">
+            <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight italic">
+              Repository <span className="text-blue-600">.</span>
+            </h1>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+              Managing {filteredProjects.length} Active Engineering Modules
+            </p>
+          </div>
+
+          <div className="flex flex-col sm:flex-row items-center gap-4">
+            <div className="relative w-full sm:w-80 group">
+              <IoSearchOutline className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
+              <input 
+                type="text"
+                placeholder="Filter index..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
+              />
             </div>
           </div>
         </div>
+      </header>
 
-      </div>
-
-      {/* --- QUICK STATS GRID - Responsive --- */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-        {[
-          { 
-            label: 'In Progress', 
-            val: projects.length, 
-            icon: <IoStatsChartOutline />, 
-            color: 'text-blue-600',
-            bg: 'bg-blue-50'
-          },
-          { 
-            label: 'Total Sites', 
-            val: new Set(projects.map(p => p.location)).size, 
-            icon: <IoLocationOutline />, 
-            color: 'text-emerald-600',
-            bg: 'bg-emerald-50'
-          },
-          { 
-            label: 'Teams', 
-            val: projects.reduce((acc, p) => acc + (p.members || 0), 0), 
-            icon: <IoPeopleOutline />, 
-            color: 'text-violet-600',
-            bg: 'bg-violet-50'
-          },
-          { 
-            label: 'Uptime', 
-            val: '98%', 
-            icon: <IoTimeOutline />, 
-            color: 'text-amber-600',
-            bg: 'bg-amber-50'
-          },
-        ].map((stat, i) => (
-          <div key={i} className="bg-white p-3 md:p-4 rounded-xl md:rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3 md:gap-4">
-            <div className={`p-2 md:p-3 rounded-lg ${stat.bg} ${stat.color}`}>
-              <div className="text-lg md:text-xl">{stat.icon}</div>
-            </div>
-            <div>
-              <p className="text-[10px] md:text-xs font-bold text-slate-400 uppercase tracking-wider leading-none mb-1">{stat.label}</p>
-              <p className="text-lg md:text-xl font-black text-slate-800 leading-none">{stat.val}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      {/* --- PROJECTS GRID - Responsive --- */}
-      {projects.length === 0 ? (
-        <EmptyState onAdd={onAddProject} />
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 md:gap-6" ref={containerRef}>
-          <AnimatePresence mode="popLayout">
-            {displayedProjects.map((project) => {
-              const theme = getProjectTheme(project.name)
-              return (
-                <motion.div
-                  layout
-                  key={project.id || project.code}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.3 }}
-                  className="group relative bg-white border border-slate-200 rounded-2xl md:rounded-3xl p-4 md:p-5 hover:shadow-xl hover:shadow-slate-200/40 transition-all duration-300 flex flex-col justify-between"
-                >
-                  <div>
-                    {/* Top Row: Icon and Actions */}
-                    <div className="flex justify-between items-start mb-4 md:mb-6">
-                      <div className={`w-10 h-10 md:w-12 md:h-12 rounded-xl md:rounded-2xl ${theme.icon} flex items-center justify-center text-white shadow-lg`}>
-                        <IoFolderOutline size={isMobile ? 20 : 24} />
-                      </div>
-                      <div className="flex gap-1">
-                        <button 
-                          onClick={() => { setProjectToDelete(project); setShowDeleteModal(true); }}
-                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
-                          aria-label="Delete project"
-                        >
-                          <IoTrashOutline size={isMobile ? 16 : 18} />
-                        </button>
-                      </div>
-                    </div>
-
-                    {/* Content */}
-                    <div className="space-y-2 mb-4 md:mb-6">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-100 text-slate-500 tracking-tighter uppercase">
-                          {project.code}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <span className={`w-2 h-2 rounded-full ${project.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300'}`} />
-                          <span className="text-xs text-slate-500">{project.status}</span>
-                        </div>
-                      </div>
-                      <h3 className="text-lg md:text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors line-clamp-1">
-                        {project.name}
-                      </h3>
-                      <p className="text-sm text-slate-500 line-clamp-2 min-h-[40px] leading-relaxed">
-                        {project.description || "No project description provided for this engineering module."}
-                      </p>
-                    </div>
-
-                    {/* Metadata */}
-                    <div className="grid grid-cols-2 gap-3 mb-4 md:mb-6">
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <IoLocationOutline className="text-slate-400 flex-shrink-0" size={isMobile ? 14 : 16} />
-                        <span className="text-xs font-semibold truncate">{project.location || 'Remote'}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-slate-600">
-                        <IoPeopleOutline className="text-slate-400 flex-shrink-0" size={isMobile ? 14 : 16} />
-                        <span className="text-xs font-semibold">{project.members || 0} Members</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Progress Section */}
-                  <div className="pt-3 md:pt-4 border-t border-slate-50">
-                    <div className="flex justify-between items-center mb-1.5 md:mb-2">
-                      <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Progress</span>
-                      <span className="text-xs font-bold text-slate-900">74%</span>
-                    </div>
-                    <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: '74%' }}
-                        transition={{ duration: 1, delay: 0.2 }}
-                        className={`h-full bg-gradient-to-r ${theme.progress} rounded-full`}
-                      />
-                    </div>
-                  </div>
-                </motion.div>
-              )
-            })}
-          </AnimatePresence>
-        </div>
-      )}
-
-      {/* --- ENHANCED PAGINATION - Mobile Responsive --- */}
-      {totalPages > 1 && (
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 md:pt-8">
-          {/* Page Info */}
-          <div className="text-sm text-slate-600">
-            Showing <span className="font-bold">{(page - 1) * responsivePageSize + 1}</span> -{' '}
-            <span className="font-bold">{Math.min(page * responsivePageSize, projects.length)}</span> of{' '}
-            <span className="font-bold">{projects.length}</span> projects
-          </div>
-          
-          {/* Pagination Controls */}
-          <div className="flex items-center gap-2">
-            {/* Previous Button */}
-            <button 
-              disabled={page === 1}
-              onClick={() => setPage(p => p - 1)}
-              className="p-2 md:p-3 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30 transition-all flex items-center gap-1"
-              aria-label="Previous page"
-            >
-              <IoChevronBackOutline className="text-lg" />
-              <span className="hidden sm:inline text-sm font-medium">Prev</span>
-            </button>
-            
-            {/* Page Numbers - Responsive */}
-            <div className="flex items-center gap-1">
-              {visiblePages.map((pageNum, index) => (
-                pageNum === '...' ? (
-                  <span key={`ellipsis-${index}`} className="px-2 text-slate-400">
-                    ...
-                  </span>
-                ) : (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={`w-8 h-8 md:w-10 md:h-10 rounded-lg text-sm font-medium transition-all ${
-                      page === pageNum 
-                        ? 'bg-gradient-to-r from-slate-900 to-blue-900 text-white shadow-md' 
-                        : 'bg-white text-slate-600 hover:bg-slate-50'
-                    }`}
-                  >
-                    {pageNum}
-                  </button>
-                )
+      <main className="max-w-[2000px] mx-auto px-6 py-12">
+        {/* --- REFINED GRID --- */}
+        {filteredProjects.length === 0 ? (
+          <EmptyState onReset={() => setSearchQuery('')} />
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            <AnimatePresence mode="popLayout">
+              {displayedProjects.map((project) => (
+                <ProjectCard 
+                  key={project.id || project.code} 
+                  project={project} 
+                  onDelete={() => { setProjectToDelete(project); setShowDeleteModal(true); }} 
+                />
               ))}
+            </AnimatePresence>
+          </div>
+        )}
+
+        {/* --- MOBILE-FIXED PAGINATION --- */}
+        {totalPages > 1 && (
+          <div className="mt-20 flex flex-col sm:flex-row items-center justify-between gap-8 py-8 border-t border-slate-100">
+            <div className="flex items-center gap-4">
+              <span className="h-px w-12 bg-slate-200 hidden md:block" />
+              <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+                Index {page} of {totalPages}
+              </p>
             </div>
             
-            {/* Next Button */}
-            <button 
-              disabled={page === totalPages}
-              onClick={() => setPage(p => p + 1)}
-              className="p-2 md:p-3 rounded-lg border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-30 transition-all flex items-center gap-1"
-              aria-label="Next page"
-            >
-              <span className="hidden sm:inline text-sm font-medium">Next</span>
-              <IoChevronForwardOutline className="text-lg" />
-            </button>
-          </div>
-          
-          {/* Mobile Page Jump (Optional) */}
-          {isMobile && (
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-slate-600">Go to:</span>
-              <select 
-                value={page}
-                onChange={(e) => setPage(Number(e.target.value))}
-                className="px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            <div className="flex items-center gap-1.5">
+              <button 
+                disabled={page === 1}
+                onClick={() => setPage(p => p - 1)}
+                className="p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 disabled:opacity-30 transition-all"
               >
-                {Array.from({ length: totalPages }, (_, i) => (
-                  <option key={i + 1} value={i + 1}>
-                    Page {i + 1}
-                  </option>
-                ))}
-              </select>
-            </div>
-          )}
-        </div>
-      )}
+                <IoChevronBackOutline size={18} />
+              </button>
 
-      {/* --- ENHANCED DELETE MODAL - Responsive --- */}
+              {/* Responsive Page Numbers */}
+              <div className="flex items-center gap-1.5">
+                {Array.from({ length: totalPages }, (_, i) => i + 1)
+                  .reduce((acc, num) => {
+                    // Show first, last, current, and adjacent pages
+                    const showOnMobile = num === 1 || num === totalPages || Math.abs(num - page) <= 1;
+                    const showOnDesktop = num === 1 || num === totalPages || Math.abs(num - page) <= 2;
+                    
+                    if ((typeof window !== 'undefined' && window.innerWidth < 640 && showOnMobile) || 
+                        (typeof window !== 'undefined' && window.innerWidth >= 640 && showOnDesktop)) {
+                      acc.push(num);
+                    }
+                    return acc;
+                  }, [])
+                  .map((num, idx, arr) => (
+                    <div key={num} className="flex items-center gap-1.5">
+                      {idx > 0 && arr[idx-1] !== num - 1 && <span className="text-slate-300 text-xs">...</span>}
+                      <button
+                        onClick={() => setPage(num)}
+                        className={`w-10 h-10 sm:w-12 sm:h-12 rounded-2xl text-xs font-black transition-all ${
+                          page === num ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:bg-slate-50'
+                        }`}
+                      >
+                        {num}
+                      </button>
+                    </div>
+                  ))}
+              </div>
+
+              <button 
+                disabled={page === totalPages}
+                onClick={() => setPage(p => p + 1)}
+                className="p-4 rounded-2xl border border-slate-100 hover:bg-slate-50 disabled:opacity-30 transition-all"
+              >
+                <IoChevronForwardOutline size={18} />
+              </button>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* --- MINIMAL DELETE MODAL --- */}
       <AnimatePresence>
         {showDeleteModal && (
-          <motion.div 
-            initial={{ opacity: 0 }} 
-            animate={{ opacity: 1 }} 
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
-          >
-            <motion.div 
-              initial={{ scale: 0.9, y: 20 }} 
-              animate={{ scale: 1, y: 0 }} 
-              exit={{ scale: 0.9, y: 20 }}
-              className="bg-white rounded-2xl md:rounded-[32px] p-6 md:p-8 max-w-sm w-full shadow-2xl mx-4"
-            >
-              <div className="space-y-4 md:space-y-6">
-                {/* Warning Icon */}
-                <div className="flex flex-col items-center">
-                  <div className="w-14 h-14 md:w-16 md:h-16 bg-gradient-to-br from-red-50 to-red-100 text-red-500 rounded-2xl flex items-center justify-center mb-3 md:mb-4">
-                    <IoTrashOutline size={isMobile ? 28 : 32} />
-                  </div>
-                  <h3 className="text-xl md:text-2xl font-black text-slate-900 text-center">Delete Project?</h3>
-                </div>
-                
-                {/* Warning Message */}
-                <div className="text-center">
-                  <p className="text-slate-600 text-sm md:text-base leading-relaxed">
-                    <span className="font-bold text-slate-800">{projectToDelete?.name}</span> will be permanently deleted along with all associated data.
-                  </p>
-                  <p className="text-red-500 text-xs md:text-sm mt-2 font-medium">
-                    This action cannot be undone.
-                  </p>
-                </div>
-                
-                {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-3 pt-2">
-                  <button 
-                    onClick={() => setShowDeleteModal(false)}
-                    className="flex-1 py-3 md:py-4 bg-slate-100 text-slate-700 rounded-xl md:rounded-2xl font-bold hover:bg-slate-200 transition-colors text-sm md:text-base"
-                  >
-                    Cancel
-                  </button>
-                  <button 
-                    onClick={() => { 
-                      onDeleteProject(projectToDelete.id)
-                      setShowDeleteModal(false)
-                    }}
-                    className="flex-1 py-3 md:py-4 bg-gradient-to-r from-red-500 to-red-600 text-white rounded-xl md:rounded-2xl font-bold hover:shadow-lg hover:shadow-red-200 transition-all text-sm md:text-base"
-                  >
-                    Delete
-                  </button>
-                </div>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setShowDeleteModal(false)} className="absolute inset-0 bg-slate-900/10 backdrop-blur-xl" />
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative bg-white rounded-[32px] p-10 max-w-sm w-full shadow-2xl text-center">
+              <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <IoTrashOutline size={28} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 mb-2">Remove Module</h3>
+              <p className="text-sm text-slate-500 font-medium mb-8">Confirm deletion of {projectToDelete?.name}?</p>
+              <div className="flex gap-3">
+                <button onClick={() => setShowDeleteModal(false)} className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-slate-400">Cancel</button>
+                <button onClick={() => { onDeleteProject(projectToDelete.id); setShowDeleteModal(false); }} className="flex-1 py-4 bg-rose-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-200">Delete</button>
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
   )
 }
 
-function EmptyState({ onAdd }) {
+function ProjectCard({ project, onDelete }) {
+  const [showMenu, setShowMenu] = useState(false)
+
   return (
-    <div className="text-center py-12 md:py-20 bg-gradient-to-b from-slate-50 to-white rounded-3xl border-2 border-dashed border-slate-300/50">
-      <div className="w-16 h-16 md:w-24 md:h-24 bg-gradient-to-br from-slate-100 to-white rounded-2xl md:rounded-3xl shadow-sm flex items-center justify-center mx-auto mb-4 md:mb-6 text-slate-400">
-        <IoFolderOutline size={isMobile ? 32 : 48} />
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      className="group relative bg-gradient-to-br from-slate-50 to-slate-100/50 hover:from-white hover:to-blue-50/30 border border-slate-200/50 hover:border-blue-200 rounded-[28px] p-8 transition-all duration-500 flex flex-col justify-between h-52 shadow-sm hover:shadow-2xl hover:shadow-blue-100/50 overflow-hidden"
+    >
+      {/* Animated Background Accent */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-purple-500/5 transition-all duration-500 rounded-[28px]" />
+      
+      {/* Subtle Corner Decoration */}
+      <div className="absolute -right-8 -top-8 w-24 h-24 bg-blue-100/0 group-hover:bg-blue-100/30 rounded-full blur-2xl transition-all duration-700" />
+      
+      <div className="relative z-10 flex justify-between items-start">
+        <div className="space-y-3 flex-1">
+          <div className="flex items-center gap-3 flex-wrap">
+            <span className="text-[10px] font-black text-blue-600 px-3 py-1.5 bg-blue-50 group-hover:bg-blue-100 rounded-xl uppercase tracking-wider border border-blue-100 group-hover:border-blue-200 transition-colors">
+              {project.code || 'ENG-00'}
+            </span>
+            <div className="flex items-center gap-1.5">
+              <div className={`w-2 h-2 rounded-full ${project.status === 'active' ? 'bg-emerald-500' : 'bg-slate-300'} animate-pulse`} />
+              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
+                {project.status === 'active' ? 'Active' : 'Inactive'}
+              </span>
+            </div>
+          </div>
+          <h3 className="text-xl font-black text-slate-900 leading-tight group-hover:text-blue-900 transition-colors pr-8">
+            {project.name}
+          </h3>
+        </div>
+        
+        {/* Enhanced Menu Button */}
+        <div className="relative">
+          <button 
+            onClick={() => setShowMenu(!showMenu)}
+            className="opacity-0 group-hover:opacity-100 p-2.5 rounded-xl text-slate-400 hover:text-slate-900 hover:bg-white/80 transition-all"
+          >
+            <IoEllipsisHorizontal size={20} />
+          </button>
+          
+          {/* Dropdown Menu */}
+          <AnimatePresence>
+            {showMenu && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9, y: -10 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                className="absolute right-0 top-12 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 w-40 z-20"
+              >
+                <button 
+                  onClick={(e) => { e.stopPropagation(); onDelete(); setShowMenu(false); }}
+                  className="w-full px-4 py-3 text-left text-sm font-bold text-rose-500 hover:bg-rose-50 transition-colors flex items-center gap-2"
+                >
+                  <IoTrashOutline size={16} />
+                  Delete
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
-      <h2 className="text-xl md:text-2xl font-bold text-slate-800 mb-2 px-4">No Projects Found</h2>
-      <p className="text-slate-500 max-w-xs mx-auto mb-6 md:mb-8 px-4">
-        Ready to start a new engineering project? Kick things off in seconds.
-      </p>
-      <button 
-        onClick={onAdd} 
-        className="inline-flex items-center gap-2 bg-gradient-to-r from-slate-900 to-blue-900 text-white px-6 md:px-8 py-3 rounded-xl md:rounded-2xl font-bold hover:scale-105 active:scale-95 transition-transform"
-      >
-        <IoAdd className="text-lg" />
-        Create First Project
-      </button>
+
+      {/* Enhanced Footer Section */}
+      <div className="relative z-10 space-y-2">
+        <div className="flex items-center gap-2 text-slate-500 group-hover:text-slate-700 transition-colors">
+          <div className="p-1.5 bg-slate-200/50 group-hover:bg-blue-100 rounded-lg transition-colors">
+            <IoLocationOutline size={14} />
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-widest">{project.location || 'Remote Site'}</span>
+        </div>
+        
+        {/* Progress Indicator (if project has progress data) */}
+        {project.progress !== undefined && (
+          <div className="space-y-1">
+            <div className="flex justify-between items-center">
+              <span className="text-[9px] font-bold uppercase tracking-wider text-slate-400">Progress</span>
+              <span className="text-xs font-black text-slate-600">{project.progress}%</span>
+            </div>
+            <div className="h-1.5 bg-slate-200 rounded-full overflow-hidden">
+              <motion.div 
+                initial={{ width: 0 }}
+                animate={{ width: `${project.progress}%` }}
+                transition={{ duration: 1, ease: "easeOut" }}
+                className="h-full bg-gradient-to-r from-blue-500 to-blue-600"
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  )
+}
+
+function EmptyState({ onReset }) {
+  return (
+    <div className="w-full py-40 text-center">
+      <h2 className="text-2xl font-black text-slate-900 mb-2">Null Result</h2>
+      <p className="text-slate-400 text-sm font-medium mb-8">No modules match your current search index.</p>
+      <button onClick={onReset} className="text-xs font-black uppercase tracking-widest text-blue-600 underline">Reset Search</button>
     </div>
   )
 }

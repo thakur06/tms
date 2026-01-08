@@ -1,33 +1,31 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   IoPerson, IoTrash, IoChevronBack, IoChevronForward, 
-  IoSearchOutline, IoLayersOutline 
+  IoSearchOutline, IoLayersOutline, IoFilterOutline, IoCheckmarkCircle 
 } from 'react-icons/io5';
-import { useState, useMemo, useRef } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 
 export default function TasksList({ tasks = [], onDeleteTask }) {
   const [filterDept, setFilterDept] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [taskToDelete, setTaskToDelete] = useState(null);
+  const [showDeptDropdown, setShowDeptDropdown] = useState(false);
   
-  const tasksPerPage = 6;
-  const listTopRef = useRef(null); // Reference for smart scrolling
+  const tasksPerPage = 8;
 
   const deptStyles = {
-    'Process': 'text-blue-600 bg-blue-50',
-    'Product Development': 'text-violet-600 bg-violet-50',
-    'Business Development': 'text-rose-600 bg-rose-50',
-    'Document Controls': 'text-emerald-600 bg-emerald-50',
-    'default': 'text-slate-600 bg-slate-50'
+    'Process': 'text-blue-600 bg-blue-50 border-blue-100',
+    'Product Development': 'text-violet-600 bg-violet-50 border-violet-100',
+    'Business Development': 'text-rose-600 bg-rose-50 border-rose-100',
+    'Document Controls': 'text-emerald-600 bg-emerald-50 border-emerald-100',
+    'default': 'text-slate-600 bg-slate-50 border-slate-100'
   };
 
-  // 1. Get ALL unique departments
   const uniqueDepts = useMemo(() => 
     ['All', ...new Set(tasks.map(t => t.task_dept).filter(Boolean))]
   , [tasks]);
 
-  // 2. Multi-stage filtering (Search + Department)
   const filteredTasks = useMemo(() => {
     return tasks.filter(t => {
       const matchesDept = filterDept === 'All' || t.task_dept === filterDept;
@@ -37,218 +35,274 @@ export default function TasksList({ tasks = [], onDeleteTask }) {
     });
   }, [tasks, filterDept, searchQuery]);
 
-  // 3. Pagination Logic
   const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
   const currentTasks = filteredTasks.slice((currentPage - 1) * tasksPerPage, currentPage * tasksPerPage);
 
-  const handlePageChange = (page) => {
-    setCurrentPage(page);
-    // Smart Scroll: Only scrolls the tasks container into view
-    listTopRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  };
+  useEffect(() => setCurrentPage(1), [searchQuery, filterDept]);
 
   return (
-    <div className="space-y-6" ref={listTopRef}>
-      {/* --- Header & Control Panel --- */}
-      <div className="bg-white rounded-[32px] p-6 lg:p-8 border border-slate-100 shadow-sm">
-        <div className="flex flex-col gap-6">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-              <h2 className="text-3xl font-black text-slate-900 tracking-tight">Active Tasks</h2>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">
-                Management & Progress Tracking
-              </p>
-            </div>
+    <div className="w-full min-h-screen bg-white">
+      {/* --- PREMIUM FULL-WIDTH HEADER --- */}
+      <header className="w-full border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-30">
+        <div className="max-w-[2000px] mx-auto px-6 py-8 md:py-12 flex flex-col md:flex-row md:items-end justify-between gap-8">
+          <div className="space-y-2">
+            <h1 className="text-4xl md:text-6xl font-black text-slate-900 tracking-tight italic">
+              Tasks <span className="text-blue-600">.</span>
+            </h1>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-400">
+              Tracking {filteredTasks.length} Active Operational Nodes
+            </p>
+          </div>
 
-            {/* Search Bar */}
-            <div className="relative group min-w-[280px]">
-              <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" />
+          <div className="flex flex-col sm:flex-row items-center gap-4 w-full md:w-auto">
+            <div className="relative w-full sm:w-80 group">
+              <IoSearchOutline className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-blue-500 transition-colors" size={18} />
               <input 
                 type="text"
-                placeholder="Search task or ID..."
+                placeholder="Filter task index..."
                 value={searchQuery}
-                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
-                className="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl text-sm focus:outline-none focus:ring-4 focus:ring-blue-500/5 focus:bg-white focus:border-blue-200 transition-all font-medium"
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full pl-14 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-blue-500/20 outline-none transition-all"
               />
             </div>
-          </div>
-
-          {/* Department Chips (Full list, wraps to next line if needed) */}
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mr-2">Filters:</span>
-            {uniqueDepts.map((dept) => (
+            
+            {/* Custom Dept Dropdown */}
+            <div className="relative w-full sm:w-auto">
               <button
-                key={dept}
-                onClick={() => { setFilterDept(dept); setCurrentPage(1); }}
-                className={`px-4 py-2 rounded-xl text-xs font-bold transition-all border ${
-                  filterDept === dept 
-                    ? 'bg-slate-900 text-white border-slate-900 shadow-lg shadow-slate-200' 
-                    : 'bg-white text-slate-500 border-slate-100 hover:border-slate-300'
-                }`}
+                onClick={() => setShowDeptDropdown(!showDeptDropdown)}
+                className="w-full flex items-center justify-between gap-3 px-6 py-4 bg-slate-900 text-white rounded-2xl font-black text-xs uppercase tracking-widest outline-none hover:bg-blue-600 transition-all min-w-[200px]"
               >
-                {dept}
+                <span className="truncate">{filterDept}</span>
+                <IoFilterOutline className="text-white/70 flex-shrink-0" size={16} />
               </button>
-            ))}
+              
+              <AnimatePresence>
+                {showDeptDropdown && (
+                  <>
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowDeptDropdown(false)}
+                    />
+                    <motion.div
+                      initial={{ opacity: 0, y: -10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      className="absolute top-full mt-2 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50 max-h-64 overflow-y-auto"
+                    >
+                      {uniqueDepts.map(dept => (
+                        <button
+                          key={dept}
+                          onClick={() => { setFilterDept(dept); setShowDeptDropdown(false); }}
+                          className={`w-full px-6 py-3 text-left text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-between ${
+                            filterDept === dept 
+                              ? 'bg-blue-50 text-blue-600' 
+                              : 'text-slate-600 hover:bg-slate-50'
+                          }`}
+                        >
+                          <span>{dept}</span>
+                          {filterDept === dept && <IoCheckmarkCircle size={16} />}
+                        </button>
+                      ))}
+                    </motion.div>
+                  </>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
-      </div>
+      </header>
 
-      {/* --- Tasks Grid --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 min-h-[400px]">
-        <AnimatePresence mode='popLayout'>
-          {currentTasks.length > 0 ? (
-            currentTasks.map((task, index) => (
-              <motion.div
-                key={task.task_id || index}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="group bg-white border border-slate-100 rounded-[24px] p-6 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.05)] transition-all flex flex-col"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <span className={`px-3 py-1 rounded-lg text-[10px] font-black uppercase tracking-tighter ${deptStyles[task.task_dept] || deptStyles.default}`}>
-                    {task.task_dept}
-                  </span>
-                  <button 
-                    onClick={() => setTaskToDelete(task)}
-                    className="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                  >
-                    <IoTrash size={16} />
-                  </button>
-                </div>
-
-                <h4 className="text-lg font-bold text-slate-800 leading-snug mb-6 flex-grow line-clamp-2">
-                  {task.task_name}
-                </h4>
-
-                <div className="flex items-center justify-between pt-4 border-t border-slate-50 mt-auto">
-                  <div className="flex items-center gap-2 text-slate-400">
-                    <IoPerson size={14} />
-                    <span className="text-xs font-bold uppercase tracking-tighter">ID: {task.task_id}</span>
-                  </div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="w-1.5 h-1.5 rounded-full bg-blue-500 animate-pulse" />
-                    <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">In Progress</span>
-                  </div>
-                </div>
-              </motion.div>
-            ))
-          ) : (
-            <motion.div 
-              initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-              className="col-span-full py-20 bg-slate-50/50 rounded-[32px] border-2 border-dashed border-slate-200 flex flex-col items-center justify-center"
+      <main className="max-w-[2000px] mx-auto px-6 py-12">
+        {/* --- REFINED GRID --- */}
+        {currentTasks.length === 0 ? (
+          <div className="w-full py-40 text-center">
+            <div className="w-20 h-20 bg-slate-50 rounded-[28px] flex items-center justify-center mx-auto mb-6">
+               <IoLayersOutline size={32} className="text-slate-300" />
+            </div>
+            <h2 className="text-2xl font-black text-slate-900 mb-2">Null Result</h2>
+            <p className="text-slate-400 text-sm font-medium mb-8">No tasks match your current query index.</p>
+            <button 
+              onClick={() => {setFilterDept('All'); setSearchQuery('');}}
+              className="text-xs font-black uppercase tracking-widest text-blue-600 underline"
             >
-              <div className="p-4 bg-white rounded-2xl shadow-sm mb-4">
-                <IoLayersOutline size={32} className="text-slate-300" />
-              </div>
-              <p className="text-slate-500 font-bold">No tasks found matching your criteria</p>
-              <button 
-                onClick={() => {setFilterDept('All'); setSearchQuery('');}}
-                className="mt-4 text-blue-600 font-bold text-xs uppercase tracking-widest hover:underline"
-              >
-                Clear all filters
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+              Reset All Filters
+            </button>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+            <AnimatePresence mode='popLayout'>
+              {currentTasks.map((task, index) => (
+                <TaskCard 
+                  key={task.task_id || index}
+                  task={task}
+                  deptStyles={deptStyles}
+                  onDelete={() => setTaskToDelete(task)}
+                />
+              ))}
+            </AnimatePresence>
+          </div>
+        )}
 
-      {totalPages > 1 && (
-  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-white p-4 rounded-[28px] border border-slate-100 shadow-sm mt-8">
-    
-    {/* Page Status: Minimalist on Mobile, Descriptive on Desktop */}
-    <div className="order-2 sm:order-1">
-      <p className="text-[11px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-2">
-        <span className="hidden sm:inline">Viewing</span>
-        <span className="text-slate-900 bg-slate-50 px-2 py-1 rounded-md border border-slate-100">
-          {currentPage}
-        </span>
-        <span className="text-slate-300">/</span>
-        <span className="text-slate-500">{totalPages}</span>
-        <span className="hidden sm:inline text-slate-400">Pages</span>
-      </p>
-    </div>
-
-    {/* Navigation Controls */}
-    <div className="flex items-center gap-2 order-1 sm:order-2 w-full sm:w-auto">
-      {/* PREVIOUS BUTTON */}
-      <button
-        disabled={currentPage === 1}
-        onClick={() => handlePageChange(currentPage - 1)}
-        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-2xl border border-slate-100 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all active:scale-95 group"
-      >
-        <IoChevronBack className="text-slate-400 group-hover:text-blue-600 transition-colors" />
-        <span className="text-sm font-bold text-slate-700">Prev</span>
-      </button>
-
-      {/* PAGE NUMBERS: Hidden on extra small mobile devices to prevent wrapping */}
-      <div className="hidden md:flex items-center gap-1.5 mx-2">
-        {Array.from({ length: totalPages }, (_, i) => i + 1)
-          .filter(page => {
-            // Logic to show: First, Last, and 1 neighbor around Current
-            return page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1;
-          })
-          .map((page, index, array) => (
-            <div key={page} className="flex items-center gap-1.5">
-              {/* Add ellipses if there is a gap in page numbers */}
-              {index > 0 && array[index - 1] !== page - 1 && (
-                <span className="text-slate-300 font-bold px-1">...</span>
-              )}
+        {/* --- MOBILE-OPTIMIZED PAGINATION --- */}
+        {totalPages > 1 && (
+          <div className="mt-20 flex flex-col items-center gap-6 py-8 border-t border-slate-100">
+            <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">
+              Page {currentPage} of {totalPages}
+            </p>
+            
+            <div className="flex items-center gap-2">
               <button
-                onClick={() => handlePageChange(page)}
-                className={`w-10 h-10 rounded-xl text-xs font-black transition-all active:scale-90 ${
-                  currentPage === page
-                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-100 border border-blue-500'
-                    : 'bg-white text-slate-400 border border-transparent hover:border-slate-200 hover:text-slate-600'
-                }`}
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(p => p - 1)}
+                className="p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
               >
-                {page}
+                <IoChevronBack size={16} className="sm:w-[18px] sm:h-[18px]" />
+              </button>
+
+              {/* Simple Mobile Pagination */}
+              <div className="flex items-center gap-1 sm:gap-1.5">
+                {(() => {
+                  const pages = [];
+                  const maxVisible = 5;
+                  
+                  let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                  let end = Math.min(totalPages, start + maxVisible - 1);
+                  
+                  if (end - start < maxVisible - 1) {
+                    start = Math.max(1, end - maxVisible + 1);
+                  }
+                  
+                  if (start > 1) {
+                    pages.push(
+                      <button
+                        key={1}
+                        onClick={() => setCurrentPage(1)}
+                        className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl text-xs font-black transition-all text-slate-400 hover:bg-slate-50"
+                      >
+                        1
+                      </button>
+                    );
+                    if (start > 2) {
+                      pages.push(<span key="dots1" className="text-slate-300 text-xs px-1">...</span>);
+                    }
+                  }
+                  
+                  for (let i = start; i <= end; i++) {
+                    pages.push(
+                      <button
+                        key={i}
+                        onClick={() => setCurrentPage(i)}
+                        className={`w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl text-xs font-black transition-all ${
+                          currentPage === i ? 'bg-slate-900 text-white shadow-xl' : 'text-slate-400 hover:bg-slate-50'
+                        }`}
+                      >
+                        {i}
+                      </button>
+                    );
+                  }
+                  
+                  if (end < totalPages) {
+                    if (end < totalPages - 1) {
+                      pages.push(<span key="dots2" className="text-slate-300 text-xs px-1">...</span>);
+                    }
+                    pages.push(
+                      <button
+                        key={totalPages}
+                        onClick={() => setCurrentPage(totalPages)}
+                        className="w-9 h-9 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl text-xs font-black transition-all text-slate-400 hover:bg-slate-50"
+                      >
+                        {totalPages}
+                      </button>
+                    );
+                  }
+                  
+                  return pages;
+                })()}
+              </div>
+
+              <button
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(p => p + 1)}
+                className="p-3 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-100 hover:bg-slate-50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              >
+                <IoChevronForward size={16} className="sm:w-[18px] sm:h-[18px]" />
               </button>
             </div>
-          ))}
-      </div>
+          </div>
+        )}
+      </main>
 
-      {/* NEXT BUTTON */}
-      <button
-        disabled={currentPage === totalPages}
-        onClick={() => handlePageChange(currentPage + 1)}
-        className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-3 sm:py-2.5 rounded-2xl border border-slate-100 hover:bg-slate-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all active:scale-95 group"
-      >
-        <span className="text-sm font-bold text-slate-700">Next</span>
-        <IoChevronForward className="text-slate-400 group-hover:text-blue-600 transition-colors" />
-      </button>
-    </div>
-  </div>
-)}
-      {/* Minimal Delete Confirmation */}
+      {/* --- MINIMAL DELETE MODAL --- */}
       <AnimatePresence>
         {taskToDelete && (
-          <motion.div 
-            initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4"
-          >
-            <motion.div 
-              initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.9, opacity: 0 }}
-              className="bg-white rounded-[32px] p-8 max-w-sm w-full shadow-2xl"
-            >
-              <h3 className="text-xl font-black text-slate-900 mb-2">Delete Task?</h3>
-              <p className="text-slate-500 text-sm mb-8 leading-relaxed">
-                You're about to remove <span className="font-bold text-slate-700">{taskToDelete.task_name}</span>. This action is permanent.
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                <button onClick={() => setTaskToDelete(null)} className="py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-50 transition-all">Cancel</button>
-                <button 
-                  onClick={() => { onDeleteTask(taskToDelete.task_id); setTaskToDelete(null); }} 
-                  className="py-4 rounded-2xl font-bold bg-red-500 text-white shadow-lg shadow-red-100 hover:bg-red-600 transition-all"
-                >
-                  Delete
-                </button>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setTaskToDelete(null)} className="absolute inset-0 bg-slate-900/10 backdrop-blur-xl" />
+            <motion.div initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.95, opacity: 0 }} className="relative bg-white rounded-[32px] p-10 max-w-sm w-full shadow-2xl text-center">
+              <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <IoTrash size={28} />
+              </div>
+              <h3 className="text-xl font-black text-slate-900 mb-2">Remove Node</h3>
+              <p className="text-sm text-slate-500 font-medium mb-8 leading-relaxed">Confirm permanent deletion of task index: <br/><b>{taskToDelete.task_name}</b></p>
+              <div className="flex gap-3">
+                <button onClick={() => setTaskToDelete(null)} className="flex-1 py-4 text-xs font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 transition-colors">Cancel</button>
+                <button onClick={() => { onDeleteTask(taskToDelete.task_id); setTaskToDelete(null); }} className="flex-1 py-4 bg-rose-500 text-white rounded-2xl text-xs font-black uppercase tracking-widest shadow-lg shadow-rose-100 hover:bg-rose-600 transition-all">Delete</button>
               </div>
             </motion.div>
-          </motion.div>
+          </div>
         )}
       </AnimatePresence>
     </div>
+  );
+}
+
+function TaskCard({ task, deptStyles, onDelete }) {
+  return (
+    <motion.div
+      layout
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      whileHover={{ y: -8, scale: 1.02 }}
+      className="group relative bg-gradient-to-br from-slate-50 to-slate-100/50 hover:from-white hover:to-blue-50/30 border border-slate-200/50 hover:border-blue-200 rounded-[28px] p-8 transition-all duration-500 flex flex-col justify-between h-64 shadow-sm hover:shadow-2xl hover:shadow-blue-100/50 overflow-hidden"
+    >
+      {/* Animated Background Accent */}
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:to-purple-500/5 transition-all duration-500 rounded-[28px]" />
+      
+      {/* Subtle Corner Decoration */}
+      <div className="absolute -right-8 -top-8 w-24 h-24 bg-blue-100/0 group-hover:bg-blue-100/30 rounded-full blur-2xl transition-all duration-700" />
+      
+      <div className="relative z-10 space-y-4">
+        <div className="flex justify-between items-start">
+          <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider border ${deptStyles[task.task_dept] || deptStyles.default}`}>
+            {task.task_dept}
+          </span>
+          <button 
+            onClick={onDelete}
+            className="opacity-100 sm:opacity-0 sm:group-hover:opacity-100 p-2.5 rounded-xl text-slate-400 hover:text-rose-500 hover:bg-rose-50 transition-all"
+          >
+            <IoTrash size={20} />
+          </button>
+        </div>
+        <h4 className="text-xl font-black text-slate-900 group-hover:text-blue-900 leading-tight line-clamp-3 pr-2 transition-colors">
+          {task.task_name}
+        </h4>
+      </div>
+
+      <div className="relative z-10 flex items-center justify-between mt-auto pt-4 border-t border-slate-200/50">
+        <div className="flex items-center gap-2 text-slate-500 group-hover:text-slate-700 transition-colors">
+          <div className="p-1.5 bg-slate-200/50 group-hover:bg-blue-100 rounded-lg transition-colors">
+            <IoPerson size={14} />
+          </div>
+          <span className="text-[10px] font-bold uppercase tracking-widest">ID: {task.task_id}</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+          <span className="text-[9px] font-bold text-slate-600 uppercase tracking-widest">Active</span>
+        </div>
+      </div>
+    </motion.div>
   );
 }

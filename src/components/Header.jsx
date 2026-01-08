@@ -56,7 +56,7 @@ export default function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1 bg-slate-50/50 p-1.5 rounded-2xl border border-slate-100">
+          <nav className="hidden md:flex items-center gap-1 bg-slate-50/50  rounded-2xl border border-slate-100">
             {navLinks.map((link) => {
               const active = isActive(link.path)
               return (

@@ -66,7 +66,7 @@ export default function CreateUserModal({ isOpen, onClose, onCreateUser, depts =
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-70 flex items-center justify-center p-3 bg-slate-900/40 backdrop-blur-sm">
       <motion.div 
         layout // Important: This makes the modal expand smoothly
         initial={{ opacity: 0, scale: 0.95 }}
