@@ -90,7 +90,7 @@ export default function TasksList({ tasks = [], onDeleteTask }) {
                       initial={{ opacity: 0, y: -10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -10 }}
-                      className="absolute top-full mt-2 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50 max-h-64 overflow-y-auto"
+                      className="absolute top-full mt-2 left-0 right-0 bg-white rounded-2xl shadow-2xl border border-slate-200 py-2 z-50 max-h-64 overflow-y-auto hide-y-scroll"
                     >
                       {uniqueDepts.map(dept => (
                         <button
