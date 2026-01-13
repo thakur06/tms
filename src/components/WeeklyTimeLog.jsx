@@ -583,6 +583,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
         weekRange={`${weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
         onSubmit={handleSubmitTimesheet}
       />
+      <div className="relative z-[999]">
       <AddTimeModal
         isOpen={showAddTimeModal}
         onClose={() => {
@@ -598,6 +599,7 @@ export default function WeeklyTimeLog({ tasks, projects, users, timeEntries, set
         onUpdate={updateTimeEntry}
         clients={clients}
       />
+      </div>
       <ToastContainer
         position="top-center"
         transition={Zoom}

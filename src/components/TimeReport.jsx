@@ -133,7 +133,7 @@ export default function TimeReport() {
     </button>
   );
 
-  // Export to Excel with enhanced formatting
+  // Export to Excel with enhanced formatting (project code removed)
   const exportToExcel = async () => {
     if (!reportData) return;
     
@@ -142,20 +142,21 @@ export default function TimeReport() {
       const workbook = new ExcelJS.Workbook();
       const sheet = workbook.addWorksheet("Time Report");
 
-      // Set column widths with increased sizes
+      // Set column widths with increased sizes (PROJECT CODE COLUMN REMOVED)
+      // Now we have 11 columns: A (1) through K (11)
       sheet.columns = [
-        { width: 25 }, // User
-        { width: 30 }, // User Email
-        { width: 40 }, // User Dept
-        { width: 15 }, // Date
-        { width: 50 }, // Task ID
-        { width: 50 }, // Project
-        { width: 20 }, // Project Code
-        { width: 25 }, // Hours
-        { width: 15 }, // Minutes
-        { width: 20 }, // Location
-        { width: 40 }, // Remarks
-        { width: 15 }  // Client
+        { width: 25 }, // A: User
+        { width: 30 }, // B: User Email
+        { width: 40 }, // C: User Dept
+        { width: 15 }, // D: Date
+        { width: 50 }, // E: Task ID
+        { width: 50 }, // F: Project
+        // Project Code column removed
+        { width: 20 }, // G: Hours (was H)
+        { width: 15 }, // H: Minutes (was I)
+        { width: 20 }, // I: Location (was J)
+        { width: 40 }, // J: Remarks (was K)
+        { width: 30 }  // K: Client (was L)
       ];
 
       // Main Title Row - Large font size and padding
@@ -163,7 +164,7 @@ export default function TimeReport() {
       titleRow.font = { size: 22, bold: true, color: { argb: '1E40AF' } };
       titleRow.alignment = { horizontal: 'center', vertical: 'middle' };
       titleRow.height = 45;
-      sheet.mergeCells('A1:K1'); // Fixed: Merge all columns A-K
+      sheet.mergeCells('A1:K1'); // 11 columns: A through K
 
       // Date Range with larger font
       sheet.addRow([]);
@@ -189,13 +190,13 @@ export default function TimeReport() {
       };
       detailHeaderRow.alignment = { horizontal: 'center', vertical: 'middle' };
       detailHeaderRow.height = 38;
-      sheet.mergeCells('A' + detailHeaderRow.number + ':K' + detailHeaderRow.number);
+      sheet.mergeCells('A' + detailHeaderRow.number + ':K' + detailHeaderRow.number); // 11 columns
 
-      // Detailed Table Headers with larger font
+      // Detailed Table Headers with larger font (PROJECT CODE REMOVED)
       sheet.addRow([]);
       const detailHeaders = sheet.addRow([
-        "User", "Email", "Department", "Date", "Task ID", "Project", "Project Code", 
-        "Hours", "Minutes", "Location", "Remarks","client"
+        "User", "Email", "Department", "Date", "Task ID", "Project", 
+        "Hours", "Minutes", "Location", "Remarks", "Client" // 11 headers
       ]);
       detailHeaders.eachCell(cell => {
         cell.font = { bold: true, size: 11 };
@@ -214,21 +215,19 @@ export default function TimeReport() {
       });
       detailHeaders.height = 32;
 
-      let currentRow = sheet.rowCount;
-      
       // Detailed Data - Grouped by user with differentiators
       sortedUsersForExport.forEach((user, userIndex) => {
-        // Add user separator/differentiator
+        // Add user separator/differentiator (11 values)
         const userSeparatorRow = sheet.addRow([
           `USER: ${user.user_name.toUpperCase()}`, 
           user.user_email || "N/A",
           user.user_dept || "N/A",
           `Entries: ${user.entries.length}`, 
           `Total: ${user.total_hours}h ${user.total_minutes}m`,
-          "", "", "", "", "", ""
+          "", "", "", "", "", "" // 6 empty strings for columns F-K
         ]);
         
-        // Style the user differentiator row
+        // Style the user differentiator row (INCLUDES COLUMN K)
         userSeparatorRow.eachCell((cell, colNumber) => {
           cell.font = { bold: true, size: 12, color: { argb: '1E40AF' } };
           cell.fill = {
@@ -251,7 +250,7 @@ export default function TimeReport() {
         // Merge cells for summary info
         sheet.mergeCells(`D${userSeparatorRow.number}:E${userSeparatorRow.number}`);
 
-        // User's entries
+        // User's entries (PROJECT CODE REMOVED)
         user.entries.forEach((entry, entryIndex) => {
           const row = sheet.addRow([
             user.user_name,
@@ -260,15 +259,15 @@ export default function TimeReport() {
             formatDateNoTime(entry.date),
             entry.task_id || "-",
             entry.project || "-",
-            entry.project_code || "-",
+            // Project Code column removed
             entry.hours,
             entry.minutes,
             entry.location || "-",
             entry.remarks || "-",
-            entry.client || "-"
+            entry.client || "-" // Column K
           ]);
           
-          // Style each entry row
+          // Style each entry row (INCLUDES COLUMN K)
           row.eachCell((cell, colNumber) => {
             // Alternate row colors
             const rowColor = entryIndex % 2 === 0 ? 'FFFFFF' : 'F8FAFC';
@@ -279,7 +278,7 @@ export default function TimeReport() {
               fgColor: { argb: rowColor }
             };
             
-            // Add borders
+            // Add borders (ALL CELLS INCLUDING COLUMN K)
             cell.border = {
               left: { style: 'thin', color: { argb: 'E2E8F0' } },
               right: { style: 'thin', color: { argb: 'E2E8F0' } },
@@ -290,8 +289,8 @@ export default function TimeReport() {
             cell.font = { size: 10 };
             cell.alignment = { vertical: 'middle', horizontal: 'left' };
             
-            // Right align for numeric columns
-            if (colNumber === 8 || colNumber === 9) { // Hours and Minutes columns
+            // Right align for numeric columns (adjusted indices)
+            if (colNumber === 7 || colNumber === 8) { // Hours and Minutes columns (now G=7, H=8)
               cell.alignment = { vertical: 'middle', horizontal: 'right' };
             }
           });
@@ -321,7 +320,7 @@ export default function TimeReport() {
       };
       summaryHeaderRow.alignment = { horizontal: 'center', vertical: 'middle' };
       summaryHeaderRow.height = 38;
-      sheet.mergeCells('A' + summaryHeaderRow.number + ':G' + summaryHeaderRow.number);
+      sheet.mergeCells('A' + summaryHeaderRow.number + ':I' + summaryHeaderRow.number);
 
       // Summary Table Headers
       sheet.addRow([]);
@@ -448,73 +447,135 @@ export default function TimeReport() {
 
   return (
     <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8 font-sans text-slate-900 relative">
-      {/* Add custom styles for react-datepicker to fix positioning issues */}
-      <style jsx>{`
-        :global(.react-datepicker) {
+      {/* Global styles for react-datepicker */}
+      <style jsx global>{`
+        .react-datepicker {
           font-family: inherit !important;
           border: 1px solid #e2e8f0 !important;
           border-radius: 1rem !important;
           box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1) !important;
-          z-index: 1000 !important;
+          z-index: 9999 !important;
+          background: white !important;
         }
         
-        :global(.react-datepicker__triangle) {
+        .react-datepicker__triangle {
           display: none !important;
         }
         
-        :global(.react-datepicker__header) {
+        .react-datepicker__header {
           background: white !important;
           border-bottom: 1px solid #e2e8f0 !important;
           border-radius: 1rem 1rem 0 0 !important;
           padding-top: 1rem !important;
         }
         
-        :global(.react-datepicker__current-month) {
+        .react-datepicker__current-month {
           font-weight: 600 !important;
           color: #1e293b !important;
+          font-size: 1rem !important;
+          margin-bottom: 0.5rem !important;
         }
         
-        :global(.react-datepicker__day--selected) {
+        .react-datepicker__day--selected {
           background: #3b82f6 !important;
           border-radius: 0.5rem !important;
+          color: white !important;
         }
         
-        :global(.react-datepicker__day:hover) {
+        .react-datepicker__day:hover {
           background: #eff6ff !important;
           border-radius: 0.5rem !important;
         }
         
+        .react-datepicker__day {
+          margin: 0.2rem !important;
+          width: 2rem !important;
+          line-height: 2rem !important;
+        }
+        
+        .react-datepicker__month {
+          margin: 0.5rem !important;
+        }
+        
+        .react-datepicker__day--keyboard-selected {
+          background-color: #eff6ff !important;
+          color: #1e293b !important;
+        }
+        
+        .react-datepicker__day--today {
+          font-weight: bold !important;
+          color: #3b82f6 !important;
+        }
+        
+        .react-datepicker__navigation {
+          top: 1rem !important;
+          width: 2rem !important;
+          height: 2rem !important;
+        }
+        
+        .react-datepicker__navigation--previous {
+          left: 1rem !important;
+        }
+        
+        .react-datepicker__navigation--next {
+          right: 1rem !important;
+        }
+        
+        .react-datepicker__navigation-icon::before {
+          border-width: 2px 2px 0 0 !important;
+          width: 8px !important;
+          height: 8px !important;
+          border-color: #64748b !important;
+        }
+        
+        .react-datepicker__day-name {
+          color: #64748b !important;
+          font-weight: 600 !important;
+          font-size: 0.875rem !important;
+          width: 2rem !important;
+          margin: 0.2rem !important;
+        }
+        
+        /* Popper positioning fixes */
+        .react-datepicker-popper {
+          z-index: 9999 !important;
+        }
+        
+        .react-datepicker-popper[data-placement^="bottom"] {
+          padding-top: 0.5rem !important;
+        }
+        
+        .react-datepicker__month-container {
+          float: none !important;
+        }
+        
         /* Fix for mobile devices */
         @media (max-width: 768px) {
-          :global(.react-datepicker) {
+          .react-datepicker {
             position: fixed !important;
             top: 50% !important;
             left: 50% !important;
             transform: translate(-50%, -50%) !important;
-            width: 90% !important;
+            width: 90vw !important;
             max-width: 320px !important;
+            max-height: 80vh !important;
+            overflow-y: auto !important;
+          }
+          
+          .react-datepicker__month-container {
+            width: 100% !important;
           }
         }
         
-        /* Fix for medium to large devices */
+        /* Fix for desktop */
         @media (min-width: 768px) {
-          :global(.react-datepicker-popper) {
-            z-index: 9999 !important;
+          .react-datepicker-popper {
             position: absolute !important;
           }
           
-          :global(.react-datepicker__month-container) {
-            margin-top: 0.5rem !important;
+          .react-datepicker {
+            min-width: 320px !important;
           }
-        }
-        
-        /* Ensure date picker appears above other content */
-        :global(.react-datepicker-popper[data-placement^="bottom"]) {
-          padding-top: 0 !important;
-        }
-        
-        :global(.react-datepicker__navigation) {
-          top: 1rem !important;
         }
       `}</style>
       
@@ -573,29 +634,30 @@ export default function TimeReport() {
                       selectsStart
                       startDate={startDate}
                       endDate={endDate}
-                      maxDate={today} // Can't select future dates
-                      placeholderText={today.toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })}
+                      maxDate={today}
+                      placeholderText="Select start date"
                       dateFormat="MMMM d, yyyy"
-                      className="react-datepicker-custom"
                       customInput={<CustomInput placeholder="Select start date" />}
                       popperPlacement="bottom-start"
                       popperModifiers={[
                         {
-                          name: 'offset',
+                          name: 'preventOverflow',
                           options: {
-                            offset: [0, 10],
+                            boundary: 'viewport',
+                            padding: 10,
                           },
                         },
                         {
-                          name: 'preventOverflow',
+                          name: 'flip',
                           options: {
-                            rootBoundary: 'viewport',
-                            tether: false,
-                            altAxis: true,
+                            allowedAutoPlacements: ['bottom', 'top'],
+                            fallbackPlacements: ['bottom', 'top'],
+                          },
+                        },
+                        {
+                          name: 'offset',
+                          options: {
+                            offset: [0, 10],
                           },
                         },
                       ]}
@@ -612,30 +674,31 @@ export default function TimeReport() {
                       selectsEnd
                       startDate={startDate}
                       endDate={endDate}
-                      minDate={startDate} // Can't select before start date
-                      maxDate={today} // Can't select future dates
-                      placeholderText={today.toLocaleDateString('en-US', { 
-                        year: 'numeric', 
-                        month: 'short', 
-                        day: 'numeric' 
-                      })}
+                      minDate={startDate}
+                      maxDate={today}
+                      placeholderText="Select end date"
                       dateFormat="MMMM d, yyyy"
-                      className="react-datepicker-custom"
                       customInput={<CustomInput placeholder="Select end date" />}
                       popperPlacement="bottom-start"
                       popperModifiers={[
                         {
-                          name: 'offset',
+                          name: 'preventOverflow',
                           options: {
-                            offset: [0, 10],
+                            boundary: 'viewport',
+                            padding: 10,
                           },
                         },
                         {
-                          name: 'preventOverflow',
+                          name: 'flip',
                           options: {
-                            rootBoundary: 'viewport',
-                            tether: false,
-                            altAxis: true,
+                            allowedAutoPlacements: ['bottom', 'top'],
+                            fallbackPlacements: ['bottom', 'top'],
+                          },
+                        },
+                        {
+                          name: 'offset',
+                          options: {
+                            offset: [0, 10],
                           },
                         },
                       ]}

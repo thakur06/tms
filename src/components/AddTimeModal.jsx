@@ -111,51 +111,43 @@ export default function AddTimeModal({
 
   return (
     <Modal 
-    isOpen={isOpen} 
-    onClose={onClose} 
-    title={
-      <div className="grid items-center grid-cols-3 w-full pr-8"> 
-        {/* 1. Left Side: Date String */}
-        <div className="">
-          <span className="text-[10px] font-black uppercase text-slate-400 tracking-tight whitespace-nowrap">
-            {dateStr}
-          </span>
+      isOpen={isOpen} 
+      onClose={onClose} 
+      title={
+        <div className="grid items-center grid-cols-3 w-full pr-8 z-200"> 
+          {/* 1. Left Side: Date String */}
+          <div className="">
+            <span className="text-[10px] font-black uppercase text-slate-400 tracking-tight whitespace-nowrap">
+              {dateStr}
+            </span>
+          </div>
+    
+          {/* 2. Middle: Save Button */}
+          <div className="justify-center items-center w-32">
+            <button
+              onClick={validateAndSubmit}
+              disabled={isSubmitting}
+              className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-white bg-indigo-600 px-4 py-1.5 rounded-full shadow-lg shadow-indigo-100 active:scale-95 transition-all disabled:opacity-50"
+            >
+              {isSubmitting ? (
+                <span className="animate-pulse">...</span>
+              ) : (
+                <>
+                  <IoCheckmarkCircle size={14} />
+                  {isEditMode ? "Update" : "Save"}
+                </>
+              )}
+            </button>
+          </div>
         </div>
-  
-        {/* 2. Middle: Save Button */}
-        <div className=" justify-center items-center w-32">
-          <button
-            onClick={validateAndSubmit}
-            disabled={isSubmitting}
-            className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-white bg-indigo-600 px-4 py-1.5 rounded-full shadow-lg shadow-indigo-100 active:scale-95 transition-all disabled:opacity-50"
-          >
-            {isSubmitting ? (
-              <span className="animate-pulse">...</span>
-            ) : (
-              <>
-                <IoCheckmarkCircle size={14} />
-                {isEditMode ? "Update" : "Save"}
-              </>
-            )}
-          </button>
-        </div>
-  
-        
-      </div>
-    }
-  >
-      
-      {/* LAYOUT FIX: 
-         1. h-full and flex-col ensures form takes available space.
-         2. max-h-[80vh] is better for mobile keyboards than fixed 60vh.
-         3. overflow-y-auto enables scrolling ONLY inside the form body.
-      */}
+      }
+      // Add modal z-index to be higher than header (header is z-[100])
+      className="z-[200]"
+    >
       <form onSubmit={validateAndSubmit} className="flex flex-col h-full max-h-[55vh] md:max-h-[65vh] px-1 pt-2 pb-4 overflow-y-auto no-scrollbar">
-        
         <div className="space-y-4 flex-1">
-          
-          {/* TASK (MANDATORY) - Z-INDEX HIGH */}
-          <div className="relative z-50" ref={taskRef}>
+          {/* TASK */}
+          <div className="relative" ref={taskRef}>
             <div className="flex justify-between items-center mb-1">
               <label className="text-[10px] font-black text-slate-500 uppercase">Task <span className="text-rose-500">*</span></label>
               <select className="text-[9px] font-black bg-slate-100 rounded px-1 h-6 outline-none border border-transparent focus:border-indigo-300" value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)}>
@@ -169,9 +161,9 @@ export default function AddTimeModal({
               <IoFolder className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
             </div>
             {dropdowns.task && (
-              <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-900 rounded-xl shadow-2xl max-h-48 overflow-y-auto  hide-y-scroll z-50">
+              <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto z-50">
                 {fTasks.map(t => (
-                  <div key={t.task_id} className="p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 text-xs font-bold" onClick={() => handleSelect('task', t.task_name)}>
+                  <div key={t.task_id} className="p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 text-xs font-bold" onClick={() => handleSelect('task', t.task_name)}>
                     {t.task_name}
                   </div>
                 ))}
@@ -179,14 +171,14 @@ export default function AddTimeModal({
             )}
           </div>
 
-          {/* PROJECT & CLIENT (MANDATORY) - Z-INDEX MID */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 relative z-40">
+          {/* PROJECT & CLIENT */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="relative" ref={projectRef}>
               <label className="text-[10px] font-black text-slate-500 uppercase mb-1 block">Project <span className="text-rose-500">*</span></label>
               <input className="w-full px-3 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all"
                 placeholder="Search..." value={search.project} onFocus={() => setDropdowns(p => ({ ...p, project: true }))} onChange={(e) => setSearch(p => ({ ...p, project: e.target.value }))} />
               {dropdowns.project && (
-                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-900 rounded-xl shadow-2xl max-h-40 overflow-y-auto hide-y-scroll z-50">
+                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-40 overflow-y-auto z-50">
                   {fProjects.map(p => (
                     <div key={p.id} className="p-2.5 hover:bg-indigo-50 text-xs font-bold cursor-pointer" onClick={() => handleSelect('project', p.name, p.code)}>
                       {p.name} <span className="text-[9px] opacity-40 block">{p.code}</span>
@@ -198,10 +190,10 @@ export default function AddTimeModal({
 
             <div className="relative" ref={clientRef}>
               <label className="text-[10px] font-black text-slate-500 uppercase mb-1 block">Client <span className="text-rose-500">*</span></label>
-              <input className="w-full px-3 md:py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all"
+              <input className="w-full px-3 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all"
                 placeholder="Search..." value={search.client} onFocus={() => setDropdowns(p => ({ ...p, client: true }))} onChange={(e) => setSearch(p => ({ ...p, client: e.target.value }))} />
               {dropdowns.client && (
-                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-900 rounded-xl shadow-2xl max-h-40 overflow-y-auto hide-y-scroll -50">
+                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-40 overflow-y-auto z-50">
                   {fClients.map(c => (
                     <div key={c.id} className="p-2.5 hover:bg-indigo-50 text-xs font-bold cursor-pointer" onClick={() => handleSelect('client', c.name)}>
                       {c.name}
@@ -212,72 +204,64 @@ export default function AddTimeModal({
             </div>
           </div>
 
-          {/* REGION & TIME - Z-INDEX LOW */}
-          <div className="grid grid-cols-2 gap-3 relative z-10">
-  {/* Left Column: Region */}
-  <div className="flex flex-col">
-    <label className="text-[10px] font-black text-slate-500 uppercase flex items-center gap-1 mb-1 tracking-tight">
-      <IoLocation className="text-indigo-500" /> Region <span className="text-rose-500">*</span>
-    </label>
-    <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 h-[52px]">
-      {['US', 'IND'].map(c => (
-        <button 
-          key={c} 
-          type="button" 
-          onClick={() => setFormData(p => ({ ...p, country: c }))} 
-          className={`flex-1 text-[10px] font-black rounded-lg transition-all ${
-            formData.country === c ? "bg-white text-indigo-600 shadow-sm" : "text-slate-400"
-          }`}
-        >
-          {c}
-        </button>
-      ))}
-    </div>
-  </div>
+          {/* REGION & TIME */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="flex flex-col">
+              <label className="text-[10px] font-black text-slate-500 uppercase flex items-center gap-1 mb-1 tracking-tight">
+                <IoLocation className="text-indigo-500" /> Region <span className="text-rose-500">*</span>
+              </label>
+              <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 h-[52px]">
+                {['US', 'IND'].map(c => (
+                  <button 
+                    key={c} 
+                    type="button" 
+                    onClick={() => setFormData(p => ({ ...p, country: c }))} 
+                    className={`flex-1 text-[10px] font-black rounded-lg transition-all ${
+                      formData.country === c ? "bg-white text-indigo-600 shadow-sm" : "text-slate-400"
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-  {/* Right Column: Time */}
-  <div className="flex flex-col">
-    <label className="text-[10px] font-black text-slate-500 uppercase mb-1 tracking-tight">
-      Duration <span className="text-rose-500">*</span>
-    </label>
-    <div className="flex items-center gap-1 bg-slate-900 px-2 rounded-xl h-[52px]">
-      <div className="flex-1 flex flex-col items-center">
-        <input 
-          type="text" 
-          inputMode="numeric" 
-          className="w-full bg-transparent text-center text-white text-lg font-black outline-none border-b border-slate-700 focus:border-indigo-400 leading-none" 
-          placeholder="0" 
-          value={formData.hours} 
-          onChange={(e) => handleTimeChange('hours', e.target.value)} 
-        />
-        <p className="text-[7px] text-slate-500 font-bold mt-1 uppercase">Hrs</p>
-      </div>
-      
-      <span className="text-slate-600 font-bold self-center pb-3">:</span>
-      
-      <div className="flex-1 flex flex-col items-center">
-        <input 
-          type="text" 
-          inputMode="numeric" 
-          className="w-full bg-transparent text-center text-white text-lg font-black outline-none border-b border-slate-700 focus:border-indigo-400 leading-none" 
-          placeholder="00" 
-          value={formData.minutes} 
-          onChange={(e) => handleTimeChange('minutes', e.target.value)} 
-        />
-        <p className="text-[7px] text-slate-500 font-bold mt-1 uppercase">Min</p>
-      </div>
-    </div>
-  </div>
-</div>
+            <div className="flex flex-col">
+              <label className="text-[10px] font-black text-slate-500 uppercase mb-1 tracking-tight">
+                Duration <span className="text-rose-500">*</span>
+              </label>
+              <div className="flex items-center gap-1 bg-slate-900 px-2 rounded-xl h-[52px]">
+                <div className="flex-1 flex flex-col items-center">
+                  <input 
+                    type="text" 
+                    inputMode="numeric" 
+                    className="w-full bg-transparent text-center text-white text-lg font-black outline-none border-b border-slate-700 focus:border-indigo-400 leading-none" 
+                    placeholder="0" 
+                    value={formData.hours} 
+                    onChange={(e) => handleTimeChange('hours', e.target.value)} 
+                  />
+                  <p className="text-[7px] text-slate-500 font-bold mt-1 uppercase">Hrs</p>
+                </div>
+                
+                <span className="text-slate-600 font-bold self-center pb-3">:</span>
+                
+                <div className="flex-1 flex flex-col items-center">
+                  <input 
+                    type="text" 
+                    inputMode="numeric" 
+                    className="w-full bg-transparent text-center text-white text-lg font-black outline-none border-b border-slate-700 focus:border-indigo-400 leading-none" 
+                    placeholder="00" 
+                    value={formData.minutes} 
+                    onChange={(e) => handleTimeChange('minutes', e.target.value)} 
+                  />
+                  <p className="text-[7px] text-slate-500 font-bold mt-1 uppercase">Min</p>
+                </div>
+              </div>
+            </div>
+          </div>
 
           <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-600 transition-all resize-none" rows="2" placeholder="Remarks (Optional)..." value={formData.remarks} onChange={(e) => setFormData(p => ({ ...p, remarks: e.target.value }))} />
         </div>
-
-        {/* Footer Button - Always at bottom */}
-        <div className="mt-4 pt-2 border-t border-slate-100">
-          
-        </div>
-
       </form>
     </Modal>
   );
