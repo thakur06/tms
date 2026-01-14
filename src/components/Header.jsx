@@ -200,9 +200,22 @@ export default function Header() {
             >
               <div className="flex flex-col h-full">
                 {/* Mobile Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+                <div className="flex items-center justify-between px-4 py border-b border-slate-200">
                   <div className="flex items-center gap-2.5 bg-transparent">
-                  
+                  <div className="px-6 py-2 bg-gradient-to-br from-emerald-50 to-teal-50 border-b border-emerald-100">
+                  <div className="flex items-center gap-5">
+                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 grid place-items-center text-white font-bold shadow-sm">
+                      {initials}
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-slate-900">{user?.name || 'User'}</p>
+                      <p className="text-xs  flex items-center gap-1.5 mt-0.5 text-green-600">
+                        {/* <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> */}
+                        Active now
+                      </p>
+                    </div>
+                  </div>
+                </div>
                   </div>
                   <button
                     onClick={() => setMobileMenuOpen(false)}
@@ -213,20 +226,7 @@ export default function Header() {
                 </div>
 
                 {/* User Info */}
-                <div className="px-6 py-4 bg-gradient-to-br from-emerald-50 to-teal-50 border-b border-emerald-100">
-                  <div className="flex items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 grid place-items-center text-white font-bold shadow-sm">
-                      {initials}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{user?.name || 'User'}</p>
-                      <p className="text-xs text-black flex items-center gap-1.5 mt-0.5">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                        Active now
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                
 
                 {/* Navigation Links */}
                 <nav className="flex-1 px-4 py-6 overflow-y-auto">
@@ -245,8 +245,16 @@ export default function Header() {
                               : 'text-black hover:bg-slate-50 font-medium'
                           }`}
                         >
-                          <Icon className="w-5 h-5" />
-                          <span className="text-sm text-black">{link.label}</span>
+                          <Icon className={`w-5 h-5 ${
+                      active 
+                        ? 'text-emerald-700 bg-emerald-50' 
+                        : 'text-black hover:text-slate-900 hover:bg-slate-50'
+                    }`} />
+                          <span className={`text-sm ${
+                      active 
+                        ? 'text-emerald-700 bg-emerald-50' 
+                        : 'text-black hover:text-slate-900 hover:bg-slate-50'
+                    }`}>{link.label}</span>
                           {active && (
                             <div className="ml-auto h-2 w-2 rounded-full bg-emerald-600" />
                           )}

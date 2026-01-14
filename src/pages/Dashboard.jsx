@@ -303,8 +303,8 @@ export default function Dashboard() {
   };
 
   const PIE_COLORS = [
-    CHART_COLORS.primary,
-    CHART_COLORS.secondary,
+    // CHART_COLORS.primary,
+    // CHART_COLORS.secondary,
     CHART_COLORS.success,
     CHART_COLORS.warning,
     CHART_COLORS.danger,
@@ -398,7 +398,7 @@ export default function Dashboard() {
               <button
                 onClick={() => window.location.reload()}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-all border border-slate-200 active:scale-[0.98]"
-              >
+              disabled>
                 Refresh Data
               </button>
             </div>
@@ -728,22 +728,22 @@ export default function Dashboard() {
         </div>
 
         {/* Footer/Summary */}
-        <div className="bg-gradient-to-r from-indigo-500 to-purple-600 rounded-2xl p-6 text-white">
+        <div className="bg-gradient-to-r from-green-700 to-green-800 rounded-2xl p-6 text-white">
           <div className="flex flex-col md:flex-row items-center justify-between gap-4">
             <div>
               <h4 className="text-lg font-bold mb-2">
                 Ready to optimize your workflow?
               </h4>
-              <p className="text-indigo-100 opacity-90">
+              <p className="text-green-100 opacity-90">
                 Track more time to unlock advanced analytics and insights
               </p>
             </div>
             <Link
               to="/time-log"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-white text-indigo-600 font-bold rounded-xl hover:bg-indigo-50 transition-all shadow-lg active:scale-[0.98] whitespace-nowrap"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-green-700 text-black font-bold rounded-xl  transition-all shadow-lg active:scale-[0.98] whitespace-nowrap"
             >
               <IoCheckmarkCircle size={18} />
-              Start Tracking Time
+              Start Tracking Your Time
             </Link>
           </div>
         </div>

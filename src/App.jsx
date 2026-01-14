@@ -15,7 +15,7 @@ function AppContent() {
   const { isAuthenticated } = useAuth();
 
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
+    <div className="min-h-screen bg-linear-to-r from-white via-indigo-300 to-indigo-400 flex flex-col">
       {/* Only show Header if authenticated */}
       {isAuthenticated && <Header />}
       

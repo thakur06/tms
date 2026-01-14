@@ -306,60 +306,63 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
     <div className="max-w-[1600px] mx-auto p-4 md:p-6 bg-slate-50 min-h-screen">
 
       {/* --- HEADER SECTION --- */}
-      <header className="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 mb-6">
-        <div className="flex items-center justify-between gap-4">
+      <header className="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200 mb-6">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
 
           {/* Logged-in User Info */}
           <div className="flex items-center gap-3 flex-shrink-0">
-            <IoCalendar className="text-indigo-500" size={20} />
-            <div className="px-4 py-2.5 bg-indigo-50 border border-indigo-200 rounded-xl">
-              <p className="text-sm font-semibold text-slate-800 whitespace-nowrap">{user?.name || 'Not signed in'}</p>
-              <p className="text-xs text-slate-600 whitespace-nowrap">{user?.email || ''}</p>
+            <IoCalendar className="text-indigo-500 hidden sm:block" size={20} />
+            <div className="px-4 py-2.5 bg-indigo-50 border border-indigo-200 rounded-xl flex-1 sm:flex-none">
+              <p className="text-sm font-semibold text-slate-800 truncate">{user?.name || 'Not signed in'}</p>
+              <p className="text-xs text-slate-600 truncate">{user?.email || ''}</p>
             </div>
           </div>
 
           {/* Navigation & Controls */}
-          <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-shrink-0">
             <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
               <button 
                 onClick={() => navigateWeek(-1)} 
-                className="p-2.5 hover:bg-white hover:shadow-sm rounded-lg transition-all text-slate-600"
+                className="p-2.5 hover:bg-white hover:shadow-sm rounded-lg transition-all text-slate-600 flex-1 sm:flex-none"
               >
                 <IoChevronBack size={18} />
               </button>
               <button 
                 onClick={goToToday} 
-                className="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-white hover:shadow-sm rounded-lg transition-all whitespace-nowrap"
+                className="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-white hover:shadow-sm rounded-lg transition-all whitespace-nowrap flex-1 sm:flex-none"
               >
                 Today
               </button>
               <button 
                 onClick={() => navigateWeek(1)} 
-                className="p-2.5 hover:bg-white hover:shadow-sm rounded-lg transition-all text-slate-600"
+                className="p-2.5 hover:bg-white hover:shadow-sm rounded-lg transition-all text-slate-600 flex-1 sm:flex-none"
               >
                 <IoChevronForward size={18} />
               </button>
             </div>
 
-            <div className={`flex items-center gap-3 px-5 py-2.5 rounded-xl border-2 transition-all ${exceedsLimit ? 'bg-red-50 border-red-200' : 'bg-indigo-50 border-indigo-200'}`}>
-              <div className="flex flex-col">
-                <span className={`text-xs uppercase tracking-wide font-semibold whitespace-nowrap ${exceedsLimit ? 'text-red-600' : 'text-indigo-600'}`}>
-                  Weekly Total
-                </span>
-                <span className={`text-xl font-bold ${exceedsLimit ? 'text-red-700' : 'text-indigo-700'}`}>
-                  {formatTime(weeklyTotalMinutes)}
-                </span>
+            <div className="flex items-center justify-between sm:justify-start gap-3">
+              <div className={`flex items-center gap-3 px-4 sm:px-5 py-2.5 rounded-xl border-2 transition-all flex-1 sm:flex-none ${exceedsLimit ? 'bg-red-50 border-red-200' : 'bg-indigo-50 border-indigo-200'}`}>
+                <div className="flex flex-col">
+                  <span className={`text-xs uppercase tracking-wide font-semibold whitespace-nowrap ${exceedsLimit ? 'text-red-600' : 'text-indigo-600'}`}>
+                    Weekly Total
+                  </span>
+                  <span className={`text-xl font-bold ${exceedsLimit ? 'text-red-700' : 'text-indigo-700'}`}>
+                    {formatTime(weeklyTotalMinutes)}
+                  </span>
+                </div>
+                <IoTime size={24} className={exceedsLimit ? 'text-red-400' : 'text-indigo-400'} />
               </div>
-              <IoTime size={24} className={exceedsLimit ? 'text-red-400' : 'text-indigo-400'} />
-            </div>
 
-            <button
-              onClick={() => setShowSubmitModal(true)}
-              className="px-6 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center gap-2 active:scale-95 whitespace-nowrap"
-            >
-              <IoCheckmarkCircle size={20} />
-              Submit
-            </button>
+              <button
+                onClick={() => setShowSubmitModal(true)}
+                className="px-4 sm:px-6 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 whitespace-nowrap flex-shrink-0"
+              >
+                <IoCheckmarkCircle size={20} />
+                <span className="hidden sm:inline">Submit</span>
+                <span className="sm:hidden">Submit</span>
+              </button>
+            </div>
           </div>
         </div>
       </header>

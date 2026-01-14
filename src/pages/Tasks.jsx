@@ -219,9 +219,9 @@ export default function Tasks() {
 
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide">Work</p>
-          <h1 className="text-2xl font-bold text-slate-900">Tasks</h1>
-          <p className="text-sm text-slate-600">Track timers and manage tasks in one place.</p>
+          
+         
+         
         </div>
         <div className="flex gap-2">
           <button onClick={() => setShowTaskModal(true)} className="ui-btn-primary px-4 py-2.5 text-sm">

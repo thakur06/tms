@@ -251,25 +251,30 @@ button, a {
 }
 
 /* Ensure the calendar is responsive on small mobile screens */
-.react-datepicker-popper {
-  z-index: 9999 !important;
+.custom-input {
+  width: 100%;
+  padding: 10px 12px 10px 40px;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  font-size: 14px;
+  color: #111827;
+  background: white;
+  outline: none;
+  transition: all 0.2s;
+  cursor: pointer;
 }
 
-.react-datepicker {
-  font-family: inherit;
-  border-radius: 1.5rem !important;
-  border: none !important;
-  shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25) !important;
-  overflow: hidden;
+.custom-input:hover {
+  border-color: #9ca3af;
 }
 
-@media (max-width: 450px) {
-  .react-datepicker__calendar-container {
-    width: 280px !important;
-  }
-  .react-datepicker__month-container {
-    width: 100% !important;
-  }
+.custom-input:focus {
+  border-color: #111827;
+  box-shadow: 0 0 0 2px rgba(17, 24, 39, 0.05);
+}
+
+.custom-input::placeholder {
+  color: #9ca3af;
 }
 .hide-y-scroll {
   overflow-y: scroll; /* Allow vertical scrolling */
