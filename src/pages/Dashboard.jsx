@@ -491,7 +491,7 @@ export default function Dashboard() {
           </>
         )}
       </div>
-
+  <div className="relative z-[999]">
       <CreateTaskModal
         isOpen={showTaskModal}
         onClose={() => setShowTaskModal(false)}
@@ -512,6 +512,7 @@ export default function Dashboard() {
         depts={dept}
         onCreateUser={handleCreateUser}
       />
+      </div>
     </div>
   );
 }

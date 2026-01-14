@@ -155,7 +155,7 @@ export default function CreateUserModal({ isOpen, onClose, onCreateUser, depts =
                     exit={{ opacity: 0, height: 0 }}
                     className="overflow-hidden mt-2 bg-slate-50/50 border border-slate-200 rounded-2xl"
                   >
-                    <div className="max-h-[160px] overflow-y-auto no-scrollbar py-1">
+                    <div className="max-h-[130px] overflow-y-auto no-scrollbar py-1">
                       {depts.map(dept => (
                         <button
                           key={dept}
