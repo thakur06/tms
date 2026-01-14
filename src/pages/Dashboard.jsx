@@ -398,7 +398,7 @@ export default function Dashboard() {
               <button
                 onClick={() => window.location.reload()}
                 className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-all border border-slate-200 active:scale-[0.98]"
-              disabled>
+              dis>
                 Refresh Data
               </button>
             </div>

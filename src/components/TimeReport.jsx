@@ -446,10 +446,9 @@ export default function TimeReport() {
   };
 
   return (
-    <div className="h-fit bg-white p-4 md:p-8 font-sans text-slate-900 relative">
+<div className="h-fit bg-white p-4 md:p-8 font-sans text-slate-900 relative">
       {/* Global styles for react-datepicker */}
       <style jsx global>{`
-      
         /* Base styles for datepicker */
         .react-datepicker {
           font-family: inherit !important;
@@ -493,14 +492,14 @@ export default function TimeReport() {
         }
         
         .react-datepicker__day--selected {
-          background: #111827 !important;
+          background: #3b82f6 !important;
           border-radius: 0.5rem !important;
           color: white !important;
           font-weight: 500 !important;
         }
         
         .react-datepicker__day:hover {
-          background: #f9fafb !important;
+          background: #eff6ff !important;
           border-radius: 0.5rem !important;
           color: #111827 !important;
         }
@@ -518,13 +517,13 @@ export default function TimeReport() {
         }
         
         .react-datepicker__day--keyboard-selected {
-          background-color: #f9fafb !important;
+          background-color: #eff6ff !important;
           color: #111827 !important;
         }
         
         .react-datepicker__day--today {
           font-weight: 600 !important;
-          color: #111827 !important;
+          color: #3b82f6 !important;
           position: relative !important;
         }
         
@@ -536,7 +535,7 @@ export default function TimeReport() {
           transform: translateX(-50%) !important;
           width: 4px !important;
           height: 4px !important;
-          background: #9ca3af !important;
+          background: #3b82f6 !important;
           border-radius: 50% !important;
         }
         
@@ -631,28 +630,6 @@ export default function TimeReport() {
             margin: 0.1rem !important;
           }
         }
-        
-        /* Desktop sizing */
-        @media (min-width: 768px) {
-          .react-datepicker {
-            min-width: 320px !important;
-          }
-        }
-        
-        /* Add a backdrop for better focus */
-        .react-datepicker-popper::before {
-          content: '' !important;
-          position: fixed !important;
-          top: 0 !important;
-          left: 0 !important;
-          right: 0 !important;
-          bottom: 0 !important;
-          background: rgba(0, 0, 0, 0.2) !important;
-          backdrop-filter: blur(2px) !important;
-          z-index: -1 !important;
-          pointer-events: none !important;
-          display: none !important; /* We'll handle backdrop separately */
-        }
       `}</style>
 
       <div className="max-w-7xl mx-auto space-y-8">
@@ -661,7 +638,7 @@ export default function TimeReport() {
         <header className="relative flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 uppercase tracking-wide mb-4">
-              <span className="px-2 py-1 rounded bg-slate-100">Analytics</span>
+              <span className="px-2 py-1 rounded bg-blue-50 text-blue-700">Analytics</span>
               <span className="text-slate-300">/</span>
               <span>Reports</span>
             </nav>
@@ -672,11 +649,11 @@ export default function TimeReport() {
           </div>
 
           {/* Real-time Status Badge */}
-          <div className="flex items-center gap-3 px-4 py-2.5 bg-white rounded-xl border border-slate-200">
+          <div className="flex items-center gap-3 px-4 py-2.5 bg-blue-50 rounded-xl border border-blue-100">
             <div className="relative">
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
             </div>
-            <span className="text-sm font-medium text-slate-700">
+            <span className="text-sm font-medium text-blue-700">
               {reportData ? `${reportData.users.length} Active Users` : 'System Ready'}
             </span>
           </div>
@@ -686,8 +663,8 @@ export default function TimeReport() {
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
             <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 bg-slate-100 rounded-lg">
-                <MdOutlineDateRange className="w-5 h-5 text-slate-700" />
+              <div className="p-2.5 bg-blue-50 rounded-lg">
+                <MdOutlineDateRange className="w-5 h-5 text-blue-600" />
               </div>
               <div>
                 <h2 className="text-lg font-semibold text-slate-900">Date Range</h2>
@@ -783,7 +760,7 @@ export default function TimeReport() {
               <button
                 onClick={fetchReport}
                 disabled={loading || !startDate || !endDate}
-                className="px-6 py-3 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-slate-900 text-white hover:bg-slate-800 active:scale-[0.98]"
+                className="px-6 py-3 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98]"
               >
                 {loading ? (
                   <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -806,10 +783,10 @@ export default function TimeReport() {
             <button
               onClick={exportToExcel}
               disabled={!reportData || exporting}
-              className="w-full py-3 bg-white text-slate-900 border border-slate-300 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-slate-50 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-emerald-100 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {exporting ? (
-                <div className="w-4 h-4 border-2 border-slate-300 border-t-slate-900 rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-emerald-300 border-t-emerald-700 rounded-full animate-spin" />
               ) : (
                 <>
                   <FiDownload className="w-4 h-4" />
@@ -826,7 +803,7 @@ export default function TimeReport() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <h3 className="text-xl font-semibold text-slate-900">Report Results</h3>
               <div className="flex gap-2">
-                <div className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium">
+                <div className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
                   Total: {reportData.users.reduce((sum, user) => sum + user.total_hours, 0)} Hours
                 </div>
                 <div className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium">
@@ -839,56 +816,50 @@ export default function TimeReport() {
               {sortedUsers.map((user, index) => (
                 <div
                   key={user.user_name}
-                  onClick={() => toggleUser(user.user_name)}
-                  className="group bg-white border border-slate-200 rounded-xl p-5 hover:shadow-sm transition-all cursor-pointer"
+                  className="group bg-white border border-slate-200 rounded-xl p-5 hover:shadow-sm transition-all"
                 >
                   {/* Profile Section */}
                   <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-slate-100 border border-slate-200 rounded-lg flex items-center justify-center text-base font-medium text-slate-700">
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-50 border border-blue-200 rounded-lg flex items-center justify-center text-base font-medium text-blue-700">
                       {user.user_name.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-medium text-slate-900 truncate">{user.user_name}</h4>
                       <p className="text-xs text-slate-500 truncate">{user.user_dept || 'General Dept'}</p>
                     </div>
-                    <div className="p-1.5 rounded-lg text-slate-400">
-                      {expandedUsers[user.user_name] ? <FiChevronUp size={18} /> : <FiChevronDown size={18} />}
-                    </div>
                   </div>
 
                   {/* Stat Pills */}
-                  <div className="flex gap-2 mb-2">
-                    <div className="flex-1 bg-slate-50 rounded-lg p-2.5 text-center border border-slate-200">
+                  <div className="flex gap-2">
+                    <div className="flex-1 bg-slate-50 rounded-lg p-3 text-center border border-slate-200">
                       <div className="text-xs text-slate-500">Hours</div>
-                      <div className="text-base font-medium text-slate-900">{user.total_hours}h</div>
+                      <div className="text-lg font-bold text-slate-900">{user.total_hours}h</div>
                     </div>
-                    <div className="flex-1 bg-slate-50 rounded-lg p-2.5 text-center border border-slate-200">
+                    <div className="flex-1 bg-slate-50 rounded-lg p-3 text-center border border-slate-200">
                       <div className="text-xs text-slate-500">Entries</div>
-                      <div className="text-base font-medium text-slate-900">{user.entries.length}</div>
+                      <div className="text-lg font-bold text-slate-900">{user.entries.length}</div>
                     </div>
                   </div>
 
-                  {/* Expandable Entries Area */}
-                  {expandedUsers[user.user_name] && (
-                    <div className="mt-4 space-y-3 pt-4 border-t border-slate-200 animate-in zoom-in-95 duration-200">
-                      {user.entries.map((entry, i) => (
-                        <div key={i} className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                          <div className="flex justify-between items-start mb-1">
-                            <span className="text-xs font-medium text-slate-600">{entry.project_code || 'PRJ'}</span>
-                            <span className="text-xs font-medium text-slate-900">{entry.hours}h {entry.minutes}m</span>
+                  {/* Summary Info */}
+                  <div className="mt-4 pt-4 border-t border-slate-100">
+                    <div className="text-xs text-slate-500">
+                      {user.entries.length > 0 ? (
+                        <div className="space-y-1">
+                          <div className="flex justify-between">
+                            <span>Projects:</span>
+                            <span className="font-medium">{[...new Set(user.entries.map(e => e.project))].length}</span>
                           </div>
-                          <p className="text-sm font-medium text-slate-900 mb-1">{entry.project}</p>
-                          <div className="flex items-center gap-1 text-xs text-slate-500">
-                            <FiCalendar className="w-3 h-3" />
-                            <span>{formatDateNoTime(entry.date)}</span>
+                          <div className="flex justify-between">
+                            <span>Avg per day:</span>
+                            <span className="font-medium">{(user.total_hours / user.entries.length).toFixed(1)}h</span>
                           </div>
-                          {entry.remarks && (
-                            <p className="text-xs text-slate-500 mt-2 italic line-clamp-2">"{entry.remarks}"</p>
-                          )}
                         </div>
-                      ))}
+                      ) : (
+                        <p className="italic">No time entries</p>
+                      )}
                     </div>
-                  )}
+                  </div>
                 </div>
               ))}
             </div>
