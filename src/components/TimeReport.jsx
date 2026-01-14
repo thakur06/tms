@@ -125,7 +125,7 @@ export default function TimeReport() {
   // Custom input component for DatePicker to fix styling issues
   const CustomInput = ({ value, onClick, placeholder }) => (
     <button 
-      className="w-full pl-12 pr-4 py-4 bg-slate-50 border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all outline-none font-semibold text-slate-700 hover:bg-slate-100/50 text-left"
+      className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl transition-all outline-none font-semibold text-slate-900 hover:bg-slate-50 text-left focus:ring-2 focus:ring-slate-500/30"
       onClick={onClick}
       type="button"
     >
@@ -446,7 +446,7 @@ export default function TimeReport() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] p-4 md:p-8 font-sans text-slate-900 relative">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8 font-sans text-slate-900 relative">
       {/* Global styles for react-datepicker */}
       <style jsx global>{`
         .react-datepicker {
@@ -584,38 +584,35 @@ export default function TimeReport() {
         {/* --- Header Section --- */}
         <header className="relative flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
-            <nav className="flex items-center gap-2 text-xs font-bold text-blue-600 uppercase tracking-widest mb-3">
-              <span className="bg-blue-100 px-2 py-1 rounded">Analytics</span>
-              <span className="text-slate-300">/</span>
-              <span className="text-slate-400">Reports</span>
+            <nav className="flex items-center gap-2 text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">
+              <span className="px-2 py-1 rounded border border-slate-300 bg-white">Analytics</span>
+              <span className="text-slate-400">/</span>
+              <span className="text-slate-500">Reports</span>
             </nav>
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight italic">
-              Time Tracking <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Reports</span>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight">
+              Time Tracking <span className="text-slate-500">Reports</span>
             </h1>
-            <p className="text-slate-500 mt-2 font-medium">Detailed workspace activity and productivity export.</p>
+            <p className="text-slate-600 mt-2 font-medium">Detailed workspace activity and productivity export.</p>
           </div>
 
           {/* Real-time Status Badge */}
-          <div className="flex items-center gap-3 px-5 py-3 bg-white shadow-[0_8px_30px_rgb(0,0,0,0.04)] rounded-2xl border border-slate-100">
+          <div className="flex items-center gap-3 px-5 py-3 bg-white rounded-2xl border border-slate-200 shadow-sm">
             <div className="relative flex h-3 w-3">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-600"></span>
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-slate-400 opacity-40"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-slate-800"></span>
             </div>
-            <span className="text-sm font-bold text-slate-700">
+            <span className="text-sm font-bold text-slate-800">
               {reportData ? `${reportData.users.length} Active Users` : 'System Ready'}
             </span>
           </div>
         </header>
 
-        {/* --- Configuration Bento Card --- */}
+        {/* --- Configuration Card --- */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-[32px] shadow-[0_20px_50px_rgba(0,0,0,0.05)] border border-white p-8 relative overflow-hidden">
-            {/* Abstract Background Decoration */}
-            <div className="absolute top-0 right-0 -mr-16 -mt-16 w-64 h-64 bg-blue-50 rounded-full blur-3xl opacity-50" />
-            
+          <div className="lg:col-span-2 bg-white rounded-[32px] shadow-sm border border-slate-200 p-8 relative overflow-hidden">
             <div className="relative flex flex-col h-full">
               <div className="flex items-center gap-4 mb-8">
-                <div className="p-3.5 bg-slate-900 rounded-2xl shadow-xl">
+                <div className="p-3.5 bg-slate-900 rounded-2xl shadow-sm">
                   <MdOutlineDateRange className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -626,7 +623,7 @@ export default function TimeReport() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-tighter ml-1">Start Date</label>
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-tighter ml-1">Start Date</label>
                   <div className="relative group">
                     <DatePicker
                       selected={startDate}
@@ -662,11 +659,11 @@ export default function TimeReport() {
                         },
                       ]}
                     />
-                    <FiCalendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors pointer-events-none" />
+                    <FiCalendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-slate-600 transition-colors pointer-events-none" />
                   </div>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-xs font-black text-slate-400 uppercase tracking-tighter ml-1">End Date</label>
+                  <label className="text-xs font-black text-slate-500 uppercase tracking-tighter ml-1">End Date</label>
                   <div className="relative group">
                     <DatePicker
                       selected={endDate}
@@ -703,9 +700,9 @@ export default function TimeReport() {
                         },
                       ]}
                     />
-                    <FiCalendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-blue-600 transition-colors pointer-events-none" />
+                    <FiCalendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-slate-600 transition-colors pointer-events-none" />
                   </div>
-                  <p className="text-xs text-slate-400 ml-1 mt-1">
+                  <p className="text-xs text-slate-500 ml-1 mt-1">
                     Cannot select dates after {today.toLocaleDateString('en-US', { 
                       year: 'numeric', 
                       month: 'short', 
@@ -719,7 +716,7 @@ export default function TimeReport() {
                 <button
                   onClick={fetchReport}
                   disabled={loading || !startDate || !endDate}
-                  className="flex-1 bg-slate-900 text-white px-8 py-4 rounded-2xl font-bold shadow-2xl shadow-slate-200 hover:bg-blue-600 transition-all active:scale-[0.98] disabled:opacity-20 flex items-center justify-center gap-3"
+                  className="flex-1 px-8 py-3 rounded-2xl font-bold transition-all active:scale-[0.98] disabled:opacity-40 flex items-center justify-center gap-3 bg-slate-900 text-white hover:bg-black"
                 >
                   {loading ? <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" /> : <FiFilter />}
                   Generate Report
@@ -729,17 +726,17 @@ export default function TimeReport() {
           </div>
 
           {/* Quick Action Card */}
-          <div className="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-[32px] p-8 text-white shadow-2xl shadow-blue-200 flex flex-col justify-between">
+          <div className="bg-white rounded-[32px] p-8 text-slate-900 shadow-sm border border-slate-200 flex flex-col justify-between">
             <div>
               <h3 className="text-2xl font-bold mb-2">Export Data</h3>
-              <p className="text-blue-100 text-sm leading-relaxed">
+              <p className="text-slate-600 text-sm leading-relaxed">
                 Download your report in .xlsx format for external accounting and payroll management.
               </p>
             </div>
             <button
               onClick={exportToExcel}
               disabled={!reportData || exporting}
-              className="w-full py-4 bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-white hover:text-blue-600 transition-all active:scale-[0.98] disabled:opacity-50"
+              className="w-full py-3 bg-slate-900 text-white border border-slate-900 rounded-2xl font-bold flex items-center justify-center gap-3 hover:bg-black transition-all active:scale-[0.98] disabled:opacity-40"
             >
               {exporting ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -759,10 +756,10 @@ export default function TimeReport() {
             <div className="flex items-center justify-between mb-6">
                 <h3 className="text-2xl font-black text-slate-900 tracking-tight">Report Results</h3>
                 <div className="flex gap-2">
-                    <div className="px-4 py-2 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-xl text-xs font-bold uppercase tracking-widest">
+                    <div className="px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold uppercase tracking-widest">
                         Total: {reportData.users.reduce((sum, user) => sum + user.total_hours, 0)} Hours
                     </div>
-                    <div className="px-4 py-2 bg-blue-50 text-blue-700 border border-blue-100 rounded-xl text-xs font-bold uppercase tracking-widest">
+                    <div className="px-4 py-2 bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold uppercase tracking-widest">
                         {formatDateNoTime(reportData.startDate)} - {formatDateNoTime(reportData.endDate)}
                     </div>
                 </div>
@@ -773,54 +770,54 @@ export default function TimeReport() {
                 <div 
                   key={user.user_name}
                   onClick={() => toggleUser(user.user_name)}
-                  className="group bg-white border border-slate-100 rounded-[28px] p-6 hover:shadow-[0_30px_60px_rgba(0,0,0,0.08)] transition-all cursor-pointer relative overflow-hidden"
+                  className="group bg-white border border-slate-200 rounded-[28px] p-6 hover:shadow-md transition-all cursor-pointer relative overflow-hidden"
                 >
                   {/* Profile Section */}
                   <div className="flex items-center gap-4 mb-6">
-                    <div className="w-14 h-14 bg-slate-100 rounded-2xl flex items-center justify-center text-xl font-black text-slate-400 group-hover:bg-blue-600 group-hover:text-white transition-all duration-500">
+                    <div className="w-14 h-14 bg-slate-100 border border-slate-200 rounded-2xl flex items-center justify-center text-xl font-black text-slate-700 transition-all duration-300">
                       {user.user_name.charAt(0)}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <h4 className="font-bold text-slate-900 truncate group-hover:text-blue-600 transition-colors">{user.user_name}</h4>
+                      <h4 className="font-bold text-slate-900 truncate transition-colors">{user.user_name}</h4>
                       <p className="text-xs font-medium text-slate-500 truncate">{user.user_dept || 'General Dept'}</p>
                       {user.user_email && (
-                        <p className="text-xs text-slate-400 truncate mt-1">{user.user_email}</p>
+                        <p className="text-xs text-slate-500 truncate mt-1">{user.user_email}</p>
                       )}
                     </div>
-                    <div className={`p-2 rounded-xl transition-colors ${expandedUsers[user.user_name] ? 'bg-blue-50 text-blue-600' : 'text-slate-300'}`}>
+                    <div className={`p-2 rounded-xl transition-colors ${expandedUsers[user.user_name] ? 'bg-slate-900 text-white' : 'text-slate-400'}`}>
                       {expandedUsers[user.user_name] ? <FiChevronUp size={20} /> : <FiChevronDown size={20} />}
                     </div>
                   </div>
 
                   {/* Stat Pills */}
                   <div className="flex gap-2 mb-2">
-                    <div className="flex-1 bg-slate-50 rounded-xl p-3 text-center border border-slate-100 group-hover:bg-white transition-colors">
-                      <div className="text-xs font-black text-slate-400 uppercase tracking-tighter">Hours</div>
+                    <div className="flex-1 bg-slate-50 rounded-xl p-3 text-center border border-slate-200 transition-colors">
+                      <div className="text-xs font-black text-slate-500 uppercase tracking-tighter">Hours</div>
                       <div className="text-lg font-black text-slate-900">{user.total_hours}h</div>
                     </div>
-                    <div className="flex-1 bg-slate-50 rounded-xl p-3 text-center border border-slate-100 group-hover:bg-white transition-colors">
-                      <div className="text-xs font-black text-slate-400 uppercase tracking-tighter">Entries</div>
+                    <div className="flex-1 bg-slate-50 rounded-xl p-3 text-center border border-slate-200 transition-colors">
+                      <div className="text-xs font-black text-slate-500 uppercase tracking-tighter">Entries</div>
                       <div className="text-lg font-black text-slate-900">{user.entries.length}</div>
                     </div>
                   </div>
 
                   {/* Expandable Entries Area */}
                   {expandedUsers[user.user_name] && (
-                    <div className="mt-6 space-y-3 pt-6 border-t border-slate-50 animate-in zoom-in-95 duration-200">
+                    <div className="mt-6 space-y-3 pt-6 border-t border-slate-200 animate-in zoom-in-95 duration-200">
                        {user.entries.map((entry, i) => (
-                         <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                         <div key={i} className="p-4 bg-slate-50 rounded-2xl border border-slate-200">
                             <div className="flex justify-between items-start">
-                                <span className="text-xs font-bold text-blue-600">{entry.project_code || 'PRJ'}</span>
+                                <span className="text-xs font-bold text-slate-600">{entry.project_code || 'PRJ'}</span>
                                 <span className="text-xs font-black text-slate-900">{entry.hours}h {entry.minutes}m</span>
                             </div>
-                            <p className="text-sm font-bold text-slate-800 mt-1">{entry.project}</p>
+                            <p className="text-sm font-bold text-slate-900 mt-1">{entry.project}</p>
                             <div className="flex items-center gap-2 mt-2">
                               <FiCalendar className="w-3 h-3 text-slate-400" />
-                              <span className="text-[11px] text-slate-500">
+                              <span className="text-[11px] text-slate-600">
                                 {formatDateNoTime(entry.date)}
                               </span>
                             </div>
-                            <p className="text-[11px] text-slate-500 mt-2 italic line-clamp-1">"{entry.remarks || 'No remarks provided'}"</p>
+                            <p className="text-[11px] text-slate-600 mt-2 italic line-clamp-1">"{entry.remarks || 'No remarks provided'}"</p>
                          </div>
                        ))}
                     </div>

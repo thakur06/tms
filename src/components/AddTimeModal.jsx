@@ -6,7 +6,7 @@ import Modal from "./Modal";
 import { toast } from "react-toastify";
 
 export default function AddTimeModal({
-  isOpen, onClose, dateStr, tasks = [], projects = [], selectedUser, onAdd, entry = null, onUpdate, clients = []
+  isOpen, onClose, dateStr, tasks = [], projects = [], onAdd, entry = null, onUpdate, clients = []
 }) {
   const isEditMode = !!entry;
 
@@ -85,7 +85,6 @@ export default function AddTimeModal({
       ...formData,
       taskName: formData.task,
       entry_date: dateStr,
-      user: selectedUser,
       hours: hrsInt,     // Sending as INT
       minutes: minInt    // Sending as INT
     };
@@ -114,7 +113,7 @@ export default function AddTimeModal({
       isOpen={isOpen} 
       onClose={onClose} 
       title={
-        <div className="grid items-center grid-cols-3 w-full pr-8 z-200"> 
+        <div className="grid items-center grid-cols-3 w-full pr-8 z-9999"> 
           {/* 1. Left Side: Date String */}
           <div className="">
             <span className="text-[10px] font-black uppercase text-slate-400 tracking-tight whitespace-nowrap">
@@ -141,8 +140,9 @@ export default function AddTimeModal({
           </div>
         </div>
       }
-      // Add modal z-index to be higher than header (header is z-[100])
-      className="z-[200]"
+      // Ensure this modal stays above app chrome even if global styles change
+      shellClassName="z-9999"
+      overlayClassName="z-9998"
     >
       <form onSubmit={validateAndSubmit} className="flex flex-col h-full max-h-[55vh] md:max-h-[65vh] px-1 pt-2 pb-4 overflow-y-auto no-scrollbar">
         <div className="space-y-4 flex-1">

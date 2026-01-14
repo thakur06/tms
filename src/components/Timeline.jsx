@@ -3,6 +3,25 @@ import { IoBarChart, IoDownload, IoPerson } from 'react-icons/io5'
 import { getRangePercent } from '../utils/formatters'
 
 export default function Timeline({ timeline }) {
+  if (!timeline || timeline.length === 0) {
+    return (
+      <div className="bg-white border border-gray-200 rounded-2xl p-4 sm:p-5 shadow-sm">
+        <div className="flex flex-col sm:flex-row justify-between items-start gap-3 mb-3">
+          <div>
+            <p className="text-xs text-gray-500 mb-0.5">Timeline</p>
+            <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+              <IoBarChart className="w-5 h-5 text-indigo-500" />
+              Gantt snapshot
+            </h3>
+          </div>
+        </div>
+        <div className="text-sm text-gray-500 font-medium bg-gray-50 border border-dashed border-gray-200 rounded-xl p-6 text-center">
+          No timeline items yet.
+        </div>
+      </div>
+    )
+  }
+
   const minDate = Math.min(...timeline.map((t) => new Date(t.start).getTime()))
   const maxDate = Math.max(...timeline.map((t) => new Date(t.end).getTime()))
 

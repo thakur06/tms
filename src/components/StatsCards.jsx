@@ -1,28 +1,29 @@
 import { motion } from 'framer-motion'
-import { IoCheckmarkCircle, IoDocumentText, IoCalendar, IoTime, IoArrowUpOutline } from 'react-icons/io5'
+import { IoArrowUpOutline } from 'react-icons/io5'
 
-export default function StatsCards({ stats }) {
+export default function StatsCards({ cards = [] }) {
   // Color mapping to ensure Tailwind classes are purged correctly
   const colorMap = {
     indigo: { bg: 'bg-indigo-50', icon: 'text-indigo-600', ring: 'ring-indigo-100', glow: 'shadow-indigo-100' },
     amber: { bg: 'bg-amber-50', icon: 'text-amber-600', ring: 'ring-amber-100', glow: 'shadow-amber-100' },
     cyan: { bg: 'bg-cyan-50', icon: 'text-cyan-600', ring: 'ring-cyan-100', glow: 'shadow-cyan-100' },
+    emerald: { bg: 'bg-emerald-50', icon: 'text-emerald-600', ring: 'ring-emerald-100', glow: 'shadow-emerald-100' },
     green: { bg: 'bg-emerald-50', icon: 'text-emerald-600', ring: 'ring-emerald-100', glow: 'shadow-emerald-100' },
+    rose: { bg: 'bg-rose-50', icon: 'text-rose-600', ring: 'ring-rose-100', glow: 'shadow-rose-100' },
   }
-
-  const cards = [
-    { icon: IoCheckmarkCircle, label: 'Open tasks', value: stats.open, hint: '+4 vs last week', color: 'indigo', trend: true },
-    { icon: IoDocumentText, label: 'Approvals pending', value: stats.approvals, hint: 'Action required', color: 'amber' },
-    { icon: IoCalendar, label: 'Calendar items', value: stats.today, hint: 'Scheduled today', color: 'cyan' },
-    { icon: IoTime, label: 'Utilization', value: `${stats.utilization}%`, hint: `Target: 85%`, color: 'green', trend: true },
-  ]
 
   return (
     <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8 mt-10">
       {cards.map((card, index) => {
         const Icon = card.icon
-        const style = colorMap[card.color]
+        const style = colorMap[card.color] || colorMap.indigo
         
+        // Better icon detection: check if Icon is a valid React component
+        const hasIcon = Icon && (
+          typeof Icon === 'function' || 
+          (typeof Icon === 'object' && Icon.$$typeof === Symbol.for('react.element'))
+        )
+
         return (
           <motion.div
             key={card.label}
@@ -37,9 +38,13 @@ export default function StatsCards({ stats }) {
 
             <div className="flex flex-col h-full">
               <div className="flex items-center justify-between mb-5">
-                {/* Icon Wrapper */}
+                {/* Icon Wrapper - Always render, but conditionally show icon */}
                 <div className={`p-3 rounded-2xl ${style.bg} ${style.ring} ring-1 transition-transform duration-500 group-hover:scale-110`}>
-                  <Icon className={`w-6 h-6 ${style.icon}`} />
+                  {hasIcon ? (
+                    <Icon className={`w-6 h-6 ${style.icon}`} />
+                  ) : (
+                    <div className={`w-6 h-6 rounded-full ${style.bg} ${style.ring} ring-1`} />
+                  )}
                 </div>
                 
                 {/* Optional Trend Badge */}
@@ -63,7 +68,7 @@ export default function StatsCards({ stats }) {
               <div className="mt-4 pt-4 border-t border-slate-50">
                 <p className="text-xs font-medium text-slate-500 flex items-center gap-1.5">
                    <span className={`w-1.5 h-1.5 rounded-full ${style.icon} bg-current opacity-40`} />
-                   {card.hint}
+                   {typeof card.hint === 'string' ? card.hint : card.hint}
                 </p>
               </div>
             </div>

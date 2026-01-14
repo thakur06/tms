@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react'
 import WeeklyTimeLog from '../components/WeeklyTimeLog'
 
 export default function TimeLog() {
-  const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [clients,setClients]= useState([]);
@@ -32,17 +31,8 @@ export default function TimeLog() {
     return entries
   })
 
-  // ✅ Fetch users from backend
+  // ✅ Fetch data from backend
   useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await fetch('http://localhost:4000/api/users')
-        const data = await res.json()
-        setUsers(data)
-      } catch (err) {
-        console.error('Failed to fetch users', err)
-      }
-    }
     const fetchProjects = async () => {
       try {
         const res = await fetch('http://localhost:4000/api/projects')
@@ -72,7 +62,6 @@ export default function TimeLog() {
       }
     }
 
-    fetchUsers()
     fetchProjects()
     fetchTasks()
     fetchClients()
@@ -81,9 +70,8 @@ export default function TimeLog() {
   return (
     <div className="w-full">
       <WeeklyTimeLog
-        tasks={tasks} // ✅ backend tasks
+        tasks={tasks}
         projects={projects}
-        users={users}              // ✅ backend users
         timeEntries={timeEntries}
         setTimeEntries={setTimeEntries}
         clients={clients}
