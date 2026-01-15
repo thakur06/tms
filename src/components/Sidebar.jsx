@@ -5,13 +5,16 @@ import {
   IoDocumentTextOutline, IoDocumentText,
   IoListOutline, IoList,
   IoBriefcaseOutline, IoBriefcase,
-  IoLogOutOutline
+  IoLogOutOutline,
+  IoCheckmarkCircleOutline, IoCheckmarkCircle,
+  IoCalendarOutline, IoCalendar,
+  IoPersonOutline, IoPerson
 } from 'react-icons/io5';
 import { useAuth } from '../context/AuthContext';
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
   const navLinks = [
     { path: '/dashboard', label: 'Dashboard', icon: IoHomeOutline, activeIcon: IoHome },
@@ -19,6 +22,9 @@ export default function Sidebar({ isOpen, onClose }) {
     { path: '/tasks', label: 'Tasks', icon: IoListOutline, activeIcon: IoList },
     { path: '/time-log', label: 'Time Log', icon: IoTimeOutline, activeIcon: IoTime },
     { path: '/reports', label: 'Reports', icon: IoDocumentTextOutline, activeIcon: IoDocumentText },
+    { path: '/my-submissions', label: 'My Submissions', icon: IoCalendarOutline, activeIcon: IoCalendar },
+    { path: '/approvals', label: 'Approvals', icon: IoCheckmarkCircleOutline, activeIcon: IoCheckmarkCircle, managerOnly: true },
+    { path: '/users', label: 'Users', icon: IoPersonOutline, activeIcon: IoPerson, managerOnly: true },
   ];
 
   const isActive = (path) => location.pathname === path || (path === '/dashboard' && location.pathname === '/');
@@ -53,7 +59,9 @@ export default function Sidebar({ isOpen, onClose }) {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {navLinks.map((link) => {
+            {navLinks
+              .filter(link => !link.managerOnly || user?.is_manager)
+              .map((link) => {
               const active = isActive(link.path);
               const Icon = active ? link.activeIcon : link.icon;
               

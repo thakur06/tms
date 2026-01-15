@@ -4,6 +4,9 @@ import Tasks from './pages/Tasks';
 import Projects from './pages/Projects';
 import TimeLog from './pages/TimeLog';
 import TimeReports from './pages/TimeReports';
+import TimesheetApprovalsPage from './pages/TimesheetApprovalsPage';
+import MyTimesheetStatus from './pages/MyTimesheetStatus';
+import UserManagement from './pages/UserManagement';
 import Header from './components/Header';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
@@ -38,6 +41,9 @@ function AppContent() {
         <Route path="/tasks" element={<Tasks />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/reports" element={<TimeReports />} />
+        <Route path="/approvals" element={<TimesheetApprovalsPage />} />
+        <Route path="/my-submissions" element={<MyTimesheetStatus />} />
+        <Route path="/users" element={<UserManagement />} />
       </Route>
 
       {/* 404 Not Found */}

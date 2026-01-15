@@ -137,9 +137,50 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
     }
   }
 
-  const handleSubmitTimesheet = () => {
-    console.log('Timesheet submitted:', timeEntries)
-    SubmitNotify();
+  const handleSubmitTimesheet = async () => {
+    try {
+      if (!user) {
+        toast.error('Please login to submit timesheet.');
+        return;
+      }
+
+      // Calculate week start and end dates
+      const weekStart = new Date(currentWeek);
+      const weekEnd = new Date(currentWeek);
+      weekEnd.setDate(weekStart.getDate() + 6);
+
+      const weekStartStr = weekStart.toISOString().split('T')[0];
+      const weekEndStr = weekEnd.toISOString().split('T')[0];
+
+      // Calculate total hours for the week
+      const totalMinutes = weeklyTotalMinutes;
+      const totalHours = (totalMinutes / 60).toFixed(2);
+
+      const token = localStorage.getItem('token');
+      const response = await fetch('http://localhost:4000/api/timesheets/submit', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          weekStartDate: weekStartStr,
+          weekEndDate: weekEndStr,
+          totalHours: parseFloat(totalHours)
+        })
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || 'Failed to submit timesheet');
+      }
+
+      SubmitNotify();
+      console.log('Timesheet submitted successfully');
+    } catch (err) {
+      console.error('Submit timesheet error:', err);
+      toast.error(err.message || 'Failed to submit timesheet');
+    }
   }
 
   const deleteTimeEntry = async (dateStr, entryId, entryIndex) => {
