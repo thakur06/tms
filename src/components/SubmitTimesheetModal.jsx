@@ -14,43 +14,43 @@ export default function SubmitTimesheetModal({ isOpen, onClose, weeklyTotal, wee
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Submit Timesheet">
-      <div className="space-y-4">
-        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-          <p className="text-sm text-gray-600 mb-2">Week Range:</p>
-          <p className="font-semibold text-gray-900">{weekRange}</p>
+      <div className="space-y-4 text-slate-300">
+        <div className="bg-white/5 rounded-xl p-4 border border-white/10">
+          <p className="text-xs text-slate-400 mb-1 uppercase tracking-wider font-bold">Week Range</p>
+          <p className="font-mono text-white text-lg">{weekRange}</p>
         </div>
 
-        <div className={`rounded-lg p-4 border-2 ${exceedsLimit ? 'bg-red-50 border-red-300' : 'bg-green-50 border-green-300'}`}>
-          <div className="flex items-center gap-2 mb-2">
+        <div className={`rounded-xl p-4 border ${exceedsLimit ? 'bg-red-500/10 border-red-500/30' : 'bg-emerald-500/10 border-emerald-500/30'}`}>
+          <div className="flex items-center gap-3 mb-2">
             {exceedsLimit ? (
-              <IoWarning className="w-5 h-5 text-red-600" />
+              <IoWarning className="w-6 h-6 text-red-400" />
             ) : (
-              <IoCheckmarkCircle className="w-5 h-5 text-green-600" />
+              <IoCheckmarkCircle className="w-6 h-6 text-emerald-400" />
             )}
-            <p className="font-semibold text-gray-900">Total Hours: {totalHours}h {weeklyTotal % 60}m</p>
+            <p className="font-bold text-white text-lg">Total Hours: {totalHours}h {weeklyTotal % 60}m</p>
           </div>
           {exceedsLimit ? (
-            <p className="text-sm text-red-700">
+            <p className="text-sm text-red-300">
               ⚠️ Warning: Your weekly hours exceed 40 hours. Please review your entries.
             </p>
           ) : (
-            <p className="text-sm text-green-700">✓ Your timesheet is within the 40-hour limit.</p>
+            <p className="text-sm text-emerald-300">✓ Your timesheet is within the 40-hour limit.</p>
           )}
         </div>
 
         <div className="flex gap-3 pt-4">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 border border-gray-300 bg-white text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all"
+            className="flex-1 ui-btn ui-btn-ghost border border-white/10 bg-white/5 hover:bg-white/10 text-slate-300"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className={`flex-1 px-4 py-2.5 rounded-lg font-semibold transition-all flex items-center justify-center gap-2 ${
+            className={`flex-1 ui-btn font-bold ${
               exceedsLimit
-                ? 'bg-red-500 hover:bg-red-600 text-white'
-                : 'bg-gradient-to-br from-indigo-500 to-cyan-400 hover:shadow-lg text-white'
+                ? 'ui-btn-danger'
+                : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 box-shadow'
             }`}
           >
             <IoCheckmarkCircle className="w-5 h-5" />

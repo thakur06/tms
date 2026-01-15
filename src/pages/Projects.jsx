@@ -161,139 +161,71 @@ export default function Projects() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-white">
-        <div className="max-w-[2000px] mx-auto p-6">
-          <div className="animate-pulse space-y-8">
-            {/* Header skeleton */}
-            <div className="flex justify-between items-center">
-              <div>
-                <div className="h-8 bg-slate-200 rounded w-48 mb-2"></div>
-                <div className="h-4 bg-slate-100 rounded w-64"></div>
-              </div>
-              <div className="h-10 bg-slate-200 rounded-lg w-32"></div>
-            </div>
-            
-            {/* Stats skeleton */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="bg-white border border-slate-200 rounded-lg p-4">
-                  <div className="h-4 bg-slate-100 rounded w-24 mb-3"></div>
-                  <div className="h-8 bg-slate-200 rounded w-16"></div>
-                </div>
-              ))}
-            </div>
-            
-            {/* Table skeleton */}
-            <div className="space-y-3">
-              <div className="h-12 bg-slate-100 rounded-lg"></div>
-              {[1, 2, 3, 4, 5].map(i => (
-                <div key={i} className="h-16 bg-slate-50 rounded-lg"></div>
-              ))}
-            </div>
-          </div>
-        </div>
+      <div className="flex justify-center items-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-4 border-indigo-500 border-t-transparent shadow-lg shadow-indigo-500/50"></div>
       </div>
     )
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-white">
+    <div className="space-y-6">
       <ToastContainer
         position="top-center"
         autoClose={2000}
         hideProgressBar
-        theme="light"
+        theme="dark"
         transition={Zoom}
         style={{ zIndex: 9999 }}
       />
 
-      <div className="max-w-[2000px] mx-auto p-4 sm:p-6">
-        {/* Header Section */}
-        <div className="mb-8">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-900">Projects</h1>
-              <p className="text-slate-600 mt-1">
-                Manage and track all active projects
-              </p>
-            </div>
+      {/* Stats Section */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="ui-card p-4 flex items-center gap-4">
+          <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
+            <IoBusinessOutline size={24} />
+          </div>
+          <div>
+            <p className="text-sm text-slate-400">Total Projects</p>
+            <p className="text-2xl font-bold text-white">{stats.total}</p>
+          </div>
+        </div>
 
+        <div className="ui-card p-4 flex items-center gap-4">
+          <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
+            <IoLocationOutline size={24} />
+          </div>
+          <div className="min-w-0">
+            <p className="text-sm text-slate-400">Top Location</p>
+            <p className="text-xl font-bold text-white truncate">{getTopLocation()}</p>
+          </div>
+        </div>
+
+        <div className="ui-card p-4 flex items-center gap-4">
+          <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
+            <IoCodeSlashOutline size={24} />
+          </div>
+          <div>
+            <p className="text-sm text-slate-400">Active Projects</p>
+            <p className="text-2xl font-bold text-white">{stats.active}</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="overflow-hidden">
+        <ProjectsList 
+          projects={projects} 
+          onDeleteProject={handleDeleteProject}
+          headerAction={
             <button
               onClick={() => setShowProjectModal(true)}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white text-sm font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-sm shadow-blue-100"
+              className="ui-btn ui-btn-primary w-full sm:w-auto"
             >
               <IoAddOutline size={18} />
               New Project
             </button>
-          </div>
-
-          {/* Stats Cards with Colors */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-white border border-blue-100 rounded-lg p-4 shadow-sm">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-blue-50 text-blue-600 rounded-lg">
-                  <IoBusinessOutline size={20} />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600">Total Projects</p>
-                  <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border border-emerald-100 rounded-lg p-4 shadow-sm">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-emerald-50 text-emerald-600 rounded-lg">
-                  <IoLocationOutline size={20} />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600">Top Location</p>
-                  <p className="text-lg font-medium text-slate-900 truncate">{getTopLocation()}</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white border border-amber-100 rounded-lg p-4 shadow-sm">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 bg-amber-50 text-amber-600 rounded-lg">
-                  <IoCodeSlashOutline size={20} />
-                </div>
-                <div>
-                  <p className="text-sm text-slate-600">Active Projects</p>
-                  <p className="text-2xl font-bold text-slate-900">{stats.active}</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main Content */}
-        <div className="bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden">
-          <ProjectsList 
-            projects={projects} 
-            onDeleteProject={handleDeleteProject}
-          />
-        </div>
-
-        {/* Empty State */}
-        {!isLoading && projects.length === 0 && (
-          <div className="text-center py-16">
-            <div className="w-20 h-20 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-full flex items-center justify-center mx-auto mb-6">
-              <IoBusinessOutline className="text-blue-500" size={32} />
-            </div>
-            <h3 className="text-xl font-semibold text-slate-900 mb-2">No projects yet</h3>
-            <p className="text-slate-600 mb-6 max-w-md mx-auto">
-              Start by creating your first project to organize work and track progress
-            </p>
-            <button
-              onClick={() => setShowProjectModal(true)}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-medium rounded-lg hover:from-blue-700 hover:to-indigo-700 transition-all shadow-md shadow-blue-100"
-            >
-              <IoAddOutline size={20} />
-              Create Your First Project
-            </button>
-          </div>
-        )}
+          }
+        />
       </div>
 
       {/* Create Project Modal */}

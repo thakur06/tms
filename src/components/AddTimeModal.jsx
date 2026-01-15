@@ -113,60 +113,76 @@ export default function AddTimeModal({
       isOpen={isOpen} 
       onClose={onClose} 
       title={
-        <div className="grid items-center grid-cols-3 w-full pr-8 z-9999"> 
-          {/* 1. Left Side: Date String */}
-          <div className="">
-            <span className="text-[10px] font-black uppercase text-slate-400 tracking-tight whitespace-nowrap">
-              {dateStr}
+        <div className="flex items-center justify-between w-full pr-8"> 
+          <div className="flex items-center gap-4">
+            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider hidden sm:block">
+              {isEditMode ? "Manage" : "New"}
             </span>
+            
+            <div className="h-4 w-[1px] bg-white/10 hidden sm:block"></div>
+
+            <div className="flex items-center gap-3">
+              <span className="text-lg font-black bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
+                {isEditMode ? "Edit Time" : "Add Time"}
+              </span>
+              <span className="text-[10px] font-mono bg-white/10 text-slate-300 px-2 py-0.5 rounded border border-white/5">
+                {dateStr}
+              </span>
+            </div>
           </div>
     
-          {/* 2. Middle: Save Button */}
-          <div className="justify-center items-center w-32">
+          <div className="flex items-center">
             <button
               onClick={validateAndSubmit}
               disabled={isSubmitting}
-              className="flex items-center gap-1.5 text-[10px] font-black uppercase tracking-[0.15em] text-white bg-indigo-600 px-4 py-1.5 rounded-full shadow-lg shadow-indigo-100 active:scale-95 transition-all disabled:opacity-50"
+              className="flex items-center ml-5 gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow-lg shadow-indigo-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitting ? (
-                <span className="animate-pulse">...</span>
+                 <div className="w-3 h-3 border-2 border-white/50 border-t-white rounded-full animate-spin" />
               ) : (
-                <>
-                  <IoCheckmarkCircle size={14} />
-                  {isEditMode ? "Update" : "Save"}
-                </>
+                <IoCheckmarkCircle size={16} />
               )}
+              {isEditMode ? "Update" : "Save"}
             </button>
           </div>
         </div>
       }
-      // Ensure this modal stays above app chrome even if global styles change
-      shellClassName="z-9999"
-      overlayClassName="z-9998"
+      shellClassName="z-[9999]"
+      overlayClassName="z-[9998]"
     >
-      <form onSubmit={validateAndSubmit} className="flex flex-col h-full max-h-[55vh] md:max-h-[65vh] px-1 pt-2 pb-4 overflow-y-auto no-scrollbar">
+      <form onSubmit={validateAndSubmit} className="flex flex-col h-full max-h-[55vh] md:max-h-[65vh] px-1 pt-2 pb-4 overflow-y-auto custom-scrollbar">
         <div className="space-y-4 flex-1">
           {/* TASK */}
           <div className="relative" ref={taskRef}>
             <div className="flex justify-between items-center mb-1">
-              <label className="text-[10px] font-black text-slate-500 uppercase">Task <span className="text-rose-500">*</span></label>
-              <select className="text-[9px] font-black bg-slate-100 rounded px-1 h-6 outline-none border border-transparent focus:border-indigo-300" value={selectedDept} onChange={(e) => setSelectedDept(e.target.value)}>
+              <label className="ui-label">Task <span className="text-rose-500">*</span></label>
+              <select 
+                className="text-[9px] font-black bg-slate-800 text-slate-300 rounded px-1 h-6 outline-none border border-slate-700 focus:border-indigo-500" 
+                value={selectedDept} 
+                onChange={(e) => setSelectedDept(e.target.value)}
+              >
                 <option value="all">ALL DEPTS</option>
                 {[...new Set(tasks.map(t => t.task_dept))].filter(Boolean).map(d => <option key={d} value={d}>{d}</option>)}
               </select>
             </div>
             <div className="relative">
-              <input className="w-full pl-9 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all"
-                placeholder="Select Task..." value={search.task} onFocus={() => setDropdowns(p => ({ ...p, task: true }))} onChange={(e) => setSearch(p => ({ ...p, task: e.target.value }))} />
-              <IoFolder className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+              <input 
+                className="ui-input pl-9 font-bold"
+                placeholder="Select Task..." 
+                value={search.task} 
+                onFocus={() => setDropdowns(p => ({ ...p, task: true }))} 
+                onChange={(e) => setSearch(p => ({ ...p, task: e.target.value }))} 
+              />
+              <IoFolder className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
             </div>
             {dropdowns.task && (
-              <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-48 overflow-y-auto z-50">
+              <div className="absolute top-full left-0 w-full mt-1 bg-[#1e293b] border border-slate-700 rounded-xl shadow-xl max-h-48 overflow-y-auto z-50">
                 {fTasks.map(t => (
-                  <div key={t.task_id} className="p-3 hover:bg-slate-50 cursor-pointer border-b border-slate-100 text-xs font-bold" onClick={() => handleSelect('task', t.task_name)}>
+                  <div key={t.task_id} className="p-3 hover:bg-slate-800 text-slate-300 cursor-pointer border-b border-slate-700 last:border-0 text-xs font-bold" onClick={() => handleSelect('task', t.task_name)}>
                     {t.task_name}
                   </div>
                 ))}
+                {fTasks.length === 0 && <div className="p-3 text-slate-500 text-xs italic">No tasks found</div>}
               </div>
             )}
           </div>
@@ -174,13 +190,18 @@ export default function AddTimeModal({
           {/* PROJECT & CLIENT */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="relative" ref={projectRef}>
-              <label className="text-[10px] font-black text-slate-500 uppercase mb-1 block">Project <span className="text-rose-500">*</span></label>
-              <input className="w-full px-3 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all"
-                placeholder="Search..." value={search.project} onFocus={() => setDropdowns(p => ({ ...p, project: true }))} onChange={(e) => setSearch(p => ({ ...p, project: e.target.value }))} />
+              <label className="ui-label block">Project <span className="text-rose-500">*</span></label>
+              <input 
+                className="ui-input font-bold"
+                placeholder="Search..." 
+                value={search.project} 
+                onFocus={() => setDropdowns(p => ({ ...p, project: true }))} 
+                onChange={(e) => setSearch(p => ({ ...p, project: e.target.value }))} 
+              />
               {dropdowns.project && (
-                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-40 overflow-y-auto z-50">
+                <div className="absolute top-full left-0 w-full mt-1 bg-[#1e293b] border border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto z-50">
                   {fProjects.map(p => (
-                    <div key={p.id} className="p-2.5 hover:bg-indigo-50 text-xs font-bold cursor-pointer" onClick={() => handleSelect('project', p.name, p.code)}>
+                    <div key={p.id} className="p-2.5 hover:bg-slate-800 text-slate-300 text-xs font-bold cursor-pointer" onClick={() => handleSelect('project', p.name, p.code)}>
                       {p.name} <span className="text-[9px] opacity-40 block">{p.code}</span>
                     </div>
                   ))}
@@ -189,13 +210,18 @@ export default function AddTimeModal({
             </div>
 
             <div className="relative" ref={clientRef}>
-              <label className="text-[10px] font-black text-slate-500 uppercase mb-1 block">Client <span className="text-rose-500">*</span></label>
-              <input className="w-full px-3 py-3 bg-white border border-slate-200 rounded-xl text-sm font-bold outline-none focus:border-indigo-600 focus:ring-1 focus:ring-indigo-600 transition-all"
-                placeholder="Search..." value={search.client} onFocus={() => setDropdowns(p => ({ ...p, client: true }))} onChange={(e) => setSearch(p => ({ ...p, client: e.target.value }))} />
+              <label className="ui-label block">Client <span className="text-rose-500">*</span></label>
+              <input 
+                className="ui-input font-bold"
+                placeholder="Search..." 
+                value={search.client} 
+                onFocus={() => setDropdowns(p => ({ ...p, client: true }))} 
+                onChange={(e) => setSearch(p => ({ ...p, client: e.target.value }))} 
+              />
               {dropdowns.client && (
-                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-slate-200 rounded-xl shadow-lg max-h-40 overflow-y-auto z-50">
+                <div className="absolute top-full left-0 w-full mt-1 bg-[#1e293b] border border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto z-50">
                   {fClients.map(c => (
-                    <div key={c.id} className="p-2.5 hover:bg-indigo-50 text-xs font-bold cursor-pointer" onClick={() => handleSelect('client', c.name)}>
+                    <div key={c.id} className="p-2.5 hover:bg-slate-800 text-slate-300 text-xs font-bold cursor-pointer" onClick={() => handleSelect('client', c.name)}>
                       {c.name}
                     </div>
                   ))}
@@ -207,17 +233,17 @@ export default function AddTimeModal({
           {/* REGION & TIME */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col">
-              <label className="text-[10px] font-black text-slate-500 uppercase flex items-center gap-1 mb-1 tracking-tight">
+              <label className="ui-label flex items-center gap-1 tracking-tight">
                 <IoLocation className="text-indigo-500" /> Region <span className="text-rose-500">*</span>
               </label>
-              <div className="flex bg-slate-100 p-1 rounded-xl border border-slate-200 h-[52px]">
+              <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-700 h-[42px]">
                 {['US', 'IND'].map(c => (
                   <button 
                     key={c} 
                     type="button" 
                     onClick={() => setFormData(p => ({ ...p, country: c }))} 
                     className={`flex-1 text-[10px] font-black rounded-lg transition-all ${
-                      formData.country === c ? "bg-white text-indigo-600 shadow-sm" : "text-slate-400"
+                      formData.country === c ? "bg-white/10 text-emerald-400 shadow-sm border border-emerald-500/30" : "text-slate-500 hover:text-slate-300"
                     }`}
                   >
                     {c}
@@ -227,40 +253,46 @@ export default function AddTimeModal({
             </div>
 
             <div className="flex flex-col">
-              <label className="text-[10px] font-black text-slate-500 uppercase mb-1 tracking-tight">
+              <label className="ui-label mb-1 tracking-tight">
                 Duration <span className="text-rose-500">*</span>
               </label>
-              <div className="flex items-center gap-1 bg-slate-900 px-2 rounded-xl h-[52px]">
-                <div className="flex-1 flex flex-col items-center">
+              <div className="flex items-center gap-1 bg-slate-900 px-2 rounded-xl h-[42px] border border-slate-700">
+                <div className="flex-1 flex flex-col items-center justify-center">
                   <input 
                     type="text" 
                     inputMode="numeric" 
-                    className="w-full bg-transparent text-center text-white text-lg font-black outline-none border-b border-slate-700 focus:border-indigo-400 leading-none" 
+                    className="w-full bg-transparent text-center text-white text-lg font-black outline-none focus:text-indigo-400 leading-none h-6" 
                     placeholder="0" 
                     value={formData.hours} 
                     onChange={(e) => handleTimeChange('hours', e.target.value)} 
                   />
-                  <p className="text-[7px] text-slate-500 font-bold mt-1 uppercase">Hrs</p>
+                  <p className="text-[7px] text-slate-500 font-bold uppercase leading-none mt-0.5">Hrs</p>
                 </div>
                 
-                <span className="text-slate-600 font-bold self-center pb-3">:</span>
+                <span className="text-slate-600 font-bold self-center pb-2">:</span>
                 
-                <div className="flex-1 flex flex-col items-center">
+                <div className="flex-1 flex flex-col items-center justify-center">
                   <input 
                     type="text" 
                     inputMode="numeric" 
-                    className="w-full bg-transparent text-center text-white text-lg font-black outline-none border-b border-slate-700 focus:border-indigo-400 leading-none" 
+                    className="w-full bg-transparent text-center text-white text-lg font-black outline-none focus:text-indigo-400 leading-none h-6" 
                     placeholder="00" 
                     value={formData.minutes} 
                     onChange={(e) => handleTimeChange('minutes', e.target.value)} 
                   />
-                  <p className="text-[7px] text-slate-500 font-bold mt-1 uppercase">Min</p>
+                  <p className="text-[7px] text-slate-500 font-bold uppercase leading-none mt-0.5">Min</p>
                 </div>
               </div>
             </div>
           </div>
 
-          <textarea className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-indigo-600 transition-all resize-none" rows="2" placeholder="Remarks (Optional)..." value={formData.remarks} onChange={(e) => setFormData(p => ({ ...p, remarks: e.target.value }))} />
+          <textarea 
+            className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 transition-all resize-none text-slate-300" 
+            rows="2" 
+            placeholder="Remarks (Optional)..." 
+            value={formData.remarks} 
+            onChange={(e) => setFormData(p => ({ ...p, remarks: e.target.value }))} 
+          />
         </div>
       </form>
     </Modal>

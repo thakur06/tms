@@ -180,26 +180,26 @@ const Login = () => {
     switch (view) {
       case 'login':
         return (
-          <div className="animate-in fade-in slide-in-from-right duration-500">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Welcome Back</h2>
-            <p className="text-gray-500 mb-8">Please enter your details to sign in.</p>
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+            <h2 className="text-3xl font-bold text-white mb-2 text-center">Welcome Back</h2>
+            <p className="text-slate-400 mb-8 text-center">Please enter your details to sign in.</p>
             
             <form className="space-y-5" onSubmit={handleLogin}>
               {info && (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
+                <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl text-sm backdrop-blur-sm">
                   {info}
                 </div>
               )}
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm backdrop-blur-sm">
                   {error}
                 </div>
               )}
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Email Address</label>
+                <label className="ui-label">Email Address</label>
                 <div className="relative">
-                  <FiMail className="absolute top-3.5 left-4 text-gray-400" />
+                  <FiMail className="absolute top-3.5 left-4 text-slate-500" />
                   <input 
                     type="email" 
                     placeholder="john@example.com" 
@@ -207,32 +207,32 @@ const Login = () => {
                     onChange={(e) => setEmail(e.target.value)}
                     autoComplete='off'
                     required
-                    className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+                    className="ui-input pl-11" 
                   />
                 </div>
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Password</label>
+                <label className="ui-label">Password</label>
                 <div className="relative">
-                  <FiLock className="absolute top-3.5 left-4 text-gray-400" />
+                  <FiLock className="absolute top-3.5 left-4 text-slate-500" />
                   <input 
                     type="password" 
                     placeholder="••••••••" 
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     required
-                    className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all" 
+                    className="ui-input pl-11" 
                   />
                 </div>
               </div>
 
               <div className="flex items-center justify-between text-sm">
-                <label className="flex items-center text-gray-600 cursor-pointer">
-                  <input type="checkbox" className="mr-2 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                <label className="flex items-center text-slate-400 cursor-pointer hover:text-white transition-colors">
+                  <input type="checkbox" className="mr-2 rounded border-white/10 bg-white/5 text-indigo-500 focus:ring-indigo-500/50" />
                   Remember me
                 </label>
-                <button type="button" onClick={() => setView('forgot')} className="font-semibold text-indigo-600 hover:text-indigo-500">
+                <button type="button" onClick={() => setView('forgot')} className="font-semibold text-indigo-400 hover:text-indigo-300 transition-colors">
                   Forgot password?
                 </button>
               </div>
@@ -240,7 +240,7 @@ const Login = () => {
               <button 
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg transition-all transform active:scale-[0.98]"
+                className="w-full ui-btn ui-btn-primary shadow-indigo-500/20"
               >
                 {loading ? 'Signing in...' : 'Sign In'}
               </button>
@@ -251,37 +251,37 @@ const Login = () => {
       case 'forgot':
         return (
           <div className="animate-in fade-in slide-in-from-right duration-500">
-            <button onClick={() => setView('login')} className="flex items-center text-sm text-gray-500 hover:text-indigo-600 mb-6 transition-colors">
+            <button onClick={() => setView('login')} className="flex items-center text-sm text-slate-400 hover:text-white mb-6 transition-colors">
               <FiArrowLeft className="mr-2" /> Back to Login
             </button>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Reset Password</h2>
-            <p className="text-gray-500 mb-8">Enter your email and we'll send you an OTP code.</p>
+            <h2 className="text-3xl font-bold text-white mb-2 text-center">Reset Password</h2>
+            <p className="text-slate-400 mb-8 text-center">Enter your email and we'll send you an OTP code.</p>
             
             <div className="space-y-6">
               {info && (
-                <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm">
+                <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl text-sm">
                   {info}
                 </div>
               )}
               {error && (
-                <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm">
+                <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm">
                   {error}
                 </div>
               )}
               <div className="relative">
-                <FiMail className="absolute top-3.5 left-4 text-gray-400" />
+                <FiMail className="absolute top-3.5 left-4 text-slate-500" />
                 <input 
                   type="email" 
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="name@company.com" 
-                  className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none" 
+                  className="ui-input pl-11" 
                 />
               </div>
               <button
                 onClick={handleSendOtp}
                 disabled={resendLoading}
-                className="w-full py-3.5 bg-indigo-600 disabled:bg-indigo-400 text-white font-bold rounded-xl shadow-lg hover:bg-indigo-700 transition-all"
+                className="w-full ui-btn ui-btn-primary"
               >
                 {resendLoading ? 'Sending...' : 'Send OTP Code'}
               </button>
@@ -292,19 +292,19 @@ const Login = () => {
       case 'otp':
         return (
           <div className="animate-in fade-in slide-in-from-right duration-500 text-center">
-            <div className="inline-flex p-4 bg-indigo-50 text-indigo-600 rounded-full mb-6">
+            <div className="inline-flex p-4 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full mb-6 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
               <FiShield size={32} />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Verify Email</h2>
-            <p className="text-gray-500 mb-8">We've sent a 6-digit code to <span className="text-gray-900 font-medium">{email || 'your email'}</span></p>
+            <h2 className="text-3xl font-bold text-white mb-2">Verify Email</h2>
+            <p className="text-slate-400 mb-8">We've sent a 6-digit code to <span className="text-white font-medium">{email || 'your email'}</span></p>
 
             {info && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm mb-6 text-left">
+              <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl text-sm mb-6 text-left">
                 {info}
               </div>
             )}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-6 text-left">
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm mb-6 text-left">
                 {error}
               </div>
             )}
@@ -333,7 +333,7 @@ const Login = () => {
                       e.target.previousSibling.focus();
                     }
                   }}
-                  className="w-12 h-14 text-center text-xl font-bold border-2 border-gray-100 rounded-xl focus:border-indigo-500 outline-none transition-all bg-gray-50"
+                  className="w-12 h-14 text-center text-xl font-bold bg-[#030712]/50 border border-white/10 rounded-xl focus:border-indigo-500 focus:shadow-[0_0_15px_rgba(99,102,241,0.3)] outline-none transition-all text-white"
                 />
               ))}
             </div>
@@ -341,16 +341,16 @@ const Login = () => {
             <button
               onClick={handleVerifyOtp}
               disabled={otpLoading}
-              className="w-full py-3.5 bg-green-600 disabled:bg-green-400 text-white font-bold rounded-xl shadow-lg hover:bg-green-700 transition-all flex items-center justify-center gap-2"
+              className="w-full ui-btn bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-500/20 border-none"
             >
               <FiCheckCircle /> {otpLoading ? 'Verifying...' : 'Verify & Continue'}
             </button>
-            <p className="mt-6 text-sm text-gray-500">
+            <p className="mt-6 text-sm text-slate-500">
               Didn't get the code?{' '}
               <button
                 disabled={resendCooldown > 0 || resendLoading}
                 onClick={handleSendOtp}
-                className={`font-bold hover:underline ${resendCooldown > 0 ? 'text-gray-400 cursor-not-allowed' : 'text-indigo-600'}`}
+                className={`font-bold hover:underline ${resendCooldown > 0 ? 'text-slate-600 cursor-not-allowed' : 'text-indigo-400'}`}
               >
                 {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend'}
               </button>
@@ -361,49 +361,49 @@ const Login = () => {
       case 'reset':
         return (
           <div className="animate-in fade-in slide-in-from-right duration-500">
-            <button onClick={() => setView('login')} className="flex items-center text-sm text-gray-500 hover:text-indigo-600 mb-6 transition-colors">
+            <button onClick={() => setView('login')} className="flex items-center text-sm text-slate-400 hover:text-white mb-6 transition-colors">
               <FiArrowLeft className="mr-2" /> Back to Login
             </button>
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Set New Password</h2>
-            <p className="text-gray-500 mb-8">Create a new password for your account.</p>
+            <h2 className="text-3xl font-bold text-white mb-2 text-center">Set New Password</h2>
+            <p className="text-slate-400 mb-8 text-center">Create a new password for your account.</p>
 
             {info && (
-              <div className="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-xl text-sm mb-4">
+              <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl text-sm mb-4">
                 {info}
               </div>
             )}
             {error && (
-              <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-xl text-sm mb-4">
+              <div className="bg-red-500/10 border border-red-500/20 text-red-400 px-4 py-3 rounded-xl text-sm mb-4">
                 {error}
               </div>
             )}
 
             <form className="space-y-5" onSubmit={handleResetPassword}>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">New Password</label>
+                <label className="ui-label">New Password</label>
                 <div className="relative">
-                  <FiLock className="absolute top-3.5 left-4 text-gray-400" />
+                  <FiLock className="absolute top-3.5 left-4 text-slate-500" />
                   <input
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                    className="ui-input pl-11"
                     required
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1.5">Confirm Password</label>
+                <label className="ui-label">Confirm Password</label>
                 <div className="relative">
-                  <FiLock className="absolute top-3.5 left-4 text-gray-400" />
+                  <FiLock className="absolute top-3.5 left-4 text-slate-500" />
                   <input
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-11 pr-4 py-3 bg-white border border-gray-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                    className="ui-input pl-11"
                     required
                   />
                 </div>
@@ -412,7 +412,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full py-3.5 bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-400 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg transition-all transform active:scale-[0.98]"
+                className="w-full ui-btn ui-btn-primary"
               >
                 {loading ? 'Saving...' : 'Reset Password'}
               </button>
@@ -424,44 +424,29 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex bg-white">
-      {/* LEFT SIDE: Visual Panel (Hidden on mobile) */}
-      <div className="hidden lg:flex lg:w-1/2 bg-indigo-600 relative overflow-hidden items-center justify-center p-12">
-        <div className="absolute inset-0 opacity-20 bg-[url('/fibre.png')]"></div>
-        <div className="relative z-10 max-w-lg text-center">
-          <h1 className="text-5xl font-extrabold text-white mb-6 leading-tight">
-            Streamline your workflow with us.
-          </h1>
-          <p className="text-indigo-100 text-lg mb-8">
-            Join 10,000+ teams managing their projects with our modern interface.
-          </p>
-          <div className="bg-white/10 backdrop-blur-md rounded-2xl p-6 border border-white/20">
-            <p className="text-white italic text-sm">"The best UI kit we've ever used. Simple, clean, and fast."</p>
-            <p className="text-indigo-200 text-xs mt-2">— Sarah Jenkins, CEO at TechFlow</p>
-          </div>
-        </div>
-        {/* Decorative Circles */}
-        <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500 rounded-full blur-3xl opacity-50"></div>
-        <div className="absolute -top-24 -right-24 w-64 h-64 bg-indigo-400 rounded-full blur-3xl opacity-50"></div>
+    <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden">
+      {/* Background Ambience */}
+      <div className="absolute inset-0 bg-[#030712]">
+        <div className="absolute top-0 -left-40 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
+        <div className="absolute bottom-0 -right-40 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
+        <div className="absolute inset-0 bg-[url('/fibre.png')] opacity-10 mix-blend-overlay"></div>
       </div>
 
-      {/* RIGHT SIDE: Form Panel */}
-      <div className="w-full lg:w-1/2 flex flex-col justify-center items-center px-8 md:px-16 lg:px-24 py-12">
-        <div className="w-full max-w-md">
-          {/* Logo Placeholder */}
-          <div className="flex items-center gap-2 mb-12 lg:hidden">
-            <div className='w-full shadow-xs shadow-fuchsia-100 p-4 ch'>
-          <img className="" src='./logo.png'/></div>
-            {/* <span className="text-xl font-bold tracking-tight">BrandName</span> */}
-          </div>
-
-          {renderForm()}
-
-          {/* Bottom Link */}
-          {/* <div className="mt-10 text-center text-sm text-gray-500">
-            New to our platform? <button className="text-indigo-600 font-bold hover:underline">Create an account</button>
-          </div> */}
+      <div className="w-full max-w-md relative z-10">
+        <div className="text-center mb-8">
+           <img className="h-16 mx-auto mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" src='./fav.png' alt="Logo"/>
+           <h1 className="text-2xl font-bold tracking-tight text-white/90">Biogas Engineering</h1>
         </div>
+
+        <div className="ui-card p-1">
+          <div className="bg-[#0b1221]/80 backdrop-blur-xl rounded-[1.2rem] p-6 sm:p-10 border border-white/5 shadow-2xl">
+            {renderForm()}
+          </div>
+        </div>
+        
+        <p className="text-center text-slate-500 text-xs mt-8">
+          &copy; {new Date().getFullYear()} Biogas Engineering. All rights reserved.
+        </p>
       </div>
     </div>
   );

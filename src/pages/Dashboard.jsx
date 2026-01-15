@@ -292,33 +292,33 @@ export default function Dashboard() {
   }, [analytics, projects.length, tasks.length]);
 
   const CHART_COLORS = {
-    primary: "#6366f1",
-    secondary: "#8b5cf6",
-    success: "#10b981",
-    warning: "#f59e0b",
-    danger: "#ef4444",
-    info: "#06b6d4",
-    indigo: "#4f46e5",
-    purple: "#7c3aed",
+    primary: "#818cf8", // Indigo-400
+    secondary: "#c084fc", // Purple-400
+    success: "#34d399", // Emerald-400
+    warning: "#fbbf24", // Amber-400
+    danger: "#f87171", // Rose-400
+    info: "#22d3ee", // Cyan-400
+    indigo: "#818cf8",
+    purple: "#c084fc",
   };
 
   const PIE_COLORS = [
-    // CHART_COLORS.primary,
-    // CHART_COLORS.secondary,
     CHART_COLORS.success,
     CHART_COLORS.warning,
     CHART_COLORS.danger,
     CHART_COLORS.info,
+    CHART_COLORS.primary,
+    CHART_COLORS.secondary,
   ];
 
   const CustomTooltip = ({ active, payload, label }) => {
     if (active && payload && payload.length) {
       return (
-        <div className="bg-white p-3 rounded-lg shadow-lg border border-slate-200">
-          <p className="text-xs font-bold text-slate-500 mb-1">{label}</p>
+        <div className="bg-[#1e293b] p-3 rounded-xl shadow-xl border border-white/10 backdrop-blur-md">
+          <p className="text-xs font-bold text-slate-400 mb-1">{label}</p>
           {payload.map((entry, index) => (
-            <p key={index} className="text-sm font-bold text-slate-800">
-              {entry.name}: <span className="text-indigo-600">{entry.value}h</span>
+            <p key={index} className="text-sm font-bold text-white">
+              {entry.name}: <span style={{ color: entry.color || CHART_COLORS.primary }}>{entry.value}h</span>
             </p>
           ))}
         </div>
@@ -329,248 +329,214 @@ export default function Dashboard() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6 lg:p-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="animate-pulse">
-            {/* Header skeleton */}
-            <div className="h-8 bg-slate-200 rounded-lg w-48 mb-6"></div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="bg-white rounded-2xl p-5 shadow-sm">
-                  <div className="h-4 bg-slate-200 rounded w-24 mb-3"></div>
-                  <div className="h-8 bg-slate-200 rounded w-16 mb-2"></div>
-                  <div className="h-3 bg-slate-100 rounded w-32"></div>
-                </div>
-              ))}
-            </div>
-          </div>
+      <div className="space-y-6 animate-pulse">
+        <div className="h-48 bg-white/5 rounded-3xl w-full mb-6"></div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-white/5 rounded-3xl h-40"></div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 bg-white/5 rounded-3xl h-80"></div>
+          <div className="bg-white/5 rounded-3xl h-80"></div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6 lg:p-8">
+    <div className="space-y-8 pb-10">
       <ToastContainer
         position="top-right"
         autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={true}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
+        theme="dark"
       />
 
-      <div className="max-w-7xl mx-auto space-y-6">
-        {/* Header Section */}
-        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 md:p-8 shadow-lg border border-white/20">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-            <div className="flex-1">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-2 bg-indigo-100 rounded-xl">
-                  <IoAnalyticsOutline className="text-indigo-600" size={24} />
-                </div>
-                <div>
-                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-                    Welcome back, {user?.name?.split(' ')[0] || 'User'}
-                  </p>
-                  <h1 className="text-2xl md:text-3xl font-bold text-slate-900 mt-1">
-                    Analytics Dashboard
-                  </h1>
-                </div>
+      {/* Header Section */}
+      <div className="relative overflow-hidden rounded-3xl p-8 border border-white/10 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 backdrop-blur-2xl">
+        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-3">
+              <div className="p-2.5 bg-indigo-500/20 rounded-xl border border-indigo-500/30">
+                <IoAnalyticsOutline className="text-indigo-400" size={24} />
               </div>
-              <p className="text-slate-600 max-w-2xl">
-                Real-time insights into your projects, time tracking, and productivity metrics.
+              <h1 className="text-3xl font-black text-white tracking-tight">
+                Analytics Dashboard
+              </h1>
+            </div>
+            <p className="text-slate-400 max-w-2xl text-lg">
+              Real-time insights into your projects, time tracking, and productivity metrics.
+            </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              to="/time-log"
+              className="ui-btn ui-btn-primary"
+            >
+              <IoCalendarOutline size={18} />
+              Time Log
+            </Link>
+            <button
+              onClick={() => window.location.reload()}
+              className="ui-btn ui-btn-secondary"
+            >
+              Refresh Data
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Overview */}
+      <StatsCards cards={cards} />
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Daily Hours Chart */}
+        <div className="lg:col-span-2 ui-card">
+          <div className="ui-card-header">
+            <div>
+              <h3 className="ui-card-title">Daily Logged Hours</h3>
+              <p className="text-sm text-slate-400 mt-1">
+                Last 14 days • Avg: <span className="text-white font-mono">{formatTime(Math.round(analytics.avgDailyMinutes))}</span>
               </p>
             </div>
-
-            <div className="flex flex-col sm:flex-row gap-3">
-              <Link
-                to="/time-log"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100 hover:shadow-xl active:scale-[0.98]"
-              >
-                <IoCalendarOutline size={18} />
-                Time Log
-              </Link>
-              <button
-                onClick={() => window.location.reload()}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-white text-slate-700 font-semibold rounded-xl hover:bg-slate-50 transition-all border border-slate-200 active:scale-[0.98]"
-              dis>
-                Refresh Data
-              </button>
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+              <div className="w-2.5 h-2.5 rounded-full bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.5)]"></div>
+              <span className="text-sm font-semibold text-indigo-300">Hours</span>
             </div>
+          </div>
+          <div className="ui-card-body h-[320px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={analytics.dailySeries}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
+                <XAxis 
+                  dataKey="day" 
+                  tick={{ fill: "#94a3b8", fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  dy={10}
+                />
+                <YAxis 
+                  tick={{ fill: "#94a3b8", fontSize: 12 }}
+                  axisLine={false}
+                  tickLine={false}
+                  dx={-10}
+                />
+                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 2 }} />
+                <Line 
+                  type="monotone" 
+                  dataKey="hours" 
+                  stroke={CHART_COLORS.primary}
+                  strokeWidth={3}
+                  dot={{ r: 4, fill: '#0f172a', stroke: CHART_COLORS.primary, strokeWidth: 2 }}
+                  activeDot={{ r: 6, fill: CHART_COLORS.primary, stroke: '#fff', strokeWidth: 2 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Stats Overview */}
-        <StatsCards cards={cards} />
-
-        {/* Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Daily Hours Chart */}
-          <div className="lg:col-span-2 bg-white rounded-2xl p-5 shadow-lg border border-slate-200">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Daily Logged Hours
-                </h3>
-                <p className="text-sm text-slate-500">
-                  Last 14 days • Avg: {formatTime(Math.round(analytics.avgDailyMinutes))}
-                </p>
-              </div>
-              <div className="flex items-center gap-2 mt-2 sm:mt-0">
-                <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-50 rounded-lg">
-                  <div className="w-3 h-3 rounded-full bg-indigo-500"></div>
-                  <span className="text-sm font-semibold text-indigo-700">Hours</span>
-                </div>
-              </div>
-            </div>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={analytics.dailySeries}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis 
-                    dataKey="day" 
-                    tick={{ fill: "#64748b", fontSize: 12 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    tick={{ fill: "#64748b", fontSize: 12 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip content={<CustomTooltip />} />
-                  <Line 
-                    type="monotone" 
-                    dataKey="hours" 
-                    stroke={CHART_COLORS.primary}
-                    strokeWidth={3}
-                    dot={{ r: 4, fill: CHART_COLORS.primary }}
-                    activeDot={{ r: 6, fill: CHART_COLORS.primary }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+        {/* Location Distribution */}
+        <div className="ui-card">
+          <div className="ui-card-header">
+            <div>
+              <h3 className="ui-card-title">Work by Location</h3>
+              <p className="text-sm text-slate-400 mt-1">Last 30 days distribution</p>
             </div>
           </div>
+          <div className="ui-card-body h-[320px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie
+                  data={analytics.locationSplit}
+                  dataKey="hours"
+                  nameKey="name"
+                  innerRadius={70}
+                  outerRadius={100}
+                  paddingAngle={4}
+                  stroke="none"
+                >
+                  {analytics.locationSplit.map((_, idx) => (
+                    <Cell 
+                      key={idx} 
+                      fill={PIE_COLORS[idx % PIE_COLORS.length]} 
+                    />
+                  ))}
+                </Pie>
+                <Tooltip content={<CustomTooltip />} />
+                <Legend 
+                  verticalAlign="bottom"
+                  height={36}
+                  iconType="circle"
+                  iconSize={8}
+                  formatter={(value) => <span className="text-slate-300 text-xs ml-1">{value}</span>}
+                />
+              </PieChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
 
-          {/* Location Distribution */}
-          <div className="bg-white rounded-2xl p-5 shadow-lg border border-slate-200">
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-1">
-                Work by Location
-              </h3>
-              <p className="text-sm text-slate-500">
-                Last 30 days distribution
-              </p>
+      {/* Projects & Clients Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Top Projects */}
+        <div className="lg:col-span-2 ui-card">
+          <div className="ui-card-header">
+            <div>
+              <h3 className="ui-card-title">Top Projects</h3>
+              <p className="text-sm text-slate-400 mt-1">By hours logged in last 30 days</p>
             </div>
-            <div className="h-[300px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <PieChart>
-                  <Pie
-                    data={analytics.locationSplit}
-                    dataKey="hours"
-                    nameKey="name"
-                    innerRadius={60}
-                    outerRadius={100}
-                    paddingAngle={2}
-                  >
-                    {analytics.locationSplit.map((_, idx) => (
-                      <Cell 
-                        key={idx} 
-                        fill={PIE_COLORS[idx % PIE_COLORS.length]} 
-                        stroke="#fff"
-                        strokeWidth={2}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip 
-                    formatter={(value) => [`${value}h`, "Hours"]}
-                    contentStyle={{
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                    }}
-                  />
-                  <Legend 
-                    verticalAlign="bottom"
-                    height={36}
-                    iconType="circle"
-                    iconSize={10}
-                  />
-                </PieChart>
-              </ResponsiveContainer>
+            <div className="ui-chip neutral">
+              {analytics.topProjects.length} projects
             </div>
+          </div>
+          <div className="ui-card-body h-[350px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={analytics.topProjects} layout="vertical" margin={{ left: 20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
+                <XAxis type="number" hide />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  tick={{ fill: "#cbd5e1", fontSize: 12, fontWeight: 500 }}
+                  axisLine={false}
+                  tickLine={false}
+                  width={120}
+                />
+                <Tooltip 
+                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
+                  content={<CustomTooltip />}
+                />
+                <Bar 
+                  dataKey="hours" 
+                  fill={CHART_COLORS.success}
+                  radius={[0, 4, 4, 0]}
+                  barSize={20}
+                >
+                  {analytics.topProjects.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={index % 2 === 0 ? CHART_COLORS.indigo : CHART_COLORS.purple} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
           </div>
         </div>
 
-        {/* Projects & Clients Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Top Projects */}
-          <div className="lg:col-span-2 bg-white rounded-2xl p-5 shadow-lg border border-slate-200">
-            <div className="flex items-center justify-between mb-6">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Top Projects
-                </h3>
-                <p className="text-sm text-slate-500">
-                  By hours logged in last 30 days
-                </p>
-              </div>
-              <div className="text-sm text-slate-500 font-semibold">
-                {analytics.topProjects.length} projects
-              </div>
-            </div>
-            <div className="h-[320px]">
-              <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={analytics.topProjects}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
-                  <XAxis 
-                    dataKey="name" 
-                    tick={{ fill: "#64748b", fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <YAxis 
-                    tick={{ fill: "#64748b", fontSize: 11 }}
-                    axisLine={false}
-                    tickLine={false}
-                  />
-                  <Tooltip 
-                    formatter={(value) => [`${value}h`, "Hours"]}
-                    contentStyle={{
-                      borderRadius: '8px',
-                      border: '1px solid #e2e8f0',
-                    }}
-                  />
-                  <Bar 
-                    dataKey="hours" 
-                    fill={CHART_COLORS.success}
-                    radius={[6, 6, 0, 0]}
-                    maxBarSize={40}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+        {/* Top Clients */}
+        <div className="ui-card">
+          <div className="ui-card-header">
+            <div>
+              <h3 className="ui-card-title">Top Clients</h3>
+              <p className="text-sm text-slate-400 mt-1">Hours distribution by client</p>
             </div>
           </div>
-
-          {/* Top Clients */}
-          <div className="bg-white rounded-2xl p-5 shadow-lg border border-slate-200">
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-slate-900 mb-1">
-                Top Clients
-              </h3>
-              <p className="text-sm text-slate-500">
-                Hours distribution by client
-              </p>
-            </div>
-            <div className="space-y-4 max-h-[320px] overflow-y-auto pr-2">
+          <div className="ui-card-body">
+            <div className="space-y-5 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
               {analytics.topClients.length === 0 ? (
-                <div className="text-center py-8">
-                  <IoBusinessOutline className="mx-auto text-slate-300" size={48} />
+                <div className="text-center py-10">
+                  <IoBusinessOutline className="mx-auto text-slate-600" size={48} />
                   <p className="text-slate-500 mt-3">No client data available</p>
                 </div>
               ) : (
@@ -579,31 +545,26 @@ export default function Dashboard() {
                   return (
                     <div 
                       key={client.name} 
-                      className="group p-4 bg-slate-50 hover:bg-indigo-50 rounded-xl transition-all duration-200"
+                      className="group"
                     >
                       <div className="flex items-start justify-between mb-2">
                         <div>
                           <div className="flex items-center gap-2">
-                            <div className={`w-2 h-2 rounded-full ${
-                              index === 0 ? 'bg-amber-500' :
-                              index === 1 ? 'bg-slate-400' :
-                              index === 2 ? 'bg-amber-700' : 'bg-slate-300'
-                            }`}></div>
-                            <h4 className="font-bold text-slate-800 line-clamp-1">
+                            <h4 className="font-bold text-slate-200 line-clamp-1 group-hover:text-white transition-colors">
                               {client.name}
                             </h4>
                           </div>
-                          <p className="text-xs text-slate-500 mt-1">
+                          <p className="text-xs text-slate-500 mt-0.5">
                             {percentage}% of total time
                           </p>
                         </div>
-                        <span className="text-lg font-black text-slate-900">
+                        <span className="text-sm font-bold text-white bg-white/5 px-2 py-1 rounded-lg">
                           {client.hours}h
                         </span>
                       </div>
-                      <div className="w-full bg-slate-200 rounded-full h-2">
+                      <div className="w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
                         <div 
-                          className="bg-indigo-500 h-2 rounded-full transition-all duration-500"
+                          className="bg-indigo-500 h-1.5 rounded-full transition-all duration-500 group-hover:shadow-[0_0_10px_rgba(99,102,241,0.5)]"
                           style={{ width: `${Math.min(percentage, 100)}%` }}
                         ></div>
                       </div>
@@ -614,138 +575,119 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Recent Activity */}
-        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
-          <div className="p-5 border-b border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="text-lg font-bold text-slate-900 mb-1">
-                  Recent Activity
-                </h3>
-                <p className="text-sm text-slate-500">
-                  Latest time entries and updates
-                </p>
-              </div>
-              <Link
-                to="/time-log"
-                className="text-sm font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1"
-              >
-                View all
-                <IoArrowUp className="rotate-90" size={14} />
-              </Link>
-            </div>
+      {/* Recent Activity */}
+      <div className="ui-card">
+        <div className="ui-card-header">
+          <div>
+            <h3 className="ui-card-title">Recent Activity</h3>
+            <p className="text-sm text-slate-400 mt-1">Latest time entries and updates</p>
           </div>
-
-          {analytics.recentEntries.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                <IoTimeOutline className="text-slate-400" size={24} />
-              </div>
-              <h4 className="text-lg font-semibold text-slate-700 mb-2">
-                No recent activity
-              </h4>
-              <p className="text-slate-500 max-w-sm mx-auto mb-6">
-                Start tracking your time to see analytics and insights
-              </p>
-              <Link
-                to="/time-log"
-                className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 transition-colors"
-              >
-                <IoCalendarOutline size={16} />
-                Go to Time Log
-              </Link>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200">
-                    <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      Date
-                    </th>
-                    <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      Project
-                    </th>
-                    <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      Task
-                    </th>
-                    <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      Client
-                    </th>
-                    <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                      Duration
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {analytics.recentEntries.map((entry, index) => (
-                    <tr 
-                      key={entry.id || index} 
-                      className="hover:bg-slate-50/50 transition-colors"
-                    >
-                      <td className="p-4">
-                        <div className="font-bold text-slate-800">
-                          {toDateKey(entry.entry_date)}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="font-semibold text-slate-800">
-                          {entry.project_name || "—"}
-                        </div>
-                        <div className="text-xs text-slate-500 font-mono">
-                          {entry.project_code || "No code"}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <div className="font-semibold text-slate-700">
-                          {entry.task_id}
-                        </div>
-                      </td>
-                      <td className="p-4">
-                        <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
-                          entry.client ? 
-                          'bg-indigo-50 text-indigo-700' : 
-                          'bg-slate-100 text-slate-600'
-                        }`}>
-                          {entry.client || "Unassigned"}
-                        </span>
-                      </td>
-                      <td className="p-4">
-                        <div className="flex items-center gap-2">
-                          <IoTimeOutline className="text-slate-400" size={16} />
-                          <span className="font-black text-slate-900">
-                            {formatTime(entryMinutes(entry))}
-                          </span>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+          <Link
+            to="/time-log"
+            className="text-sm font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors"
+          >
+            View all
+            <IoArrowUp className="rotate-90" size={14} />
+          </Link>
         </div>
 
-        {/* Footer/Summary */}
-        <div className="bg-gradient-to-r from-green-700 to-green-800 rounded-2xl p-6 text-white">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-            <div>
-              <h4 className="text-lg font-bold mb-2">
-                Ready to optimize your workflow?
-              </h4>
-              <p className="text-green-100 opacity-90">
-                Track more time to unlock advanced analytics and insights
-              </p>
+        {analytics.recentEntries.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
+              <IoTimeOutline className="text-slate-500" size={24} />
             </div>
+            <h4 className="text-lg font-semibold text-slate-300 mb-2">
+              No recent activity
+            </h4>
             <Link
               to="/time-log"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-green-700 text-black font-bold rounded-xl  transition-all shadow-lg active:scale-[0.98] whitespace-nowrap"
+              className="ui-btn ui-btn-primary mt-4"
             >
-              <IoCheckmarkCircle size={18} />
-              Start Tracking Your Time
+              Start Tracking
             </Link>
           </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-white/5 bg-white/[0.02]">
+                  <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-widest pl-6">Date</th>
+                  <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Project</th>
+                  <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Task</th>
+                  <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Client</th>
+                  <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Duration</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-white/5">
+                {analytics.recentEntries.map((entry, index) => (
+                  <tr 
+                    key={entry.id || index} 
+                    className="hover:bg-white/[0.02] transition-colors"
+                  >
+                    <td className="p-4 pl-6">
+                      <div className="font-bold text-slate-300">
+                        {toDateKey(entry.entry_date)}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-semibold text-white">
+                        {entry.project_name || "—"}
+                      </div>
+                      <div className="text-xs text-slate-500 font-mono mt-0.5">
+                        {entry.project_code}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <div className="font-medium text-slate-400">
+                        {entry.task_id}
+                      </div>
+                    </td>
+                    <td className="p-4">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border ${
+                        entry.client 
+                          ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20' 
+                          : 'bg-slate-700/20 text-slate-500 border-slate-700/30'
+                      }`}>
+                        {entry.client || "Unassigned"}
+                      </span>
+                    </td>
+                    <td className="p-4">
+                      <div className="flex items-center gap-2">
+                        <IoTimeOutline className="text-slate-600" size={16} />
+                        <span className="font-bold text-white">
+                          {formatTime(entryMinutes(entry))}
+                        </span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Footer/Summary */}
+      <div className="relative overflow-hidden rounded-3xl p-8 bg-emerald-900/20 border border-emerald-500/20">
+         <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 to-transparent pointer-events-none" />
+        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+          <div>
+            <h4 className="text-xl font-bold text-white mb-2">
+              Ready to optimize your workflow?
+            </h4>
+            <p className="text-emerald-200/70">
+              Track more time to unlock advanced analytics and insights
+            </p>
+          </div>
+          <Link
+            to="/time-log"
+            className="ui-btn bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)] border-none"
+          >
+            <IoCheckmarkCircle size={18} />
+            Start Tracking
+          </Link>
         </div>
       </div>
     </div>

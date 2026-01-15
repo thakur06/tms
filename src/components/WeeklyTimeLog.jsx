@@ -38,18 +38,13 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
     return monday
   })
 
+  // ... (keep helper functions same as original)
   const normalizeDateStr = (date) => {
     if (!date) return '';
-
-    // If it's already a YYYY-MM-DD string, return it
     if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}/.test(date)) {
       return date.split('T')[0];
     }
-
-    // If it's a Date object or needs conversion
     const d = date instanceof Date ? date : new Date(date);
-
-    // Make sure we're using local date, not UTC
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, '0');
     const day = String(d.getDate()).padStart(2, '0');
@@ -132,9 +127,7 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
       if (!response.ok) throw new Error('Failed to save time entry');
       const newEntry = await response.json();
 
-      // Refetch entries to ensure consistency
       await fetchUserEntries();
-
       toast.success('Time entry added successfully!', { theme: "colored" });
       return newEntry;
 
@@ -150,14 +143,10 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
   }
 
   const deleteTimeEntry = async (dateStr, entryId, entryIndex) => {
-    // If we have an entryId (from database), use it
-    // Otherwise use entryIndex for local entries
     if (!entryId && entryIndex === undefined) {
       console.error('Cannot delete: No entryId or index provided')
       return
     }
-
-    // if (!window.confirm('Delete this time entry?')) return
 
     try {
       if (entryId) {
@@ -172,33 +161,19 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
         if (!res.ok) throw new Error('Delete failed')
       }
 
-      // Optimistic update
       setTimeEntries(prev => {
         const updated = { ...prev }
-
         if (!updated[dateStr]) return updated
-
         updated[dateStr] = updated[dateStr].filter((entry, index) => {
-          if (entryId) {
-            return entry.id !== entryId
-          } else {
-            return index !== entryIndex
-          }
+          if (entryId) return entry.id !== entryId
+          return index !== entryIndex
         })
-
-        // Clean up empty date
-        if (updated[dateStr].length === 0) {
-          delete updated[dateStr]
-        }
-
+        if (updated[dateStr].length === 0) delete updated[dateStr]
         return updated
       })
 
       toast.success('Entry deleted', { theme: 'colored' })
-      
-      if (user) {
-        fetchUserEntries();
-      }
+      if (user) fetchUserEntries();
     } catch (err) {
       toast.error('Failed to delete from server')
       console.error(err)
@@ -245,9 +220,7 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
       });
 
       if (!response.ok) throw new Error('Update failed');
-
       await fetchUserEntries();
-
       toast.success('Entry updated!', { theme: "colored" });
 
     } catch (error) {
@@ -258,7 +231,6 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
 
   const fetchUserEntries = async () => {
     if (!user) return;
-
     try {
       const token = localStorage.getItem('token');
       const res = await fetch('http://localhost:4000/api/time-entries/user/me', {
@@ -274,7 +246,6 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
         const utcDate = new Date(entry.entry_date)
         const dateStr = normalizeDateStr(utcDate)
         if (!entriesByDate[dateStr]) entriesByDate[dateStr] = []
-
         entriesByDate[dateStr].push({
           id: entry.id,
           taskName: entry.task_id,
@@ -285,9 +256,10 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
           user: entry.user_name,
           location: entry.location,
           remarks: entry.remarks,
+          client: entry.client || '',
+          country: entry.country || 'US',
         })
       })
-
       setTimeEntries(entriesByDate)
     } catch (err) {
       console.error('Failed to fetch time entries', err)
@@ -296,73 +268,69 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
   }
 
   useEffect(() => {
-    if (user) {
-      fetchUserEntries()
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (user) fetchUserEntries()
   }, [user])
 
   return (
-    <div className="max-w-[1600px] mx-auto p-4 md:p-6 bg-slate-50 min-h-screen">
-
+    <div className="w-full space-y-6">
       {/* --- HEADER SECTION --- */}
-      <header className="bg-white rounded-3xl p-4 sm:p-6 shadow-sm border border-slate-200 mb-6">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+      <header className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
+        {/* Logged-in User Info */}
+        <div className="flex items-center gap-4">
+          <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+            <IoCalendar size={24} />
+          </div>
+          <div>
+            <h2 className="text-2xl font-bold text-white">Weekly Timesheet</h2>
+            <p className="text-slate-400 text-sm">
+              {user?.name ? `Tracking for ${user.name}` : 'Not signed in'}
+            </p>
+          </div>
+        </div>
 
-          {/* Logged-in User Info */}
-          <div className="flex items-center gap-3 flex-shrink-0">
-            <IoCalendar className="text-indigo-500 hidden sm:block" size={20} />
-            <div className="px-4 py-2.5 bg-indigo-50 border border-indigo-200 rounded-xl flex-1 sm:flex-none">
-              <p className="text-sm font-semibold text-slate-800 truncate">{user?.name || 'Not signed in'}</p>
-              <p className="text-xs text-slate-600 truncate">{user?.email || ''}</p>
-            </div>
+        {/* Navigation & Controls */}
+        <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+          <div className="flex items-center bg-white/5 p-1 rounded-xl border border-white/10 w-full sm:w-auto">
+            <button 
+              onClick={() => navigateWeek(-1)} 
+              className="p-2.5 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white"
+            >
+              <IoChevronBack size={18} />
+            </button>
+            <button 
+              onClick={goToToday} 
+              className="px-4 py-1.5 text-sm font-semibold text-slate-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors whitespace-nowrap"
+            >
+              Today
+            </button>
+            <button 
+              onClick={() => navigateWeek(1)} 
+              className="p-2.5 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white"
+            >
+              <IoChevronForward size={18} />
+            </button>
           </div>
 
-          {/* Navigation & Controls */}
-          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-shrink-0">
-            <div className="flex bg-slate-100 p-1 rounded-xl gap-1">
-              <button 
-                onClick={() => navigateWeek(-1)} 
-                className="p-2.5 hover:bg-white hover:shadow-sm rounded-lg transition-all text-slate-600 flex-1 sm:flex-none"
-              >
-                <IoChevronBack size={18} />
-              </button>
-              <button 
-                onClick={goToToday} 
-                className="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-white hover:shadow-sm rounded-lg transition-all whitespace-nowrap flex-1 sm:flex-none"
-              >
-                Today
-              </button>
-              <button 
-                onClick={() => navigateWeek(1)} 
-                className="p-2.5 hover:bg-white hover:shadow-sm rounded-lg transition-all text-slate-600 flex-1 sm:flex-none"
-              >
-                <IoChevronForward size={18} />
-              </button>
-            </div>
-
-            <div className="flex items-center justify-between sm:justify-start gap-3">
-              <div className={`flex items-center gap-3 px-4 sm:px-5 py-2.5 rounded-xl border-2 transition-all flex-1 sm:flex-none ${exceedsLimit ? 'bg-red-50 border-red-200' : 'bg-indigo-50 border-indigo-200'}`}>
-                <div className="flex flex-col">
-                  <span className={`text-xs uppercase tracking-wide font-semibold whitespace-nowrap ${exceedsLimit ? 'text-red-600' : 'text-indigo-600'}`}>
-                    Weekly Total
-                  </span>
-                  <span className={`text-xl font-bold ${exceedsLimit ? 'text-red-700' : 'text-indigo-700'}`}>
-                    {formatTime(weeklyTotalMinutes)}
-                  </span>
-                </div>
-                <IoTime size={24} className={exceedsLimit ? 'text-red-400' : 'text-indigo-400'} />
+          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
+             <div className={`flex items-center gap-3 px-5 py-2 rounded-xl border w-full sm:w-auto justify-between ${exceedsLimit ? 'bg-red-500/10 border-red-500/20' : 'bg-indigo-500/10 border-indigo-500/20'}`}>
+              <div className="flex flex-col">
+                <span className={`text-[10px] uppercase tracking-wider font-bold ${exceedsLimit ? 'text-red-400' : 'text-indigo-400'}`}>
+                  Weekly Total
+                </span>
+                <span className={`text-xl font-bold font-mono ${exceedsLimit ? 'text-red-300' : 'text-indigo-300'}`}>
+                  {formatTime(weeklyTotalMinutes)}
+                </span>
               </div>
-
-              <button
-                onClick={() => setShowSubmitModal(true)}
-                className="px-4 sm:px-6 py-2.5 bg-green-600 hover:bg-green-500 text-white rounded-xl font-semibold shadow-md hover:shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 whitespace-nowrap flex-shrink-0"
-              >
-                <IoCheckmarkCircle size={20} />
-                <span className="hidden sm:inline">Submit</span>
-                <span className="sm:hidden">Submit</span>
-              </button>
+              <IoTime size={24} className={exceedsLimit ? 'text-red-400' : 'text-indigo-400'} />
             </div>
+
+            <button
+              onClick={() => setShowSubmitModal(true)}
+              className="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-900/20 transition-all flex items-center justify-center gap-2 active:scale-95"
+            >
+              <IoCheckmarkCircle size={20} />
+              <span>Submit</span>
+            </button>
           </div>
         </div>
       </header>
@@ -375,6 +343,7 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
           const dayTotal = getTotalTimeForDate(dateStr)
           const isToday = formatDate(new Date()) === dateStr
           const dayName = day.toLocaleDateString('en-US', { weekday: 'short' })
+          const isWeekend = dayName.toUpperCase() === 'SAT' || dayName.toUpperCase() === 'SUN'
 
           return (
             <motion.div
@@ -382,70 +351,98 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className={`flex flex-col rounded-3xl transition-all duration-300 ${isToday ? 'bg-white ring-2 ring-indigo-500 shadow-xl' : dayName.toUpperCase() == 'SAT' || dayName.toUpperCase() == 'SUN' ? 'bg-white ring-2 ring-red-100 shadow-xl' : 'bg-white ring-2 ring-green-100 shadow-xl'
-                }`}
+              className={`flex flex-col ui-card overflow-hidden h-full min-h-[300px] ${
+                isToday 
+                  ? 'border-indigo-500/50 shadow-[0_0_20px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/30' 
+                  : ''
+              }`}
             >
               {/* Day Header */}
-              <div className={`p-4 rounded-t-3xl flex justify-between items-center ${isToday ? 'bg-indigo-500 text-white' : dayName.toUpperCase() == 'SAT' || dayName.toUpperCase() == 'SUN' ? 'bg-red-200 text-red-600' : 'bg-green-300 text-slate-600'}`}>
-                <div>
-                  <h4 className={`text-lg leading-tight ${dayName.toUpperCase() == 'SAT' || dayName.toUpperCase() == 'SUN' ? 'text-red-500 text-[16px] italic' : 'font-black'}`}>{day.getDate()}</h4>
-                  <p className={`text-[10px] uppercase font-bold opacity-80 ${dayName.toUpperCase() == 'SAT' || dayName.toUpperCase() == 'SUN' ? 'text-red-500 text-[16px] italic' : 'text-slate-600'}`}>{dayName}</p>
-                </div>
-                <div className="text-right">
-                  <span className="text-[10px] uppercase font-bold opacity-60 block">Daily Total</span>
-                  <span className="font-bold">{formatTime(dayTotal)}</span>
+              <div className={`p-4 border-b border-white/5 ${
+                isToday 
+                  ? 'bg-indigo-500/20' 
+                  : isWeekend 
+                    ? 'bg-rose-500/10' 
+                    : 'bg-white/[0.02]'
+              }`}>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h4 className={`text-2xl font-black leading-none mb-1 ${
+                      isToday ? 'text-white' : isWeekend ? 'text-rose-400' : 'text-slate-300'
+                    }`}>
+                      {day.getDate()}
+                    </h4>
+                    <p className={`text-xs font-bold uppercase tracking-wider ${
+                      isToday ? 'text-indigo-300' : isWeekend ? 'text-rose-400/70' : 'text-slate-500'
+                    }`}>
+                      {dayName}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">Total</span>
+                    <span className={`font-mono font-bold ${dayTotal > 0 ? 'text-white' : 'text-slate-600'}`}>
+                      {formatTime(dayTotal)}
+                    </span>
+                  </div>
                 </div>
               </div>
 
               {/* Entries Body */}
-              <div className="p-3 flex-1 space-y-3 max-h-[300px] overflow-y-auto hide-y-scroll">
+              <div className="p-3 flex-1 space-y-2 overflow-y-auto hide-y-scroll md:max-h-[290px] max-h-[265px]">
                 {dayEntries.length === 0 ? (
-                  <div className="py-10 flex flex-col items-center justify-center opacity-20 italic text-sm text-slate-500">
-                    <IoCalendar size={32} className="mb-2" />
+                  <div className="h-full flex flex-col items-center justify-center py-8 opacity-20 text-sm font-medium text-slate-400">
+                    <IoCalendar size={24} className="mb-2" />
                     <p>No entries</p>
                   </div>
                 ) : (
                   dayEntries.map((entry, entryIndex) => (
-                    <div key={entry.id || entryIndex} className="group p-3 bg-white border border-slate-100 rounded-2xl shadow-sm hover:shadow-md hover:border-indigo-100 transition-all">
-                      <div className="flex justify-between items-start mb-2">
-                        <span className="text-xs font-bold px-2 py-1 bg-slate-100 text-slate-600 rounded-lg truncate max-w-[100px]">
+                    <div 
+                      key={entry.id || entryIndex} 
+                      className="group relative p-3 bg-white/[0.03] border border-white/5 rounded-xl hover:bg-white/[0.06] hover:border-white/10 transition-all"
+                    >
+                      <div className="flex justify-between items-start mb-1.5">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-white/10 text-slate-300 rounded border border-white/5 truncate max-w-[80px]">
                           {entry.project_code || 'N/A'}
                         </span>
-                        <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                           <button
                             onClick={() => { setEditingEntry(entry); setSelectedDateForModal(dateStr); setShowAddTimeModal(true); }}
-                            className="p-1 hover:text-indigo-600"
+                            className="p-1 text-slate-400 hover:text-indigo-400 rounded hover:bg-indigo-500/10 transition-colors"
                           >
-                            <IoLayersOutline size={14} />
+                            <IoLayersOutline size={12} />
                           </button>
                         </div>
                       </div>
 
-                      <h5 className="text-sm font-semibold text-slate-800 truncate mb-1">{entry.taskName}</h5>
+                      <h5 className="text-xs font-bold text-slate-200 truncate mb-1" title={entry.taskName}>
+                        {entry.taskName}
+                      </h5>
 
-                      <div className="flex items-center gap-2 text-[11px] text-slate-500 mb-2">
-                        <span className="flex items-center gap-1"><IoTime className="text-indigo-400" /> {entry.hours}h {entry.minutes}m</span>
-                        {entry.location && <span className="flex items-center gap-1"><IoLocationOutline className="text-emerald-400" /> {entry.location}</span>}
+                      <div className="flex items-center gap-3 text-[10px] font-medium text-slate-500 mb-2">
+                        <span className="flex items-center gap-1 text-indigo-300/80">
+                          <IoTime size={10} /> 
+                          {entry.hours}h {entry.minutes}m
+                        </span>
+                        {entry.location && (
+                          <span className="flex items-center gap-1 text-emerald-300/80">
+                            <IoLocationOutline size={10} /> 
+                            {entry.location}
+                          </span>
+                        )}
                       </div>
 
-                      {entry.remarks && (
-                        <p className="text-[10px] text-slate-400 line-clamp-2 italic border-l-2 border-slate-100 pl-2">
+                      {/* {entry.remarks && (
+                        <p className="text-[10px] text-slate-400 italic border-l-2 border-white/10 pl-2 mb-2 line-clamp-1">
                           "{entry.remarks}"
                         </p>
-                      )}
-
-                      <div className="mt-3 pt-2 border-t border-slate-50 flex justify-between">
-                        <button
-                          onClick={() => { setEditingEntry(entry); setSelectedDateForModal(dateStr); setShowAddTimeModal(true); }}
-                          className="text-[10px] font-bold text-indigo-500 uppercase tracking-tighter"
-                        >
-                          Edit Entry
-                        </button>
+                      )} */}
+                      
+                      <div className="flex justify-end gap-2 pt-2 border-t border-white/5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() => deleteTimeEntry(dateStr, entry.id, entryIndex)}
-                          className="text-slate-300 hover:text-red-500 transition-colors"
+                          className="text-[10px] text-red-400 hover:text-red-300 font-semibold"
                         >
-                          <IoTrash size={14} />
+                          DELETE
                         </button>
                       </div>
                     </div>
@@ -454,19 +451,20 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
               </div>
 
               {/* Add Button Area */}
-              <div className="p-3 bg-slate-50/50 rounded-b-3xl">
+              <div className="p-3 border-t border-white/5 bg-white/[0.02]">
                 <button
                   onClick={() => handleOpenAddTimeModal(dateStr)}
-                  className="w-full py-2 flex items-center justify-center gap-2 text-xs font-bold text-slate-500 hover:text-indigo-600 border-2 border-dashed border-slate-200 rounded-xl hover:border-indigo-300 hover:bg-white transition-all"
+                  className="w-full py-2.5 flex items-center justify-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-300 border border-dashed border-slate-700/50 rounded-xl hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all"
                 >
-                  <IoAdd size={16} />
-                  Add Time
+                  <IoAdd size={14} />
+                  Add Entry
                 </button>
               </div>
             </motion.div>
           )
         })}
       </div>
+
       <SubmitTimesheetModal
         isOpen={showSubmitModal}
         onClose={() => setShowSubmitModal(false)}
@@ -474,7 +472,8 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
         weekRange={`${weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - ${weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`}
         onSubmit={handleSubmitTimesheet}
       />
-      <div className="relative z-999">
+
+      <div className="relative z-[9999]">
         <AddTimeModal
           isOpen={showAddTimeModal}
           onClose={() => {
@@ -490,12 +489,13 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
           clients={clients}
         />
       </div>
+      
       <ToastContainer
         position="top-center"
         transition={Zoom}
-        theme="colored"
+        theme="dark"
         autoClose={2000}
-        style={{ zIndex: 99999 }} // Force it above any modal
+        style={{ zIndex: 99999 }}
         hideProgressBar={true}
       />
     </div>

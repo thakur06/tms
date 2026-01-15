@@ -11,60 +11,38 @@ import ProtectedRoutes from "./security/ProtectedRoutes";
 import PublicRoute from "./security/PublicRoute";
 import { AuthProvider, useAuth } from './context/AuthContext';
 
+import { Outlet } from 'react-router-dom';
+import Layout from './components/Layout';
+
 function AppContent() {
-  const { isAuthenticated } = useAuth();
-
   return (
-    <div className="min-h-screen bg-slate-50 flex flex-col">
-      {/* Only show Header if authenticated */}
-      {isAuthenticated && <Header />}
-      
-      <main className={`w-full ${isAuthenticated ? 'px-4 sm:px-6 lg:px-8 py-4' : ''}`}>
-        <Routes>
-          {/* Public Route - redirects to dashboard if already authenticated */}
-          <Route path="/auth" element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          } />
+    <Routes>
+      {/* Public Route - redirects to dashboard if already authenticated */}
+      <Route path="/auth" element={
+        <PublicRoute>
+          <Login />
+        </PublicRoute>
+      } />
 
-          {/* Protected Routes */}
-          <Route path="/" element={
-            <ProtectedRoutes>
-              <Dashboard />
-            </ProtectedRoutes>
-          } />
-          <Route path="/dashboard" element={
-            <ProtectedRoutes>
-              <Dashboard />
-            </ProtectedRoutes>
-          } />
-          <Route path="/time-log" element={
-            <ProtectedRoutes>
-              <TimeLog />
-            </ProtectedRoutes>
-          } />
-          <Route path="/tasks" element={
-            <ProtectedRoutes>
-              <Tasks />
-            </ProtectedRoutes>
-          } />
-          <Route path="/projects" element={
-            <ProtectedRoutes>
-              <Projects />
-            </ProtectedRoutes>
-          } />
-          <Route path="/reports" element={
-            <ProtectedRoutes>
-              <TimeReports />
-            </ProtectedRoutes>
-          } />
+      {/* Protected Routes with Layout */}
+      <Route element={
+        <ProtectedRoutes>
+          <Layout>
+            <Outlet />
+          </Layout>
+        </ProtectedRoutes>
+      }>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/time-log" element={<TimeLog />} />
+        <Route path="/tasks" element={<Tasks />} />
+        <Route path="/projects" element={<Projects />} />
+        <Route path="/reports" element={<TimeReports />} />
+      </Route>
 
-          {/* 404 Not Found */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-    </div>
+      {/* 404 Not Found */}
+      <Route path="*" element={<NotFound />} />
+    </Routes>
   );
 }
 

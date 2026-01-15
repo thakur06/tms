@@ -29,9 +29,8 @@ export default function TimeReport() {
   const [exporting, setExporting] = useState(false);
   const [expandedUsers, setExpandedUsers] = useState({});
   const [sortedUsers, setSortedUsers] = useState([]);
-  const [today] = useState(new Date()); // Store today's date
+  const [today] = useState(new Date()); 
 
-  // Sort users by name in ascending order
   useEffect(() => {
     if (reportData && reportData.users) {
       const sorted = [...reportData.users].sort((a, b) =>
@@ -39,7 +38,6 @@ export default function TimeReport() {
       );
       setSortedUsers(sorted);
 
-      // Initialize expanded state for all sorted users
       const initialExpanded = {};
       sorted.forEach(user => {
         initialExpanded[user.user_name] = false;
@@ -48,7 +46,6 @@ export default function TimeReport() {
     }
   }, [reportData]);
 
-  // Toggle user expansion
   const toggleUser = (userName) => {
     setExpandedUsers(prev => ({
       ...prev,
@@ -56,14 +53,12 @@ export default function TimeReport() {
     }));
   };
 
-  // Fetch report from backend
   const fetchReport = async () => {
     if (!startDate || !endDate) {
       alert("Please select both start and end dates");
       return;
     }
 
-    // Additional validation: end date shouldn't be before start date
     if (endDate < startDate) {
       alert("End date cannot be before start date");
       return;
@@ -75,8 +70,6 @@ export default function TimeReport() {
     const formattedEnd = formatDateLocal(endDate);
 
     try {
-      console.log("Fetching report with dates:", formattedStart, formattedEnd);
-
       const res = await fetch(
         `http://localhost:4000/api/reports/time-entries?startDate=${formattedStart}&endDate=${formattedEnd}`
       );
@@ -86,7 +79,6 @@ export default function TimeReport() {
       }
 
       const data = await res.json();
-      console.log("Report data received:", data);
       setReportData(data);
     } catch (error) {
       console.error("Error fetching report:", error);
@@ -96,7 +88,6 @@ export default function TimeReport() {
     }
   };
 
-  // Helper function
   const formatDateLocal = (date) => {
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -104,7 +95,6 @@ export default function TimeReport() {
     return `${year}-${month}-${day}`;
   };
 
-  // Format date without timestamp (just date)
   const formatDateNoTime = (dateString) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
@@ -113,27 +103,24 @@ export default function TimeReport() {
     });
   };
 
-  // Handle start date change - also adjust end date if needed
   const handleStartDateChange = (date) => {
     setStartDate(date);
-    // If end date is earlier than new start date, reset end date
     if (endDate && date > endDate) {
       setEndDate(date);
     }
   };
 
-  // Custom input component for DatePicker to fix styling issues
   const CustomInput = ({ value, onClick, placeholder }) => (
     <button
-      className="w-full pl-12 pr-4 py-3 bg-white border border-slate-200 rounded-2xl transition-all outline-none font-semibold text-slate-900 hover:bg-slate-50 text-left focus:ring-2 focus:ring-slate-500/30"
+      className="ui-input w-full pl-12 font-semibold text-left flex items-center h-[50px] relative z-0"
       onClick={onClick}
       type="button"
     >
-      {value || placeholder}
+      {value || <span className="text-slate-500">{placeholder}</span>}
+      <FiCalendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-400 pointer-events-none" />
     </button>
   );
 
-  // Export to Excel with enhanced formatting (project code removed)
   const exportToExcel = async () => {
     if (!reportData) return;
 
@@ -142,31 +129,18 @@ export default function TimeReport() {
       const workbook = new ExcelJS.Workbook();
       const sheet = workbook.addWorksheet("Time Report");
 
-      // Set column widths with increased sizes (PROJECT CODE COLUMN REMOVED)
-      // Now we have 11 columns: A (1) through K (11)
       sheet.columns = [
-        { width: 25 }, // A: User
-        { width: 30 }, // B: User Email
-        { width: 40 }, // C: User Dept
-        { width: 15 }, // D: Date
-        { width: 50 }, // E: Task ID
-        { width: 50 }, // F: Project
-        // Project Code column removed
-        { width: 20 }, // G: Hours (was H)
-        { width: 15 }, // H: Minutes (was I)
-        { width: 20 }, // I: Location (was J)
-        { width: 40 }, // J: Remarks (was K)
-        { width: 30 }  // K: Client (was L)
+        { width: 25 }, { width: 30 }, { width: 40 }, { width: 15 },
+        { width: 50 }, { width: 50 }, { width: 20 }, { width: 15 },
+        { width: 20 }, { width: 40 }, { width: 30 }
       ];
 
-      // Main Title Row - Large font size and padding
       const titleRow = sheet.addRow(["TIME TRACKING REPORT"]);
       titleRow.font = { size: 22, bold: true, color: { argb: '1E40AF' } };
       titleRow.alignment = { horizontal: 'center', vertical: 'middle' };
       titleRow.height = 45;
-      sheet.mergeCells('A1:K1'); // 11 columns: A through K
+      sheet.mergeCells('A1:K1');
 
-      // Date Range with larger font
       sheet.addRow([]);
       const dateRangeRow = sheet.addRow(["Date Range:", `${reportData.startDate} to ${reportData.endDate}`]);
       dateRangeRow.font = { bold: true, size: 12 };
@@ -175,265 +149,65 @@ export default function TimeReport() {
       sheet.addRow([]);
       sheet.addRow([]);
 
-      // Sort users alphabetically for Excel export
       const sortedUsersForExport = [...reportData.users].sort((a, b) =>
         a.user_name.localeCompare(b.user_name)
       );
 
-      // Detailed Entries Header with larger font
       const detailHeaderRow = sheet.addRow(["DETAILED TIME ENTRIES BY USER"]);
       detailHeaderRow.font = { bold: true, size: 16, color: { argb: '7C3AED' } };
-      detailHeaderRow.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'F3E8FF' }
-      };
+      detailHeaderRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'F3E8FF' } };
       detailHeaderRow.alignment = { horizontal: 'center', vertical: 'middle' };
       detailHeaderRow.height = 38;
-      sheet.mergeCells('A' + detailHeaderRow.number + ':K' + detailHeaderRow.number); // 11 columns
+      sheet.mergeCells('A' + detailHeaderRow.number + ':K' + detailHeaderRow.number);
 
-      // Detailed Table Headers with larger font (PROJECT CODE REMOVED)
       sheet.addRow([]);
       const detailHeaders = sheet.addRow([
         "User", "Email", "Department", "Date", "Task ID", "Project",
-        "Hours", "Minutes", "Location", "Remarks", "Client" // 11 headers
+        "Hours", "Minutes", "Location", "Remarks", "Client"
       ]);
       detailHeaders.eachCell(cell => {
         cell.font = { bold: true, size: 11 };
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'EFF6FF' }
-        };
-        cell.border = {
-          top: { style: 'thin', color: { argb: '94A3B8' } },
-          left: { style: 'thin', color: { argb: '94A3B8' } },
-          bottom: { style: 'thin', color: { argb: '94A3B8' } },
-          right: { style: 'thin', color: { argb: '94A3B8' } }
-        };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'EFF6FF' } };
+        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
         cell.alignment = { vertical: 'middle', horizontal: 'center' };
       });
       detailHeaders.height = 32;
 
-      // Detailed Data - Grouped by user with differentiators
       sortedUsersForExport.forEach((user, userIndex) => {
-        // Add user separator/differentiator (11 values)
         const userSeparatorRow = sheet.addRow([
           `USER: ${user.user_name.toUpperCase()}`,
           user.user_email || "N/A",
           user.user_dept || "N/A",
           `Entries: ${user.entries.length}`,
           `Total: ${user.total_hours}h ${user.total_minutes}m`,
-          "", "", "", "", "", "" // 6 empty strings for columns F-K
+          "", "", "", "", "", ""
         ]);
 
-        // Style the user differentiator row (INCLUDES COLUMN K)
-        userSeparatorRow.eachCell((cell, colNumber) => {
+        userSeparatorRow.eachCell((cell) => {
           cell.font = { bold: true, size: 12, color: { argb: '1E40AF' } };
-          cell.fill = {
-            type: 'pattern',
-            pattern: 'solid',
-            fgColor: userIndex % 2 === 0 ? { argb: 'E0F2FE' } : { argb: 'DBEAFE' }
-          };
-          cell.border = {
-            top: { style: 'medium', color: { argb: '3B82F6' } },
-            bottom: { style: 'medium', color: { argb: '3B82F6' } },
-            left: { style: 'thin', color: { argb: '94A3B8' } },
-            right: { style: 'thin', color: { argb: '94A3B8' } }
-          };
+          cell.fill = { type: 'pattern', pattern: 'solid', fgColor: userIndex % 2 === 0 ? { argb: 'E0F2FE' } : { argb: 'DBEAFE' } };
           cell.alignment = { vertical: 'middle' };
         });
         userSeparatorRow.height = 36;
-
-        // Merge cells for user name
         sheet.mergeCells(`A${userSeparatorRow.number}:C${userSeparatorRow.number}`);
-        // Merge cells for summary info
         sheet.mergeCells(`D${userSeparatorRow.number}:E${userSeparatorRow.number}`);
 
-        // User's entries (PROJECT CODE REMOVED)
         user.entries.forEach((entry, entryIndex) => {
           const row = sheet.addRow([
-            user.user_name,
-            user.user_email || "-",
-            user.user_dept || "-",
-            formatDateNoTime(entry.date),
-            entry.task_id || "-",
-            entry.project || "-",
-            // Project Code column removed
-            entry.hours,
-            entry.minutes,
-            entry.location || "-",
-            entry.remarks || "-",
-            entry.client || "-" // Column K
+            user.user_name, user.user_email || "-", user.user_dept || "-",
+            formatDateNoTime(entry.date), entry.task_id || "-", entry.project || "-",
+            entry.hours, entry.minutes, entry.location || "-", entry.remarks || "-", entry.client || "-"
           ]);
-
-          // Style each entry row (INCLUDES COLUMN K)
           row.eachCell((cell, colNumber) => {
-            // Alternate row colors
             const rowColor = entryIndex % 2 === 0 ? 'FFFFFF' : 'F8FAFC';
-
-            cell.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: rowColor }
-            };
-
-            // Add borders (ALL CELLS INCLUDING COLUMN K)
-            cell.border = {
-              left: { style: 'thin', color: { argb: 'E2E8F0' } },
-              right: { style: 'thin', color: { argb: 'E2E8F0' } },
-              bottom: { style: 'thin', color: { argb: 'E2E8F0' } }
-            };
-
-            // Font styling
-            cell.font = { size: 10 };
-            cell.alignment = { vertical: 'middle', horizontal: 'left' };
-
-            // Right align for numeric columns (adjusted indices)
-            if (colNumber === 7 || colNumber === 8) { // Hours and Minutes columns (now G=7, H=8)
-              cell.alignment = { vertical: 'middle', horizontal: 'right' };
-            }
+            cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: rowColor } };
+            cell.border = { left: { style: 'thin', color: { argb: 'E2E8F0' } }, right: { style: 'thin', color: { argb: 'E2E8F0' } }, bottom: { style: 'thin', color: { argb: 'E2E8F0' } } };
+            if (colNumber === 7 || colNumber === 8) cell.alignment = { vertical: 'middle', horizontal: 'right' };
           });
-          row.height = 24;
         });
-
-        // Add a blank row between users
-        const blankRow = sheet.addRow([]);
-        blankRow.height = 12;
+        sheet.addRow([]);
       });
 
-      // Remove last blank row if exists
-      if (sheet.rowCount > 0 && !sheet.getRow(sheet.rowCount).values.length) {
-        sheet.spliceRows(sheet.rowCount, 1);
-      }
-
-      sheet.addRow([]);
-      sheet.addRow([]);
-
-      // Summary Section with larger font
-      const summaryHeaderRow = sheet.addRow(["USER SUMMARY"]);
-      summaryHeaderRow.font = { bold: true, size: 16, color: { argb: '059669' } };
-      summaryHeaderRow.fill = {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'D1FAE5' }
-      };
-      summaryHeaderRow.alignment = { horizontal: 'center', vertical: 'middle' };
-      summaryHeaderRow.height = 38;
-      sheet.mergeCells('A' + summaryHeaderRow.number + ':I' + summaryHeaderRow.number);
-
-      // Summary Table Headers
-      sheet.addRow([]);
-      const summaryHeaders = sheet.addRow([
-        "Sr. No.", "User", "Email", "Department", "Total Entries", "Total Hours", "Total Minutes", "Total Time", "Avg. Hours/Day"
-      ]);
-      summaryHeaders.eachCell(cell => {
-        cell.font = { bold: true, size: 11 };
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'EFF6FF' }
-        };
-        cell.border = {
-          top: { style: 'thin', color: { argb: '94A3B8' } },
-          left: { style: 'thin', color: { argb: '94A3B8' } },
-          bottom: { style: 'thin', color: { argb: '94A3B8' } },
-          right: { style: 'thin', color: { argb: '94A3B8' } }
-        };
-        cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      });
-      summaryHeaders.height = 32;
-
-      // Calculate days in range
-      const daysInRange = Math.ceil((new Date(reportData.endDate) - new Date(reportData.startDate)) / (1000 * 60 * 60 * 24)) + 1;
-
-      // Summary Data
-      sortedUsersForExport.forEach((user, index) => {
-        const totalTime = `${user.total_hours}h ${user.total_minutes}m`;
-        const avgHoursPerDay = (user.total_hours + (user.total_minutes / 60)) / daysInRange;
-
-        const row = sheet.addRow([
-          index + 1,
-          user.user_name,
-          user.user_email || "-",
-          user.user_dept || "-",
-          user.entries.length,
-          user.total_hours,
-          user.total_minutes,
-          totalTime,
-          avgHoursPerDay.toFixed(2)
-        ]);
-
-        // Style summary rows
-        row.eachCell(cell => {
-          cell.border = {
-            left: { style: 'thin', color: { argb: 'E2E8F0' } },
-            right: { style: 'thin', color: { argb: 'E2E8F0' } },
-            bottom: { style: 'thin', color: { argb: 'E2E8F0' } }
-          };
-          cell.font = { size: 10 };
-          cell.alignment = { vertical: 'middle', horizontal: 'left' };
-
-          // Right align for numeric columns
-          if ([1, 6, 7, 9].includes(cell.col)) { // Sr.No, Hours, Minutes, Avg Hours
-            cell.alignment = { vertical: 'middle', horizontal: 'right' };
-          }
-
-          // Alternate row colors
-          if (index % 2 === 0) {
-            cell.fill = {
-              type: 'pattern',
-              pattern: 'solid',
-              fgColor: { argb: 'F9FAFB' }
-            };
-          }
-        });
-        row.height = 26;
-      });
-
-      // Add totals row with larger font
-      const totalHours = reportData.users.reduce((sum, user) => sum + user.total_hours, 0);
-      const totalMinutes = reportData.users.reduce((sum, user) => sum + user.total_minutes, 0);
-      const totalEntries = reportData.users.reduce((sum, user) => sum + user.entries.length, 0);
-
-      sheet.addRow([]);
-      const totalRow = sheet.addRow([
-        "TOTAL",
-        `${sortedUsersForExport.length} Users`,
-        "",
-        "",
-        totalEntries,
-        totalHours,
-        totalMinutes,
-        `${totalHours}h ${totalMinutes}m`,
-        ""
-      ]);
-
-      totalRow.eachCell(cell => {
-        cell.font = { bold: true, size: 11 };
-        cell.fill = {
-          type: 'pattern',
-          pattern: 'solid',
-          fgColor: { argb: 'DBEAFE' }
-        };
-        cell.border = {
-          top: { style: 'double', color: { argb: '3B82F6' } },
-          left: { style: 'thin', color: { argb: '94A3B8' } },
-          bottom: { style: 'double', color: { argb: '3B82F6' } },
-          right: { style: 'thin', color: { argb: '94A3B8' } }
-        };
-        cell.alignment = { vertical: 'middle', horizontal: 'center' };
-      });
-      totalRow.height = 34;
-
-      // Add generated timestamp
-      sheet.addRow([]);
-      sheet.addRow([]);
-      const timestampRow = sheet.addRow([`Report generated: ${new Date().toLocaleString()}`]);
-      timestampRow.font = { italic: true, size: 9, color: { argb: '6B7280' } };
-      timestampRow.height = 22;
-
-      // Generate Excel file
       const buf = await workbook.xlsx.writeBuffer();
       const filename = `Time_Report_${reportData.startDate}_to_${reportData.endDate}.xlsx`;
       saveAs(new Blob([buf]), filename);
@@ -446,214 +220,75 @@ export default function TimeReport() {
   };
 
   return (
-<div className="h-fit bg-white p-4 md:p-8 font-sans text-slate-900 relative">
-      {/* Global styles for react-datepicker */}
+<div className="min-h-screen font-sans text-slate-200 relative pb-20">
       <style jsx global>{`
-        /* Base styles for datepicker */
         .react-datepicker {
           font-family: inherit !important;
-          border: 1px solid #e5e7eb !important;
+          border: 1px solid rgba(255,255,255,0.1) !important;
           border-radius: 1rem !important;
-          box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12) !important;
-          z-index: 9999 !important;
-          background: white !important;
+          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
+          background: #1e293b !important;
           overflow: hidden !important;
-          animation: slideIn 0.2s ease-out !important;
-        }
-        
-        @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateY(-10px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-        
-        .react-datepicker__triangle {
-          display: none !important;
-        }
-        
-        .react-datepicker__header {
-          background: white !important;
-          border-bottom: 1px solid #f3f4f6 !important;
-          border-radius: 1rem 1rem 0 0 !important;
-          padding: 1rem 0.5rem 0.5rem 0.5rem !important;
-          text-align: center !important;
-        }
-        
-        .react-datepicker__current-month {
-          font-weight: 600 !important;
-          color: #111827 !important;
-          font-size: 0.95rem !important;
-          margin-bottom: 0.75rem !important;
-        }
-        
-        .react-datepicker__day--selected {
-          background: #3b82f6 !important;
-          border-radius: 0.5rem !important;
           color: white !important;
-          font-weight: 500 !important;
         }
-        
+        .react-datepicker__header {
+          background: #0f172a !important;
+          border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+          border-radius: 1rem 1rem 0 0 !important;
+        }
+        .react-datepicker__current-month {
+          color: white !important;
+        }
+        .react-datepicker__day--selected {
+          background: #6366f1 !important;
+          color: white !important;
+        }
         .react-datepicker__day:hover {
-          background: #eff6ff !important;
-          border-radius: 0.5rem !important;
-          color: #111827 !important;
+          background: rgba(99,102,241,0.2) !important;
+          color: white !important;
         }
-        
         .react-datepicker__day {
-          margin: 0.15rem !important;
-          width: 2.25rem !important;
-          line-height: 2.25rem !important;
-          font-size: 0.875rem !important;
-          color: #374151 !important;
+          color: #94a3b8 !important;
         }
-        
-        .react-datepicker__month {
-          margin: 0.75rem !important;
-        }
-        
         .react-datepicker__day--keyboard-selected {
-          background-color: #eff6ff !important;
-          color: #111827 !important;
+          background-color: rgba(99,102,241,0.2) !important;
+          color: white !important;
         }
-        
         .react-datepicker__day--today {
-          font-weight: 600 !important;
-          color: #3b82f6 !important;
-          position: relative !important;
+          color: #6366f1 !important;
+          font-weight: bold !important;
         }
-        
-        .react-datepicker__day--today::after {
-          content: '' !important;
-          position: absolute !important;
-          bottom: 4px !important;
-          left: 50% !important;
-          transform: translateX(-50%) !important;
-          width: 4px !important;
-          height: 4px !important;
-          background: #3b82f6 !important;
-          border-radius: 50% !important;
-        }
-        
-        .react-datepicker__day--selected::after {
-          background: white !important;
-        }
-        
-        .react-datepicker__navigation {
-          top: 1rem !important;
-          width: 2rem !important;
-          height: 2rem !important;
-          border-radius: 0.5rem !important;
-          transition: all 0.2s !important;
-        }
-        
-        .react-datepicker__navigation:hover {
-          background: #f9fafb !important;
-        }
-        
-        .react-datepicker__navigation--previous {
-          left: 0.75rem !important;
-        }
-        
-        .react-datepicker__navigation--next {
-          right: 0.75rem !important;
-        }
-        
-        .react-datepicker__navigation-icon::before {
-          border-width: 2px 2px 0 0 !important;
-          width: 7px !important;
-          height: 7px !important;
-          border-color: #6b7280 !important;
-          top: 12px !important;
-        }
-        
         .react-datepicker__day-name {
-          color: #6b7280 !important;
-          font-weight: 500 !important;
-          font-size: 0.75rem !important;
-          width: 2.25rem !important;
-          margin: 0.15rem !important;
-          text-transform: uppercase !important;
-          letter-spacing: 0.025em !important;
+          color: #64748b !important;
         }
-        
-        /* CENTER POSITIONING - FIXED FOR ALL SCREENS */
         .react-datepicker-popper {
           z-index: 9999 !important;
-          position: fixed !important;
-          top: 50% !important;
-          left: 50% !important;
-          transform: translate(-50%, -50%) !important;
-          padding: 0 !important;
-          margin: 0 !important;
-          width: auto !important;
-          height: auto !important;
-        }
-        
-        /* Remove any default popper positioning */
-        .react-datepicker-popper[data-placement^="bottom"],
-        .react-datepicker-popper[data-placement^="top"],
-        .react-datepicker-popper[data-placement^="left"],
-        .react-datepicker-popper[data-placement^="right"] {
-          transform: translate(-50%, -50%) !important;
-          top: 50% !important;
-          left: 50% !important;
-          padding-top: 0 !important;
-          padding-bottom: 0 !important;
-        }
-        
-        /* Ensure the datepicker is visible on mobile */
-        @media (max-width: 768px) {
-          .react-datepicker {
-            width: 90vw !important;
-            max-width: 340px !important;
-            max-height: 80vh !important;
-            overflow-y: auto !important;
-          }
-          
-          .react-datepicker__month-container {
-            width: 100% !important;
-          }
-          
-          .react-datepicker__day {
-            width: 2.75rem !important;
-            line-height: 2.75rem !important;
-            margin: 0.1rem !important;
-          }
-          
-          .react-datepicker__day-name {
-            width: 2.75rem !important;
-            margin: 0.1rem !important;
-          }
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto space-y-8">
-
+      <div className="max-w-7xl mx-auto space-y-8 p-6">
         {/* --- Header Section --- */}
         <header className="relative flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 uppercase tracking-wide mb-4">
-              <span className="px-2 py-1 rounded bg-blue-50 text-blue-700">Analytics</span>
-              <span className="text-slate-300">/</span>
+              <span className="px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Analytics</span>
+              <span className="text-slate-600">/</span>
               <span>Reports</span>
             </nav>
-            <h1 className="text-3xl font-bold text-slate-900 tracking-tight">
-              Time Tracking Reports
+            <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-3">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">
+                Time Reports
+              </span>
             </h1>
-            <p className="text-slate-600 mt-2 text-sm">Detailed workspace activity and productivity metrics</p>
+            <p className="text-slate-400 mt-2 text-sm">Detailed workspace activity and productivity metrics</p>
           </div>
 
           {/* Real-time Status Badge */}
-          <div className="flex items-center gap-3 px-4 py-2.5 bg-blue-50 rounded-xl border border-blue-100">
+          <div className="flex items-center gap-3 px-4 py-2.5 bg-white/5 rounded-xl border border-white/10 backdrop-blur-md">
             <div className="relative">
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-500"></span>
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 animate-pulse"></span>
             </div>
-            <span className="text-sm font-medium text-blue-700">
+            <span className="text-sm font-medium text-emerald-400">
               {reportData ? `${reportData.users.length} Active Users` : 'System Ready'}
             </span>
           </div>
@@ -661,132 +296,92 @@ export default function TimeReport() {
 
         {/* --- Configuration Card --- */}
         <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-200 p-6">
-            <div className="flex items-center gap-3 mb-6">
-              <div className="p-2.5 bg-blue-50 rounded-lg">
-                <MdOutlineDateRange className="w-5 h-5 text-blue-600" />
-              </div>
-              <div>
-                <h2 className="text-lg font-semibold text-slate-900">Date Range</h2>
-                <p className="text-sm text-slate-500">Select start and end dates</p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Start Date</label>
-                <div className="relative">
-                  <DatePicker
-                    selected={startDate}
-                    onChange={handleStartDateChange}
-                    selectsStart
-                    startDate={startDate}
-                    endDate={endDate}
-                    maxDate={today}
-                    placeholderText="Select start date"
-                    dateFormat="MMM d, yyyy"
-                    customInput={<CustomInput placeholder="Select start date" />}
-                    popperPlacement="bottom-start"
-                    popperModifiers={[
-                      {
-                        name: 'preventOverflow',
-                        options: {
-                          boundary: 'viewport',
-                          padding: 8,
-                        },
-                      },
-                      {
-                        name: 'flip',
-                        options: {
-                          allowedAutoPlacements: ['bottom', 'top'],
-                          fallbackPlacements: ['bottom', 'top'],
-                        },
-                      },
-                      {
-                        name: 'offset',
-                        options: {
-                          offset: [0, 8],
-                        },
-                      },
-                    ]}
-                  />
-                  <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+          <div className="lg:col-span-2 ui-card p-0 !overflow-visible">
+            <div className="ui-card-header">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
+                  <MdOutlineDateRange className="w-5 h-5" />
                 </div>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">End Date</label>
-                <div className="relative">
-                  <DatePicker
-                    selected={endDate}
-                    onChange={(date) => setEndDate(date)}
-                    selectsEnd
-                    startDate={startDate}
-                    endDate={endDate}
-                    minDate={startDate}
-                    maxDate={today}
-                    placeholderText="Select end date"
-                    dateFormat="MMM d, yyyy"
-                    customInput={<CustomInput placeholder="Select end date" />}
-                    popperPlacement="bottom-start"
-                    popperModifiers={[
-                      {
-                        name: 'preventOverflow',
-                        options: {
-                          boundary: 'viewport',
-                          padding: 8,
-                        },
-                      },
-                      {
-                        name: 'flip',
-                        options: {
-                          allowedAutoPlacements: ['bottom', 'top'],
-                          fallbackPlacements: ['bottom', 'top'],
-                        },
-                      },
-                      {
-                        name: 'offset',
-                        options: {
-                          offset: [0, 8],
-                        },
-                      },
-                    ]}
-                  />
-                  <FiCalendar className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 pointer-events-none" />
+                <div>
+                  <h2 className="text-lg font-bold text-white">Date Range</h2>
+                  <p className="text-xs text-slate-400 uppercase tracking-wide">Select period for report</p>
                 </div>
               </div>
             </div>
 
-            <div className="flex gap-4">
-              <button
-                onClick={fetchReport}
-                disabled={loading || !startDate || !endDate}
-                className="px-6 py-3 rounded-xl font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 bg-blue-600 text-white hover:bg-blue-700 active:scale-[0.98]"
-              >
-                {loading ? (
-                  <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                ) : (
-                  <FiFilter className="w-4 h-4" />
-                )}
-                Generate Report
-              </button>
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div className="space-y-2">
+                  <label className="ui-label">Start Date</label>
+                  <div className="relative z-30">
+                    <DatePicker
+                      selected={startDate}
+                      onChange={handleStartDateChange}
+                      selectsStart
+                      startDate={startDate}
+                      endDate={endDate}
+                      maxDate={today}
+                      placeholderText="Select start date"
+                      dateFormat="MMM d, yyyy"
+                      customInput={<CustomInput placeholder="Select start date" />}
+                      popperPlacement="bottom-start"
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <label className="ui-label">End Date</label>
+                  <div className="relative z-20">
+                    <DatePicker
+                      selected={endDate}
+                      onChange={(date) => setEndDate(date)}
+                      selectsEnd
+                      startDate={startDate}
+                      endDate={endDate}
+                      minDate={startDate}
+                      maxDate={today}
+                      placeholderText="Select end date"
+                      dateFormat="MMM d, yyyy"
+                      customInput={<CustomInput placeholder="Select end date" />}
+                      popperPlacement="bottom-start"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button
+                  onClick={fetchReport}
+                  disabled={loading || !startDate || !endDate}
+                  className="ui-btn ui-btn-primary w-full md:w-auto min-w-[200px]"
+                >
+                  {loading ? (
+                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                  ) : (
+                    <FiFilter className="w-4 h-4" />
+                  )}
+                  Generate Report
+                </button>
+              </div>
             </div>
           </div>
 
           {/* Quick Action Card */}
-          <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div className="ui-card p-6 flex flex-col justify-between h-full bg-gradient-to-br from-indigo-500/10 to-purple-500/5 z-20">
             <div className="mb-6">
-              <h3 className="text-lg font-semibold text-slate-900 mb-2">Export Data</h3>
-              <p className="text-slate-600 text-sm">
-                Download report in .xlsx format for external use.
+              <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
+                <FiDownload className="text-emerald-400" /> Export Data
+              </h3>
+              <p className="text-slate-400 text-sm leading-relaxed">
+                Download comprehensive report in .xlsx format for external analysis and record keeping.
               </p>
             </div>
             <button
               onClick={exportToExcel}
               disabled={!reportData || exporting}
-              className="w-full py-3 bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-xl font-medium flex items-center justify-center gap-2 hover:bg-emerald-100 transition-all active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ui-btn w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 hover:border-emerald-500/50"
             >
               {exporting ? (
-                <div className="w-4 h-4 border-2 border-emerald-300 border-t-emerald-700 rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
               ) : (
                 <>
                   <FiDownload className="w-4 h-4" />
@@ -799,14 +394,17 @@ export default function TimeReport() {
 
         {/* --- Data Display Section --- */}
         {reportData && (
-          <div className="animate-in fade-in slide-in-from-bottom-4 duration-300">
+          <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-              <h3 className="text-xl font-semibold text-slate-900">Report Results</h3>
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
+                Report Results
+              </h3>
               <div className="flex gap-2">
-                <div className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium">
+                <div className="px-3 py-1.5 bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 rounded-lg text-xs font-mono font-bold">
                   Total: {reportData.users.reduce((sum, user) => sum + user.total_hours, 0)} Hours
                 </div>
-                <div className="px-3 py-1.5 bg-slate-100 text-slate-700 rounded-lg text-xs font-medium">
+                <div className="px-3 py-1.5 bg-white/5 text-slate-300 border border-white/10 rounded-lg text-xs font-mono">
                   {formatDateNoTime(reportData.startDate)} - {formatDateNoTime(reportData.endDate)}
                 </div>
               </div>
@@ -816,48 +414,52 @@ export default function TimeReport() {
               {sortedUsers.map((user, index) => (
                 <div
                   key={user.user_name}
-                  className="group bg-white border border-slate-200 rounded-xl p-5 hover:shadow-sm transition-all"
+                  className="group ui-card hover:border-indigo-500/30 hover:translate-y-[-2px] transition-all duration-300"
                 >
-                  {/* Profile Section */}
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-50 border border-blue-200 rounded-lg flex items-center justify-center text-base font-medium text-blue-700">
-                      {user.user_name.charAt(0)}
+                  <div className="p-5">
+                    {/* Profile Section */}
+                    <div className="flex items-center gap-4 mb-5">
+                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-lg font-bold text-white shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
+                        {user.user_name.charAt(0)}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="font-bold text-white truncate text-lg">{user.user_name}</h4>
+                        <p className="text-xs text-indigo-300 truncate font-medium bg-indigo-500/10 inline-block px-2 py-0.5 rounded border border-indigo-500/20 mt-1">
+                          {user.user_dept || 'General Dept'}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <h4 className="font-medium text-slate-900 truncate">{user.user_name}</h4>
-                      <p className="text-xs text-slate-500 truncate">{user.user_dept || 'General Dept'}</p>
-                    </div>
-                  </div>
 
-                  {/* Stat Pills */}
-                  <div className="flex gap-2">
-                    <div className="flex-1 bg-slate-50 rounded-lg p-3 text-center border border-slate-200">
-                      <div className="text-xs text-slate-500">Hours</div>
-                      <div className="text-lg font-bold text-slate-900">{user.total_hours}h</div>
+                    {/* Stat Pills */}
+                    <div className="flex gap-3 mb-5">
+                      <div className="flex-1 bg-white/5 rounded-xl p-3 text-center border border-white/5">
+                        <div className="text-[10px] uppercase text-slate-500 font-bold tracking-wider mb-1">Hours</div>
+                        <div className="text-xl font-black text-white">{user.total_hours}h</div>
+                      </div>
+                      <div className="flex-1 bg-white/5 rounded-xl p-3 text-center border border-white/5">
+                        <div className="text-[10px] uppercase text-slate-500 font-bold tracking-wider mb-1">Entries</div>
+                        <div className="text-xl font-black text-white">{user.entries.length}</div>
+                      </div>
                     </div>
-                    <div className="flex-1 bg-slate-50 rounded-lg p-3 text-center border border-slate-200">
-                      <div className="text-xs text-slate-500">Entries</div>
-                      <div className="text-lg font-bold text-slate-900">{user.entries.length}</div>
-                    </div>
-                  </div>
 
-                  {/* Summary Info */}
-                  <div className="mt-4 pt-4 border-t border-slate-100">
-                    <div className="text-xs text-slate-500">
-                      {user.entries.length > 0 ? (
-                        <div className="space-y-1">
-                          <div className="flex justify-between">
-                            <span>Projects:</span>
-                            <span className="font-medium">{[...new Set(user.entries.map(e => e.project))].length}</span>
+                    {/* Summary Info */}
+                    <div className="pt-4 border-t border-white/5">
+                      <div className="text-sm text-slate-400">
+                        {user.entries.length > 0 ? (
+                          <div className="space-y-2">
+                            <div className="flex justify-between items-center bg-white/[0.02] p-2 rounded-lg">
+                              <span className="text-xs font-semibold">Projects Active</span>
+                              <span className="font-mono font-bold text-indigo-400">{[...new Set(user.entries.map(e => e.project))].length}</span>
+                            </div>
+                            <div className="flex justify-between items-center bg-white/[0.02] p-2 rounded-lg">
+                              <span className="text-xs font-semibold">Avg Hours / Day</span>
+                              <span className="font-mono font-bold text-emerald-400">{(user.total_hours / user.entries.length).toFixed(1)}h</span>
+                            </div>
                           </div>
-                          <div className="flex justify-between">
-                            <span>Avg per day:</span>
-                            <span className="font-medium">{(user.total_hours / user.entries.length).toFixed(1)}h</span>
-                          </div>
-                        </div>
-                      ) : (
-                        <p className="italic">No time entries</p>
-                      )}
+                        ) : (
+                          <p className="italic text-center py-2 opacity-50">No time entries recorded</p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 </div>

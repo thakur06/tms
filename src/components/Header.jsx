@@ -1,287 +1,319 @@
-import { useState, useEffect } from 'react'
-import { Link, useLocation, useNavigate } from 'react-router-dom'
-import {
-  IoMenu, IoClose,
-  IoHomeOutline, IoHome,
-  IoTimeOutline, IoTime,
-  IoDocumentTextOutline, IoDocumentText,
-  IoListOutline, IoList,
-  IoBriefcaseOutline, IoBriefcase,
-  IoLogOutOutline, IoChevronDown
-} from 'react-icons/io5'
-import { motion, AnimatePresence } from 'framer-motion'
-import { useAuth } from '../context/AuthContext'
+import { useState, useEffect } from 'react';
+import { useLocation } from 'react-router-dom';
+import { 
+  IoMenu, IoSearchOutline, IoNotificationsOutline, 
+  IoChevronDown, IoLogOutOutline, IoSunnyOutline, IoMoonOutline, IoDesktopOutline,
+  IoPersonAddOutline, IoWarningOutline, IoCheckmarkCircleOutline
+} from 'react-icons/io5';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import CreateUserModal from './CreateUserModal';
+import { toast } from 'react-toastify';
+import LogoutConfirmationModal from './LogoutConfirmationModal';
 
-export default function Header() {
-  const location = useLocation()
-  const navigate = useNavigate()
-  const { logout, user } = useAuth()
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-  const [scrolled, setScrolled] = useState(false)
-  const [userMenuOpen, setUserMenuOpen] = useState(false)
+export default function Header({ onMenuClick }) {
+  const { user, logout } = useAuth();
+  const { theme, setTheme } = useTheme();
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [notifOpen, setNotifOpen] = useState(false);
+  const [showCreateUserModal, setShowCreateUserModal] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [notifications, setNotifications] = useState([]);
+  const location = useLocation();
 
-  const initials = (user?.name || 'User').charAt(0).toUpperCase()
-
-  const handleLogout = () => {
-    logout()
-    navigate('/auth')
-    setMobileMenuOpen(false)
-    setUserMenuOpen(false)
-  }
-
-  useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10)
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
-  }, [])
-
-  useEffect(() => {
-    if (mobileMenuOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = 'unset'
+  // Mapping paths to titles
+  const getPageTitle = () => {
+    switch(location.pathname) {
+      case '/dashboard': return 'Dashboard';
+      case '/projects': return 'Projects';
+      case '/tasks': return 'Tasks';
+      case '/time-log': return 'Time Log';
+      case '/reports': return 'Reports';
+      default: return 'Overview';
     }
-    return () => { document.body.style.overflow = 'unset' }
-  }, [mobileMenuOpen])
+  };
 
-  const navLinks = [
-    { path: '/dashboard', label: 'Dashboard', icon: IoHomeOutline, activeIcon: IoHome },
-    { path: '/projects', label: 'Projects', icon: IoBriefcaseOutline, activeIcon: IoBriefcase },
-    { path: '/tasks', label: 'Tasks', icon: IoListOutline, activeIcon: IoList },
-    { path: '/time-log', label: 'Time Log', icon: IoTimeOutline, activeIcon: IoTime },
-    { path: '/reports', label: 'Reports', icon: IoDocumentTextOutline, activeIcon: IoDocumentText },
-  ]
+  const initials = (user?.name || 'User').charAt(0).toUpperCase();
 
-  const isActive = (path) => location.pathname === path || (path === '/dashboard' && location.pathname === '/')
+  // Check Previous Week's Hours
+  useEffect(() => {
+    const checkPreviousWeekHours = async () => {
+      try {
+        // Calculate previous week range (Mon-Sun)
+        const today = new Date();
+        const day = today.getDay();
+        const diffToMonday = today.getDate() - day + (day === 0 ? -6 : 1);
+        const currentMonday = new Date(today);
+        currentMonday.setDate(diffToMonday);
+        
+        const prevMonday = new Date(currentMonday);
+        prevMonday.setDate(currentMonday.getDate() - 7);
+        
+        const prevSunday = new Date(prevMonday);
+        prevSunday.setDate(prevMonday.getDate() + 6);
+        
+        const startStr = prevMonday.toISOString().split('T')[0];
+        const endStr = prevSunday.toISOString().split('T')[0];
+
+        // Fetch entries for logged in user for that range
+        const res = await fetch('http://localhost:4000/api/time-entries/user/me', {
+          headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
+        });
+        
+        if (!res.ok) return;
+        
+        const data = await res.json();
+        
+        // Filter for prev week
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        end.setHours(23, 59, 59, 999);
+
+        const prevWeekEntries = data.filter(entry => {
+          const d = new Date(entry.entry_date);
+          return d >= start && d <= end;
+        });
+
+        const totalHours = prevWeekEntries.reduce((acc, curr) => acc + (curr.hours || 0) + ((curr.minutes || 0) / 60), 0);
+        
+        const alerts = [];
+        if (totalHours < 40) {
+          alerts.push({
+            id: 'low-hrs-prev',
+            type: 'warning',
+            title: 'Low Hours Alert (Last Week)',
+            message: `You logged ${totalHours.toFixed(1)}h last week (${startStr} to ${endStr}). Target: 40h.`,
+            time: 'Just now'
+          });
+        }
+
+        alerts.push({
+          id: 'welcome',
+          type: 'success',
+          title: 'System Update',
+          message: 'Welcome to the new Light/Dark theme UI.',
+          time: '1d ago'
+        });
+
+        setNotifications(alerts);
+
+      } catch (err) {
+        console.error("Failed to check hours", err);
+      }
+    };
+
+    if (user) {
+      checkPreviousWeekHours();
+    }
+  }, [user]);
+
+  const toggleTheme = () => {
+    if (theme === 'system') setTheme('light');
+    else if (theme === 'light') setTheme('dark');
+    else setTheme('system');
+  };
+
+  const getThemeIcon = () => {
+    switch(theme) {
+      case 'light': return <IoSunnyOutline className="w-5 h-5" />;
+      case 'dark': return <IoMoonOutline className="w-5 h-5" />;
+      default: return <IoDesktopOutline className="w-5 h-5" />;
+    }
+  };
+
+  const handleSearch = (e) => {
+    if (e.key === 'Enter') {
+      toast.info(`Searching for: ${searchQuery}`);
+      // Implement global search logic or redirection here
+    }
+  };
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled ? 'bg-white/80 backdrop-blur-xl shadow-sm border-b border-slate-200/60' : 'bg-white border-b border-transparent'
-      }`}>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16 sm:h-18">
-            
-            {/* Logo */}
-            <Link to="/" className="flex items-center gap-2.5 group flex-shrink-0">
-              <div className="relative h-10 w-10  p-[2px] overflow-hidden">
-                <div className="absolute inset-0  opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                <div className="relative h-full w-full  bg-white grid place-items-center">
-                  <img src="./fav.png" alt="logo" className="h-8 w-8 object-contain" />
-                </div>
-              </div>
-              <div className="hidden sm:block">
-                <div className="flex items-baseline gap-1">
-                  <span className="text-lg font-bold text-slate-900">Biogas</span>
-                  <span className="text-sm font-semibold text-emerald-600">Engineering</span>
-                </div>
-                <p className="text-[10px] font-medium text-slate-500 tracking-wide uppercase">Time Tracking System</p>
-              </div>
-            </Link>
+      <header className="sticky top-0 z-30 h-20 px-6 sm:px-8 flex items-center justify-between border-b transition-colors duration-300
+        bg-white/80 border-slate-200 backdrop-blur-md
+        dark:bg-[#030712]/80 dark:border-white/5">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={onMenuClick}
+            className="lg:hidden p-2 -ml-2 rounded-lg transition-colors 
+              text-slate-500 hover:bg-slate-100 hover:text-slate-900
+              dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+          >
+            <IoMenu className="w-6 h-6" />
+          </button>
+          
+          <div>
+            <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white transition-colors">{getPageTitle()}</h2>
+            <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Welcome back, {user?.name?.split(' ')[0]}</p>
+          </div>
+        </div>
 
-            {/* Desktop Navigation */}
-            <nav className="hidden md:flex items-center gap-1">
-              {navLinks.map((link) => {
-                const active = isActive(link.path)
-                const Icon = active ? link.activeIcon : link.icon
-                return (
-                  <Link
-                    key={link.path}
-                    to={link.path}
-                    className={`relative px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition-all `}
-                  >
-                    <Icon className={`w-4 h-4 ${
-                      active 
-                        ? 'text-emerald-700 bg-emerald-50' 
-                        : 'text-black hover:text-slate-900 hover:bg-slate-50'
-                    }`} />
-                    <span className={`${
-                      active 
-                        ? 'text-emerald-700 bg-emerald-50' 
-                        : 'text-black hover:text-slate-900 hover:bg-slate-50'
-                    }`}>{link.label}</span>
-                    {active && (
-                      <motion.div
-                        layoutId="activeTab"
-                        className="absolute bottom-0 left-3 right-3 h-0.5 bg-emerald-600 rounded-full"
-                        transition={{ type: 'spring', stiffness: 380, damping: 30 }}
-                      />
-                    )}
-                  </Link>
-                )
-              })}
-            </nav>
+        <div className="flex items-center gap-2 md:gap-4">
+          {/* Search - hidden on small mobile */}
+          <div className="hidden md:flex relative group">
+            <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 transition-colors
+              text-slate-400 group-focus-within:text-indigo-600
+              dark:text-slate-500 dark:group-focus-within:text-indigo-400" />
+            <input 
+              type="text" 
+              placeholder="Search tasks, projects..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyDown={handleSearch}
+              className="h-10 pl-10 pr-4 rounded-full text-sm transition-all w-64 outline-none border
+                bg-slate-100 border-transparent text-slate-900 placeholder:text-slate-500 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20
+                dark:bg-white/5 dark:border-white/5 dark:text-slate-200 dark:focus:bg-white/10 dark:focus:border-indigo-500/50 dark:focus:ring-0"
+            />
+          </div>
 
-            {/* Desktop User Menu */}
-            <div className="hidden md:flex items-center gap-3">
-              <div className="relative">
-                <button
-                  onClick={() => setUserMenuOpen(!userMenuOpen)}
-                  className="flex items-center gap-2.5 px-3 py-2 rounded-lg hover:bg-slate-50 transition-colors group"
-                >
-                  <div className="h-9 w-9 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 grid place-items-center text-white font-bold text-sm shadow-sm">
-                    {initials}
-                  </div>
-                  <div className="text-left hidden lg:block">
-                    <p className="text-sm font-semibold text-slate-900">{user?.name || 'User'}</p>
-                    <p className="text-xs text-slate-500 flex items-center gap-1">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      Active
-                    </p>
-                  </div>
-                  <IoChevronDown className={`w-4 h-4 text-slate-400 transition-transform hidden lg:block ${userMenuOpen ? 'rotate-180' : ''}`} />
-                </button>
+          {/* Theme Toggle */}
+          <button 
+            onClick={toggleTheme}
+            className="p-2.5 rounded-full transition-colors
+              text-slate-500 hover:bg-slate-100 hover:text-indigo-600
+              dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+            title={`Theme: ${theme.charAt(0).toUpperCase() + theme.slice(1)}`}
+          >
+            {getThemeIcon()}
+          </button>
 
-                <AnimatePresence>
-                  {userMenuOpen && (
-                    <>
-                      <div 
-                        className="fixed inset-0 z-10" 
-                        onClick={() => setUserMenuOpen(false)}
-                      />
-                      <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: -10 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute right-0 top-full mt-2 w-56 bg-white rounded-xl shadow-xl border border-slate-200 py-2 z-20"
-                      >
-                        <div className="px-4 py-3 border-b border-slate-100">
-                          <p className="text-sm font-semibold text-slate-900">{user?.name || 'User'}</p>
-                          <p className="text-xs text-slate-500 mt-0.5">{user?.email || 'user@biogas.com'}</p>
-                        </div>
-                        <button
-                          onClick={handleLogout}
-                          className="w-full flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors mt-1"
-                        >
-                          <IoLogOutOutline className="w-4 h-4" />
-                          Sign out
-                        </button>
-                      </motion.div>
-                    </>
-                  )}
-                </AnimatePresence>
-              </div>
-            </div>
-
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 rounded-lg hover:bg-slate-100 active:bg-slate-200 transition-colors"
-            >
-              {mobileMenuOpen ? (
-                <IoClose className="w-6 h-6 text-slate-700" />
-              ) : (
-                <IoMenu className="w-6 h-6 text-slate-700" />
+          {/* Notifications */}
+          <div className="relative">
+            <button 
+              onClick={() => setNotifOpen(!notifOpen)}
+              className="relative p-2.5 rounded-full transition-colors
+              text-slate-500 hover:bg-slate-100 hover:text-indigo-600
+              dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white">
+              <IoNotificationsOutline className="w-5 h-5" />
+              {notifications.some(n => n.type === 'warning') && (
+                <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full box-content border-2 
+                  border-white dark:border-[#030712]" />
               )}
             </button>
+            <AnimatePresence>
+              {notifOpen && (
+                <>
+                  <div className="fixed inset-0 z-10" onClick={() => setNotifOpen(false)} />
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    className="absolute right-0 top-full mt-2 w-80 rounded-2xl shadow-xl z-20 border overflow-hidden
+                      bg-white border-slate-200 shadow-slate-200/50
+                      dark:bg-[#1e293b] dark:border-white/10 dark:shadow-black/50"
+                  >
+                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 flex justify-between items-center">
+                      <span className="font-semibold text-sm text-slate-900 dark:text-white">Notifications</span>
+                      <span className="text-[10px] bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 px-2 py-0.5 rounded-full">{notifications.length} New</span>
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">No new notifications</div>
+                      ) : (
+                        notifications.map(n => (
+                          <div key={n.id} className="p-4 border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                            <div className="flex gap-3">
+                              <div className={`mt-0.5 shrink-0 ${n.type === 'warning' ? 'text-red-500' : 'text-emerald-500'}`}>
+                                {n.type === 'warning' ? <IoWarningOutline size={18} /> : <IoCheckmarkCircleOutline size={18} />}
+                              </div>
+                              <div>
+                                <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-200 line-clamp-1">{n.title}</h4>
+                                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{n.message}</p>
+                                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2">{n.time}</p>
+                              </div>
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* User Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setUserMenuOpen(!userMenuOpen)}
+              className="flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full transition-colors border border-transparent 
+                hover:bg-slate-100 hover:border-slate-200
+                dark:hover:bg-white/5 dark:hover:border-white/5"
+            >
+              <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 grid place-items-center text-white font-bold text-xs ring-2 
+                ring-white dark:ring-[#030712]">
+                {initials}
+              </div>
+              <span className="hidden md:block text-sm font-medium text-slate-700 dark:text-slate-200">{user?.name}</span>
+              <IoChevronDown className={`w-4 h-4 transition-transform ${userMenuOpen ? 'rotate-180' : ''} 
+                text-slate-400 dark:text-slate-500`} />
+            </button>
+
+            <AnimatePresence>
+              {userMenuOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setUserMenuOpen(false)} 
+                  />
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute right-0 top-full mt-2 w-56 p-2 rounded-2xl shadow-xl z-20 border
+                      bg-white border-slate-200 shadow-slate-200/50
+                      dark:bg-[#1e293b] dark:border-white/10 dark:shadow-black/50"
+                  >
+                    <div className="px-3 py-2 border-b mb-1 border-slate-100 dark:border-white/5">
+                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.name}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 text-truncate">{user?.email}</p>
+                    </div>
+
+                    <button
+                      onClick={() => { setUserMenuOpen(false); setShowCreateUserModal(true); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors
+                        text-slate-600 hover:bg-slate-100
+                        dark:text-slate-300 dark:hover:bg-white/5"
+                    >
+                      <IoPersonAddOutline className="w-4 h-4" />
+                      Add New User
+                    </button>
+                    
+                    <button
+                      onClick={() => { setUserMenuOpen(false); setShowLogoutConfirm(true); }}
+                      className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors
+                        text-red-600 hover:bg-red-50
+                        dark:text-red-400 dark:hover:bg-red-500/10"
+                    >
+                      <IoLogOutOutline className="w-4 h-4" />
+                      Sign Out
+                    </button>
+                  </motion.div>
+                </>
+              )}
+            </AnimatePresence>
           </div>
         </div>
       </header>
 
-      {/* Mobile Menu */}
-      <AnimatePresence>
-        {mobileMenuOpen && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.2 }}
-              className="fixed inset-0 bg-black/20 backdrop-blur-sm z-40 md:hidden"
-              onClick={() => setMobileMenuOpen(false)}
-            />
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-              className="fixed top-0 right-0 bottom-0 w-full  bg-white z-50 md:hidden shadow-2xl"
-            >
-              <div className="flex flex-col h-full">
-                {/* Mobile Header */}
-                <div className="flex items-center justify-between px-4 py border-b border-slate-200">
-                  <div className="flex items-center gap-2.5 bg-transparent">
-                  <div className="px-6 py-2 bg-gradient-to-br from-emerald-50 to-teal-50 border-b border-emerald-100">
-                  <div className="flex items-center gap-5">
-                    <div className="h-12 w-12 rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 grid place-items-center text-white font-bold shadow-sm">
-                      {initials}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-slate-900">{user?.name || 'User'}</p>
-                      <p className="text-xs  flex items-center gap-1.5 mt-0.5 text-green-600">
-                        {/* <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" /> */}
-                        Active now
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                  </div>
-                  <button
-                    onClick={() => setMobileMenuOpen(false)}
-                    className="p-2 rounded-lg hover:bg-slate-100 active:bg-slate-200 transition-colors"
-                  >
-                    <IoClose className="w-6 h-6 text-slate-700" />
-                  </button>
-                </div>
+      <CreateUserModal 
+        isOpen={showCreateUserModal} 
+        onClose={() => setShowCreateUserModal(false)} 
+        onUserCreated={(newUser) => {
+          // You might trigger a global user refresh here if needed
+          console.log("New user created:", newUser);
+        }}
+      />
 
-                {/* User Info */}
-                
-
-                {/* Navigation Links */}
-                <nav className="flex-1 px-4 py-6 overflow-y-auto">
-                  <div className="space-y-1">
-                    {navLinks.map((link) => {
-                      const active = isActive(link.path)
-                      const Icon = active ? link.activeIcon : link.icon
-                      return (
-                        <Link
-                          key={link.path}
-                          to={link.path}
-                          onClick={() => setMobileMenuOpen(false)}
-                          className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${
-                            active
-                              ? 'bg-emerald-50 text-emerald-700 font-semibold'
-                              : 'text-black hover:bg-slate-50 font-medium'
-                          }`}
-                        >
-                          <Icon className={`w-5 h-5 ${
-                      active 
-                        ? 'text-emerald-700 bg-emerald-50' 
-                        : 'text-black hover:text-slate-900 hover:bg-slate-50'
-                    }`} />
-                          <span className={`text-sm ${
-                      active 
-                        ? 'text-emerald-700 bg-emerald-50' 
-                        : 'text-black hover:text-slate-900 hover:bg-slate-50'
-                    }`}>{link.label}</span>
-                          {active && (
-                            <div className="ml-auto h-2 w-2 rounded-full bg-emerald-600" />
-                          )}
-                        </Link>
-                      )
-                    })}
-                  </div>
-                </nav>
-
-                {/* Logout Button */}
-                <div className="px-4 py-4 border-t border-slate-200">
-                  <button
-                    onClick={handleLogout}
-                    className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-red-50 text-red-600 font-semibold hover:bg-red-100 active:bg-red-200 transition-colors"
-                  >
-                    <IoLogOutOutline className="w-5 h-5" />
-                    Sign out
-                  </button>
-                </div>
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-
-      {/* Spacer for fixed header */}
-      <div className="h-16 sm:h-18" />
+      <LogoutConfirmationModal
+        isOpen={showLogoutConfirm}
+        onClose={() => setShowLogoutConfirm(false)}
+        onConfirm={logout}
+      />
     </>
-  )
+  );
 }
