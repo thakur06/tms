@@ -9,6 +9,8 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import EditUserModal from '../components/EditUserModal';
 import CreateUserModal from '../components/CreateUserModal';
+import UserHierarchyModal from '../components/UserHierarchyModal';
+import { IoGitNetworkOutline } from 'react-icons/io5';
 
 export default function UserManagement() {
   const [users, setUsers] = useState([]);
@@ -18,6 +20,7 @@ export default function UserManagement() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isHierarchyModalOpen, setIsHierarchyModalOpen] = useState(false);
 
   useEffect(() => {
     fetchUsers();
@@ -62,13 +65,28 @@ export default function UserManagement() {
           <p className="text-slate-400 mt-2 text-sm">Manage system users, roles, and reporting managers</p>
         </div>
 
-        <button
-          onClick={() => setIsAddModalOpen(true)}
-          className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-900/20 transition-all active:scale-95"
-        >
-          <IoPersonAddOutline size={20} />
-          Add User
-        </button>
+        <div className="flex items-center gap-3 w-full sm:w-auto">
+          {/* <button
+            onClick={fetchUsers}
+            className="p-3 bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white rounded-xl border border-white/10 transition-all active:scale-95"
+            title="Refresh Users"
+            disabled={loading}
+          >
+            <motion.div
+              animate={loading ? { rotate: 360 } : {}}
+              transition={loading ? { repeat: Infinity, duration: 1, ease: "linear" } : {}}
+            >
+              <IoFilterOutline size={20} className="rotate-90" />
+            </motion.div>
+          </button> */}
+          <button
+            onClick={() => setIsAddModalOpen(true)}
+            className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-900/20 transition-all active:scale-95"
+          >
+            <IoPersonAddOutline size={20} />
+            Add User
+          </button>
+        </div>
       </header>
 
       {/* Controls */}
@@ -108,7 +126,7 @@ export default function UserManagement() {
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead>
-                <tr className="border-b border-white/5 bg-white/[0.02]">
+                <tr className="border-b border-white/5 bg-white/2">
                   <th className="text-left py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">User</th>
                   <th className="text-left py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Dept</th>
                   <th className="text-left py-4 px-6 text-xs font-bold text-slate-400 uppercase tracking-wider">Role</th>
@@ -125,11 +143,11 @@ export default function UserManagement() {
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, scale: 0.95 }}
                       transition={{ duration: 0.2, delay: index * 0.03 }}
-                      className="border-b border-white/5 hover:bg-white/[0.02] transition-colors group"
+                      className="border-b border-white/5 hover:bg-white/2 transition-colors group"
                     >
                       <td className="py-4 px-6">
                         <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
+                          <div className="w-10 h-10 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 flex items-center justify-center text-white font-bold text-sm">
                             {user.name.charAt(0)}
                           </div>
                           <div>
@@ -164,15 +182,28 @@ export default function UserManagement() {
                         </span>
                       </td>
                       <td className="py-4 px-6 text-right">
-                        <button
-                          onClick={() => {
-                            setSelectedUser(user);
-                            setIsEditModalOpen(true);
-                          }}
-                          className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
-                        >
-                          <IoPencilOutline size={18} />
-                        </button>
+                        <div className="flex items-center justify-end gap-1">
+                          <button
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setIsHierarchyModalOpen(true);
+                            }}
+                            className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
+                            title="View Hierarchy"
+                          >
+                            <IoGitNetworkOutline size={18} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              setSelectedUser(user);
+                              setIsEditModalOpen(true);
+                            }}
+                            className="p-2 text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
+                            title="Edit User"
+                          >
+                            <IoPencilOutline size={18} />
+                          </button>
+                        </div>
                       </td>
                     </motion.tr>
                   ))}
@@ -201,6 +232,13 @@ export default function UserManagement() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSuccess={fetchUsers}
+      />
+
+      <UserHierarchyModal
+        isOpen={isHierarchyModalOpen}
+        onClose={() => setIsHierarchyModalOpen(false)}
+        user={selectedUser}
+        allUsers={users}
       />
     </div>
   );

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Link } from 'react-router-dom';
 import { 
   IoMenu, IoSearchOutline, IoNotificationsOutline, 
   IoChevronDown, IoLogOutOutline, IoSunnyOutline, IoMoonOutline, IoDesktopOutline,
@@ -31,6 +31,9 @@ export default function Header({ onMenuClick }) {
       case '/tasks': return 'Tasks';
       case '/time-log': return 'Time Log';
       case '/reports': return 'Reports';
+      case '/my-submissions': return 'My Submissions';
+      case '/approvals': return 'Approvals';
+      case '/users': return 'User Management';
       default: return 'Overview';
     }
   };
@@ -149,6 +152,46 @@ export default function Header({ onMenuClick }) {
             <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white transition-colors">{getPageTitle()}</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Welcome back, {user?.name?.split(' ')[0]}</p>
           </div>
+
+          {/* New Navigation Links for Desktop */}
+          {/* {user && (
+            <div className="hidden xl:flex items-center gap-2 ml-4">
+              <Link
+                to="/dashboard"
+                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                  location.pathname === '/dashboard' || location.pathname === '/'
+                    ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                }`}
+              >
+                Dashboard
+              </Link>
+              {user.is_manager && (
+                <>
+                  <Link
+                    to="/approvals"
+                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                      location.pathname === '/approvals'
+                        ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                    }`}
+                  >
+                    Approvals
+                  </Link>
+                  <Link
+                    to="/users"
+                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                      location.pathname === '/users'
+                        ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
+                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+                    }`}
+                  >
+                    Users
+                  </Link>
+                </>
+              )}
+            </div>
+          )} */}
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
@@ -201,7 +244,7 @@ export default function Header({ onMenuClick }) {
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    className="absolute right-0 top-full mt-2 w-80 rounded-2xl shadow-xl z-20 border overflow-hidden
+                    className="absolute right-0 sm:right-0 top-full mt-2 w-80 max-sm:fixed max-sm:inset-x-4 max-sm:mx-auto max-sm:top-20 max-sm:w-auto rounded-2xl shadow-xl z-20 border overflow-hidden
                       bg-white border-slate-200 shadow-slate-200/50
                       dark:bg-[#1e293b] dark:border-white/10 dark:shadow-black/50"
                   >
@@ -214,7 +257,7 @@ export default function Header({ onMenuClick }) {
                         <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">No new notifications</div>
                       ) : (
                         notifications.map(n => (
-                          <div key={n.id} className="p-4 border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/[0.02] transition-colors">
+                          <div key={n.id} className="p-4 border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/2 transition-colors">
                             <div className="flex gap-3">
                               <div className={`mt-0.5 shrink-0 ${n.type === 'warning' ? 'text-red-500' : 'text-emerald-500'}`}>
                                 {n.type === 'warning' ? <IoWarningOutline size={18} /> : <IoCheckmarkCircleOutline size={18} />}
@@ -243,7 +286,7 @@ export default function Header({ onMenuClick }) {
                 hover:bg-slate-100 hover:border-slate-200
                 dark:hover:bg-white/5 dark:hover:border-white/5"
             >
-              <div className="h-8 w-8 rounded-full bg-gradient-to-tr from-indigo-500 to-purple-500 grid place-items-center text-white font-bold text-xs ring-2 
+              <div className="h-8 w-8 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 grid place-items-center text-white font-bold text-xs ring-2 
                 ring-white dark:ring-[#030712]">
                 {initials}
               </div>
@@ -273,15 +316,17 @@ export default function Header({ onMenuClick }) {
                       <p className="text-xs text-slate-500 dark:text-slate-400 text-truncate">{user?.email}</p>
                     </div>
 
-                    <button
-                      onClick={() => { setUserMenuOpen(false); setShowCreateUserModal(true); }}
-                      className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors
-                        text-slate-600 hover:bg-slate-100
-                        dark:text-slate-300 dark:hover:bg-white/5"
-                    >
-                      <IoPersonAddOutline className="w-4 h-4" />
-                      Add New User
-                    </button>
+                    {user?.is_manager && (
+                      <button
+                        onClick={() => { setUserMenuOpen(false); setShowCreateUserModal(true); }}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors
+                          text-slate-600 hover:bg-slate-100
+                          dark:text-slate-300 dark:hover:bg-white/5"
+                      >
+                        <IoPersonAddOutline className="w-4 h-4" />
+                        Add New User
+                      </button>
+                    )}
                     
                     <button
                       onClick={() => { setUserMenuOpen(false); setShowLogoutConfirm(true); }}

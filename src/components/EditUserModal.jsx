@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { IoClose, IoPersonOutline, IoCheckmarkCircle } from 'react-icons/io5';
+import { 
+  IoClose, IoPersonOutline, IoCheckmarkCircle, IoBusinessOutline,
+  IoMailOutline, IoChevronDown, IoSearchOutline, IoSaveOutline
+} from 'react-icons/io5';
 import { createPortal } from 'react-dom';
 import { toast } from 'react-toastify';
 import axios from 'axios';
@@ -8,6 +11,7 @@ import axios from 'axios';
 export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
   const [mounted, setMounted] = useState(false);
   const [managers, setManagers] = useState([]);
+  const [depts, setDepts] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -17,6 +21,12 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
   });
   const [loading, setLoading] = useState(false);
 
+  // Dropdown states
+  const [isDeptOpen, setIsDeptOpen] = useState(false);
+  const [isManagerOpen, setIsManagerOpen] = useState(false);
+  const [deptSearch, setDeptSearch] = useState('');
+  const [managerSearch, setManagerSearch] = useState('');
+
   useEffect(() => {
     setMounted(true);
     return () => setMounted(false);
@@ -24,6 +34,7 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
 
   useEffect(() => {
     if (isOpen) {
+      fetchDepts();
       fetchManagers();
       if (user) {
         setFormData({
@@ -37,17 +48,41 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
     }
   }, [isOpen, user]);
 
+  const fetchDepts = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get('http://localhost:4000/api/dept', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDepts(response.data);
+    } catch (error) {
+      console.error('Failed to fetch departments:', error);
+    }
+  };
+
   const fetchManagers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:4000/api/users/managers', {
+      // Fetch ALL users so we can assign anyone as a manager (backend handles promotion)
+      const response = await axios.get('http://localhost:4000/api/users', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setManagers(response.data);
     } catch (error) {
-      console.error('Failed to fetch managers:', error);
+      console.error('Failed to fetch users for manager selection:', error);
     }
   };
+
+  const filteredDepts = depts.filter(d => 
+    d.dept_name.toLowerCase().includes(deptSearch.toLowerCase())
+  );
+
+  const filteredManagers = managers.filter(m => 
+    m.name.toLowerCase().includes(managerSearch.toLowerCase()) || 
+    m.email.toLowerCase().includes(managerSearch.toLowerCase())
+  );
+
+  const selectedManager = managers.find(m => m.id === parseInt(formData.reporting_manager_id));
 
   const handleSave = async () => {
     if (!user) return;
@@ -128,7 +163,10 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
 
               <div className="ui-modal-body flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
                 <div>
-                  <label className="ui-label mb-1.5">Full Name</label>
+                  <label className="ui-label mb-1.5 flex items-center gap-2">
+                    <IoPersonOutline className="text-indigo-400" size={14} /> 
+                    Full Name
+                  </label>
                   <input
                     type="text"
                     className="ui-input"
@@ -138,7 +176,10 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                 </div>
 
                 <div>
-                  <label className="ui-label mb-1.5">Email Address</label>
+                  <label className="ui-label mb-1.5 flex items-center gap-2">
+                    <IoMailOutline className="text-indigo-400" size={14} />
+                    Email Address
+                  </label>
                   <input
                     type="email"
                     className="ui-input"
@@ -147,14 +188,143 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                   />
                 </div>
 
-                <div>
-                  <label className="ui-label mb-1.5">Department</label>
-                  <input
-                    type="text"
-                    className="ui-input"
-                    value={formData.dept}
-                    onChange={(e) => setFormData({ ...formData, dept: e.target.value })}
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Searchable Dept */}
+                  <div className="space-y-2">
+                    <label className="ui-label flex items-center gap-2">
+                      <IoBusinessOutline className="text-indigo-400" size={14} />
+                      Dept
+                    </label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => { setIsDeptOpen(!isDeptOpen); setIsManagerOpen(false); }}
+                        className={`w-full flex items-center justify-between px-3 py-2 bg-white/5 border rounded-xl text-xs font-medium transition-all ${
+                          isDeptOpen ? 'border-indigo-500 bg-white/10 text-white' : 'border-white/10 text-slate-400'
+                        }`}
+                      >
+                        <span className={formData.dept ? 'text-white' : 'text-slate-500'}>
+                          {formData.dept || 'Select Dept...'}
+                        </span>
+                        <IoChevronDown className={`text-indigo-400 transition-transform ${isDeptOpen ? 'rotate-180' : ''}`} size={14} />
+                      </button>
+
+                      <AnimatePresence>
+                        {isDeptOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="relative mt-2 bg-white/5 border border-white/10 rounded-xl overflow-hidden z-10"
+                          >
+                            <div className="p-2 border-b border-white/5">
+                              <div className="relative">
+                                <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={12} />
+                                <input
+                                  className="w-full pl-8 pr-3 py-1 bg-black/20 rounded-lg text-[10px] outline-none border border-transparent focus:border-indigo-500/50 text-white"
+                                  placeholder="Search dept..."
+                                  value={deptSearch}
+                                  onChange={(e) => setDeptSearch(e.target.value)}
+                                />
+                              </div>
+                            </div>
+                            <div className="max-h-32 overflow-y-auto custom-scrollbar">
+                              {filteredDepts.map(d => (
+                                <button
+                                  key={d.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData({ ...formData, dept: d.dept_name });
+                                    setIsDeptOpen(false);
+                                  }}
+                                  className="w-full px-3 py-2 text-left text-[10px] text-slate-300 hover:bg-white/5 hover:text-white transition-all flex items-center justify-between"
+                                >
+                                  {d.dept_name}
+                                  {formData.dept === d.dept_name && <IoCheckmarkCircle className="text-indigo-400" size={12} />}
+                                </button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  {/* Searchable Manager */}
+                  <div className="space-y-2">
+                    <label className="ui-label flex items-center gap-2">
+                      <IoPersonOutline className="text-indigo-400" size={14} />
+                      Manager
+                    </label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => { setIsManagerOpen(!isManagerOpen); setIsDeptOpen(false); }}
+                        className={`w-full flex items-center justify-between px-3 py-2 bg-white/5 border rounded-xl text-xs font-medium transition-all ${
+                          isManagerOpen ? 'border-indigo-500 bg-white/10 text-white' : 'border-white/10 text-slate-400'
+                        }`}
+                      >
+                        <span className={formData.reporting_manager_id ? 'text-white' : 'text-slate-500 truncate'}>
+                          {selectedManager?.name || 'Select Manager...'}
+                        </span>
+                        <IoChevronDown className={`text-indigo-400 transition-transform ${isManagerOpen ? 'rotate-180' : ''}`} size={14} />
+                      </button>
+
+                      <AnimatePresence>
+                        {isManagerOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="relative mt-2 bg-white/5 border border-white/10 rounded-xl overflow-hidden z-10"
+                          >
+                            <div className="p-2 border-b border-white/5">
+                              <div className="relative">
+                                <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" size={12} />
+                                <input
+                                  className="w-full pl-8 pr-3 py-1 bg-black/20 rounded-lg text-[10px] outline-none border border-transparent focus:border-indigo-500/50 text-white"
+                                  placeholder="Search manager..."
+                                  value={managerSearch}
+                                  onChange={(e) => setManagerSearch(e.target.value)}
+                                />
+                              </div>
+                            </div>
+                            <div className="max-h-32 overflow-y-auto custom-scrollbar">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setFormData({ ...formData, reporting_manager_id: '' });
+                                  setIsManagerOpen(false);
+                                }}
+                                className="w-full px-3 py-2 text-left text-[10px] text-slate-400 italic hover:bg-white/5 hover:text-white transition-all"
+                              >
+                                No Manager
+                              </button>
+                              {filteredManagers
+                                .filter(m => m.id !== user?.id)
+                                .map(m => (
+                                <button
+                                  key={m.id}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData({ ...formData, reporting_manager_id: m.id });
+                                    setIsManagerOpen(false);
+                                  }}
+                                  className="w-full px-3 py-1.5 text-left hover:bg-white/5 transition-all outline-none"
+                                >
+                                  <div className="flex items-center justify-between px-0.5">
+                                    <span className="text-[10px] text-white font-medium truncate">{m.name}</span>
+                                    {parseInt(formData.reporting_manager_id) === m.id && <IoCheckmarkCircle className="text-indigo-400" size={12} />}
+                                  </div>
+                                  <p className="text-[8px] text-slate-500 truncate px-0.5">{m.dept} • {m.email}</p>
+                                </button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
                 </div>
 
                 <div className="pt-2">
@@ -172,24 +342,6 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                   </p>
                 </div>
 
-                <div>
-                  <label className="ui-label mb-1.5">Reporting Manager</label>
-                  <select
-                    value={formData.reporting_manager_id}
-                    onChange={(e) => setFormData({ ...formData, reporting_manager_id: e.target.value })}
-                    className="ui-input"
-                  >
-                    <option value="">No Manager</option>
-                    {managers
-                      .filter(m => m.id !== user?.id)
-                      .map(manager => (
-                        <option key={manager.id} value={manager.id}>
-                          {manager.name} ({manager.dept})
-                        </option>
-                      ))}
-                  </select>
-                </div>
-
                 <div className="flex gap-3 pt-6">
                   <button
                     onClick={onClose}
@@ -205,7 +357,7 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                     {loading ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
                     ) : (
-                      <IoCheckmarkCircle className="w-5 h-5" />
+                      <IoSaveOutline className="w-5 h-5" />
                     )}
                     Save Changes
                   </button>
