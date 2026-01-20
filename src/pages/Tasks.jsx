@@ -12,7 +12,7 @@ export default function Tasks() {
   const [isLoading, setIsLoading] = useState(true)
   const [tick, setTick] = useState(0)
   const [showTaskModal, setShowTaskModal] = useState(false)
-
+  const token = localStorage.getItem('token');
   const notifyError = (msg) =>
     toast.error(msg, {
       position: "top-center",
@@ -49,11 +49,16 @@ export default function Tasks() {
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true)
+      const headers = {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      };
+      
       try {
         const [tasksRes, projectsRes, deptRes] = await Promise.all([
-          fetch("http://localhost:4000/api/tasks"),
-          fetch("http://localhost:4000/api/projects"),
-          fetch("http://localhost:4000/api/dept"),
+          fetch("http://localhost:4000/api/tasks", { headers }),
+          fetch("http://localhost:4000/api/projects", { headers }),
+          fetch("http://localhost:4000/api/dept", { headers }),
         ])
 
         if (tasksRes.ok) {
@@ -145,6 +150,9 @@ export default function Tasks() {
   const handleDeleteTask = async (taskId) => {
     try {
       const response = await fetch(`http://localhost:4000/api/tasks/${taskId}`, {
+        headers: { "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
         method: "DELETE",
       })
 
@@ -169,7 +177,9 @@ export default function Tasks() {
     try {
       const response = await fetch("http://localhost:4000/api/tasks", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify(taskData),
       })
 

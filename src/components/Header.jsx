@@ -136,8 +136,8 @@ export default function Header({ onMenuClick }) {
   return (
     <>
       <header className="sticky top-0 z-30 h-20 px-6 sm:px-8 flex items-center justify-between border-b transition-colors duration-300
-        bg-white/80 border-slate-200 backdrop-blur-md
-        dark:bg-[#030712]/80 dark:border-white/5">
+        border-slate-600 backdrop-blur-md
+        bg-[#030712]/80 ">
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuClick}
@@ -152,46 +152,6 @@ export default function Header({ onMenuClick }) {
             <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white transition-colors">{getPageTitle()}</h2>
             <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Welcome back, {user?.name?.split(' ')[0]}</p>
           </div>
-
-          {/* New Navigation Links for Desktop */}
-          {/* {user && (
-            <div className="hidden xl:flex items-center gap-2 ml-4">
-              <Link
-                to="/dashboard"
-                className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                  location.pathname === '/dashboard' || location.pathname === '/'
-                    ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                    : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                }`}
-              >
-                Dashboard
-              </Link>
-              {user.is_manager && (
-                <>
-                  <Link
-                    to="/approvals"
-                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                      location.pathname === '/approvals'
-                        ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                    }`}
-                  >
-                    Approvals
-                  </Link>
-                  <Link
-                    to="/users"
-                    className={`px-3 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                      location.pathname === '/users'
-                        ? 'bg-indigo-500 text-white shadow-lg shadow-indigo-500/20'
-                        : 'text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
-                    }`}
-                  >
-                    Users
-                  </Link>
-                </>
-              )}
-            </div>
-          )} */}
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">

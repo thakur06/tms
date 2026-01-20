@@ -21,7 +21,7 @@ export default function Projects() {
   })
 
   const apiBase = "http://localhost:4000/api"
-
+  const token = localStorage.getItem('token');
   const notifyError = (msg) =>
     toast.error(msg, {
       position: "top-center",
@@ -87,6 +87,9 @@ export default function Projects() {
   const handleDeleteProject = async (projectId) => {
     try {
       const response = await fetch(`${apiBase}/projects/${projectId}`, {
+        headers: { "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
+        },
         method: "DELETE",
       })
       if (response.ok) {
@@ -120,7 +123,9 @@ export default function Projects() {
     try {
       const response = await fetch(`${apiBase}/projects`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json",
+           Authorization: `Bearer ${token}`
+         },
         body: JSON.stringify(projectData),
       })
 

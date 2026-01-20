@@ -70,8 +70,11 @@ export default function TimeReport() {
     const formattedEnd = formatDateLocal(endDate);
 
     try {
+       const token = localStorage.getItem('token');
       const res = await fetch(
-        `http://localhost:4000/api/reports/time-entries?startDate=${formattedStart}&endDate=${formattedEnd}`
+        `http://localhost:4000/api/reports/time-entries?startDate=${formattedStart}&endDate=${formattedEnd}`,{
+           headers: { Authorization: `Bearer ${token}` }
+        }
       );
 
       if (!res.ok) {
