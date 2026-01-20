@@ -6,6 +6,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 
 export default function AssignManagerModal({ isOpen, onClose, user, onSuccess }) {
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
   const [mounted, setMounted] = useState(false);
   const [managers, setManagers] = useState([]);
   const [selectedManager, setSelectedManager] = useState('');
@@ -30,7 +31,7 @@ export default function AssignManagerModal({ isOpen, onClose, user, onSuccess })
   const fetchManagers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:4000/api/users/managers', {
+      const response = await axios.get('${server}/api/users/managers', {
         headers: { Authorization: `Bearer ${token}` }
       });
       setManagers(response.data);
@@ -50,7 +51,7 @@ export default function AssignManagerModal({ isOpen, onClose, user, onSuccess })
       // Update manager status if changed
       if (isManager !== user.is_manager) {
         await axios.put(
-          `http://localhost:4000/api/users/${user.id}/manager-status`,
+          `${server}/api/users/${user.id}/manager-status`,
           { isManager },
           { headers: { Authorization: `Bearer ${token}` } }
         );
@@ -58,7 +59,7 @@ export default function AssignManagerModal({ isOpen, onClose, user, onSuccess })
 
       // Update reporting manager
       await axios.put(
-        `http://localhost:4000/api/users/${user.id}/manager`,
+        `${server}/api/users/${user.id}/manager`,
         { managerId: selectedManager || null },
         { headers: { Authorization: `Bearer ${token}` } }
       );

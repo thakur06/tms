@@ -8,7 +8,7 @@ import {
   IoLogOutOutline,
   IoCheckmarkCircleOutline, IoCheckmarkCircle,
   IoCalendarOutline, IoCalendar,
-  IoPersonOutline, IoPerson
+  IoPersonOutline, IoPerson,IoAnalyticsOutline,IoAnalytics
 } from 'react-icons/io5';
 import { useAuth } from '../context/AuthContext';
 
@@ -25,6 +25,7 @@ export default function Sidebar({ isOpen, onClose }) {
     { path: '/my-submissions', label: 'My Submissions', icon: IoCalendarOutline, activeIcon: IoCalendar },
     { path: '/approvals', label: 'Approvals', icon: IoCheckmarkCircleOutline, activeIcon: IoCheckmarkCircle, hideIfNoReports: true },
     { path: '/users', label: 'Users', icon: IoPersonOutline, activeIcon: IoPerson, adminOnly: true },
+    { path: '/analytics', label: 'Analytics', icon: IoAnalyticsOutline, activeIcon: IoAnalytics, adminOnly: true },
   ];
 
   const isActive = (path) => location.pathname === path || (path === '/dashboard' && location.pathname === '/');

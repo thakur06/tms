@@ -34,6 +34,7 @@ import {
 import { motion } from "framer-motion";
 
 export default function Dashboard() {
+  const server=import.meta.env.VITE_SERVER_ADDRESS
   const { user } = useAuth();
   const [tasks, setTasks] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -41,7 +42,6 @@ export default function Dashboard() {
   const [isLoading, setIsLoading] = useState(true);
   const [loadingError, setLoadingError] = useState("");
 
-  const apiBase = "http://localhost:4000/api";
 
   const toDateKey = (d) => {
     if (!d) return "";
@@ -72,9 +72,9 @@ export default function Dashboard() {
       setLoadingError("");
       try {
         const [tasksRes, projectsRes, teRes] = await Promise.all([
-          fetch(`${apiBase}/tasks`),
-          fetch(`${apiBase}/projects`),
-          fetch(`${apiBase}/time-entries/user/me`, {
+          fetch(`${server}/api/tasks`),
+          fetch(`${server}/api/projects`),
+          fetch(`${server}/api/time-entries/user/me`, {
             headers: { 
               Authorization: `Bearer ${localStorage.getItem("token")}` 
             },

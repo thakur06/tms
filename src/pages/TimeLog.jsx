@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import WeeklyTimeLog from '../components/WeeklyTimeLog'
 
 export default function TimeLog() {
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [clients,setClients]= useState([]);
@@ -35,7 +36,7 @@ export default function TimeLog() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/projects')
+        const res = await fetch(`${server}/api/projects`)
         const data = await res.json()
         setProjects(data)
       } catch (err) {
@@ -44,7 +45,7 @@ export default function TimeLog() {
     }
     const fetchTasks = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/tasks')
+        const res = await fetch(`${server}/api/tasks`)
         const data = await res.json()
         setTasks(data)
       } catch (err) {
@@ -54,7 +55,7 @@ export default function TimeLog() {
 
     const fetchClients = async () => {
       try {
-        const res = await fetch('http://localhost:4000/api/client')
+        const res = await fetch(`${server}/api/client`)
         const data = await res.json()
         setClients(data)
       } catch (err) {

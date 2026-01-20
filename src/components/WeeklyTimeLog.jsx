@@ -12,6 +12,7 @@ import { ToastContainer, toast, Zoom } from 'react-toastify';
 import { useAuth } from '../context/AuthContext';
 
 export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEntries, clients }) {
+  const server=import.meta.env.VITE_SERVER_ADDRESS;
   const { user } = useAuth();
   const [showSubmitModal, setShowSubmitModal] = useState(false)
   const [showAddTimeModal, setShowAddTimeModal] = useState(false)
@@ -115,7 +116,7 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
         minutes: parseInt(minutes) || 0,
       }
 
-      const response = await fetch('http://localhost:4000/api/time-entries', {
+      const response = await fetch(`${server}/api/time-entries`, {
         method: 'POST',
         headers: { 
           'Content-Type': 'application/json',
@@ -157,7 +158,7 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
       const totalHours = (totalMinutes / 60).toFixed(2);
 
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:4000/api/timesheets/submit', {
+      const response = await fetch(`${server}/api/timesheets/submit`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -192,7 +193,7 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
     try {
       if (entryId) {
         const token = localStorage.getItem('token');
-        const res = await fetch(`http://localhost:4000/api/time-entries/${entryId}`, {
+        const res = await fetch(`${server}/api/time-entries/${entryId}`, {
           method: 'DELETE',
           headers: {
             'Authorization': `Bearer ${token}`
@@ -241,7 +242,7 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
   const updateTimeEntry = async (entryId, updatedData) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch(`http://localhost:4000/api/time-entries/${entryId}`, {
+      const response = await fetch(`${server}/api/time-entries/${entryId}`, {
         method: 'PUT',
         headers: { 
           'Content-Type': 'application/json',
@@ -274,7 +275,7 @@ export default function WeeklyTimeLog({ tasks, projects, timeEntries, setTimeEnt
     if (!user) return;
     try {
       const token = localStorage.getItem('token');
-      const res = await fetch('http://localhost:4000/api/time-entries/user/me', {
+      const res = await fetch(`${server}/api/time-entries/user/me`, {
         headers: {
           'Authorization': `Bearer ${token}`
         }

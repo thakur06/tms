@@ -9,6 +9,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 export default function MyTimesheetStatus() {
+  const server=import.meta.env.VITE_SERVER_ADDRESS;
   const { user } = useAuth();
   const [timesheets, setTimesheets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -24,7 +25,7 @@ export default function MyTimesheetStatus() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:4000/api/timesheets/my-status', {
+      const response = await axios.get(`${server}/api/timesheets/my-status`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTimesheets(response.data);

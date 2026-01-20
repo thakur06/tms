@@ -5,6 +5,7 @@ import TasksList from "../components/TasksList"
 import CreateTaskModal from "../components/CreateTaskModal"
 
 export default function Tasks() {
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
   const [tasks, setTasks] = useState([])
   const [projects, setProjects] = useState([])
   const [dept, setDept] = useState([])
@@ -56,9 +57,9 @@ export default function Tasks() {
       
       try {
         const [tasksRes, projectsRes, deptRes] = await Promise.all([
-          fetch("http://localhost:4000/api/tasks", { headers }),
-          fetch("http://localhost:4000/api/projects", { headers }),
-          fetch("http://localhost:4000/api/dept", { headers }),
+          fetch(`${server}/api/tasks`, { headers }),
+          fetch(`${server}/api/projects`, { headers }),
+          fetch(`${server}/api/dept`, { headers }),
         ])
 
         if (tasksRes.ok) {
@@ -136,7 +137,7 @@ export default function Tasks() {
 
   const updateTaskLoggedTime = async (taskId, loggedHours) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/tasks/${taskId}`, {
+      const response = await fetch(`${server}/api/tasks/${taskId}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ logged: loggedHours }),
@@ -149,7 +150,7 @@ export default function Tasks() {
 
   const handleDeleteTask = async (taskId) => {
     try {
-      const response = await fetch(`http://localhost:4000/api/tasks/${taskId}`, {
+      const response = await fetch(`${server}/api/tasks/${taskId}`, {
         headers: { "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
@@ -175,7 +176,7 @@ export default function Tasks() {
 
   const handleCreateTask = async (taskData) => {
     try {
-      const response = await fetch("http://localhost:4000/api/tasks", {
+      const response = await fetch("${server}/api/tasks", {
         method: "POST",
         headers: { "Content-Type": "application/json",
           Authorization: `Bearer ${token}`

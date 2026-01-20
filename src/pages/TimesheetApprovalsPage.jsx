@@ -8,6 +8,7 @@ import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
 export default function TimesheetApprovalsPage() {
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
   const { user } = useAuth();
   const [timesheets, setTimesheets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -31,7 +32,7 @@ export default function TimesheetApprovalsPage() {
         ? `/api/timesheets/team`
         : `/api/timesheets/team?status=${filter}`;
       
-      const response = await axios.get(`http://localhost:4000${endpoint}`, {
+      const response = await axios.get(`${server}${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTimesheets(response.data);
@@ -49,7 +50,7 @@ export default function TimesheetApprovalsPage() {
     setShowDetailsModal(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:4000/api/timesheets/${ts.id}/details`, {
+      const response = await axios.get(`${server}/api/timesheets/${ts.id}/details`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSelectedDetails(response.data.entries);
@@ -66,7 +67,7 @@ export default function TimesheetApprovalsPage() {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://localhost:4000/api/timesheets/${timesheetId}/approve`,
+        `${server}/api/timesheets/${timesheetId}/approve`,
         {},
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -88,7 +89,7 @@ export default function TimesheetApprovalsPage() {
     try {
       const token = localStorage.getItem('token');
       await axios.put(
-        `http://localhost:4000/api/timesheets/${selectedTimesheet.id}/reject`,
+        `${server}/api/timesheets/${selectedTimesheet.id}/reject`,
         { reason: rejectionReason },
         { headers: { Authorization: `Bearer ${token}` } }
       );

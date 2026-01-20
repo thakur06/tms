@@ -22,6 +22,7 @@ import {
 import { MdOutlineDateRange, MdOutlineCheckCircle, MdOutlineSortByAlpha } from "react-icons/md";
 
 export default function TimeReport() {
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [reportData, setReportData] = useState(null);
@@ -72,7 +73,7 @@ export default function TimeReport() {
     try {
        const token = localStorage.getItem('token');
       const res = await fetch(
-        `http://localhost:4000/api/reports/time-entries?startDate=${formattedStart}&endDate=${formattedEnd}`,{
+        `${server}/api/reports/time-entries?startDate=${formattedStart}&endDate=${formattedEnd}`,{
            headers: { Authorization: `Bearer ${token}` }
         }
       );

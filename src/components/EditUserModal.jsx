@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 
 export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
   const [mounted, setMounted] = useState(false);
   const [managers, setManagers] = useState([]);
   const [depts, setDepts] = useState([]);
@@ -55,7 +56,7 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
   const fetchDepts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:4000/api/dept', {
+      const response = await axios.get(`${server}/api/dept`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDepts(response.data);
@@ -68,7 +69,7 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
     try {
       const token = localStorage.getItem('token');
       // Fetch users for selection - request a large limit to get 'all' potential managers
-      const response = await axios.get('http://localhost:4000/api/users?limit=1000', {
+      const response = await axios.get(`${server}/api/users?limit=1000`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setManagers(response.data.users || []);
@@ -96,7 +97,7 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
       
       // Update basic details
       await axios.put(
-        `http://localhost:4000/api/users/${user.id}`,
+        `${server}/api/users/${user.id}`,
         {
           name: formData.name,
           email: formData.email,
@@ -108,14 +109,14 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
 
       // Update manager status
       await axios.put(
-        `http://localhost:4000/api/users/${user.id}/manager-status`,
+        `${server}/api/users/${user.id}/manager-status`,
         { isManager: formData.is_manager },
         { headers: { Authorization: `Bearer ${token}` } }
       );
 
       // Update reporting manager
       await axios.put(
-        `http://localhost:4000/api/users/${user.id}/manager`,
+        `${server}/api/users/${user.id}/manager`,
         { managerId: formData.reporting_manager_id || null },
         { headers: { Authorization: `Bearer ${token}` } }
       );

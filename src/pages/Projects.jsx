@@ -20,7 +20,7 @@ export default function Projects() {
     active: 0
   })
 
-  const apiBase = "http://localhost:4000/api"
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
   const token = localStorage.getItem('token');
   const notifyError = (msg) =>
     toast.error(msg, {
@@ -53,7 +53,7 @@ export default function Projects() {
     const fetchProjects = async () => {
       setIsLoading(true)
       try {
-        const response = await fetch(`${apiBase}/projects`)
+        const response = await fetch(`${server}/api/projects`)
         if (response.ok) {
           const data = await response.json()
           const transformedData = data.map(transformProject)
@@ -86,7 +86,7 @@ export default function Projects() {
 
   const handleDeleteProject = async (projectId) => {
     try {
-      const response = await fetch(`${apiBase}/projects/${projectId}`, {
+      const response = await fetch(`${server}/api/projects/${projectId}`, {
         headers: { "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
@@ -121,7 +121,7 @@ export default function Projects() {
 
   const handleCreateProject = async (projectData) => {
     try {
-      const response = await fetch(`${apiBase}/projects`, {
+      const response = await fetch(`${server}/api/projects`, {
         method: "POST",
         headers: { "Content-Type": "application/json",
            Authorization: `Bearer ${token}`

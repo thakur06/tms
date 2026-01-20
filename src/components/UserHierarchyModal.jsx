@@ -8,6 +8,7 @@ import Modal from './Modal';
 import axios from 'axios';
 
 export default function UserHierarchyModal({ isOpen, onClose, user, allUsers = [] }) {
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
   const [team, setTeam] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -41,7 +42,7 @@ export default function UserHierarchyModal({ isOpen, onClose, user, allUsers = [
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:4000/api/users/${user.id}/team`, {
+      const response = await axios.get(`${server}/api/users/${user.id}/team`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setTeam(response.data);

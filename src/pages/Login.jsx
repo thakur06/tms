@@ -19,7 +19,7 @@ const Login = () => {
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  const API = 'http://localhost:4000/api';
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -28,7 +28,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch(`${API}/auth/login`, {
+      const response = await fetch(`${server}/api/auth/login`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -84,7 +84,7 @@ const Login = () => {
 
     setResendLoading(true);
     try {
-      const response = await fetch(`${API}/auth/send-otp`, {
+      const response = await fetch(`${server}/api/auth/send-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email }),
@@ -114,7 +114,7 @@ const Login = () => {
 
     setOtpLoading(true);
     try {
-      const response = await fetch(`${API}/auth/verify-otp`, {
+      const response = await fetch(`${server}/api/auth/verify-otp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, otp }),
@@ -154,7 +154,7 @@ const Login = () => {
 
     setLoading(true);
     try {
-      const response = await fetch(`${API}/auth/reset-password`, {
+      const response = await fetch(`${server}/api/auth/reset-password`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ resetToken, newPassword }),

@@ -13,6 +13,7 @@ import CreateUserModal from '../components/CreateUserModal';
 import UserHierarchyModal from '../components/UserHierarchyModal';
 
 export default function UserManagement() {
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -34,7 +35,7 @@ export default function UserManagement() {
   const fetchMetadata = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:4000/api/users?limit=10000`, {
+      const response = await axios.get(`${server}/api/users?limit=10000`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       const users = response.data.users || [];
@@ -50,7 +51,7 @@ export default function UserManagement() {
     setIsSendingAlerts(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:4000/api/notifications/check-weekly-hours', {}, {
+      const response = await axios.post('${server}/api/notifications/check-weekly-hours', {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success(`Success! Alerts sent to ${response.data.lowHourUsersCount} users.`);
@@ -66,7 +67,7 @@ export default function UserManagement() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:4000/api/users`, {
+      const response = await axios.get(`${server}/api/users`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           page,

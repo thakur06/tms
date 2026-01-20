@@ -10,6 +10,7 @@ import { toast, Zoom } from 'react-toastify';
 import axios from 'axios';
 
 export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -39,7 +40,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
   const fetchDepts = async () => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get('http://localhost:4000/api/dept', {
+      const response = await axios.get(`${server}/api/dept`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDepts(response.data);
@@ -52,7 +53,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
     try {
       const token = localStorage.getItem('token');
       // Fetch users for selection - request a large limit to get 'all' potential managers
-      const response = await axios.get('http://localhost:4000/api/users?limit=1000', {
+      const response = await axios.get(`${server}/api/users?limit=1000`, {
         headers: { Authorization: `Bearer ${token}` }
       });
       setManagers(response.data.users || []);
@@ -77,7 +78,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('http://localhost:4000/api/users', formData, {
+      const response = await axios.post(`${server}/api/users`, formData, {
         headers: { Authorization: `Bearer ${token}` }
       });
 

@@ -16,6 +16,7 @@ import { AuthProvider, useAuth } from './context/AuthContext';
 
 import { Outlet } from 'react-router-dom';
 import Layout from './components/Layout';
+import { Analytics } from './pages/Analytics';
 
 function AppContent() {
   return (
@@ -44,6 +45,7 @@ function AppContent() {
         <Route path="/approvals" element={<TimesheetApprovalsPage />} />
         <Route path="/my-submissions" element={<MyTimesheetStatus />} />
         <Route path="/users" element={<UserManagement />} />
+        <Route path="/analytics" element={<Analytics />} />
       </Route>
 
       {/* 404 Not Found */}

@@ -13,6 +13,7 @@ import { toast } from 'react-toastify';
 import LogoutConfirmationModal from './LogoutConfirmationModal';
 
 export default function Header({ onMenuClick }) {
+   const server=import.meta.env.VITE_SERVER_ADDRESS;
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -61,7 +62,7 @@ export default function Header({ onMenuClick }) {
         const endStr = prevSunday.toISOString().split('T')[0];
 
         // Fetch entries for logged in user for that range
-        const res = await fetch('http://localhost:4000/api/time-entries/user/me', {
+        const res = await fetch(`${server}/api/time-entries/user/me`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
         
