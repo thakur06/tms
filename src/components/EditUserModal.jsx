@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   IoClose, IoPersonOutline, IoCheckmarkCircle, IoBusinessOutline,
-  IoMailOutline, IoChevronDown, IoSearchOutline, IoSaveOutline
+  IoMailOutline, IoChevronDown, IoSearchOutline, IoSaveOutline,IoShieldCheckmarkOutline
 } from 'react-icons/io5';
 import { createPortal } from 'react-dom';
 import { toast } from 'react-toastify';
@@ -16,6 +16,7 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
     name: '',
     email: '',
     dept: '',
+    role: '',
     is_manager: false,
     reporting_manager_id: ''
   });
@@ -23,8 +24,10 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
 
   // Dropdown states
   const [isDeptOpen, setIsDeptOpen] = useState(false);
+  const [isRoleOpen, setIsRoleOpen] = useState(false);
   const [isManagerOpen, setIsManagerOpen] = useState(false);
   const [deptSearch, setDeptSearch] = useState('');
+  const [roleSearch, setRoleSearch] = useState('');
   const [managerSearch, setManagerSearch] = useState('');
 
   useEffect(() => {
@@ -41,6 +44,7 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
           name: user.name || '',
           email: user.email || '',
           dept: user.dept || '',
+          role: user.role || 'employee',
           is_manager: user.is_manager || false,
           reporting_manager_id: user.reporting_manager_id || ''
         });
@@ -63,11 +67,11 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
   const fetchManagers = async () => {
     try {
       const token = localStorage.getItem('token');
-      // Fetch ALL users so we can assign anyone as a manager (backend handles promotion)
-      const response = await axios.get('http://localhost:4000/api/users', {
+      // Fetch users for selection - request a large limit to get 'all' potential managers
+      const response = await axios.get('http://localhost:4000/api/users?limit=1000', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setManagers(response.data);
+      setManagers(response.data.users || []);
     } catch (error) {
       console.error('Failed to fetch users for manager selection:', error);
     }
@@ -96,7 +100,8 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
         {
           name: formData.name,
           email: formData.email,
-          dept: formData.dept
+          dept: formData.dept,
+          role: formData.role
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
@@ -317,6 +322,56 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                                     {parseInt(formData.reporting_manager_id) === m.id && <IoCheckmarkCircle className="text-indigo-400" size={12} />}
                                   </div>
                                   <p className="text-[8px] text-slate-500 truncate px-0.5">{m.dept} • {m.email}</p>
+                                </button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </div>
+
+                  {/* Role Selection */}
+                  <div className="space-y-2">
+                    <label className="ui-label flex items-center gap-2">
+                      <IoShieldCheckmarkOutline className="text-indigo-400" size={14} />
+                      User Role
+                    </label>
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => { setIsRoleOpen(!isRoleOpen); setIsDeptOpen(false); }}
+                        className={`w-full flex items-center justify-between px-3 py-2 bg-white/5 border rounded-xl text-xs font-medium transition-all ${
+                          isRoleOpen ? 'border-indigo-500 bg-white/10 text-white' : 'border-white/10 text-slate-400'
+                        }`}
+                      >
+                        <span className="text-white capitalize">
+                          {formData.role}
+                        </span>
+                        <IoChevronDown className={`text-indigo-400 transition-transform ${isRoleOpen ? 'rotate-180' : ''}`} size={14} />
+                      </button>
+
+                      <AnimatePresence>
+                        {isRoleOpen && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            className="relative mt-2 bg-[#0b1221] border border-white/10 rounded-xl overflow-hidden z-[9999]"
+                          >
+                            <div className="max-h-32 overflow-y-auto custom-scrollbar">
+                              {['admin', 'employee'].map(r => (
+                                <button
+                                  key={r}
+                                  type="button"
+                                  onClick={() => {
+                                    setFormData({ ...formData, role: r });
+                                    setIsRoleOpen(false);
+                                  }}
+                                  className="w-full px-3 py-2 text-left text-[10px] text-slate-300 hover:bg-white/5 hover:text-white transition-all flex items-center justify-between capitalize"
+                                >
+                                  {r}
+                                  {formData.role === r && <IoCheckmarkCircle className="text-indigo-400" size={12} />}
                                 </button>
                               ))}
                             </div>

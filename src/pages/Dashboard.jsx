@@ -31,6 +31,7 @@ import {
   IoArrowUp,
   IoArrowDown
 } from "react-icons/io5";
+import { motion } from "framer-motion";
 
 export default function Dashboard() {
   const { user } = useAuth();
@@ -482,7 +483,7 @@ export default function Dashboard() {
       {/* Projects & Clients Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Top Projects */}
-        <div className="lg:col-span-2 ui-card">
+        <div className="lg:col-span-2 ui-card flex flex-col">
           <div className="ui-card-header">
             <div>
               <h3 className="ui-card-title">Top Projects</h3>
@@ -492,35 +493,60 @@ export default function Dashboard() {
               {analytics.topProjects.length} projects
             </div>
           </div>
-          <div className="ui-card-body h-[350px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={analytics.topProjects} layout="vertical" margin={{ left: 20 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" horizontal={true} vertical={false} />
-                <XAxis type="number" hide />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  tick={{ fill: "#cbd5e1", fontSize: 12, fontWeight: 500 }}
-                  axisLine={false}
-                  tickLine={false}
-                  width={120}
-                />
-                <Tooltip 
-                  cursor={{ fill: 'rgba(255,255,255,0.05)' }}
-                  content={<CustomTooltip />}
-                />
-                <Bar 
-                  dataKey="hours" 
-                  fill={CHART_COLORS.success}
-                  radius={[0, 4, 4, 0]}
-                  barSize={20}
-                >
-                  {analytics.topProjects.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={index % 2 === 0 ? CHART_COLORS.indigo : CHART_COLORS.purple} />
-                  ))}
-                </Bar>
-              </BarChart>
-            </ResponsiveContainer>
+          <div className="ui-card-body flex-1">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              {analytics.topProjects.length === 0 ? (
+                <div className="col-span-2 text-center py-10">
+                  <IoFolderOutline className="mx-auto text-slate-600 mb-3" size={48} />
+                  <p className="text-slate-500">No recent project activity</p>
+                </div>
+              ) : (
+                analytics.topProjects.map((project, index) => {
+                  const maxMinutes = Math.max(...analytics.topProjects.map(p => p.minutes));
+                  const relativePercentage = Math.round((project.minutes / maxMinutes) * 100);
+                  const totalPercentage = Math.round((project.minutes / analytics.totalMinutesAll) * 100);
+                  
+                  return (
+                    <div key={project.name} className="group flex flex-col gap-2">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white text-xs shadow-lg transition-all group-hover:scale-110 ${
+                            index % 2 === 0 
+                              ? 'bg-linear-to-br from-indigo-500 to-indigo-600 shadow-indigo-500/20' 
+                              : 'bg-linear-to-br from-purple-500 to-purple-600 shadow-purple-500/20'
+                          }`}>
+                            {project.name.substring(0, 2).toUpperCase()}
+                          </div>
+                          <div>
+                            <h4 className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors line-clamp-1">
+                              {project.name}
+                            </h4>
+                            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">
+                              {totalPercentage}% contribution
+                            </p>
+                          </div>
+                        </div>
+                        <div className="text-right">
+                          <div className="text-sm font-black text-white">{project.hours}h</div>
+                          <div className="text-[10px] text-slate-500 font-mono">Logged</div>
+                        </div>
+                      </div>
+                      
+                      <div className="relative w-full h-2 bg-white/5 rounded-full overflow-hidden">
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${relativePercentage}%` }}
+                          transition={{ duration: 1, ease: "easeOut", delay: index * 0.1 }}
+                          className={`absolute top-0 left-0 h-full rounded-full ${
+                             index % 2 === 0 ? 'bg-indigo-500' : 'bg-purple-500'
+                          }`}
+                        />
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
           </div>
         </div>
 
@@ -624,7 +650,7 @@ export default function Dashboard() {
                 {analytics.recentEntries.map((entry, index) => (
                   <tr 
                     key={entry.id || index} 
-                    className="hover:bg-white/[0.02] transition-colors"
+                    className="hover:bg-white/2 transition-colors"
                   >
                     <td className="p-4 pl-6">
                       <div className="font-bold text-slate-300">

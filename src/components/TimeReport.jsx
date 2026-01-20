@@ -221,7 +221,7 @@ export default function TimeReport() {
 
   return (
 <div className="min-h-screen font-sans text-slate-200 relative pb-20">
-      <style jsx global>{`
+      <style>{`
         .react-datepicker {
           font-family: inherit !important;
           border: 1px solid rgba(255,255,255,0.1) !important;

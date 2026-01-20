@@ -18,16 +18,30 @@ export default function Sidebar({ isOpen, onClose }) {
 
   const navLinks = [
     { path: '/dashboard', label: 'Dashboard', icon: IoHomeOutline, activeIcon: IoHome },
-    { path: '/projects', label: 'Projects', icon: IoBriefcaseOutline, activeIcon: IoBriefcase },
-    { path: '/tasks', label: 'Tasks', icon: IoListOutline, activeIcon: IoList },
+    { path: '/projects', label: 'Projects', icon: IoBriefcaseOutline, activeIcon: IoBriefcase, adminOnly: true },
+    { path: '/tasks', label: 'Tasks', icon: IoListOutline, activeIcon: IoList, adminOnly: true },
     { path: '/time-log', label: 'Time Log', icon: IoTimeOutline, activeIcon: IoTime },
-    { path: '/reports', label: 'Reports', icon: IoDocumentTextOutline, activeIcon: IoDocumentText },
+    { path: '/reports', label: 'Reports', icon: IoDocumentTextOutline, activeIcon: IoDocumentText, adminOnly: true },
     { path: '/my-submissions', label: 'My Submissions', icon: IoCalendarOutline, activeIcon: IoCalendar },
-    { path: '/approvals', label: 'Approvals', icon: IoCheckmarkCircleOutline, activeIcon: IoCheckmarkCircle, managerOnly: true },
-    { path: '/users', label: 'Users', icon: IoPersonOutline, activeIcon: IoPerson, managerOnly: true },
+    { path: '/approvals', label: 'Approvals', icon: IoCheckmarkCircleOutline, activeIcon: IoCheckmarkCircle, hideIfNoReports: true },
+    { path: '/users', label: 'Users', icon: IoPersonOutline, activeIcon: IoPerson, adminOnly: true },
   ];
 
   const isActive = (path) => location.pathname === path || (path === '/dashboard' && location.pathname === '/');
+
+  // Filter links based on role and reportsCount
+  const visibleLinks = navLinks.filter(link => {
+    // Admin sees everything
+    if (user?.role === 'admin') return true;
+    
+    // Check if link is admin-only and user is not admin
+    if (link.adminOnly && user?.role !== 'admin') return false;
+    
+    // Check if link requires reports and user has none
+    if (link.hideIfNoReports && (parseInt(user?.reportsCount) || 0) <= 0) return false;
+    
+    return true;
+  });
 
   return (
     <>
@@ -59,8 +73,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
           {/* Navigation */}
           <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
-            {navLinks
-              .filter(link => !link.managerOnly || user?.is_manager)
+            {visibleLinks
               .map((link) => {
               const active = isActive(link.path);
               const Icon = active ? link.activeIcon : link.icon;

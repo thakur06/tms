@@ -38,8 +38,17 @@ export const AuthProvider = ({ children }) => {
   const login = (token, userData) => {
     localStorage.setItem('token', token);
     if (userData) {
-      localStorage.setItem('user', JSON.stringify(userData));
-      setUser(userData);
+      // Ensure we store all relevant user data including role and reportsCount
+      const cleanUserData = {
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        dept: userData.dept,
+        role: userData.role || 'employee',
+        reportsCount: parseInt(userData.reportsCount) || 0
+      };
+      localStorage.setItem('user', JSON.stringify(cleanUserData));
+      setUser(cleanUserData);
     }
     setIsAuthenticated(true);
   };
@@ -49,6 +58,8 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
     setIsAuthenticated(false);
     setUser(null);
+    // Force redirect to login page since routes are no longer strictly protected
+    window.location.href = '/auth';
   };
 
   return (

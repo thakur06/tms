@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   IoPersonAddOutline, IoBusinessOutline, IoMailOutline, IoSaveOutline, 
   IoClose, IoChevronDown, IoSearchOutline, IoCheckmarkCircle,
-  IoPersonOutline
+  IoPersonOutline,IoShieldCheckmarkOutline
 } from 'react-icons/io5';
 import Modal from './Modal';
 import { toast, Zoom } from 'react-toastify';
@@ -14,7 +14,8 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
     name: '',
     email: '',
     dept: '',
-    reporting_manager_id: null
+    reporting_manager_id: '',
+    role: 'employee'
   });
   
   const [loading, setLoading] = useState(false);
@@ -23,6 +24,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
   
   // Dropdown states
   const [isDeptOpen, setIsDeptOpen] = useState(false);
+  const [isRoleOpen, setIsRoleOpen] = useState(false);
   const [isManagerOpen, setIsManagerOpen] = useState(false);
   const [deptSearch, setDeptSearch] = useState('');
   const [managerSearch, setManagerSearch] = useState('');
@@ -49,11 +51,11 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
   const fetchManagers = async () => {
     try {
       const token = localStorage.getItem('token');
-      // Fetch ALL users so we can assign anyone as a manager (backend handles promotion)
-      const response = await axios.get('http://localhost:4000/api/users', {
+      // Fetch users for selection - request a large limit to get 'all' potential managers
+      const response = await axios.get('http://localhost:4000/api/users?limit=1000', {
         headers: { Authorization: `Bearer ${token}` }
       });
-      setManagers(response.data);
+      setManagers(response.data.users || []);
     } catch (error) {
       console.error('Failed to fetch users for manager selection:', error);
     }
@@ -278,6 +280,56 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
                             {formData.reporting_manager_id === m.id && <IoCheckmarkCircle className="text-indigo-400" size={14} />}
                           </div>
                           <p className="text-[10px] text-slate-500 px-0.5 truncate">{m.dept} • {m.email}</p>
+                        </button>
+                      ))}
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Role Selection */}
+          <div className="space-y-2">
+            <label className="ui-label flex items-center gap-2">
+              <IoShieldCheckmarkOutline className="text-indigo-400" />
+              User Role
+            </label>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => { setIsRoleOpen(!isRoleOpen); setIsDeptOpen(false); setIsManagerOpen(false); }}
+                className={`w-full flex items-center justify-between px-4 py-2.5 bg-white/5 border rounded-xl text-sm font-medium transition-all ${
+                  isRoleOpen ? 'border-indigo-500 bg-white/10 text-white' : 'border-white/10 text-slate-400'
+                }`}
+              >
+                <span className="text-white capitalize">
+                  {formData.role}
+                </span>
+                <IoChevronDown className={`text-indigo-400 transition-transform ${isRoleOpen ? 'rotate-180' : ''}`} />
+              </button>
+
+              <AnimatePresence>
+                {isRoleOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, height: 0 }}
+                    animate={{ opacity: 1, height: 'auto' }}
+                    exit={{ opacity: 0, height: 0 }}
+                    className="relative mt-2 bg-white/5 border border-white/10 rounded-xl overflow-hidden z-10"
+                  >
+                    <div className="max-h-40 overflow-y-auto custom-scrollbar">
+                      {['admin', 'employee'].map(r => (
+                        <button
+                          key={r}
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, role: r });
+                            setIsRoleOpen(false);
+                          }}
+                          className="w-full px-4 py-2.5 text-left text-xs text-slate-300 hover:bg-white/5 hover:text-white transition-all flex items-center justify-between capitalize"
+                        >
+                          {r}
+                          {formData.role === r && <IoCheckmarkCircle className="text-indigo-400" />}
                         </button>
                       ))}
                     </div>
