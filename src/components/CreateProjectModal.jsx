@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
   IoAddCircle, IoClose, IoLocationOutline, 
@@ -6,38 +6,57 @@ import {
 } from 'react-icons/io5'
 import { toast } from 'react-toastify'
 
-export default function CreateProjectModal({ isOpen, onClose, onCreateProject }) {
+export default function CreateProjectModal({ isOpen, onClose, onCreateProject, projectToEdit, onUpdateProject }) {
   const [formData, setFormData] = useState({
     name: '',
-    code: '',
+    client: '',
     location: '',
     status: 'planning'
   })
   const [isLoading, setIsLoading] = useState(false)
 
+  // Load data when modal opens or projectToEdit changes
+  useEffect(() => {
+    if (isOpen) {
+      if (projectToEdit) {
+        setFormData({
+          name: projectToEdit.name || '',
+          client: projectToEdit.client || '',
+          location: projectToEdit.location || '',
+          status: projectToEdit.status || 'planning'
+        })
+      } else {
+        setFormData({ name: '', client: '', location: '', status: 'planning' })
+      }
+    }
+  }, [isOpen, projectToEdit])
+
   const handleSubmit = async (e) => {
     e.preventDefault()
     
-    if (!formData.name.trim() || !formData.code.trim() || !formData.location.trim()) {
+    // Validations
+    if (!formData.name.trim() || !formData.location.trim() || !formData.client.trim()) {
       toast.error('Please fill in all required fields')
       return
     }
 
     setIsLoading(true)
     try {
-      await onCreateProject(formData)
-      // toast.success('Project initialized successfully')
+      if (projectToEdit) {
+        await onUpdateProject(projectToEdit.id, formData)
+      } else {
+        await onCreateProject(formData)
+      }
       handleClose()
     } catch (error) {
       console.error('Error:', error)
-      // toast.error('Failed to create project')
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleClose = () => {
-    setFormData({ name: '', code: '', location: '', status: 'planning' })
+    setFormData({ name: '', client: '', location: '', status: 'planning' })
     onClose()
   }
 
@@ -60,8 +79,12 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject })
                 <IoRocketOutline className="w-6 h-6 text-indigo-400" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">New Project</h2>
-                <p className="text-sm font-medium text-slate-400">Expand your production portfolio</p>
+                <h2 className="text-2xl font-bold text-white tracking-tight">
+                  {projectToEdit ? 'Edit Project' : 'New Project'}
+                </h2>
+                <p className="text-sm font-medium text-slate-400">
+                  {projectToEdit ? 'Update project details' : 'Expand your production portfolio'}
+                </p>
               </div>
             </div>
             <button
@@ -94,18 +117,18 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject })
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-            {/* Project Code */}
+            {/* Client */}
             <div className="space-y-2">
               <label className="ui-label flex items-center gap-2">
-                <IoCodeSlash size={14} className="text-indigo-400" />
-                Identifier
+                <IoDocumentTextOutline size={14} className="text-indigo-400" />
+                Client
               </label>
               <input
                 type="text"
-                value={formData.code}
-                onChange={(e) => setFormData({ ...formData, code: e.target.value.toUpperCase() })}
-                className="ui-input w-full font-mono tracking-widest text-indigo-300"
-                placeholder="PRJ-01"
+                value={formData.client}
+                onChange={(e) => setFormData({ ...formData, client: e.target.value })}
+                className="ui-input w-full"
+                placeholder="Client Name"
                 disabled={isLoading}
               />
             </div>
@@ -131,7 +154,7 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject })
           <div className="pt-2">
             <button
               type="submit"
-              disabled={isLoading || !formData.name || !formData.code || !formData.location}
+              disabled={isLoading || !formData.name || !formData.client || !formData.location}
               className="ui-btn ui-btn-primary w-full h-14 justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed"
             >
               {isLoading ? (
@@ -139,7 +162,7 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject })
               ) : (
                 <>
                   <IoAddCircle size={22} className="text-indigo-200" />
-                  <span>Deploy Project</span>
+                  <span>{projectToEdit ? 'Update Project' : 'Deploy Project'}</span>
                 </>
               )}
             </button>

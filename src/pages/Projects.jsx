@@ -13,6 +13,7 @@ import {
 export default function Projects() {
   const [projects, setProjects] = useState([])
   const [showProjectModal, setShowProjectModal] = useState(false)
+  const [editingProject, setEditingProject] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
   const [stats, setStats] = useState({
     total: 0,
@@ -20,8 +21,9 @@ export default function Projects() {
     active: 0
   })
 
-   const server=import.meta.env.VITE_SERVER_ADDRESS;
+  const server=import.meta.env.VITE_SERVER_ADDRESS;
   const token = localStorage.getItem('token');
+  
   const notifyError = (msg) =>
     toast.error(msg, {
       position: "top-center",
@@ -156,6 +158,47 @@ export default function Projects() {
     }
   }
 
+  const handleUpdateProject = async (id, projectData) => {
+    try {
+      const response = await fetch(`${server}/api/projects/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json",
+           Authorization: `Bearer ${token}`
+         },
+        body: JSON.stringify(projectData),
+      })
+
+      if (!response.ok) {
+        const errorData = await response.json()
+        notifyError(errorData.error || "Failed to update project")
+        return
+      }
+
+      const updatedProject = await response.json()
+      const transformedProject = transformProject(updatedProject)
+      
+      setProjects((prev) => prev.map(p => p.id === id ? transformedProject : p))
+      
+      // Recalculate stats as location might have changed
+      const locationCounts = {}
+      const updatedProjects = projects.map(p => p.id === id ? transformedProject : p)
+      updatedProjects.forEach(project => {
+        const location = project.location || 'Unknown'
+        locationCounts[location] = (locationCounts[location] || 0) + 1
+      })
+      
+      setStats({
+         total: updatedProjects.length,
+         byLocation: locationCounts,
+         active: updatedProjects.length
+      })
+
+      notifySuccess("Project updated successfully!")
+    } catch (error) {
+       notifyError("Failed to update project")
+    }
+  }
+
   const getTopLocation = () => {
     const entries = Object.entries(stats.byLocation)
     if (entries.length === 0) return 'N/A'
@@ -221,9 +264,16 @@ export default function Projects() {
         <ProjectsList 
           projects={projects} 
           onDeleteProject={handleDeleteProject}
+          onEditProject={(project) => {
+             setEditingProject(project)
+             setShowProjectModal(true)
+          }}
           headerAction={
             <button
-              onClick={() => setShowProjectModal(true)}
+              onClick={() => {
+                setEditingProject(null)
+                setShowProjectModal(true)
+              }}
               className="ui-btn ui-btn-primary w-full sm:w-auto"
             >
               <IoAddOutline size={18} />
@@ -233,11 +283,16 @@ export default function Projects() {
         />
       </div>
 
-      {/* Create Project Modal */}
+      {/* Create/Edit Project Modal */}
       <CreateProjectModal
         isOpen={showProjectModal}
-        onClose={() => setShowProjectModal(false)}
+        onClose={() => {
+          setShowProjectModal(false)
+          setEditingProject(null)
+        }}
         onCreateProject={handleCreateProject}
+        onUpdateProject={handleUpdateProject}
+        projectToEdit={editingProject}
       />
     </div>
   )

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ToastContainer, toast, Zoom } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import {
   ResponsiveContainer,
@@ -10,8 +10,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  BarChart,
-  Bar,
   PieChart,
   Pie,
   Cell,
@@ -23,336 +21,359 @@ import { formatTime } from "../utils/formatters";
 import {
   IoCalendarOutline,
   IoTimeOutline,
-  IoAnalyticsOutline,
   IoStatsChartOutline,
-  IoBusinessOutline,
   IoFolderOutline,
   IoCheckmarkCircle,
   IoArrowUp,
-  IoArrowDown
+  IoArrowDown,
+  IoClose,
+  IoBusinessOutline,
+  IoLocationOutline,
+  IoPeopleOutline,
+  IoConstructOutline
 } from "react-icons/io5";
-import { motion } from "framer-motion";
+import { RiBeerFill } from "react-icons/ri";
+import { MdModelTraining } from "react-icons/md";
+import { GiBrain } from "react-icons/gi";
+import { motion, AnimatePresence } from "framer-motion";
+import axios from "axios";
+
+// Helper to format duration
+const formatDuration = (hours, minutes) => {
+  const h = hours + Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h}h ${m}m`;
+};
 
 export default function Dashboard() {
-  const server=import.meta.env.VITE_SERVER_ADDRESS
+  const server = import.meta.env.VITE_SERVER_ADDRESS;
   const { user } = useAuth();
-  const [tasks, setTasks] = useState([]);
-  const [projects, setProjects] = useState([]);
   const [timeEntries, setTimeEntries] = useState([]);
+  const [projectsList, setProjectsList] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [loadingError, setLoadingError] = useState("");
+  
+  const [modalOpen, setModalOpen] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: "", data: [], type: "", detail: "" });
 
-
-  const toDateKey = (d) => {
-    if (!d) return "";
-    if (typeof d === "string") return d.slice(0, 10);
-    return new Date(d).toISOString().slice(0, 10);
+  const getWeekStartMiddleEnd = () => {
+     const now = new Date();
+     const day = now.getDay();
+     const diff = now.getDate() - day + (day === 0 ? -6 : 1);
+     const monday = new Date(now.setDate(diff));
+     monday.setHours(0,0,0,0);
+     
+     const sunday = new Date(monday);
+     sunday.setDate(monday.getDate() + 6);
+     sunday.setHours(23,59,59,999);
+     
+     return { monday, sunday };
   };
-
-  const getWeekStartMonday = (date = new Date()) => {
-    const d = new Date(date);
-    const day = d.getDay();
-    const diff = d.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(d);
-    monday.setHours(0, 0, 0, 0);
-    monday.setDate(diff);
-    return monday;
-  };
-
-  const safeInt = (v) => {
-    const n = Number.parseInt(v, 10);
-    return Number.isFinite(n) ? n : 0;
-  };
-
-  const entryMinutes = (e) => safeInt(e?.hours) * 60 + safeInt(e?.minutes);
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
-      setLoadingError("");
       try {
-        const [tasksRes, projectsRes, teRes] = await Promise.all([
-          fetch(`${server}/api/tasks`),
-          fetch(`${server}/api/projects`),
-          fetch(`${server}/api/time-entries/user/me`, {
-            headers: { 
-              Authorization: `Bearer ${localStorage.getItem("token")}` 
-            },
-          })
+        const { monday, sunday } = getWeekStartMiddleEnd();
+        const startStr = monday.toISOString().split('T')[0];
+        const endStr = sunday.toISOString().split('T')[0];
+        const token = localStorage.getItem('token');
+        
+        const [teRes, projectsRes] = await Promise.all([
+          axios.get(`${server}/api/time-entries/user/me`, {
+             params: { start: startStr, end: endStr },
+             headers: { Authorization: `Bearer ${token}` }
+          }),
+          axios.get(`${server}/api/projects`, { headers: { Authorization: `Bearer ${token}` } })
         ]);
 
-        if (!tasksRes.ok) throw new Error("Failed to fetch tasks");
-        if (!projectsRes.ok) throw new Error("Failed to fetch projects");
-
-        setTasks(await tasksRes.json());
-        setProjects(await projectsRes.json());
-
-        if (teRes.ok) {
-          setTimeEntries(await teRes.json());
-        } else {
-          console.warn("Failed to fetch time entries:", teRes.status);
-          setTimeEntries([]);
-        }
+        setTimeEntries(teRes.data || []);
+        setProjectsList(projectsRes.data || []);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        setLoadingError("Failed to load dashboard analytics. Please check server connection.");
-        toast.error("Failed to load data from server", {
-          position: "top-right",
-          autoClose: 5000,
-          theme: "colored",
-        });
+        console.error("Error fetching dashboard data:", error);
+        toast.error("Failed to load dashboard data");
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [user]);
+  }, [user, server]);
 
   const analytics = useMemo(() => {
-    const now = new Date();
-    const todayKey = toDateKey(now);
-    const monday = getWeekStartMonday(now);
-    const mondayKey = toDateKey(monday);
-
-    // Last 14 days trend
-    const days = [];
-    for (let i = 13; i >= 0; i--) {
-      const d = new Date(now);
-      d.setDate(d.getDate() - i);
-      d.setHours(0, 0, 0, 0);
-      days.push(d);
-    }
-
-    const minutesByDay = new Map(days.map((d) => [toDateKey(d), 0]));
-    const recentCutoff = new Date(now);
-    recentCutoff.setDate(recentCutoff.getDate() - 29);
-    recentCutoff.setHours(0, 0, 0, 0);
-
-    let weekMinutes = 0;
-    let todayMinutes = 0;
-    let totalMinutesAll = 0;
-
-    const projectAgg = new Map();
-    const clientAgg = new Map();
-    const locationAgg = new Map();
-
-    for (const e of timeEntries) {
-      const dateKey = toDateKey(e.entry_date);
-      const mins = entryMinutes(e);
-      totalMinutesAll += mins;
-
-      if (dateKey === todayKey) todayMinutes += mins;
-      if (dateKey >= mondayKey) weekMinutes += mins;
-
-      if (minutesByDay.has(dateKey)) {
-        minutesByDay.set(dateKey, minutesByDay.get(dateKey) + mins);
-      }
-
-      const eDate = new Date(dateKey);
-      if (eDate >= recentCutoff) {
-        const pKey = `${e.project_code || ""}::${e.project_name || ""}`;
-        if (!projectAgg.has(pKey)) {
-          projectAgg.set(pKey, {
-            project: e.project_name || "Unassigned",
-            project_code: e.project_code || "—",
-            minutes: 0,
-          });
-        }
-        projectAgg.get(pKey).minutes += mins;
-
-        const client = e.client || "Unassigned";
-        clientAgg.set(client, (clientAgg.get(client) || 0) + mins);
-
-        const loc = e.location || "Unspecified";
-        locationAgg.set(loc, (locationAgg.get(loc) || 0) + mins);
-      }
-    }
-
-    const dailySeries = days.map((d) => {
-      const key = toDateKey(d);
-      const mins = minutesByDay.get(key) || 0;
-      return {
-        date: key.slice(5),
-        day: d.toLocaleDateString('en-US', { weekday: 'short' }),
-        minutes: mins,
-        hours: Number((mins / 60).toFixed(2)),
-      };
+    // 1. Calculate Metrics for Time Entries (which are already filtered for current week)
+    const totalMinutes = timeEntries.reduce((sum, e) => sum + (e.hours * 60 + e.minutes), 0);
+    const totalTimeStr = formatDuration(Math.floor(totalMinutes / 60), totalMinutes % 60);
+    
+    // Categories & Aggregations
+    const entriesByCat = {
+      project: [],
+      pto: [],
+      training: [],
+      rd: []
+    };
+    
+    const dailyMap = new Map();
+    const locationMap = new Map();
+    const projectMap = new Map(); // For top projects
+    const clientMap = new Map();  // For top clients
+    
+    const projectCategoryMap = new Map();
+    projectsList.forEach(p => {
+       projectCategoryMap.set(p.name, p.category?.toLowerCase() || 'project');
+       projectCategoryMap.set(p.code, p.category?.toLowerCase() || 'project');
     });
 
-    const avgDailyMinutes =
-      dailySeries.reduce((s, x) => s + x.minutes, 0) / (dailySeries.length || 1);
+    timeEntries.forEach(e => {
+       // Category Logic
+       let cat = 'project';
+       const pName = e.project_name || e.project; 
+       if (projectCategoryMap.has(pName)) {
+         cat = projectCategoryMap.get(pName);
+       } else if (pName?.toLowerCase().includes('pto') || e.task_id?.toLowerCase().includes('pto')) {
+         cat = 'pto';
+       } else if (pName?.toLowerCase().includes('training')) {
+          cat = 'training';
+       } else if (pName?.toLowerCase().includes('r&d')) {
+          cat = 'r&d';
+       }
+       
+       if (cat === 'pto') entriesByCat.pto.push(e);
+       else if (cat === 'training') entriesByCat.training.push(e);
+       else if (cat === 'r&d' || cat === 'research') entriesByCat.rd.push(e);
+       else entriesByCat.project.push(e);
 
-    const utilizationPct = Math.round((weekMinutes / (40 * 60)) * 100) || 0;
-    const activeProjects30d = [...projectAgg.values()].filter((p) => p.minutes > 0).length;
+       // Duration
+       const mins = e.hours * 60 + e.minutes;
 
-    const topProjects = [...projectAgg.values()]
-      .sort((a, b) => b.minutes - a.minutes)
-      .slice(0, 8)
-      .map((p) => ({
-        name: p.project_code !== "—" ? p.project_code : p.project,
-        minutes: p.minutes,
-        hours: Number((p.minutes / 60).toFixed(2)),
+       // Daily Chart Data
+       const date = e.entry_date.split('T')[0];
+       dailyMap.set(date, (dailyMap.get(date) || 0) + mins);
+
+       // Location Data
+       const loc = e.location || 'Unknown';
+       locationMap.set(loc, (locationMap.get(loc) || 0) + mins);
+
+       // Top Projects
+       const pKey = pName || 'Unknown Project';
+       const currentP = projectMap.get(pKey) || { name: pKey, minutes: 0, code: e.project_code || 'N/A' };
+       currentP.minutes += mins;
+       projectMap.set(pKey, currentP);
+
+       // Top Clients
+       const client = e.client || 'Internal';
+       clientMap.set(client, (clientMap.get(client) || 0) + mins);
+    });
+    
+    // Active Projects (Distinct count)
+    const uniqueProjects = new Set(entriesByCat.project.map(e => e.project_name || e.project)).size;
+    
+    // Utilization (Week = 40h)
+    const utilization = ((totalMinutes / 60) / 40) * 100;
+    
+    // Tasks
+    const uniqueTasks = new Set(timeEntries.map(e => e.task_id)).size;
+
+    // Charts Transformations
+    const chartData = Array.from(dailyMap.entries()).map(([date, mins]) => ({
+       date,
+       hours: Number((mins / 60).toFixed(1))
+    })).sort((a,b) => a.date.localeCompare(b.date));
+
+    // Fill missing days for the week? Optional, but good for UI.
+    // For now, let's just use what we have.
+
+    const locationData = Array.from(locationMap.entries()).map(([name, mins]) => ({
+       name,
+       hours: Number((mins / 60).toFixed(1))
+    }));
+
+    const topProjects = Array.from(projectMap.values())
+      .sort((a,b) => b.minutes - a.minutes)
+      .slice(0, 5)
+      .map(p => ({
+         ...p,
+         totalTime: formatDuration(Math.floor(p.minutes/60), p.minutes%60),
+         progress: Math.min(100, (p.minutes / totalMinutes) * 100) // Share of total time
       }));
 
-    const topClients = [...clientAgg.entries()]
-      .map(([name, minutes]) => ({ 
-        name, 
-        minutes, 
-        hours: Number((minutes / 60).toFixed(2)) 
-      }))
-      .sort((a, b) => b.minutes - a.minutes)
-      .slice(0, 6);
-
-    const locationSplit = [...locationAgg.entries()]
-      .map(([name, minutes]) => ({ 
-        name, 
-        minutes, 
-        hours: Number((minutes / 60).toFixed(2)) 
-      }))
-      .sort((a, b) => b.minutes - a.minutes);
-
-    const recentEntries = [...timeEntries]
-      .sort((a, b) => String(b.entry_date).localeCompare(String(a.entry_date)))
-      .slice(0, 8);
-
-    // Calculate trend (last week vs current week)
-    const lastWeekStart = new Date(monday);
-    lastWeekStart.setDate(lastWeekStart.getDate() - 7);
-    const lastWeekKey = toDateKey(lastWeekStart);
-    let lastWeekMinutes = 0;
-    for (const e of timeEntries) {
-      const dateKey = toDateKey(e.entry_date);
-      const entryDate = new Date(dateKey);
-      const lastWeekEnd = new Date(lastWeekStart);
-      lastWeekEnd.setDate(lastWeekStart.getDate() + 6);
-      if (entryDate >= lastWeekStart && entryDate <= lastWeekEnd) {
-        lastWeekMinutes += entryMinutes(e);
-      }
-    }
-
-    const weekTrend = lastWeekMinutes > 0 
-      ? Math.round(((weekMinutes - lastWeekMinutes) / lastWeekMinutes) * 100)
-      : 0;
-
+    const topClients = Array.from(clientMap.entries())
+      .sort((a,b) => b[1] - a[1])
+      .slice(0, 5)
+      .map(([name, mins]) => ({
+         name,
+         totalTime: formatDuration(Math.floor(mins/60), mins%60),
+         percentage: Math.min(100, (mins / totalMinutes) * 100)
+      }));
+    
     return {
-      todayMinutes,
-      weekMinutes,
-      totalMinutesAll,
-      avgDailyMinutes,
-      utilizationPct,
-      activeProjects30d,
-      dailySeries,
-      topProjects,
-      topClients,
-      locationSplit,
-      recentEntries,
-      weekTrend,
+       totalTimeStr,
+       totalMinutes,
+       activeProjectsCount: uniqueProjects,
+       utilization: utilization.toFixed(1),
+       entriesByCat,
+       tasksCount: uniqueTasks,
+       chartData,
+       locationData,
+       topProjects,
+       topClients,
+       recentEntries: timeEntries.slice(0, 10) // First 10 recent
     };
-  }, [timeEntries]);
+  }, [timeEntries, projectsList]);
 
-  const cards = useMemo(() => {
-    return [
-      {
-        icon: IoFolderOutline,
-        label: "Active Projects",
-        value: analytics.activeProjects30d,
-        hint: `Total: ${projects.length}`,
-        color: "indigo",
-        trend: analytics.activeProjects30d > 0,
-      },
-      {
-        icon: IoAnalyticsOutline,
-        label: "Tasks Catalog",
-        value: tasks.length,
-        hint: "Available work items",
-        color: "cyan",
-      },
-      {
-        icon: IoTimeOutline,
-        label: "This Week",
-        value: formatTime(analytics.weekMinutes),
-        hint: analytics.weekTrend !== 0 ? (
-          <span className={`flex items-center gap-1 ${analytics.weekTrend > 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-            {analytics.weekTrend > 0 ? <IoArrowUp size={12} /> : <IoArrowDown size={12} />}
-            {Math.abs(analytics.weekTrend)}% from last week
-          </span>
-        ) : "vs last week",
-        color: "emerald",
-        trend: analytics.weekMinutes > 0,
-      },
-      {
-        icon: IoStatsChartOutline,
-        label: "Utilization",
-        value: `${analytics.utilizationPct}%`,
-        hint: "vs 40h/week target",
-        color: analytics.utilizationPct >= 85 ? "emerald" : analytics.utilizationPct >= 70 ? "amber" : "rose",
-        trend: analytics.utilizationPct >= 85,
-      },
-    ];
-  }, [analytics, projects.length, tasks.length]);
-
-  const CHART_COLORS = {
-    primary: "#818cf8", // Indigo-400
-    secondary: "#c084fc", // Purple-400
-    success: "#34d399", // Emerald-400
-    warning: "#fbbf24", // Amber-400
-    danger: "#f87171", // Rose-400
-    info: "#22d3ee", // Cyan-400
-    indigo: "#818cf8",
-    purple: "#c084fc",
-  };
-
-  const PIE_COLORS = [
-    CHART_COLORS.success,
-    CHART_COLORS.warning,
-    CHART_COLORS.danger,
-    CHART_COLORS.info,
-    CHART_COLORS.primary,
-    CHART_COLORS.secondary,
-  ];
-
-  const CustomTooltip = ({ active, payload, label }) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="bg-[#1e293b] p-3 rounded-xl shadow-xl border border-white/10 backdrop-blur-md">
-          <p className="text-xs font-bold text-slate-400 mb-1">{label}</p>
-          {payload.map((entry, index) => (
-            <p key={index} className="text-sm font-bold text-white">
-              {entry.name}: <span style={{ color: entry.color || CHART_COLORS.primary }}>{entry.value}h</span>
-            </p>
-          ))}
-        </div>
-      );
+  const cards = [
+    {
+       label: "Active Projects",
+       value: analytics.activeProjectsCount,
+       icon: IoFolderOutline,
+       color: "indigo",
+       data: analytics.entriesByCat.project,
+       type: "projects",
+       detail: "Worked on this week"
+    },
+    {
+       label: "Tasks Worked",
+       value: analytics.tasksCount,
+       icon: IoCheckmarkCircle,
+       color: "cyan",
+       data: timeEntries,
+       type: "tasks",
+       detail: "Tasks this week"
+    },
+    {
+       label: "Total Time",
+       value: analytics.totalTimeStr,
+       icon: IoTimeOutline,
+       color: "emerald",
+       data: timeEntries,
+       type: "time",
+       detail: "Logged this week"
+    },
+    {
+       label: "Utilization",
+       value: `${analytics.utilization}%`,
+       icon: IoStatsChartOutline,
+       color: "amber",
+       data: [],
+       type: "utilization",
+       detail: "Based on 40h week"
+    },
+    {
+       label: "PTO",
+       value: formatDuration(0, analytics.entriesByCat.pto.reduce((s,e)=>s + (e.hours*60+e.minutes), 0)),
+       icon: RiBeerFill,
+       color: "rose",
+       data: analytics.entriesByCat.pto,
+       type: "pto",
+       detail: "Time off"
+    },
+    {
+       label: "Training",
+       value: formatDuration(0, analytics.entriesByCat.training.reduce((s,e)=>s + (e.hours*60+e.minutes), 0)),
+       icon: MdModelTraining,
+       color: "lime",
+       data: analytics.entriesByCat.training,
+       type: "training",
+       detail: "Learning hours"
+    },
+    {
+       label: "R&D",
+       value: formatDuration(0, analytics.entriesByCat.rd.reduce((s,e)=>s + (e.hours*60+e.minutes), 0)),
+       icon: GiBrain,
+       color: "violet",
+       data: analytics.entriesByCat.rd,
+       type: "rd",
+       detail: "Research time"
     }
-    return null;
+  ];
+  
+  const handleCardClick = (card) => {
+     if(card.data && card.data.length > 0) {
+        
+        // Prepare display data (grouping projects etc)
+        let displayData = card.data;
+        const aggregateData = (items, keyField) => {
+             const map = new Map();
+             items.forEach(e => {
+                const key = keyField === 'task_id' ? (e.task_id || 'Unknown') : (e.project_name || e.project || e.task_id);
+                if(!map.has(key)) {
+                   map.set(key, {
+                      name: key,
+                      code: e.project_code,
+                      hours: 0,
+                      mins: 0,
+                      count: 0
+                   });
+                }
+                const p = map.get(key);
+                p.hours += e.hours;
+                p.mins += e.minutes;
+                p.count += 1;
+             });
+             return Array.from(map.values()).map(p => ({
+                ...p,
+                totalDisplay: formatDuration(p.hours, p.mins)
+             })).sort((a,b) => (b.hours*60+b.minutes) - (a.hours*60+a.minutes));
+        };
+
+        if (card.type === 'projects') {
+            displayData = aggregateData(card.data, 'project_name');
+        } else if (card.type === 'tasks' || ['pto', 'training', 'rd'].includes(card.type)) {
+            displayData = aggregateData(card.data, 'task_id');
+        }
+        
+        setModalContent({
+           title: card.label,
+           data: displayData,
+           type: card.type,
+           detail: card.detail
+        });
+        setModalOpen(true);
+     } else {
+        toast.info("No data available");
+     }
   };
 
-  if (isLoading) {
+  const renderModalContent = () => {
+    if (['projects', 'pto', 'training', 'rd', 'tasks'].includes(modalContent.type)) {
+       return (
+          <div className="space-y-3">
+             {modalContent.data.map((item, idx) => (
+                <div key={idx} className="flex justify-between items-center p-3 bg-slate-800 rounded-lg">
+                   <div>
+                      <div className="font-bold text-white">{item.name}</div>
+                      {item.code && <div className="text-xs text-slate-500">{item.code}</div>}
+                      {item.count && <div className="text-xs text-slate-500">{item.count} entries</div>}
+                   </div>
+                   <div className="text-indigo-400 font-mono font-bold">{item.totalDisplay}</div>
+                </div>
+             ))}
+          </div>
+       )
+    }
+    
     return (
-      <div className="space-y-6 animate-pulse">
-        <div className="h-48 bg-white/5 rounded-3xl w-full mb-6"></div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-white/5 rounded-3xl h-40"></div>
+       <div className="space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
+          {modalContent.data.map((item, idx) => (
+             <div key={idx} className="p-3 bg-slate-800 rounded-lg">
+                <div className="flex justify-between">
+                   <div className="font-semibold text-white">{item.project_name || item.project}</div>
+                   <div className="text-sm text-slate-400">{new Date(item.entry_date).toLocaleDateString()}</div>
+                </div>
+                <div className="text-sm text-indigo-300">{item.task_id}</div>
+                <div className="flex justify-between mt-2 text-xs text-slate-500">
+                   <div>{item.entry_date}</div>
+                   <div className="font-mono text-white">{item.hours}h {item.minutes}m</div>
+                </div>
+             </div>
           ))}
-        </div>
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 bg-white/5 rounded-3xl h-80"></div>
-          <div className="bg-white/5 rounded-3xl h-80"></div>
-        </div>
-      </div>
+       </div>
     );
-  }
+  };
 
   return (
     <div className="space-y-8 pb-10">
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        theme="dark"
-      />
-
+      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
+      
       {/* Header Section */}
       <div className="relative overflow-hidden rounded-3xl p-8 border border-white/10 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 backdrop-blur-2xl">
         <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
@@ -360,362 +381,283 @@ export default function Dashboard() {
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2.5 bg-indigo-500/20 rounded-xl border border-indigo-500/30">
-                <IoAnalyticsOutline className="text-indigo-400" size={24} />
+                <IoBusinessOutline className="text-indigo-400" size={24} />
               </div>
               <h1 className="text-3xl font-black text-white tracking-tight">
-                Analytics Dashboard
+                My Dashboard
               </h1>
             </div>
             <p className="text-slate-400 max-w-2xl text-lg">
-              Real-time insights into your projects, time tracking, and productivity metrics.
+               Overview for Current Week
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link
-              to="/time-log"
-              className="ui-btn ui-btn-primary"
-            >
+            <Link to="/time-log" className="ui-btn ui-btn-primary">
               <IoCalendarOutline size={18} />
               Time Log
             </Link>
-            <button
-              onClick={() => window.location.reload()}
-              className="ui-btn ui-btn-secondary"
+          </div>
+        </div>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+         {cards.map((card, idx) => (
+            <motion.div
+               key={idx}
+               whileHover={{ scale: 1.02 }}
+               whileTap={{ scale: 0.98 }}
+               className="ui-card p-6 cursor-pointer hover:border-indigo-500/50 transition-colors"
+               onClick={() => handleCardClick(card)}
             >
-              Refresh Data
-            </button>
-          </div>
-        </div>
+               <div className="flex justify-between items-start mb-4">
+                  <div className={`p-3 rounded-xl bg-${card.color}-500/10 text-${card.color}-400`}>
+                     <card.icon size={24} />
+                  </div>
+               </div>
+               <div>
+                  <div className="text-slate-400 text-sm font-medium">{card.label}</div>
+                  <div className="text-2xl font-bold text-white mt-1">{card.value}</div>
+                  <div className="text-xs text-slate-500 mt-2">{card.detail}</div>
+               </div>
+            </motion.div>
+         ))}
       </div>
 
-      {/* Stats Overview */}
-      <StatsCards cards={cards} />
-
-      {/* Charts Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* --- Charts Grid --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Daily Hours Chart */}
-        <div className="lg:col-span-2 ui-card">
-          <div className="ui-card-header">
-            <div>
-              <h3 className="ui-card-title">Daily Logged Hours</h3>
-              <p className="text-sm text-slate-400 mt-1">
-                Last 14 days • Avg: <span className="text-white font-mono">{formatTime(Math.round(analytics.avgDailyMinutes))}</span>
-              </p>
-            </div>
-            <div className="flex items-center gap-2 px-3 py-1.5 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
-              <div className="w-2.5 h-2.5 rounded-full bg-indigo-400 shadow-[0_0_10px_rgba(129,140,248,0.5)]"></div>
-              <span className="text-sm font-semibold text-indigo-300">Hours</span>
-            </div>
-          </div>
-          <div className="ui-card-body h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={analytics.dailySeries}>
-                <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.05)" />
-                <XAxis 
-                  dataKey="day" 
-                  tick={{ fill: "#94a3b8", fontSize: 12 }}
-                  axisLine={false}
-                  tickLine={false}
-                  dy={10}
-                />
-                <YAxis 
-                  tick={{ fill: "#94a3b8", fontSize: 12 }}
-                  axisLine={false}
-                  tickLine={false}
-                  dx={-10}
-                />
-                <Tooltip content={<CustomTooltip />} cursor={{ stroke: 'rgba(255,255,255,0.1)', strokeWidth: 2 }} />
-                <Line 
-                  type="monotone" 
-                  dataKey="hours" 
-                  stroke={CHART_COLORS.primary}
-                  strokeWidth={3}
-                  dot={{ r: 4, fill: '#0f172a', stroke: CHART_COLORS.primary, strokeWidth: 2 }}
-                  activeDot={{ r: 6, fill: CHART_COLORS.primary, stroke: '#fff', strokeWidth: 2 }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+        <div className="ui-card p-6 bg-slate-900 border-slate-800">
+          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <IoStatsChartOutline className="text-indigo-400" />
+            Daily Activity
+          </h3>
+          <div className="h-[300px] w-full flex items-center justify-center">
+            {analytics.chartData.length > 0 ? (
+               <ResponsiveContainer width="100%" height="100%">
+                 <LineChart data={analytics.chartData}>
+                   <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                   <XAxis 
+                     dataKey="date" 
+                     stroke="#94a3b8" 
+                     fontSize={12}
+                     tickFormatter={(str) => new Date(str).toLocaleDateString(undefined, {weekday:'short'})}
+                   />
+                   <YAxis stroke="#94a3b8" fontSize={12} />
+                   <Tooltip 
+                     contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
+                     itemStyle={{ color: '#fff' }}
+                   />
+                   <Line type="monotone" dataKey="hours" stroke="#6366f1" strokeWidth={3} dot={{r: 4, fill: '#6366f1'}} activeDot={{ r: 6 }} />
+                 </LineChart>
+               </ResponsiveContainer>
+            ) : (
+               <div className="text-slate-500 flex flex-col items-center">
+                  <IoStatsChartOutline size={48} className="mb-2 opacity-20" />
+                  <p>No activity data available</p>
+               </div>
+            )}
           </div>
         </div>
 
-        {/* Location Distribution */}
-        <div className="ui-card">
-          <div className="ui-card-header">
-            <div>
-              <h3 className="ui-card-title">Work by Location</h3>
-              <p className="text-sm text-slate-400 mt-1">Last 30 days distribution</p>
-            </div>
-          </div>
-          <div className="ui-card-body h-[320px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={analytics.locationSplit}
-                  dataKey="hours"
-                  nameKey="name"
-                  innerRadius={70}
-                  outerRadius={100}
-                  paddingAngle={4}
-                  stroke="none"
-                >
-                  {analytics.locationSplit.map((_, idx) => (
-                    <Cell 
-                      key={idx} 
-                      fill={PIE_COLORS[idx % PIE_COLORS.length]} 
-                    />
-                  ))}
-                </Pie>
-                <Tooltip content={<CustomTooltip />} />
-                <Legend 
-                  verticalAlign="bottom"
-                  height={36}
-                  iconType="circle"
-                  iconSize={8}
-                  formatter={(value) => <span className="text-slate-300 text-xs ml-1">{value}</span>}
-                />
-              </PieChart>
-            </ResponsiveContainer>
+        {/* Location Split Chart */}
+        <div className="ui-card p-6 bg-slate-900 border-slate-800">
+          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <IoLocationOutline className="text-emerald-400" />
+            Work Location
+          </h3>
+          <div className="h-[300px] w-full flex items-center justify-center">
+            {analytics.locationData.length > 0 ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={analytics.locationData}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={60}
+                    outerRadius={100}
+                    paddingAngle={5}
+                    dataKey="hours"
+                  >
+                    {analytics.locationData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={['#6366f1', '#10b981', '#f59e0b', '#ef4444'][index % 4]} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                     contentStyle={{ backgroundColor: '#1e293b', borderColor: '#334155', color: '#f8fafc' }}
+                  />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+               <div className="text-slate-500">No location data available</div>
+            )}
           </div>
         </div>
       </div>
 
-      {/* Projects & Clients Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Top Projects */}
-        <div className="lg:col-span-2 ui-card flex flex-col">
-          <div className="ui-card-header">
-            <div>
-              <h3 className="ui-card-title">Top Projects</h3>
-              <p className="text-sm text-slate-400 mt-1">By hours logged in last 30 days</p>
-            </div>
-            <div className="ui-chip neutral">
-              {analytics.topProjects.length} projects
-            </div>
+      {/* --- Projects & Clients Grid --- */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Top Projects List */}
+        <div className="ui-card p-0 overflow-hidden bg-slate-900 border-slate-800">
+          <div className="p-6 border-b border-white/5">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <IoFolderOutline className="text-amber-400" />
+              Top Projects
+            </h3>
           </div>
-          <div className="ui-card-body flex-1">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-              {analytics.topProjects.length === 0 ? (
-                <div className="col-span-2 text-center py-10">
-                  <IoFolderOutline className="mx-auto text-slate-600 mb-3" size={48} />
-                  <p className="text-slate-500">No recent project activity</p>
-                </div>
-              ) : (
-                analytics.topProjects.map((project, index) => {
-                  const maxMinutes = Math.max(...analytics.topProjects.map(p => p.minutes));
-                  const relativePercentage = Math.round((project.minutes / maxMinutes) * 100);
-                  const totalPercentage = Math.round((project.minutes / analytics.totalMinutesAll) * 100);
-                  
-                  return (
-                    <div key={project.name} className="group flex flex-col gap-2">
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-white text-xs shadow-lg transition-all group-hover:scale-110 ${
-                            index % 2 === 0 
-                              ? 'bg-linear-to-br from-indigo-500 to-indigo-600 shadow-indigo-500/20' 
-                              : 'bg-linear-to-br from-purple-500 to-purple-600 shadow-purple-500/20'
-                          }`}>
-                            {project.name.substring(0, 2).toUpperCase()}
-                          </div>
-                          <div>
-                            <h4 className="text-sm font-bold text-white group-hover:text-indigo-400 transition-colors line-clamp-1">
-                              {project.name}
-                            </h4>
-                            <p className="text-[10px] text-slate-500 uppercase tracking-widest font-black">
-                              {totalPercentage}% contribution
-                            </p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <div className="text-sm font-black text-white">{project.hours}h</div>
-                          <div className="text-[10px] text-slate-500 font-mono">Logged</div>
-                        </div>
+          <div className="divide-y divide-white/5">
+            {analytics.topProjects.length > 0 ? (
+               analytics.topProjects.map((project, i) => (
+                  <div key={i} className="p-4 hover:bg-white/5 transition-colors flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-xs">
+                        {i + 1}
                       </div>
-                      
-                      <div className="relative w-full h-2 bg-white/5 rounded-full overflow-hidden">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${relativePercentage}%` }}
-                          transition={{ duration: 1, ease: "easeOut", delay: index * 0.1 }}
-                          className={`absolute top-0 left-0 h-full rounded-full ${
-                             index % 2 === 0 ? 'bg-indigo-500' : 'bg-purple-500'
-                          }`}
+                      <div>
+                        <div className="font-medium text-white">{project.name}</div>
+                        <div className="text-xs text-slate-500">{project.code}</div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-mono text-indigo-400 font-bold">{project.totalTime}</div>
+                      <div className="text-xs text-slate-500">{project.progress.toFixed(0)}%</div>
+                    </div>
+                  </div>
+               ))
+            ) : (
+               <div className="p-8 text-center text-slate-500">No project activity this week</div>
+            )}
+          </div>
+        </div>
+
+        {/* Top Clients List */}
+        <div className="ui-card p-0 overflow-hidden bg-slate-900 border-slate-800">
+          <div className="p-6 border-b border-white/5">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <IoPeopleOutline className="text-rose-400" />
+              Top Clients
+            </h3>
+          </div>
+          <div className="divide-y divide-white/5">
+             {analytics.topClients.length > 0 ? (
+                analytics.topClients.map((client, i) => (
+                  <div key={i} className="p-4 hover:bg-white/5 transition-colors flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 font-bold text-xs">
+                        {client.name.charAt(0)}
+                      </div>
+                      <div className="font-medium text-white">{client.name}</div>
+                    </div>
+                    <div className="text-right">
+                      <div className="font-mono text-indigo-400 font-bold">{client.totalTime}</div>
+                      <div className="w-24 h-1.5 bg-slate-700 rounded-full mt-2 overflow-hidden">
+                        <div 
+                           className="h-full bg-rose-500 rounded-full" 
+                           style={{ width: `${client.percentage}%` }}
                         />
                       </div>
                     </div>
-                  );
-                })
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* Top Clients */}
-        <div className="ui-card">
-          <div className="ui-card-header">
-            <div>
-              <h3 className="ui-card-title">Top Clients</h3>
-              <p className="text-sm text-slate-400 mt-1">Hours distribution by client</p>
-            </div>
-          </div>
-          <div className="ui-card-body">
-            <div className="space-y-5 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-              {analytics.topClients.length === 0 ? (
-                <div className="text-center py-10">
-                  <IoBusinessOutline className="mx-auto text-slate-600" size={48} />
-                  <p className="text-slate-500 mt-3">No client data available</p>
-                </div>
-              ) : (
-                analytics.topClients.map((client, index) => {
-                  const percentage = Math.round((client.minutes / analytics.totalMinutesAll) * 100);
-                  return (
-                    <div 
-                      key={client.name} 
-                      className="group"
-                    >
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <h4 className="font-bold text-slate-200 line-clamp-1 group-hover:text-white transition-colors">
-                              {client.name}
-                            </h4>
-                          </div>
-                          <p className="text-xs text-slate-500 mt-0.5">
-                            {percentage}% of total time
-                          </p>
-                        </div>
-                        <span className="text-sm font-bold text-white bg-white/5 px-2 py-1 rounded-lg">
-                          {client.hours}h
-                        </span>
-                      </div>
-                      <div className="w-full bg-slate-700/50 rounded-full h-1.5 overflow-hidden">
-                        <div 
-                          className="bg-indigo-500 h-1.5 rounded-full transition-all duration-500 group-hover:shadow-[0_0_10px_rgba(99,102,241,0.5)]"
-                          style={{ width: `${Math.min(percentage, 100)}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  );
-                })
-              )}
-            </div>
+                  </div>
+                ))
+             ) : (
+                <div className="p-8 text-center text-slate-500">No client details available</div>
+             )}
           </div>
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="ui-card">
-        <div className="ui-card-header">
-          <div>
-            <h3 className="ui-card-title">Recent Activity</h3>
-            <p className="text-sm text-slate-400 mt-1">Latest time entries and updates</p>
-          </div>
-          <Link
-            to="/time-log"
-            className="text-sm font-semibold text-indigo-400 hover:text-indigo-300 flex items-center gap-1 transition-colors"
-          >
-            View all
-            <IoArrowUp className="rotate-90" size={14} />
-          </Link>
-        </div>
-
-        {analytics.recentEntries.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-4 border border-white/10">
-              <IoTimeOutline className="text-slate-500" size={24} />
-            </div>
-            <h4 className="text-lg font-semibold text-slate-300 mb-2">
-              No recent activity
-            </h4>
-            <Link
-              to="/time-log"
-              className="ui-btn ui-btn-primary mt-4"
-            >
-              Start Tracking
-            </Link>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-white/5 bg-white/[0.02]">
-                  <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-widest pl-6">Date</th>
-                  <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Project</th>
-                  <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Task</th>
-                  <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Client</th>
-                  <th className="text-left p-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Duration</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {analytics.recentEntries.map((entry, index) => (
-                  <tr 
-                    key={entry.id || index} 
-                    className="hover:bg-white/2 transition-colors"
-                  >
-                    <td className="p-4 pl-6">
-                      <div className="font-bold text-slate-300">
-                        {toDateKey(entry.entry_date)}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="font-semibold text-white">
-                        {entry.project_name || "—"}
-                      </div>
-                      <div className="text-xs text-slate-500 font-mono mt-0.5">
-                        {entry.project_code}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <div className="font-medium text-slate-400">
-                        {entry.task_id}
-                      </div>
-                    </td>
-                    <td className="p-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border ${
-                        entry.client 
-                          ? 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20' 
-                          : 'bg-slate-700/20 text-slate-500 border-slate-700/30'
-                      }`}>
-                        {entry.client || "Unassigned"}
-                      </span>
-                    </td>
-                    <td className="p-4">
-                      <div className="flex items-center gap-2">
-                        <IoTimeOutline className="text-slate-600" size={16} />
-                        <span className="font-bold text-white">
-                          {formatTime(entryMinutes(entry))}
-                        </span>
-                      </div>
-                    </td>
+      {/* --- Recent Activity Table --- */}
+      <div className="ui-card p-0 overflow-hidden bg-slate-900 border-slate-800">
+         <div className="p-6 border-b border-white/5 flex justify-between items-center">
+            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+              <IoConstructOutline className="text-cyan-400" />
+              Recent Activity
+            </h3>
+            <Link to="/time-log" className="text-xs font-medium text-indigo-400 hover:text-indigo-300">View All</Link>
+         </div>
+         <div className="overflow-x-auto">
+            <table className="w-full text-left text-sm text-slate-400">
+               <thead className="bg-white/5 text-xs uppercase font-semibold text-slate-300">
+                  <tr>
+                     <th className="px-6 py-4">Date</th>
+                     <th className="px-6 py-4">Project</th>
+                     <th className="px-6 py-4">Task</th>
+                     <th className="px-6 py-4 text-right">Duration</th>
+                     <th className="px-6 py-4 text-right">Status</th>
                   </tr>
-                ))}
-              </tbody>
+               </thead>
+               <tbody className="divide-y divide-white/5">
+                  {analytics.recentEntries.length > 0 ? (
+                     analytics.recentEntries.map((entry) => (
+                        <tr key={entry.id} className="hover:bg-white/[0.02] transition-colors">
+                           <td className="px-6 py-4 text-white font-medium">
+                              {new Date(entry.entry_date).toLocaleDateString()}
+                           </td>
+                           <td className="px-6 py-4">
+                              <div className="text-white">{entry.project_name || entry.project}</div>
+                              <div className="text-xs opacity-50">{entry.client}</div>
+                           </td>
+                           <td className="px-6 py-4">
+                              <span className="inline-flex items-center px-2 py-1 rounded bg-slate-800 text-slate-300 text-xs border border-white/10">
+                                 {entry.task_id}
+                              </span>
+                           </td>
+                           <td className="px-6 py-4 text-right font-mono text-indigo-400 font-bold">
+                              {entry.hours}h {entry.minutes}m
+                           </td>
+                           <td className="px-6 py-4 text-right">
+                              <span className="text-emerald-400 flex justify-end gap-1 items-center text-xs font-bold uppercase">
+                                 <IoCheckmarkCircle /> Logged
+                              </span>
+                           </td>
+                        </tr>
+                     ))
+                  ) : (
+                     <tr>
+                        <td colSpan="5" className="p-8 text-center text-slate-500">No recent activity</td>
+                     </tr>
+                  )}
+               </tbody>
             </table>
-          </div>
-        )}
+         </div>
       </div>
-
-      {/* Footer/Summary */}
-      <div className="relative overflow-hidden rounded-3xl p-8 bg-emerald-900/20 border border-emerald-500/20">
-         <div className="absolute inset-0 bg-gradient-to-r from-emerald-600/10 to-transparent pointer-events-none" />
-        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
-          <div>
-            <h4 className="text-xl font-bold text-white mb-2">
-              Ready to optimize your workflow?
-            </h4>
-            <p className="text-emerald-200/70">
-              Track more time to unlock advanced analytics and insights
-            </p>
-          </div>
-          <Link
-            to="/time-log"
-            className="ui-btn bg-emerald-500 hover:bg-emerald-400 text-black shadow-[0_0_20px_rgba(16,185,129,0.3)] border-none"
+      
+      {/* Modal */}
+      <AnimatePresence>
+        {/* ... (Previous Modal Code) ... */}
+        {modalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            onClick={() => setModalOpen(false)}
           >
-            <IoCheckmarkCircle size={18} />
-            Start Tracking
-          </Link>
-        </div>
-      </div>
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
+              onClick={e => e.stopPropagation()}
+            >
+              <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                 <div>
+                    <h3 className="text-xl font-bold text-white">{modalContent.title}</h3>
+                    <p className="text-sm text-slate-400">{modalContent.detail}</p>
+                 </div>
+                 <button onClick={() => setModalOpen(false)} className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white">
+                    <IoClose size={24} />
+                 </button>
+              </div>
+              <div className="p-6">
+                 {renderModalContent()}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

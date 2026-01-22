@@ -105,7 +105,7 @@ export default function AddTimeModal({
   };
 
   const fTasks = tasks.filter(t => (selectedDept === "all" || t.task_dept === selectedDept) && t.task_name.toLowerCase().includes(search.task.toLowerCase()));
-  const fProjects = projects.filter(p => p.name.toLowerCase().includes(search.project.toLowerCase()) || p.code?.toLowerCase().includes(search.project.toLowerCase()));
+  const fProjects = projects.filter(p => p.name.toLowerCase().includes(search.project.toLowerCase()) || p.code?.toString().toLowerCase().includes(search.project.toLowerCase()));
   const fClients = clients.filter(c => c.name.toLowerCase().includes(search.client.toLowerCase()));
 
   return (
@@ -152,7 +152,45 @@ export default function AddTimeModal({
     >
       <form onSubmit={validateAndSubmit} className="flex flex-col h-full max-h-[55vh] md:max-h-[65vh] px-1 pt-2 pb-4 overflow-y-auto custom-scrollbar">
         <div className="space-y-4 flex-1">
-          {/* TASK */}
+          {/* PROJECT - Changed to be first */}
+          <div className="relative" ref={projectRef}>
+            <label className="ui-label block">Project <span className="text-rose-500">*</span></label>
+            <input 
+              className="ui-input font-bold"
+              placeholder="Search..." 
+              value={search.project} 
+              onFocus={() => setDropdowns(p => ({ ...p, project: true }))} 
+              onChange={(e) => setSearch(p => ({ ...p, project: e.target.value }))} 
+            />
+            {dropdowns.project && (
+              <div className="absolute top-full left-0 w-full mt-1 bg-[#1e293b] border border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto z-50">
+                {fProjects.map(p => (
+                  <div key={p.id} className="p-2.5 hover:bg-slate-800 text-slate-300 text-xs font-bold cursor-pointer" 
+                    onClick={() => {
+                      // Auto-set client and country (region) from project
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        project: p.name, 
+                        project_code: p.code,
+                        client: p.client || "",        // Auto-fetch client
+                        country: p.location || "US"   // Auto-fetch location (region)
+                      }));
+                      setSearch(prev => ({ 
+                        ...prev, 
+                        project: p.name,
+                        client: p.client || ""         // Update client search display too
+                      }));
+                      setDropdowns(prev => ({ ...prev, project: false }));
+                    }}
+                  >
+                    {p.name} <span className="text-[9px] opacity-40 block">{p.code}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* TASK - Moved below project */}
           <div className="relative" ref={taskRef}>
             <div className="flex justify-between items-center mb-1">
               <label className="ui-label">Task <span className="text-rose-500">*</span></label>
@@ -187,101 +225,53 @@ export default function AddTimeModal({
             )}
           </div>
 
-          {/* PROJECT & CLIENT */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="relative" ref={projectRef}>
-              <label className="ui-label block">Project <span className="text-rose-500">*</span></label>
-              <input 
-                className="ui-input font-bold"
-                placeholder="Search..." 
-                value={search.project} 
-                onFocus={() => setDropdowns(p => ({ ...p, project: true }))} 
-                onChange={(e) => setSearch(p => ({ ...p, project: e.target.value }))} 
-              />
-              {dropdowns.project && (
-                <div className="absolute top-full left-0 w-full mt-1 bg-[#1e293b] border border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto z-50">
-                  {fProjects.map(p => (
-                    <div key={p.id} className="p-2.5 hover:bg-slate-800 text-slate-300 text-xs font-bold cursor-pointer" onClick={() => handleSelect('project', p.name, p.code)}>
-                      {p.name} <span className="text-[9px] opacity-40 block">{p.code}</span>
-                    </div>
-                  ))}
+          {/* AUTO INFO DISPLAY (Client & Region) */}
+          <div className="grid grid-cols-2 gap-3 items-center">
+             <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
+                <span className="text-[10px] text-slate-500 uppercase font-bold block mb-1">Client</span>
+                <div className="text-xs font-bold text-slate-300 truncate">
+                  {formData.client || <span className="text-slate-600 italic">Auto-selected</span>}
                 </div>
-              )}
-            </div>
-
-            <div className="relative" ref={clientRef}>
-              <label className="ui-label block">Client <span className="text-rose-500">*</span></label>
-              <input 
-                className="ui-input font-bold"
-                placeholder="Search..." 
-                value={search.client} 
-                onFocus={() => setDropdowns(p => ({ ...p, client: true }))} 
-                onChange={(e) => setSearch(p => ({ ...p, client: e.target.value }))} 
-              />
-              {dropdowns.client && (
-                <div className="absolute top-full left-0 w-full mt-1 bg-[#1e293b] border border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto z-50">
-                  {fClients.map(c => (
-                    <div key={c.id} className="p-2.5 hover:bg-slate-800 text-slate-300 text-xs font-bold cursor-pointer" onClick={() => handleSelect('client', c.name)}>
-                      {c.name}
-                    </div>
-                  ))}
-                </div>
-              )}
-            </div>
+             </div>
+             <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
+                <span className="text-[10px] text-slate-500 uppercase font-bold block mb-1">Region</span>
+                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
+                    <IoLocation className="text-indigo-500" size={12}/>
+                    {formData.country || <span className="text-slate-600 italic">Auto-selected</span>}
+                 </div>
+             </div>
           </div>
 
-          {/* REGION & TIME */}
-          <div className="grid grid-cols-2 gap-3">
-            <div className="flex flex-col">
-              <label className="ui-label flex items-center gap-1 tracking-tight">
-                <IoLocation className="text-indigo-500" /> Region <span className="text-rose-500">*</span>
-              </label>
-              <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-700 h-[42px]">
-                {['US', 'IND'].map(c => (
-                  <button 
-                    key={c} 
-                    type="button" 
-                    onClick={() => setFormData(p => ({ ...p, country: c }))} 
-                    className={`flex-1 text-[10px] font-black rounded-lg transition-all ${
-                      formData.country === c ? "bg-white/10 text-emerald-400 shadow-sm border border-emerald-500/30" : "text-slate-500 hover:text-slate-300"
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
+          {/* DURATION */}
+          <div className="flex flex-col">
+            <label className="ui-label mb-1 tracking-tight">
+              Duration <span className="text-rose-500">*</span>
+            </label>
+            <div className="flex items-center gap-1 bg-slate-900 px-2 rounded-xl h-[42px] border border-slate-700">
+              <div className="flex-1 flex flex-col items-center justify-center">
+                <input 
+                  type="text" 
+                  inputMode="numeric" 
+                  className="w-full bg-transparent text-center text-white text-lg font-black outline-none focus:text-indigo-400 leading-none h-6" 
+                  placeholder="0" 
+                  value={formData.hours} 
+                  onChange={(e) => handleTimeChange('hours', e.target.value)} 
+                />
+                <p className="text-[7px] text-slate-500 font-bold uppercase leading-none mt-0.5">Hrs</p>
               </div>
-            </div>
-
-            <div className="flex flex-col">
-              <label className="ui-label mb-1 tracking-tight">
-                Duration <span className="text-rose-500">*</span>
-              </label>
-              <div className="flex items-center gap-1 bg-slate-900 px-2 rounded-xl h-[42px] border border-slate-700">
-                <div className="flex-1 flex flex-col items-center justify-center">
-                  <input 
-                    type="text" 
-                    inputMode="numeric" 
-                    className="w-full bg-transparent text-center text-white text-lg font-black outline-none focus:text-indigo-400 leading-none h-6" 
-                    placeholder="0" 
-                    value={formData.hours} 
-                    onChange={(e) => handleTimeChange('hours', e.target.value)} 
-                  />
-                  <p className="text-[7px] text-slate-500 font-bold uppercase leading-none mt-0.5">Hrs</p>
-                </div>
-                
-                <span className="text-slate-600 font-bold self-center pb-2">:</span>
-                
-                <div className="flex-1 flex flex-col items-center justify-center">
-                  <input 
-                    type="text" 
-                    inputMode="numeric" 
-                    className="w-full bg-transparent text-center text-white text-lg font-black outline-none focus:text-indigo-400 leading-none h-6" 
-                    placeholder="00" 
-                    value={formData.minutes} 
-                    onChange={(e) => handleTimeChange('minutes', e.target.value)} 
-                  />
-                  <p className="text-[7px] text-slate-500 font-bold uppercase leading-none mt-0.5">Min</p>
-                </div>
+              
+              <span className="text-slate-600 font-bold self-center pb-2">:</span>
+              
+              <div className="flex-1 flex flex-col items-center justify-center">
+                <input 
+                  type="text" 
+                  inputMode="numeric" 
+                  className="w-full bg-transparent text-center text-white text-lg font-black outline-none focus:text-indigo-400 leading-none h-6" 
+                  placeholder="00" 
+                  value={formData.minutes} 
+                  onChange={(e) => handleTimeChange('minutes', e.target.value)} 
+                />
+                <p className="text-[7px] text-slate-500 font-bold uppercase leading-none mt-0.5">Min</p>
               </div>
             </div>
           </div>

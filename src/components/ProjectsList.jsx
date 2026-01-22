@@ -7,12 +7,11 @@ import {
   IoLocationOutline,
   IoEllipsisHorizontal,
   IoBusinessOutline,
-  IoTimeOutline,
-  IoCheckmarkCircle
+  IoPencilOutline
 } from 'react-icons/io5'
 import { useState, useEffect, useMemo } from 'react'
 
-export default function ProjectsList({ projects, onDeleteProject, headerAction }) {
+export default function ProjectsList({ projects, onDeleteProject, onEditProject, headerAction }) {
   const [searchQuery, setSearchQuery] = useState('')
   const [projectToDelete, setProjectToDelete] = useState(null)
   const [showDeleteModal, setShowDeleteModal] = useState(false)
@@ -104,6 +103,7 @@ export default function ProjectsList({ projects, onDeleteProject, headerAction }
               index={index}
               getStatusColor={getStatusColor}
               onDelete={() => { setProjectToDelete(project); setShowDeleteModal(true); }} 
+              onEdit={() => onEditProject && onEditProject(project)}
             />
           ))}
         </div>
@@ -223,7 +223,7 @@ export default function ProjectsList({ projects, onDeleteProject, headerAction }
   )
 }
 
-function ProjectCard({ project, index, getStatusColor, onDelete }) {
+function ProjectCard({ project, index, getStatusColor, onDelete, onEdit }) {
   const [showMenu, setShowMenu] = useState(false)
   
   return (
@@ -267,6 +267,13 @@ function ProjectCard({ project, index, getStatusColor, onDelete }) {
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
                     className="absolute right-0 top-8 bg-[#1e293b] rounded-lg shadow-xl border border-white/10 py-1 z-20 w-40"
                   >
+                    <button 
+                      onClick={(e) => { e.stopPropagation(); onEdit(); setShowMenu(false); }}
+                      className="w-full px-3 py-2 text-left text-sm text-slate-300 hover:text-white hover:bg-slate-700/50 transition-colors flex items-center gap-2"
+                    >
+                      <IoPencilOutline size={14} />
+                      Edit Project
+                    </button>
                     <button 
                       onClick={(e) => { e.stopPropagation(); onDelete(); setShowMenu(false); }}
                       className="w-full px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10 transition-colors flex items-center gap-2"
