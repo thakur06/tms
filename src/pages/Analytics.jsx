@@ -18,6 +18,8 @@ import {
   Legend,
 } from "recharts";
 import {
+    IoPeopleSharp,
+  IoGameController,
   IoTimeOutline,
   IoStatsChartOutline,
   IoFolderOutline,
@@ -33,7 +35,7 @@ import {
   IoAnalytics,
 } from "react-icons/io5";
 import { RiBeerFill } from "react-icons/ri";
-import { MdModelTraining } from "react-icons/md";
+import {MdBusiness, MdMeetingRoom, MdModelTraining } from "react-icons/md";
 import { GiBrain, GiSuitcase } from "react-icons/gi";
 import { FiCalendar, FiUsers, FiLayers } from "react-icons/fi";
 import { motion, AnimatePresence } from "framer-motion";
@@ -330,12 +332,16 @@ export const Analytics = () => {
     );
 
     // Categories
-    const entriesByCat = {
+     const entriesByCat = {
       project: [],
       pto: [],
       training: [],
       rd: [],
       bd: [],
+      tb: [],
+      meetings:[],
+      holidays:[],
+
     };
 
     // Lookup map
@@ -358,14 +364,30 @@ export const Analytics = () => {
         cat = "pto";
       } else if (e.project?.toLowerCase().includes("training")) {
         cat = "training";
+      } else if (e.project?.toLowerCase().includes("r&d")) {
+        cat = "r&d";
       }
-
-      // Map to keys
+      else if (e.project?.toLowerCase().includes("bd")) {
+        cat = "bd";
+      }
+      else if (e.project?.toLowerCase().includes("Meetings")) {
+        cat = "meetings";
+      }
+      else if (e.project?.toLowerCase().includes("Public Holiday")) {
+        cat = "public holiday";
+      }
+      else if (e.project?.toLowerCase().includes("Team Building")) {
+        cat = "team building";
+      }
       if (cat === "pto") entriesByCat.pto.push(e);
       else if (cat === "training") entriesByCat.training.push(e);
       else if (cat === "r&d" || cat === "research") entriesByCat.rd.push(e);
-      else if (cat === "BD") entriesByCat.bd.push(e);
+      else if (cat === "bd") entriesByCat.bd.push(e);
+      else if (cat === "meetings") entriesByCat.meetings.push(e);
+      else if (cat === "public holiday") entriesByCat.holidays.push(e);
+      else if (cat === "team building") entriesByCat.tb.push(e);
       else entriesByCat.project.push(e);
+
     });
 
     // Unique counts
@@ -516,20 +538,65 @@ export const Analytics = () => {
       detail: "Research & Development",
     },
     {
-      label: "Buisness Development",
-      value: formatDuration(
-        0,
-        analytics.entriesByCat.bd.reduce(
-          (s, e) => s + e.hours * 60 + e.minutes,
-          0,
-        ),
-      ),
-      icon: GiSuitcase,
-      color: "from-yellow-400 to-yellow-600",
-      type: "BD",
-      data: analytics.entriesByCat.bd,
-      detail: "Buisness Development",
-    },
+         label: "Buisness Development",
+         value: formatDuration(
+           0,
+           analytics.entriesByCat.bd.reduce(
+             (s, e) => s + e.hours * 60 + e.minutes,
+             0,
+           ),
+         ),
+         icon: MdBusiness,
+         color: "from-yellow-400 to-yellow-600",
+         type: "bd",
+         data: analytics.entriesByCat.bd,
+         detail: "Buisness Development",
+       },
+       {
+         label: "Meetings",
+         value: formatDuration(
+           0,
+           analytics.entriesByCat.meetings.reduce(
+             (s, e) => s + e.hours * 60 + e.minutes,
+             0,
+           ),
+         ),
+         icon: MdMeetingRoom,
+         color: "from-yellow-400 to-yellow-600",
+         type: "meetings",
+         data: analytics.entriesByCat.meetings,
+         detail: "Meetings",
+       },
+       {
+         label: "Public Holiday",
+         value: formatDuration(
+           0,
+           analytics.entriesByCat.holidays.reduce(
+             (s, e) => s + e.hours * 60 + e.minutes,
+             0,
+           ),
+         ),
+         icon: IoGameController,
+         color: "from-yellow-400 to-yellow-600",
+         type: "BD",
+         data: analytics.entriesByCat.holidays,
+         detail: "publicholiday",
+       },
+       {
+         label: "Team Building",
+         value: formatDuration(
+           0,
+           analytics.entriesByCat.tb.reduce(
+             (s, e) => s + e.hours * 60 + e.minutes,
+             0,
+           ),
+         ),
+         icon: IoPeopleSharp,
+         color: "from-yellow-400 to-yellow-600",
+         type: "teambuilding",
+         data: analytics.entriesByCat.tb,
+         detail: "Team Building",
+       },
   ];
 
   const handleCardClick = (card) => {
