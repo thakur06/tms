@@ -192,7 +192,7 @@ export default function AddTimeModal({
 
           {/* TASK - Moved below project */}
           <div className="relative" ref={taskRef}>
-            <div className="flex justify-between items-center mb-1">
+            {/* <div className="flex justify-between items-center mb-1">
               <label className="ui-label">Task <span className="text-rose-500">*</span></label>
               <select 
                 className="text-[9px] font-black bg-slate-800 text-slate-300 rounded px-1 h-6 outline-none border border-slate-700 focus:border-indigo-500" 
@@ -202,7 +202,7 @@ export default function AddTimeModal({
                 <option value="all">ALL DEPTS</option>
                 {[...new Set(tasks.map(t => t.task_dept))].filter(Boolean).map(d => <option key={d} value={d}>{d}</option>)}
               </select>
-            </div>
+            </div> */}
             <div className="relative">
               <input 
                 className="ui-input pl-9 font-bold"

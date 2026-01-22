@@ -30,6 +30,7 @@ import {
   IoBusinessOutline,
   IoLocationOutline,
   IoPeopleOutline,
+  IoAnalyticsOutline ,
   IoConstructOutline
 } from "react-icons/io5";
 import { RiBeerFill } from "react-icons/ri";
@@ -382,32 +383,40 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-8 pb-10">
+    <div className="space-y-8 pb-10 p-3">
       <ToastContainer position="top-right" autoClose={3000} theme="dark" />
       
-      {/* Header Section */}
       <div className="relative overflow-hidden rounded-3xl p-8 border border-white/10 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 backdrop-blur-2xl">
         <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-3">
               <div className="p-2.5 bg-indigo-500/20 rounded-xl border border-indigo-500/30">
-                <IoBusinessOutline className="text-indigo-400" size={24} />
+                <IoAnalyticsOutline className="text-indigo-400" size={24} />
               </div>
               <h1 className="text-3xl font-black text-white tracking-tight">
-                My Dashboard
+                Analytics Dashboard
               </h1>
             </div>
             <p className="text-slate-400 max-w-2xl text-lg">
-               Overview for Current Week
+              Real-time insights into your projects, time tracking, and productivity metrics.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link to="/time-log" className="ui-btn ui-btn-primary">
+            <Link
+              to="/time-log"
+              className="ui-btn ui-btn-primary"
+            >
               <IoCalendarOutline size={18} />
               Time Log
             </Link>
+            <button
+              onClick={() => window.location.reload()}
+              className="ui-btn ui-btn-secondary"
+            >
+              Refresh Data
+            </button>
           </div>
         </div>
       </div>
