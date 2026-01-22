@@ -34,7 +34,7 @@ import {
 } from "react-icons/io5";
 import { RiBeerFill } from "react-icons/ri";
 import { MdModelTraining } from "react-icons/md";
-import { GiBrain } from "react-icons/gi";
+import { GiBrain, GiSuitcase } from "react-icons/gi";
 import { motion, AnimatePresence } from "framer-motion";
 import axios from "axios";
 
@@ -109,7 +109,8 @@ export default function Dashboard() {
       project: [],
       pto: [],
       training: [],
-      rd: []
+      rd: [],
+      bd:[]
     };
     
     const dailyMap = new Map();
@@ -140,6 +141,7 @@ export default function Dashboard() {
        if (cat === 'pto') entriesByCat.pto.push(e);
        else if (cat === 'training') entriesByCat.training.push(e);
        else if (cat === 'r&d' || cat === 'research') entriesByCat.rd.push(e);
+       else if (cat === 'BD') entriesByCat.bd.push(e);
        else entriesByCat.project.push(e);
 
        // Duration
@@ -283,7 +285,16 @@ export default function Dashboard() {
        data: analytics.entriesByCat.rd,
        type: "rd",
        detail: "Research time"
-    }
+    },
+    {
+          label: "Buisness Development",
+          value: formatDuration(0, analytics.entriesByCat.bd.reduce((s,e)=>s + e.hours*60+e.minutes, 0)),
+          icon: GiSuitcase,
+          color: "from-yellow-400 to-yellow-600",
+          type: "BD",
+          data: analytics.entriesByCat.bd,
+          detail: "Buisness Development"
+        }
   ];
   
   const handleCardClick = (card) => {
