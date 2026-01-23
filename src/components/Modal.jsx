@@ -34,14 +34,15 @@ export default function Modal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             onClick={onClose}
-            className={`ui-modal-overlay z-[9998] ${overlayClassName}`}
+            className={`ui-modal-overlay ${overlayClassName}`}
           />
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            transition={{ type: 'spring', duration: 0.3 }}
+            exit={{ opacity: 0, scale: 0.9, y: 20 }}
+            transition={{ type: 'spring', damping: 25, stiffness: 300 }}
             className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9999] w-full max-w-lg ${shellClassName}`}
             onClick={(e) => e.stopPropagation()}
           >
@@ -50,7 +51,7 @@ export default function Modal({
                 <h2 className="ui-modal-title">{title}</h2>
                 <button
                   onClick={onClose}
-                  className="p-2 hover:bg-white/10 rounded-xl transition-colors text-slate-400 hover:text-white"
+                  className="p-2 hover:bg-white/10 rounded-xl transition-all text-slate-400 hover:text-white hover:rotate-90 duration-300"
                 >
                   <IoClose className="w-5 h-5" />
                 </button>

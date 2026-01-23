@@ -10,35 +10,40 @@
   -moz-osx-font-smoothing: grayscale;
 
   /* --- Light Mode (Default) --- */
-  --app-bg: #f8fafc;
-  --glass-border: rgba(255, 255, 255, 0.4);
-  --glass-surface: rgba(255, 255, 255, 0.7);
-  --glass-highlight: rgba(255, 255, 255, 0.8);
+  --app-bg: #020617;
+  /* Slate-950/Black */
+  --glass-border: rgba(255, 255, 255, 0.08);
+  --glass-surface: rgba(15, 23, 42, 0.6);
+  /* Slate-900 with opacity */
+  --glass-highlight: rgba(255, 255, 255, 0.05);
 
   /* Accents */
-  --primary: #6366f1;
-  /* Indigo-500 */
-  --primary-glow: rgba(99, 102, 241, 0.2);
-  --secondary: #ec4899;
-  /* Pink-500 */
-  --secondary-glow: rgba(236, 72, 153, 0.2);
-  --accent: #06b6d4;
-  /* Cyan-500 */
+  --primary: #818cf8;
+  /* Indigo-400 */
+  --primary-glow: rgba(99, 102, 241, 0.3);
+  --secondary: #f472b6;
+  /* Pink-400 */
+  --secondary-glow: rgba(244, 114, 182, 0.3);
+  --accent: #22d3ee;
+  /* Cyan-400 */
 
   /* Functional Colors */
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-  --text-inverse: #f8fafc;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --text-inverse: #020617;
 
   /* Shadows */
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
-  --shadow-neon: 0 0 15px var(--primary-glow);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  --shadow-neon: 0 0 25px var(--primary-glow);
 
-  /* Gradients */
-  --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+  /* Gradients - Deep Spatial Feel */
+  --bg-gradient:
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15) 0%, transparent 25%),
+    linear-gradient(to bottom right, #020617 0%, #0f172a 100%);
 }
 
 .dark {

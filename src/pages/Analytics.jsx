@@ -855,26 +855,28 @@ export const Analytics = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: i * 0.05 }}
+            whileHover={{ scale: 1.03, y: -5 }}
+            whileTap={{ scale: 0.98 }}
             className="relative group cursor-pointer"
             onClick={() => handleCardClick(card)}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm hover:border-indigo-500/30 transition-colors">
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm hover:border-indigo-500/30 transition-all shadow-lg hover:shadow-xl hover:shadow-indigo-500/10">
               <div className="flex justify-between items-start mb-4">
                 <div
-                  className={`p-3 rounded-xl bg-gradient-to-br ${card.color} bg-opacity-10 text-white`}
+                  className={`p-3 rounded-xl bg-gradient-to-br ${card.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}
                 >
-                  <card.icon size={24} />
+                  <card.icon size={24} className="text-white" />
                 </div>
                 {card.data && card.data.length > 0 && (
-                  <IoArrowUp className="text-slate-500 -rotate-45 group-hover:text-white transition-colors" />
+                  <IoArrowUp className="text-slate-500 -rotate-45 group-hover:text-indigo-400 group-hover:scale-110 transition-all" />
                 )}
               </div>
               <div>
                 <div className="text-slate-400 text-sm font-medium mb-1">
                   {card.label}
                 </div>
-                <div className="text-2xl font-bold text-white tracking-tight">
+                <div className="text-2xl font-bold text-white tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400 transition-all">
                   {card.value}
                 </div>
                 <div className="text-xs text-slate-500 mt-2">{card.detail}</div>
@@ -887,12 +889,28 @@ export const Analytics = () => {
       {/* Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Activity Chart */}
-        <div className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-          <h3 className="text-lg font-bold text-white mb-6">Activity Trend</h3>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm hover:border-indigo-500/20 transition-all"
+        >
+          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <div className="p-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+              <IoStatsChartOutline className="text-indigo-400" size={18} />
+            </div>
+            Activity Trend
+          </h3>
           <div className="h-[300px] w-full flex items-center justify-center">
             {analytics.chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={analytics.chartData}>
+                  <defs>
+                    <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#818cf8" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#818cf8" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
                     stroke="rgba(255,255,255,0.1)"
@@ -912,7 +930,9 @@ export const Analytics = () => {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1e293b",
-                      borderColor: "rgba(255,255,255,0.1)",
+                      borderColor: "#818cf8",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.5)"
                     }}
                     itemStyle={{ color: "#fff" }}
                     labelStyle={{ color: "#94a3b8" }}
@@ -922,7 +942,9 @@ export const Analytics = () => {
                     dataKey="hours"
                     stroke="#818cf8"
                     strokeWidth={3}
-                    dot={{ r: 4 }}
+                    dot={{ r: 5, fill: "#818cf8", strokeWidth: 2, stroke: "#1e293b" }}
+                    activeDot={{ r: 7, fill: "#a78bfa", stroke: "#818cf8", strokeWidth: 2 }}
+                    fill="url(#colorActivity)"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -933,11 +955,21 @@ export const Analytics = () => {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Location Chart */}
-        <div className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm">
-          <h3 className="text-lg font-bold text-white mb-6">Location Split</h3>
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm hover:border-emerald-500/20 transition-all"
+        >
+          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+            <div className="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+              <IoLocationOutline className="text-emerald-400" size={18} />
+            </div>
+            Location Split
+          </h3>
           <div className="h-[300px] w-full flex items-center justify-center">
             {analytics.locationData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
@@ -948,7 +980,9 @@ export const Analytics = () => {
                     nameKey="name"
                     cx="50%"
                     cy="50%"
+                    innerRadius={60}
                     outerRadius={100}
+                    paddingAngle={5}
                     label={({ name, percent }) =>
                       `${name} ${(percent * 100).toFixed(0)}%`
                     }
@@ -968,7 +1002,14 @@ export const Analytics = () => {
                       />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip 
+                    contentStyle={{
+                      backgroundColor: "#1e293b",
+                      borderColor: "#34d399",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.5)"
+                    }}
+                  />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
@@ -979,7 +1020,7 @@ export const Analytics = () => {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Modal */}

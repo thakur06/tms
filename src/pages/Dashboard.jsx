@@ -560,26 +560,32 @@ export default function Dashboard() {
         {cards.map((card, idx) => (
           <motion.div
             key={idx}
-            whileHover={{ scale: 1.02 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: idx * 0.05 }}
+            whileHover={{ scale: 1.05, y: -5 }}
             whileTap={{ scale: 0.98 }}
-            className="ui-card p-6 cursor-pointer hover:border-indigo-500/50 transition-colors"
+            className="ui-card p-6 cursor-pointer hover:border-indigo-500/50 transition-all group relative overflow-hidden"
             onClick={() => handleCardClick(card)}
           >
-            <div className="flex justify-between items-start mb-4">
-              <div
-                className={`p-3 rounded-xl bg-${card.color}-500/10 text-${card.color}-400`}
-              >
-                <card.icon size={24} />
+            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="relative z-10">
+              <div className="flex justify-between items-start mb-4">
+                <div
+                  className={`p-3 rounded-xl bg-${card.color}-500/10 text-${card.color}-400 border border-${card.color}-500/20 shadow-lg shadow-${card.color}-500/10 group-hover:shadow-${card.color}-500/30 transition-all`}
+                >
+                  <card.icon size={24} className="group-hover:scale-110 transition-transform" />
+                </div>
               </div>
-            </div>
-            <div>
-              <div className="text-slate-400 text-sm font-medium">
-                {card.label}
+              <div>
+                <div className="text-slate-400 text-sm font-medium">
+                  {card.label}
+                </div>
+                <div className="text-2xl font-bold text-white mt-1 group-hover:text-gradient transition-all">
+                  {card.value}
+                </div>
+                <div className="text-xs text-slate-500 mt-2">{card.detail}</div>
               </div>
-              <div className="text-2xl font-bold text-white mt-1">
-                {card.value}
-              </div>
-              <div className="text-xs text-slate-500 mt-2">{card.detail}</div>
             </div>
           </motion.div>
         ))}
@@ -588,16 +594,29 @@ export default function Dashboard() {
       {/* --- Charts Grid --- */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Daily Hours Chart */}
-        <div className="ui-card p-6 bg-slate-900 border-slate-800">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="ui-card p-6 bg-slate-900 border-slate-800 hover:border-indigo-500/30 transition-all"
+        >
           <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-            <IoStatsChartOutline className="text-indigo-400" />
+            <div className="p-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
+              <IoStatsChartOutline className="text-indigo-400" />
+            </div>
             Daily Activity
           </h3>
           <div className="h-[300px] w-full flex items-center justify-center">
             {analytics.chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={analytics.chartData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+                  <defs>
+                    <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
                   <XAxis
                     dataKey="date"
                     stroke="#94a3b8"
@@ -612,8 +631,10 @@ export default function Dashboard() {
                   <Tooltip
                     contentStyle={{
                       backgroundColor: "#1e293b",
-                      borderColor: "#334155",
+                      borderColor: "#6366f1",
                       color: "#f8fafc",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.5)"
                     }}
                     itemStyle={{ color: "#fff" }}
                   />
@@ -622,8 +643,9 @@ export default function Dashboard() {
                     dataKey="hours"
                     stroke="#6366f1"
                     strokeWidth={3}
-                    dot={{ r: 4, fill: "#6366f1" }}
-                    activeDot={{ r: 6 }}
+                    dot={{ r: 5, fill: "#6366f1", strokeWidth: 2, stroke: "#1e293b" }}
+                    activeDot={{ r: 7, fill: "#818cf8", stroke: "#6366f1", strokeWidth: 2 }}
+                    fill="url(#colorHours)"
                   />
                 </LineChart>
               </ResponsiveContainer>
@@ -634,7 +656,7 @@ export default function Dashboard() {
               </div>
             )}
           </div>
-        </div>
+        </motion.div>
 
         {/* Location Split Chart */}
         <div className="ui-card p-6 bg-slate-900 border-slate-800">
@@ -801,22 +823,25 @@ export default function Dashboard() {
             </thead>
             <tbody className="divide-y divide-white/5">
               {analytics.recentEntries.length > 0 ? (
-                analytics.recentEntries.map((entry) => (
-                  <tr
+                analytics.recentEntries.map((entry, idx) => (
+                  <motion.tr
                     key={entry.id}
-                    className="hover:bg-white/[0.02] transition-colors"
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: idx * 0.05 }}
+                    className="hover:bg-gradient-to-r hover:from-indigo-500/5 hover:to-purple-500/5 transition-all group"
                   >
                     <td className="px-6 py-4 text-white font-medium">
                       {new Date(entry.entry_date).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-white">
+                      <div className="text-white group-hover:text-indigo-300 transition-colors">
                         {entry.project_name || entry.project}
                       </div>
                       <div className="text-xs opacity-50">{entry.client}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-2 py-1 rounded bg-slate-800 text-slate-300 text-xs border border-white/10">
+                      <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs border border-white/10 group-hover:border-indigo-500/30 group-hover:bg-indigo-500/10 transition-all">
                         {entry.task_id}
                       </span>
                     </td>
@@ -825,10 +850,10 @@ export default function Dashboard() {
                     </td>
                     <td className="px-6 py-4 text-right">
                       <span className="text-emerald-400 flex justify-end gap-1 items-center text-xs font-bold uppercase">
-                        <IoCheckmarkCircle /> Logged
+                        <IoCheckmarkCircle className="group-hover:scale-110 transition-transform" /> Logged
                       </span>
                     </td>
-                  </tr>
+                  </motion.tr>
                 ))
               ) : (
                 <tr>

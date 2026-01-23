@@ -11,6 +11,7 @@ import {
   IoPersonOutline, IoPerson,IoAnalyticsOutline,IoAnalytics
 } from 'react-icons/io5';
 import { useAuth } from '../context/AuthContext';
+import { motion } from 'framer-motion';
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
@@ -56,46 +57,59 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {/* Sidebar */}
       <aside 
-        className={`fixed top-0 left-0 h-full w-64 bg-[#020617]/80 backdrop-blur-2xl border-r border-white/5 z-50 transition-transform duration-300 transform lg:translate-x-0 ${
+        className={`fixed top-0 left-0 h-full w-64 bg-[#020617]/90 backdrop-blur-2xl border-r border-white/5 z-50 transition-transform duration-300 transform lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo Area */}
-          <div className="h-20 flex items-center gap-3 px-6 border-b border-white/5">
-            <div className="relative flex items-center justify-center rounded-xl  ">
-              <img src="/logo.png" alt="logo" className=" h-28 w-40 object-contain" />
+          <div className="h-20 flex items-center gap-3 px-6 border-b border-white/5 bg-gradient-to-r from-indigo-500/5 to-purple-500/5">
+            <div className="relative flex items-center justify-center rounded-xl">
+              <img src="/logo.png" alt="logo" className="h-28 w-40 object-contain drop-shadow-[0_0_10px_rgba(99,102,241,0.3)]" />
             </div>
-            {/* <div>
-              <h1 className="text-lg font-bold text-white tracking-tight">Biogas</h1>
-              <p className="text-[10px] font-medium text-indigo-400 tracking-wider uppercase">Engineering</p>
-            </div> */}
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
+          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
             {visibleLinks
-              .map((link) => {
+              .map((link, index) => {
               const active = isActive(link.path);
               const Icon = active ? link.activeIcon : link.icon;
               
               return (
-                <Link
+                <motion.div
                   key={link.path}
-                  to={link.path}
-                  onClick={() => window.innerWidth < 1024 && onClose()}
-                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                    active 
-                      ? 'text-white bg-indigo-500/10 border border-indigo-500/20' 
-                      : 'text-slate-400 hover:text-white hover:bg-white/5'
-                  }`}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
                 >
-                  {active && (
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-indigo-500 rounded-r-full shadow-[0_0_12px_rgba(99,102,241,0.5)]" />
-                  )}
-                  <Icon className={`w-5 h-5 transition-colors ${active ? 'text-indigo-400' : 'group-hover:text-indigo-400'}`} />
-                  <span className="font-medium text-sm tracking-wide">{link.label}</span>
-                </Link>
+                  <Link
+                    to={link.path}
+                    onClick={() => window.innerWidth < 1024 && onClose()}
+                    className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                      active 
+                        ? 'text-white bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 shadow-lg shadow-indigo-500/10' 
+                        : 'text-slate-400 hover:text-white hover:bg-white/5 hover:border hover:border-white/10'
+                    }`}
+                  >
+                    {active && (
+                      <motion.div 
+                        layoutId="activeIndicator"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-r-full shadow-[0_0_12px_rgba(99,102,241,0.5)]"
+                        transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+                      />
+                    )}
+                    <Icon className={`w-5 h-5 transition-all duration-200 ${active ? 'text-indigo-400 scale-110' : 'group-hover:text-indigo-400 group-hover:scale-110'}`} />
+                    <span className="font-medium text-sm tracking-wide">{link.label}</span>
+                    {active && (
+                      <motion.div
+                        initial={{ scale: 0 }}
+                        animate={{ scale: 1 }}
+                        className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.8)]"
+                      />
+                    )}
+                  </Link>
+                </motion.div>
               );
             })}
           </nav>

@@ -3,6 +3,7 @@ import { ToastContainer, toast, Zoom } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 import ProjectsList from "../components/ProjectsList"
 import CreateProjectModal from "../components/CreateProjectModal"
+import { motion } from "framer-motion"
 import {
   IoAddOutline,
   IoBusinessOutline,
@@ -228,35 +229,56 @@ export default function Projects() {
 
       {/* Stats Section */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="ui-card p-4 flex items-center gap-4">
-          <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)]">
-            <IoBusinessOutline size={24} />
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          whileHover={{ scale: 1.03, y: -3 }}
+          className="ui-card p-4 flex items-center gap-4 group relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="relative z-10 p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)] group-hover:shadow-[0_0_25px_rgba(59,130,246,0.3)] transition-all">
+            <IoBusinessOutline size={24} className="group-hover:scale-110 transition-transform" />
           </div>
-          <div>
+          <div className="relative z-10">
             <p className="text-sm text-slate-400">Total Projects</p>
-            <p className="text-2xl font-bold text-white">{stats.total}</p>
+            <p className="text-2xl font-bold text-white group-hover:text-gradient transition-all">{stats.total}</p>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="ui-card p-4 flex items-center gap-4">
-          <div className="p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)]">
-            <IoLocationOutline size={24} />
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          whileHover={{ scale: 1.03, y: -3 }}
+          className="ui-card p-4 flex items-center gap-4 group relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="relative z-10 p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] group-hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] transition-all">
+            <IoLocationOutline size={24} className="group-hover:scale-110 transition-transform" />
           </div>
-          <div className="min-w-0">
+          <div className="relative z-10 min-w-0">
             <p className="text-sm text-slate-400">Top Location</p>
-            <p className="text-xl font-bold text-white truncate">{getTopLocation()}</p>
+            <p className="text-xl font-bold text-white truncate group-hover:text-gradient-success transition-all">{getTopLocation()}</p>
           </div>
-        </div>
+        </motion.div>
 
-        <div className="ui-card p-4 flex items-center gap-4">
-          <div className="p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.15)]">
-            <IoCodeSlashOutline size={24} />
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          whileHover={{ scale: 1.03, y: -3 }}
+          className="ui-card p-4 flex items-center gap-4 group relative overflow-hidden"
+        >
+          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="relative z-10 p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.15)] group-hover:shadow-[0_0_25px_rgba(245,158,11,0.3)] transition-all">
+            <IoCodeSlashOutline size={24} className="group-hover:scale-110 transition-transform" />
           </div>
-          <div>
+          <div className="relative z-10">
             <p className="text-sm text-slate-400">Active Projects</p>
-            <p className="text-2xl font-bold text-white">{stats.active}</p>
+            <p className="text-2xl font-bold text-white group-hover:text-gradient transition-all">{stats.active}</p>
           </div>
-        </div>
+        </motion.div>
       </div>
 
       {/* Main Content */}
