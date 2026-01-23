@@ -331,6 +331,9 @@ export default function TimesheetApprovalsPage() {
                             </span>
                             <h4 className="text-white font-semibold">{entry.project_name}</h4>
                           </div>
+                           <p className="text-sm text-slate-300 flex items-center gap-2">
+                             <strong className="text-slate-500 text-xs uppercase tracking-wider">Task:</strong> {entry.task_id}
+                          </p>
                           <p className="text-sm text-slate-300 flex items-center gap-2">
                             <IoDocumentTextOutline className="text-slate-500" />
                             {entry.remarks}

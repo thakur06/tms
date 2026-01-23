@@ -4,7 +4,8 @@ import {
   IoSearchOutline, IoFilterOutline, IoPersonAddOutline, 
   IoPencilOutline, IoShieldCheckmarkOutline,
   IoMailOutline, IoBusinessOutline, IoNotificationsOutline,
-  IoChevronBackOutline, IoChevronForwardOutline, IoGitNetworkOutline
+  IoChevronBackOutline, IoChevronForwardOutline, IoGitNetworkOutline,
+  IoTrashOutline
 } from 'react-icons/io5';
 import axios from 'axios';
 import { toast } from 'react-toastify';
@@ -51,7 +52,7 @@ export default function UserManagement() {
     setIsSendingAlerts(true);
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.post('${server}/api/notifications/check-weekly-hours', {}, {
+      const response = await axios.post(`${server}/api/notifications/check-weekly-hours`, {}, {
         headers: { Authorization: `Bearer ${token}` }
       });
       toast.success(`Success! Alerts sent to ${response.data.lowHourUsersCount} users.`);
@@ -60,6 +61,24 @@ export default function UserManagement() {
       toast.error('Failed to send email alerts. Check SMTP settings.');
     } finally {
       setIsSendingAlerts(false);
+    }
+  };
+
+  const handleDeleteUser = async (user) => {
+    if (!window.confirm(`Are you sure you want to delete ${user.name}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      const token = localStorage.getItem('token');
+      await axios.delete(`${server}/api/users/${user.id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      toast.success('User deleted successfully');
+      fetchUsers(pagination.page);
+    } catch (error) {
+      console.error('Failed to delete user:', error);
+      toast.error(error.response?.data?.error || 'Failed to delete user');
     }
   };
 
@@ -260,6 +279,13 @@ export default function UserManagement() {
                               title="Edit User"
                             >
                               <IoPencilOutline size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteUser(user)}
+                              className="p-2.5 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all active:scale-90"
+                              title="Delete User"
+                            >
+                              <IoTrashOutline size={18} />
                             </button>
                           </div>
                         </td>

@@ -15,8 +15,14 @@ export default function Modal({
 
   useEffect(() => {
     setMounted(true)
-    return () => setMounted(false)
-  }, [])
+    if (isOpen) {
+      document.body.style.overflow = 'hidden';
+    }
+    return () => {
+      setMounted(false)
+      document.body.style.overflow = 'unset';
+    }
+  }, [isOpen])
 
   if (!mounted) return null
 

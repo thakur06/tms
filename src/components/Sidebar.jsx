@@ -56,7 +56,7 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {/* Sidebar */}
       <aside 
-        className={`fixed top-0 left-0 h-full w-64 bg-[#0b1221]/90 backdrop-blur-xl border-r border-white/5 z-50 transition-transform duration-300 transform lg:translate-x-0 ${
+        className={`fixed top-0 left-0 h-full w-64 bg-[#020617]/80 backdrop-blur-2xl border-r border-white/5 z-50 transition-transform duration-300 transform lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

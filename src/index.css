@@ -2,7 +2,7 @@
 
 :root {
   /* Typography */
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
   line-height: 1.5;
   font-weight: 400;
   text-rendering: optimizeLegibility;
@@ -10,81 +10,73 @@
   -moz-osx-font-smoothing: grayscale;
 
   /* --- Light Mode (Default) --- */
-
- --app-bg: #030712;
-  /* Rich dark background */
-  --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-surface: rgba(17, 24, 39, 0.6);
-  /* Translucent dark surface */
-  --glass-highlight: rgba(255, 255, 255, 0.03);
+  --app-bg: #f8fafc;
+  --glass-border: rgba(255, 255, 255, 0.4);
+  --glass-surface: rgba(255, 255, 255, 0.7);
+  --glass-highlight: rgba(255, 255, 255, 0.8);
 
   /* Accents */
   --primary: #6366f1;
   /* Indigo-500 */
-  --primary-glow: rgba(99, 102, 241, 0.4);
+  --primary-glow: rgba(99, 102, 241, 0.2);
   --secondary: #ec4899;
   /* Pink-500 */
-  --secondary-glow: rgba(236, 72, 153, 0.4);
-  --accent: #22d3ee;
-  /* Cyan-400 */
+  --secondary-glow: rgba(236, 72, 153, 0.2);
+  --accent: #06b6d4;
+  /* Cyan-500 */
 
   /* Functional Colors */
   --success: #10b981;
   --warning: #f59e0b;
   --danger: #ef4444;
-  --text-main: #f8fafc;
-  --text-muted: #94a3b8;
-  --text-inverse: #0f172a;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --text-inverse: #f8fafc;
 
   /* Shadows */
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  --shadow-neon: 0 0 20px var(--primary-glow);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.05);
+  --shadow-neon: 0 0 15px var(--primary-glow);
 
   /* Gradients */
-  --bg-gradient:
-    radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+  --bg-gradient: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
 }
 
 .dark {
   /* --- Dark Mode (Cosmic Glass) --- */
-
-  /* Backgrounds */
-  --app-bg: #030712;
-  /* Rich dark background */
+  --app-bg: #020617;
+  /* Slate-950/Black */
   --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-surface: rgba(17, 24, 39, 0.6);
-  /* Translucent dark surface */
-  --glass-highlight: rgba(255, 255, 255, 0.03);
+  --glass-surface: rgba(15, 23, 42, 0.6);
+  /* Slate-900 with opacity */
+  --glass-highlight: rgba(255, 255, 255, 0.05);
 
   /* Accents */
-  --primary: #6366f1;
-  /* Indigo-500 */
-  --primary-glow: rgba(99, 102, 241, 0.4);
-  --secondary: #ec4899;
-  /* Pink-500 */
-  --secondary-glow: rgba(236, 72, 153, 0.4);
+  --primary: #818cf8;
+  /* Indigo-400 */
+  --primary-glow: rgba(99, 102, 241, 0.3);
+  --secondary: #f472b6;
+  /* Pink-400 */
+  --secondary-glow: rgba(244, 114, 182, 0.3);
   --accent: #22d3ee;
   /* Cyan-400 */
 
   /* Functional Colors */
-  --success: #10b981;
-  --warning: #f59e0b;
-  --danger: #ef4444;
-  --text-main: #f8fafc;
+  --success: #34d399;
+  --warning: #fbbf24;
+  --danger: #f87171;
+  --text-main: #f1f5f9;
   --text-muted: #94a3b8;
-  --text-inverse: #0f172a;
+  --text-inverse: #020617;
 
   /* Shadows */
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
-  --shadow-neon: 0 0 20px var(--primary-glow);
+  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+  --shadow-neon: 0 0 25px var(--primary-glow);
 
-  /* Gradients */
+  /* Gradients - Deep Spatial Feel */
   --bg-gradient:
-    radial-gradient(at 0% 0%, hsla(253, 16%, 7%, 1) 0, transparent 50%),
-    radial-gradient(at 50% 0%, hsla(225, 39%, 30%, 1) 0, transparent 50%),
-    radial-gradient(at 100% 0%, hsla(339, 49%, 30%, 1) 0, transparent 50%);
+    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15) 0%, transparent 25%),
+    linear-gradient(to bottom right, #020617 0%, #0f172a 100%);
 }
 
 *,
@@ -105,14 +97,58 @@ body {
   background-attachment: fixed;
   color: var(--text-main);
   overflow-x: hidden;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: 'Outfit', sans-serif;
+  /* Prefer Outfit/Inter */
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
-/* Scrollbar - Hidden globally but allows scrolling */
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pulse-glow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 10px var(--primary-glow);
+  }
+
+  50% {
+    box-shadow: 0 0 25px var(--primary-glow);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 0px;
-  height: 0px;
-  background: transparent;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -120,167 +156,89 @@ body {
 }
 
 ::-webkit-scrollbar-thumb {
-  background: transparent;
-  border: none;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
 }
 
-/* For Firefox */
-html {
-  scrollbar-width: none;
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
 }
 
-/* --- UI Primitives (Theme Aware) --- */
-
+/* --- UI Primitives --- */
 @layer components {
-
-  /* Layout Containers */
   .ui-page {
     @apply min-h-screen w-full flex flex-col;
   }
 
   .ui-container {
-    @apply w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6;
+    @apply w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-6;
   }
 
-  /* Glass Card */
+  /* Modern Glass Card */
   .ui-card {
     @apply relative overflow-hidden rounded-2xl border transition-all duration-300;
     background: var(--glass-surface);
     border-color: var(--glass-border);
-    backdrop-filter: blur(12px);
+    backdrop-filter: blur(16px);
     box-shadow: var(--shadow-glass);
   }
 
   .ui-card:hover {
-    border-color: var(--primary);
-    box-shadow: 0 10px 40px -10px rgba(0, 0, 0, 0.1), 0 0 15px var(--primary-glow);
-  }
-
-  .ui-card-header {
-    @apply px-6 py-5 border-b flex items-center justify-between;
-    border-color: var(--glass-border);
-    background: rgba(125, 125, 125, 0.05);
-  }
-
-  .ui-card-title {
-    @apply text-lg font-bold tracking-tight flex items-center gap-2;
-    color: var(--text-main);
-  }
-
-  .ui-card-body {
-    @apply p-6;
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+    transform: translateY(-2px);
   }
 
   /* Inputs */
   .ui-input {
-    @apply w-full px-4 py-2.5 rounded-lg outline-none transition-all duration-200 text-sm;
-    background: rgba(125, 125, 125, 0.05);
+    @apply w-full px-4 py-3 rounded-xl outline-none transition-all duration-200 text-sm font-medium;
+    background: rgba(0, 0, 0, 0.2);
     border: 1px solid var(--glass-border);
     color: var(--text-main);
   }
 
   .ui-input:focus {
     border-color: var(--primary);
-    background: rgba(125, 125, 125, 0.1);
-    box-shadow: 0 0 0 2px var(--primary-glow);
-  }
-
-  .ui-label {
-    @apply block text-xs font-bold uppercase tracking-wider mb-1.5 ml-1;
-    color: var(--text-muted);
+    background: rgba(0, 0, 0, 0.3);
+    box-shadow: 0 0 0 4px var(--primary-glow);
   }
 
   /* Buttons */
   .ui-btn {
-    @apply inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer;
+    @apply inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer shadow-lg;
   }
 
   .ui-btn-primary {
-    @apply text-white shadow-lg;
+    @apply text-white;
     background: linear-gradient(135deg, var(--primary), #4f46e5);
-    box-shadow: 0 4px 15px var(--primary-glow);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 0 20px var(--primary-glow);
+    border: 1px solid rgba(255, 255, 255, 0.1);
   }
 
   .ui-btn-primary:hover:not(:disabled) {
-    box-shadow: 0 6px 20px var(--primary-glow);
-    filter: brightness(1.1);
+    box-shadow: 0 0 30px var(--primary-glow);
+    transform: translateY(-1px);
   }
 
-  .ui-btn-secondary {
-    @apply border backdrop-blur-md shadow-sm;
-    background: rgba(125, 125, 125, 0.1);
-    border-color: var(--glass-border);
-    color: var(--text-main);
+  /* Utilities */
+  .text-gradient {
+    background: linear-gradient(to right, var(--primary), var(--secondary));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
   }
 
-  .ui-btn-secondary:hover:not(:disabled) {
-    background: rgba(125, 125, 125, 0.2);
-    border-color: var(--text-muted);
+  .glass-panel {
+    background: var(--glass-surface);
+    backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
   }
 
-  .ui-btn-danger {
-    @apply text-white shadow-lg;
-    background: linear-gradient(135deg, var(--danger), #dc2626);
-    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+  .hide-y-scroll {
+    scrollbar-width: none;
   }
 
-  .ui-btn-ghost {
-    color: var(--text-muted);
+  .hide-y-scroll::-webkit-scrollbar {
+    width: 0px;
+    background: transparent;
   }
-
-  .ui-btn-ghost:hover {
-    color: var(--text-main);
-    background: rgba(125, 125, 125, 0.1);
-  }
-
-  /* Modal */
-  .ui-modal-overlay {
-    @apply fixed inset-0 z-[9998] flex items-center justify-center p-4;
-    background: rgba(0, 0, 0, 0.6);
-    backdrop-filter: blur(4px);
-  }
-
-  .ui-modal {
-    @apply w-full max-w-lg rounded-2xl border shadow-2xl flex flex-col max-h-[90vh];
-    background: var(--app-bg);
-    border-color: var(--glass-border);
-    color: var(--text-main);
-  }
-
-  .ui-modal-header {
-    @apply px-6 py-4 border-b flex items-center justify-between;
-    border-color: var(--glass-border);
-  }
-
-  .ui-modal-body {
-    @apply p-6 overflow-y-auto;
-  }
-}
-
-/* Utilities */
-.glass-panel {
-  background: var(--glass-surface);
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--glass-border);
-}
-
-.text-gradient {
-  background: linear-gradient(to right, var(--primary), var(--accent));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.hide-y-scroll {
-  overflow-y: scroll;
-  /* Allow vertical scrolling */
-  scrollbar-width: none;
-  /* Firefox */
-}
-
-.hide-y-scroll::-webkit-scrollbar {
-  width: 0px;
-  /* Hide vertical scrollbar width */
-  background: transparent;
-  /* Optional */
 }

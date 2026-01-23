@@ -13,40 +13,25 @@ const smoothTransition = {
 };
 
 export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
-  const [filterDept, setFilterDept] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [taskToDelete, setTaskToDelete] = useState(null);
-  const [showDeptDropdown, setShowDeptDropdown] = useState(false);
   const [expandedRow, setExpandedRow] = useState(null);
   
   const tasksPerPage = 10;
 
-  const deptColors = {
-    'Process': 'bg-blue-500/10 text-blue-400 border-blue-500/20',
-    'Product Development': 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20',
-    'Business Development': 'bg-amber-500/10 text-amber-400 border-amber-500/20',
-    'Document Controls': 'bg-purple-500/10 text-purple-400 border-purple-500/20',
-    'default': 'bg-slate-500/10 text-slate-400 border-slate-500/20'
-  };
-
-  const uniqueDepts = useMemo(() => 
-    ['All', ...new Set(tasks.map(t => t.task_dept).filter(Boolean))]
-  , [tasks]);
-
   const filteredTasks = useMemo(() => {
     return tasks.filter(t => {
-      const matchesDept = filterDept === 'All' || t.task_dept === filterDept;
       const matchesSearch = (t.task_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
                             (t.task_id || '').toString().includes(searchQuery);
-      return matchesDept && matchesSearch;
+      return matchesSearch;
     });
-  }, [tasks, filterDept, searchQuery]);
+  }, [tasks, searchQuery]);
 
   const totalPages = Math.ceil(filteredTasks.length / tasksPerPage);
   const currentTasks = filteredTasks.slice((currentPage - 1) * tasksPerPage, currentPage * tasksPerPage);
 
-  useEffect(() => setCurrentPage(1), [searchQuery, filterDept]);
+  useEffect(() => setCurrentPage(1), [searchQuery]);
 
   const toggleRow = (taskId) => {
     setExpandedRow(expandedRow === taskId ? null : taskId);
@@ -59,7 +44,7 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
         <div>
           <h2 className="text-xl font-bold text-white">Tasks Overview</h2>
           <p className="text-sm text-slate-400 mt-1">
-            {filteredTasks.length} tasks • {filterDept !== 'All' ? `${filterDept} only` : 'All departments'}
+            {filteredTasks.length} tasks
           </p>
         </div>
 
@@ -74,44 +59,6 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
               onChange={(e) => setSearchQuery(e.target.value)}
               className="ui-input pl-10 py-2 h-10 w-full"
             />
-          </div>
-          
-          <div className="relative w-full sm:w-auto">
-            <button
-              onClick={() => setShowDeptDropdown(!showDeptDropdown)}
-              onBlur={() => setTimeout(() => setShowDeptDropdown(false), 200)}
-              className="ui-btn ui-btn-secondary w-full justify-between h-10"
-            >
-              <span>{filterDept}</span>
-              <IoFilterOutline size={14} />
-            </button>
-            
-            <AnimatePresence>
-              {showDeptDropdown && (
-                <motion.div
-                  initial={{ opacity: 0, y: -5, scale: 0.95 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: -5, scale: 0.95 }}
-                  transition={smoothTransition}
-                  className="absolute top-full mt-1 left-0 right-0 bg-[#1e293b] rounded-xl shadow-xl border border-white/10 py-1 z-50 max-h-60 overflow-y-auto custom-scrollbar"
-                >
-                  {uniqueDepts.map(dept => (
-                    <button
-                      key={dept}
-                      onClick={() => { setFilterDept(dept); setShowDeptDropdown(false); }}
-                      className={`w-full px-4 py-2 text-left text-sm flex items-center justify-between transition-colors ${
-                        filterDept === dept 
-                          ? 'bg-indigo-500/20 text-indigo-300' 
-                          : 'text-slate-400 hover:bg-white/5 hover:text-white'
-                      }`}
-                    >
-                      <span>{dept}</span>
-                      {filterDept === dept && <IoCheckmarkCircle size={14} />}
-                    </button>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
           </div>
         </div>
       </div>
@@ -131,10 +78,10 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
             <h3 className="text-lg font-bold text-white mb-2">No tasks found</h3>
             <p className="text-slate-400 text-sm mb-6">Try adjusting your search or filter</p>
             <button 
-              onClick={() => {setFilterDept('All'); setSearchQuery('');}}
+              onClick={() => {setSearchQuery('');}}
               className="text-sm font-semibold text-indigo-400 hover:text-indigo-300 underline"
             >
-              Clear filters
+              Clear search
             </button>
           </motion.div>
         ) : (
@@ -148,9 +95,9 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
                   <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
                     Task Name
                   </th>
-                  <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
+                  {/* <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
                     Department
-                  </th>
+                  </th> */}
                   <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
                     Actions
                   </th>
@@ -179,7 +126,7 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
                         onClick={() => toggleRow(task.task_id)}
                       >
                         {task.task_name}
-                        <AnimatePresence>
+                        {/* <AnimatePresence>
                           {expandedRow === task.task_id && (
                             <motion.div 
                               initial={{ opacity: 0, height: 0, marginTop: 0 }}
@@ -199,14 +146,14 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
                               </div>
                             </motion.div>
                           )}
-                        </AnimatePresence>
+                        </AnimatePresence> */}
                       </div>
                     </td>
-                    <td className="py-4 px-6">
+                    {/* <td className="py-4 px-6">
                       <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${deptColors[task.task_dept] || deptColors.default}`}>
                         {task.task_dept || 'Unassigned'}
                       </span>
-                    </td>
+                    </td> */}
                     <td className="py-4 px-6">
                       <div className="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         {/* <button
