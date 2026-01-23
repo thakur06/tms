@@ -483,15 +483,15 @@ export const Analytics = () => {
       data: Object.values(analytics.entriesByCat).flat(),
       detail: "Total hours logged",
     },
-    {
-      label: "Utilization",
-      value: `${analytics.utilization}%`,
-      icon: IoStatsChartOutline,
-      color: "from-purple-500 to-pink-500",
-      type: "utilization",
-      data: [], // No specific data list
-      detail: "Based on 8h/day capacity",
-    },
+    // {
+    //   label: "Utilization",
+    //   value: `${analytics.utilization}%`,
+    //   icon: IoStatsChartOutline,
+    //   color: "from-purple-500 to-pink-500",
+    //   type: "utilization",
+    //   data: [], // No specific data list
+    //   detail: "Based on 8h/day capacity",
+    // },
     {
       label: "PTO",
       value: formatDuration(
@@ -562,7 +562,7 @@ export const Analytics = () => {
            ),
          ),
          icon: MdMeetingRoom,
-         color: "from-yellow-400 to-yellow-600",
+         color: "from-grey-400 to-yellow-600",
          type: "meetings",
          data: analytics.entriesByCat.meetings,
          detail: "Meetings",
@@ -577,7 +577,7 @@ export const Analytics = () => {
            ),
          ),
          icon: IoGameController,
-         color: "from-yellow-400 to-yellow-600",
+         color: "from-blue-400 to-blue-600",
          type: "BD",
          data: analytics.entriesByCat.holidays,
          detail: "publicholiday",
@@ -592,7 +592,7 @@ export const Analytics = () => {
            ),
          ),
          icon: IoPeopleSharp,
-         color: "from-yellow-400 to-yellow-600",
+         color: "from-red-400 to-red-600",
          type: "teambuilding",
          data: analytics.entriesByCat.tb,
          detail: "Team Building",
