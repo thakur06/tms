@@ -533,12 +533,12 @@ export default function WeeklyTimeLog({
                         {dayTotal >= 480 ? (
                           <>
                             <IoCheckmarkCircle size={10} />
-                            Complete
+                            DONE
                           </>
                         ) : (
                           <>
                             <IoTime size={10} />
-                            Log 8h
+                            LOG 8H
                           </>
                         )}
                       </div>

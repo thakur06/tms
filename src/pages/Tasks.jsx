@@ -233,20 +233,20 @@ export default function Tasks() {
       ) : (
         <>
           <div className="mb-8">
-            <nav className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
+            <nav className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
               <span>Planning</span>
               <span className="opacity-30">/</span>
-              <span className="text-[#161efd]">Tasks</span>
+              <span className="text-amber-500">Tasks</span>
             </nav>
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100 text-[#161efd] shadow-sm">
+              <div className="p-3 bg-amber-500/10 rounded-2xl border border-amber-500/20 text-amber-500 shadow-sm">
                 <IoListOutline size={28} />
               </div>
               <div>
-                <h1 className="text-2xl font-black text-gray-900 tracking-tight leading-none">
+                <h1 className="text-2xl font-black text-white tracking-tight leading-none">
                   Workspace Tasks
                 </h1>
-                <p className="text-gray-500 mt-1.5 text-xs font-bold italic">Manage and track unit objectives</p>
+                <p className="text-gray-400 mt-1.5 text-xs font-bold italic">Manage and track unit objectives</p>
               </div>
             </div>
           </div>

@@ -62,16 +62,18 @@ function App() {
       <AuthProvider>
         <AppContent />
         <ToastContainer 
-          position="top-right"
-          autoClose={3000}
-          hideProgressBar={false}
-          newestOnTop
+          position="top-center"
+          autoClose={2000}
+          hideProgressBar={true}
+          newestOnTop={false}
           closeOnClick
           rtl={false}
           pauseOnFocusLoss
-          draggable
+          draggable={false}
           pauseOnHover
-          theme="light"
+          theme="dark"
+          limit={1}
+          closeButton={false}
           transition={Zoom}
         />
       </AuthProvider>

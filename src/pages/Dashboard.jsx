@@ -545,20 +545,20 @@ export default function Dashboard() {
           {modalContent.data.map((item, idx) => (
             <div
               key={idx}
-              className="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-xl hover:bg-blue-50 hover:border-blue-100 transition-all"
+              className="flex justify-between items-center p-4 bg-zinc-900 border border-white/5 rounded-xl hover:bg-white/5 hover:border-amber-500/20 transition-all group"
             >
               <div>
-                <div className="font-bold text-gray-900">{item.name}</div>
+                <div className="font-bold text-white group-hover:text-amber-500 transition-colors">{item.name}</div>
                 {item.code && (
-                  <div className="text-xs text-gray-400 font-medium">{item.code}</div>
+                  <div className="text-xs text-gray-500 font-medium">{item.code}</div>
                 )}
                 {item.count && (
-                  <div className="text-xs text-gray-400 font-medium">
+                  <div className="text-xs text-gray-500 font-medium">
                     {item.count} entries
                   </div>
                 )}
               </div>
-              <div className="text-[#161efd] font-mono font-black text-lg">
+              <div className="text-amber-500 font-mono font-black text-lg">
                 {item.totalDisplay}
               </div>
             </div>

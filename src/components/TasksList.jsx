@@ -116,16 +116,16 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 border-t border-gray-100 bg-gray-50/50">
-            <div className="text-sm text-gray-500 font-medium italic">
-              Showing <span className="text-gray-900 font-black">{(currentPage - 1) * tasksPerPage + 1}</span> to <span className="text-gray-900 font-black">{Math.min(currentPage * tasksPerPage, filteredTasks.length)}</span> of <span className="text-gray-900 font-black">{filteredTasks.length}</span> tasks
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 border-t border-white/5 bg-white/5 rounded-xl">
+            <div className="text-sm text-gray-400 font-medium italic">
+              Showing <span className="text-white font-black">{(currentPage - 1) * tasksPerPage + 1}</span> to <span className="text-white font-black">{Math.min(currentPage * tasksPerPage, filteredTasks.length)}</span> of <span className="text-white font-black">{filteredTasks.length}</span> tasks
             </div>
             
             <div className="flex items-center gap-2">
               <button
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(p => p - 1)}
-                className="p-2 rounded-lg border border-white/10 text-slate-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <IoChevronBack size={16} />
               </button>
@@ -150,8 +150,8 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
                         whileTap={{ scale: 0.95 }}
                         className={`w-8 h-8 text-sm font-black rounded-lg transition-all ${
                           currentPage === i 
-                            ? 'bg-[#161efd] text-white shadow-lg shadow-blue-500/20' 
-                            : 'text-gray-500 hover:bg-gray-100'
+                            ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20' 
+                            : 'text-gray-500 hover:bg-white/5 hover:text-white'
                         }`}
                       >
                         {i}
@@ -166,7 +166,7 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
               <button
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(p => p + 1)}
-                className="p-2 rounded-lg border border-white/10 text-slate-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-2 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
               >
                 <IoChevronForward size={16} />
               </button>
@@ -190,20 +190,20 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
               animate={{ scale: 1, opacity: 1 }} 
               exit={{ scale: 0.95, opacity: 0 }} 
               transition={smoothTransition}
-              className="relative w-full max-w-sm ui-modal p-6 shadow-2xl"
+              className="relative w-full max-w-sm ui-modal p-6 shadow-2xl bg-zinc-900 border-white/5"
             >
               <div className="text-center">
-                <div className="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
+                <div className="w-14 h-14 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
                   <IoTrash size={24} />
                 </div>
-                <h3 className="text-xl font-black text-gray-900 mb-2">Delete Task</h3>
-                <p className="text-sm text-gray-500 mb-6 leading-relaxed font-medium">
-                  Are you sure you want to delete <span className="text-gray-900 font-black">{taskToDelete.task_name}</span>? This action cannot be undone.
+                <h3 className="text-xl font-black text-white mb-2">Delete Task</h3>
+                <p className="text-sm text-gray-400 mb-6 leading-relaxed font-medium">
+                  Are you sure you want to delete <span className="text-white font-black">{taskToDelete.task_name}</span>? This action cannot be undone.
                 </p>
                 <div className="flex gap-3">
                   <button 
                     onClick={() => setTaskToDelete(null)} 
-                    className="flex-1 py-2.5 text-sm font-black text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all uppercase tracking-wider"
+                    className="flex-1 py-2.5 text-sm font-black text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all uppercase tracking-wider"
                   >
                     Cancel
                   </button>

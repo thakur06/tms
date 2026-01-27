@@ -137,7 +137,7 @@ export default function Header({ onMenuClick }) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 h-20 px-6 sm:px-8 flex items-center justify-between border-b transition-all duration-300 border-white/5 backdrop-blur-xl bg-zinc-950/80 shadow-sm">
+      <header className="sticky top-0 z-40 h-20 px-6 sm:px-8 flex items-center justify-between border-b transition-all duration-300 border-white/5 backdrop-blur-xl bg-zinc-950/80 shadow-sm">
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuClick}
@@ -190,10 +190,10 @@ export default function Header({ onMenuClick }) {
           <div className="relative">
             <button 
               onClick={() => setNotifOpen(!notifOpen)}
-              className="relative p-2.5 rounded-xl transition-all duration-200 text-gray-500 hover:bg-blue-50 hover:text-[#161efd] border border-transparent hover:border-blue-100">
+              className="relative p-2.5 rounded-xl transition-all duration-200 text-gray-500 hover:bg-amber-500/10 hover:text-amber-500 border border-transparent hover:border-amber-500/20">
               <IoNotificationsOutline className="w-5 h-5" />
               {notifications.some(n => n.type === 'warning') && (
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full box-content border-2 border-white" />
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full box-content border-2 border-zinc-900" />
               )}
             </button>
             <AnimatePresence>
@@ -209,7 +209,7 @@ export default function Header({ onMenuClick }) {
                   >
                     <div className="px-4 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center">
                       <span className="font-semibold text-sm text-white">Notifications</span>
-                      <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">{notifications.length} New</span>
+                      <span className="text-[10px] bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded-full font-bold">{notifications.length} New</span>
                     </div>
                     <div className="max-h-[300px] overflow-y-auto">
                       {notifications.length === 0 ? (

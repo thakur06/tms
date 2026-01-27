@@ -97,7 +97,7 @@ export default function Sidebar({ isOpen, onClose }) {
                         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                       />
                     )}
-                    <Icon className={`w-5 h-5 transition-all duration-300 ${active ? 'text-white scale-110 drop-shadow-md' : 'group-hover:text-[#161efd] group-hover:scale-110'}`} />
+                    <Icon className={`w-5 h-5 transition-all duration-300 ${active ? 'text-white scale-110 drop-shadow-md' : 'group-hover:text-amber-500 group-hover:scale-110'}`} />
                     <span className="text-sm font-bold tracking-tight">{link.label}</span>
                     {active && (
                       <motion.div

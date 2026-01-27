@@ -156,12 +156,12 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
             <div className="ui-modal max-h-[90vh] flex flex-col shadow-2xl">
               <div className="ui-modal-header shrink-0">
                 <h2 className="ui-modal-title flex items-center gap-2">
-                  <IoPersonOutline className="w-5 h-5 text-[#161efd]" />
+                  <IoPersonOutline className="w-5 h-5 text-amber-500" />
                   Edit User
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-2 hover:bg-gray-100 rounded-xl transition-colors text-gray-400 hover:text-gray-900"
+                  className="p-2 hover:bg-white/5 rounded-xl transition-colors text-gray-400 hover:text-white"
                 >
                   <IoClose className="w-5 h-5" />
                 </button>
@@ -170,7 +170,7 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
               <div className="ui-modal-body flex-1 overflow-y-auto custom-scrollbar p-6 space-y-4">
                 <div>
                   <label className="ui-label mb-1.5 flex items-center gap-2">
-                    <IoPersonOutline className="text-[#161efd]" size={14} /> 
+                    <IoPersonOutline className="text-amber-500" size={14} /> 
                     Full Name
                   </label>
                   <input
@@ -183,7 +183,7 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
 
                 <div>
                   <label className="ui-label mb-1.5 flex items-center gap-2">
-                    <IoMailOutline className="text-[#161efd]" size={14} />
+                    <IoMailOutline className="text-amber-500" size={14} />
                     Email Address
                   </label>
                   <input
@@ -198,21 +198,21 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                   {/* Searchable Dept */}
                   <div className="space-y-2">
                     <label className="ui-label flex items-center gap-2">
-                      <IoBusinessOutline className="text-[#161efd]" size={14} />
+                      <IoBusinessOutline className="text-amber-500" size={14} />
                       Dept
                     </label>
                     <div className="relative">
                       <button
                         type="button"
                         onClick={() => { setIsDeptOpen(!isDeptOpen); setIsManagerOpen(false); }}
-                        className={`w-full flex items-center justify-between px-3 py-2 bg-white border rounded-xl text-xs font-medium transition-all ${
-                          isDeptOpen ? 'border-[#161efd] bg-blue-50 text-[#161efd]' : 'border-gray-200 text-gray-500'
+                        className={`w-full flex items-center justify-between px-3 py-2 bg-zinc-900 border rounded-xl text-xs font-medium transition-all ${
+                          isDeptOpen ? 'border-amber-500 bg-amber-500/10 text-amber-500' : 'border-white/10 text-gray-500'
                         }`}
                       >
-                        <span className={formData.dept ? 'text-gray-900' : 'text-gray-400'}>
+                        <span className={formData.dept ? 'text-white' : 'text-gray-500'}>
                           {formData.dept || 'Select Dept...'}
                         </span>
-                        <IoChevronDown className={`text-[#161efd] transition-transform ${isDeptOpen ? 'rotate-180' : ''}`} size={14} />
+                        <IoChevronDown className={`text-amber-500 transition-transform ${isDeptOpen ? 'rotate-180' : ''}`} size={14} />
                       </button>
 
                       <AnimatePresence>
@@ -221,13 +221,13 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="relative mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden z-10"
+                            className="relative mt-2 bg-zinc-900 border border-white/10 rounded-xl shadow-xl overflow-hidden z-10"
                           >
-                            <div className="p-2 border-b border-gray-50">
+                            <div className="p-2 border-b border-white/5">
                               <div className="relative">
-                                <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={12} />
+                                <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={12} />
                                 <input
-                                  className="w-full pl-8 pr-3 py-1 bg-gray-50 rounded-lg text-[10px] outline-none border border-transparent focus:border-[#161efd]/50 text-gray-900"
+                                  className="w-full pl-8 pr-3 py-1 bg-white/5 rounded-lg text-[10px] outline-none border border-transparent focus:border-amber-500/50 text-white placeholder-gray-500"
                                   placeholder="Search dept..."
                                   value={deptSearch}
                                   onChange={(e) => setDeptSearch(e.target.value)}
@@ -243,10 +243,10 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                                     setFormData({ ...formData, dept: d.dept_name });
                                     setIsDeptOpen(false);
                                   }}
-                                  className="w-full px-3 py-2 text-left text-[10px] text-gray-600 hover:bg-blue-50 hover:text-[#161efd] transition-all flex items-center justify-between"
+                                  className="w-full px-3 py-2 text-left text-[10px] text-gray-400 hover:bg-amber-500/10 hover:text-amber-500 transition-all flex items-center justify-between"
                                 >
                                   {d.dept_name}
-                                  {formData.dept === d.dept_name && <IoCheckmarkCircle className="text-[#161efd]" size={12} />}
+                                  {formData.dept === d.dept_name && <IoCheckmarkCircle className="text-amber-500" size={12} />}
                                 </button>
                               ))}
                             </div>
@@ -259,21 +259,21 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                   {/* Searchable Manager */}
                   <div className="space-y-2">
                     <label className="ui-label flex items-center gap-2">
-                      <IoPersonOutline className="text-[#161efd]" size={14} />
+                      <IoPersonOutline className="text-amber-500" size={14} />
                       Manager
                     </label>
                     <div className="relative">
                       <button
                         type="button"
                         onClick={() => { setIsManagerOpen(!isManagerOpen); setIsDeptOpen(false); }}
-                        className={`w-full flex items-center justify-between px-3 py-2 bg-white border rounded-xl text-xs font-medium transition-all ${
-                          isManagerOpen ? 'border-[#161efd] bg-blue-50 text-[#161efd]' : 'border-gray-200 text-gray-500'
+                        className={`w-full flex items-center justify-between px-3 py-2 bg-zinc-900 border rounded-xl text-xs font-medium transition-all ${
+                          isManagerOpen ? 'border-amber-500 bg-amber-500/10 text-amber-500' : 'border-white/10 text-gray-500'
                         }`}
                       >
-                        <span className={formData.reporting_manager_id ? 'text-gray-900' : 'text-gray-400 truncate'}>
+                        <span className={formData.reporting_manager_id ? 'text-white' : 'text-gray-500 truncate'}>
                           {selectedManager?.name || 'Select Manager...'}
                         </span>
-                        <IoChevronDown className={`text-[#161efd] transition-transform ${isManagerOpen ? 'rotate-180' : ''}`} size={14} />
+                        <IoChevronDown className={`text-amber-500 transition-transform ${isManagerOpen ? 'rotate-180' : ''}`} size={14} />
                       </button>
 
                       <AnimatePresence>
@@ -282,13 +282,13 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="relative mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden z-10"
+                            className="relative mt-2 bg-zinc-900 border border-white/10 rounded-xl shadow-xl overflow-hidden z-10"
                           >
-                            <div className="p-2 border-b border-gray-50">
+                            <div className="p-2 border-b border-white/5">
                               <div className="relative">
                                 <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={12} />
                                 <input
-                                  className="w-full pl-8 pr-3 py-1 bg-gray-50 rounded-lg text-[10px] outline-none border border-transparent focus:border-[#161efd]/50 text-gray-900"
+                                  className="w-full pl-8 pr-3 py-1 bg-white/5 rounded-lg text-[10px] outline-none border border-transparent focus:border-amber-500/50 text-white placeholder-gray-500"
                                   placeholder="Search manager..."
                                   value={managerSearch}
                                   onChange={(e) => setManagerSearch(e.target.value)}
@@ -302,7 +302,7 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                                   setFormData({ ...formData, reporting_manager_id: '' });
                                   setIsManagerOpen(false);
                                 }}
-                                className="w-full px-3 py-2 text-left text-[10px] text-gray-400 italic hover:bg-gray-50 hover:text-[#161efd] transition-all"
+                                className="w-full px-3 py-2 text-left text-[10px] text-gray-500 italic hover:bg-amber-500/10 hover:text-amber-500 transition-all"
                               >
                                 No Manager
                               </button>
@@ -316,13 +316,13 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                                     setFormData({ ...formData, reporting_manager_id: m.id });
                                     setIsManagerOpen(false);
                                   }}
-                                  className="w-full px-3 py-1.5 text-left hover:bg-gray-50 transition-all outline-none"
+                                  className="w-full px-3 py-1.5 text-left hover:bg-amber-500/10 transition-all outline-none"
                                 >
                                   <div className="flex items-center justify-between px-0.5">
-                                    <span className="text-[10px] text-gray-900 font-medium truncate">{m.name}</span>
-                                    {parseInt(formData.reporting_manager_id) === m.id && <IoCheckmarkCircle className="text-[#161efd]" size={12} />}
+                                    <span className="text-[10px] text-gray-300 font-medium truncate">{m.name}</span>
+                                    {parseInt(formData.reporting_manager_id) === m.id && <IoCheckmarkCircle className="text-amber-500" size={12} />}
                                   </div>
-                                  <p className="text-[8px] text-gray-400 truncate px-0.5">{m.dept} • {m.email}</p>
+                                  <p className="text-[8px] text-gray-500 truncate px-0.5">{m.dept} • {m.email}</p>
                                 </button>
                               ))}
                             </div>
@@ -335,21 +335,21 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                   {/* Role Selection */}
                   <div className="space-y-2">
                     <label className="ui-label flex items-center gap-2">
-                      <IoShieldCheckmarkOutline className="text-[#161efd]" size={14} />
+                      <IoShieldCheckmarkOutline className="text-amber-500" size={14} />
                       User Role
                     </label>
                     <div className="relative">
                       <button
                         type="button"
                         onClick={() => { setIsRoleOpen(!isRoleOpen); setIsDeptOpen(false); }}
-                        className={`w-full flex items-center justify-between px-3 py-2 bg-white border rounded-xl text-xs font-medium transition-all ${
-                          isRoleOpen ? 'border-[#161efd] bg-blue-50 text-[#161efd]' : 'border-gray-200 text-gray-500'
+                        className={`w-full flex items-center justify-between px-3 py-2 bg-zinc-900 border rounded-xl text-xs font-medium transition-all ${
+                          isRoleOpen ? 'border-amber-500 bg-amber-500/10 text-amber-500' : 'border-white/10 text-gray-500'
                         }`}
                       >
-                        <span className="text-gray-900 capitalize">
+                        <span className="text-white capitalize">
                           {formData.role}
                         </span>
-                        <IoChevronDown className={`text-[#161efd] transition-transform ${isRoleOpen ? 'rotate-180' : ''}`} size={14} />
+                        <IoChevronDown className={`text-amber-500 transition-transform ${isRoleOpen ? 'rotate-180' : ''}`} size={14} />
                       </button>
 
                       <AnimatePresence>
@@ -358,7 +358,7 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                             initial={{ opacity: 0, height: 0 }}
                             animate={{ opacity: 1, height: 'auto' }}
                             exit={{ opacity: 0, height: 0 }}
-                            className="relative mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden z-10"
+                            className="relative mt-2 bg-zinc-900 border border-white/10 rounded-xl shadow-xl overflow-hidden z-10"
                           >
                             <div className="max-h-32 overflow-y-auto custom-scrollbar">
                               {['admin', 'employee'].map(r => (
@@ -369,10 +369,10 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                                     setFormData({ ...formData, role: r });
                                     setIsRoleOpen(false);
                                   }}
-                                  className="w-full px-3 py-2 text-left text-[10px] text-gray-600 hover:bg-blue-50 hover:text-[#161efd] transition-all flex items-center justify-between capitalize"
+                                  className="w-full px-3 py-2 text-left text-[10px] text-gray-400 hover:bg-amber-500/10 hover:text-amber-500 transition-all flex items-center justify-between capitalize"
                                 >
                                   {r}
-                                  {formData.role === r && <IoCheckmarkCircle className="text-[#161efd]" size={12} />}
+                                  {formData.role === r && <IoCheckmarkCircle className="text-amber-500" size={12} />}
                                 </button>
                               ))}
                             </div>
@@ -389,9 +389,9 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                       type="checkbox"
                       checked={formData.is_manager}
                       onChange={(e) => setFormData({ ...formData, is_manager: e.target.checked })}
-                      className="w-4 h-4 rounded border-gray-300 bg-white text-[#161efd] focus:ring-[#161efd] focus:ring-offset-0"
+                      className="w-4 h-4 rounded border-gray-600 bg-zinc-800 text-amber-500 focus:ring-amber-500 focus:ring-offset-0"
                     />
-                    <span className="text-gray-900">Mark as Manager</span>
+                    <span className="text-gray-300">Mark as Manager</span>
                   </label>
                   <p className="text-xs text-gray-500 ml-6">
                     Managers can approve timesheets for their team members
@@ -401,17 +401,17 @@ export default function EditUserModal({ isOpen, onClose, user, onSuccess }) {
                  <div className="flex gap-3 pt-6">
                   <button
                     onClick={onClose}
-                    className="flex-1 py-3 text-sm font-bold text-gray-500 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-colors border border-transparent hover:border-gray-200"
+                    className="flex-1 py-3 text-sm font-bold text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-colors border border-transparent hover:border-white/10"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={loading}
-                    className="flex-1 py-3 bg-[#161efd] hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                    className="flex-1 py-3 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-bold shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
                   >
                     {loading ? (
-                      <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                      <div className="w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />
                     ) : (
                       <IoSaveOutline className="w-5 h-5" />
                     )}

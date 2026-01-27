@@ -123,7 +123,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
         {/* Name */}
         <div className="space-y-2">
           <label className="ui-label flex items-center gap-2">
-            <IoPersonAddOutline className="text-[#161efd]" />
+            <IoPersonAddOutline className="text-amber-500" />
             Full Name
           </label>
           <input
@@ -140,7 +140,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
         {/* Email */}
         <div className="space-y-2">
           <label className="ui-label flex items-center gap-2">
-            <IoMailOutline className="text-[#161efd]" />
+            <IoMailOutline className="text-amber-500" />
             Email Address
           </label>
           <input
@@ -156,23 +156,24 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* Searchable Dept */}
+          {/* Searchable Dept */}
           <div className="space-y-2">
             <label className="ui-label flex items-center gap-2">
-              <IoBusinessOutline className="text-[#161efd]" />
+              <IoBusinessOutline className="text-amber-500" />
               Department
             </label>
             <div className="relative">
               <button
                 type="button"
                 onClick={() => { setIsDeptOpen(!isDeptOpen); setIsManagerOpen(false); }}
-                className={`w-full flex items-center justify-between px-4 py-2.5 bg-white border rounded-xl text-sm font-medium transition-all ${
-                  isDeptOpen ? 'border-[#161efd] bg-blue-50 text-[#161efd]' : 'border-gray-200 text-gray-500'
+                className={`w-full flex items-center justify-between px-4 py-2.5 bg-zinc-900 border rounded-xl text-sm font-medium transition-all ${
+                  isDeptOpen ? 'border-amber-500 bg-amber-500/10 text-amber-500' : 'border-white/10 text-gray-500'
                 }`}
               >
-                <span className={formData.dept ? 'text-gray-900' : 'text-gray-400'}>
+                <span className={formData.dept ? 'text-white' : 'text-gray-500'}>
                   {formData.dept || 'Select Dept...'}
                 </span>
-                <IoChevronDown className={`text-[#161efd] transition-transform ${isDeptOpen ? 'rotate-180' : ''}`} />
+                <IoChevronDown className={`text-amber-500 transition-transform ${isDeptOpen ? 'rotate-180' : ''}`} />
               </button>
 
               <AnimatePresence>
@@ -181,13 +182,13 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="relative mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden z-10"
+                    className="relative mt-2 bg-zinc-900 border border-white/10 rounded-xl shadow-xl overflow-hidden z-10"
                   >
-                    <div className="p-2 border-b border-gray-50">
+                    <div className="p-2 border-b border-white/5">
                       <div className="relative">
-                        <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                        <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
                         <input
-                          className="w-full pl-9 pr-3 py-1.5 bg-gray-50 rounded-lg text-xs outline-none border border-transparent focus:border-[#161efd]/50 text-gray-900"
+                          className="w-full pl-9 pr-3 py-1.5 bg-white/5 rounded-lg text-xs outline-none border border-transparent focus:border-amber-500/50 text-white placeholder-gray-500"
                           placeholder="Search dept..."
                           value={deptSearch}
                           onChange={(e) => setDeptSearch(e.target.value)}
@@ -203,10 +204,10 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
                             setFormData({ ...formData, dept: d.dept_name });
                             setIsDeptOpen(false);
                           }}
-                          className="w-full px-4 py-2.5 text-left text-xs text-gray-600 hover:bg-blue-50 hover:text-[#161efd] transition-all flex items-center justify-between"
+                          className="w-full px-4 py-2.5 text-left text-xs text-gray-400 hover:bg-amber-500/10 hover:text-amber-500 transition-all flex items-center justify-between"
                         >
                           {d.dept_name}
-                          {formData.dept === d.dept_name && <IoCheckmarkCircle className="text-[#161efd]" />}
+                          {formData.dept === d.dept_name && <IoCheckmarkCircle className="text-amber-500" />}
                         </button>
                       ))}
                     </div>
@@ -217,23 +218,24 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
           </div>
 
           {/* Searchable Manager */}
+          {/* Searchable Manager */}
           <div className="space-y-2">
             <label className="ui-label flex items-center gap-2">
-              <IoPersonOutline className="text-[#161efd]" />
+              <IoPersonOutline className="text-amber-500" />
               Reporting Manager
             </label>
             <div className="relative">
               <button
                 type="button"
                 onClick={() => { setIsManagerOpen(!isManagerOpen); setIsDeptOpen(false); }}
-                className={`w-full flex items-center justify-between px-4 py-2.5 bg-white border rounded-xl text-sm font-medium transition-all ${
-                  isManagerOpen ? 'border-[#161efd] bg-blue-50 text-[#161efd]' : 'border-gray-200 text-gray-500'
+                className={`w-full flex items-center justify-between px-4 py-2.5 bg-zinc-900 border rounded-xl text-sm font-medium transition-all ${
+                  isManagerOpen ? 'border-amber-500 bg-amber-500/10 text-amber-500' : 'border-white/10 text-gray-500'
                 }`}
               >
-                <span className={formData.reporting_manager_id ? 'text-gray-900' : 'text-gray-400 truncate'}>
+                <span className={formData.reporting_manager_id ? 'text-white' : 'text-gray-500 truncate'}>
                   {selectedManager?.name || 'Select Manager...'}
                 </span>
-                <IoChevronDown className={`text-[#161efd] transition-transform ${isManagerOpen ? 'rotate-180' : ''}`} />
+                <IoChevronDown className={`text-amber-500 transition-transform ${isManagerOpen ? 'rotate-180' : ''}`} />
               </button>
 
               <AnimatePresence>
@@ -242,13 +244,13 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="relative mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden z-10"
+                    className="relative mt-2 bg-zinc-900 border border-white/10 rounded-xl shadow-xl overflow-hidden z-10"
                   >
-                    <div className="p-2 border-b border-gray-50">
+                    <div className="p-2 border-b border-white/5">
                       <div className="relative">
-                        <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={14} />
+                        <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
                         <input
-                          className="w-full pl-9 pr-3 py-1.5 bg-gray-50 rounded-lg text-xs outline-none border border-transparent focus:border-[#161efd]/50 text-gray-900"
+                          className="w-full pl-9 pr-3 py-1.5 bg-white/5 rounded-lg text-xs outline-none border border-transparent focus:border-amber-500/50 text-white placeholder-gray-500"
                           placeholder="Search manager..."
                           value={managerSearch}
                           onChange={(e) => setManagerSearch(e.target.value)}
@@ -262,7 +264,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
                           setFormData({ ...formData, reporting_manager_id: null });
                           setIsManagerOpen(false);
                         }}
-                        className="w-full px-4 py-2.5 text-left text-xs text-gray-400 italic hover:bg-gray-50 hover:text-[#161efd] transition-all"
+                        className="w-full px-4 py-2.5 text-left text-xs text-gray-500 italic hover:bg-amber-500/10 hover:text-amber-500 transition-all"
                       >
                         No Manager
                       </button>
@@ -274,13 +276,13 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
                             setFormData({ ...formData, reporting_manager_id: m.id });
                             setIsManagerOpen(false);
                           }}
-                          className="w-full px-4 py-2 text-left hover:bg-gray-50 transition-all space-y-0.5"
+                          className="w-full px-4 py-2 text-left hover:bg-amber-500/10 transition-all space-y-0.5"
                         >
                           <div className="flex items-center justify-between px-0.5">
-                            <span className="text-xs text-gray-900 font-medium">{m.name}</span>
-                            {formData.reporting_manager_id === m.id && <IoCheckmarkCircle className="text-[#161efd]" size={14} />}
+                            <span className="text-xs text-gray-300 font-medium">{m.name}</span>
+                            {formData.reporting_manager_id === m.id && <IoCheckmarkCircle className="text-amber-500" size={14} />}
                           </div>
-                          <p className="text-[10px] text-gray-400 px-0.5 truncate">{m.dept} • {m.email}</p>
+                          <p className="text-[10px] text-gray-500 px-0.5 truncate">{m.dept} • {m.email}</p>
                         </button>
                       ))}
                     </div>
@@ -293,21 +295,21 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
           {/* Role Selection */}
           <div className="space-y-2">
             <label className="ui-label flex items-center gap-2">
-              <IoShieldCheckmarkOutline className="text-[#161efd]" />
+              <IoShieldCheckmarkOutline className="text-amber-500" />
               User Role
             </label>
             <div className="relative">
               <button
                 type="button"
                 onClick={() => { setIsRoleOpen(!isRoleOpen); setIsDeptOpen(false); setIsManagerOpen(false); }}
-                className={`w-full flex items-center justify-between px-4 py-2.5 bg-white border rounded-xl text-sm font-medium transition-all ${
-                  isRoleOpen ? 'border-[#161efd] bg-blue-50 text-[#161efd]' : 'border-gray-200 text-gray-500'
+                className={`w-full flex items-center justify-between px-4 py-2.5 bg-zinc-900 border rounded-xl text-sm font-medium transition-all ${
+                  isRoleOpen ? 'border-amber-500 bg-amber-500/10 text-amber-500' : 'border-white/10 text-gray-500'
                 }`}
               >
-                <span className="text-gray-900 capitalize">
+                <span className="text-white capitalize">
                   {formData.role}
                 </span>
-                <IoChevronDown className={`text-[#161efd] transition-transform ${isRoleOpen ? 'rotate-180' : ''}`} />
+                <IoChevronDown className={`text-amber-500 transition-transform ${isRoleOpen ? 'rotate-180' : ''}`} />
               </button>
 
               <AnimatePresence>
@@ -316,7 +318,7 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="relative mt-2 bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden z-10"
+                    className="relative mt-2 bg-zinc-900 border border-white/10 rounded-xl shadow-xl overflow-hidden z-10"
                   >
                     <div className="max-h-40 overflow-y-auto custom-scrollbar">
                       {['admin', 'employee'].map(r => (
@@ -327,10 +329,10 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
                             setFormData({ ...formData, role: r });
                             setIsRoleOpen(false);
                           }}
-                          className="w-full px-4 py-2.5 text-left text-xs text-gray-600 hover:bg-blue-50 hover:text-[#161efd] transition-all flex items-center justify-between capitalize"
+                          className="w-full px-4 py-2.5 text-left text-xs text-gray-400 hover:bg-amber-500/10 hover:text-amber-500 transition-all flex items-center justify-between capitalize"
                         >
                           {r}
-                          {formData.role === r && <IoCheckmarkCircle className="text-[#161efd]" />}
+                          {formData.role === r && <IoCheckmarkCircle className="text-amber-500" />}
                         </button>
                       ))}
                     </div>
@@ -342,11 +344,11 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex justify-end gap-3 pt-4 border-t border-gray-50">
+        <div className="flex justify-end gap-3 pt-4 border-t border-white/5">
           <button
             type="button"
             onClick={handleClose}
-            className="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-400 hover:text-gray-900 hover:bg-gray-50 transition-all"
+            className="px-6 py-2.5 rounded-xl text-sm font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-all"
             disabled={loading}
           >
             Cancel
@@ -354,11 +356,11 @@ export default function CreateUserModal({ isOpen, onClose, onSuccess }) {
           <button
             type="submit"
             disabled={loading}
-            className="relative px-8 py-2.5 bg-[#161efd] hover:bg-blue-700 text-white rounded-xl font-bold shadow-lg shadow-blue-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
+            className="relative px-8 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-bold shadow-lg shadow-amber-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:active:scale-100"
           >
             {loading ? (
               <span className="flex items-center gap-2">
-                <span className="animate-spin w-4 h-4 border-2 border-white/20 border-t-white rounded-full" />
+                <span className="animate-spin w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full" />
                 Processing...
               </span>
             ) : (

@@ -46,17 +46,17 @@ export default function Modal({
             className={`fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-[9999] w-full max-w-lg ${shellClassName}`}
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-white rounded-4xl max-h-[85vh] flex flex-col shadow-[0_20px_50px_rgba(0,0,0,0.1)] border border-gray-100/50">
-              <div className="px-8 py-6 flex items-center justify-between shrink-0">
-                <div className="ui-modal-title flex-1">{title}</div>
+            <div className="bg-zinc-900 rounded-4xl max-h-[85vh] flex flex-col shadow-2xl border border-white/10">
+              <div className="px-8 py-6 flex items-center justify-between shrink-0 border-b border-white/5">
+                <div className="ui-modal-title flex-1 text-white">{title}</div>
                 <button
                   onClick={onClose}
-                  className="p-2.5 hover:bg-gray-50 rounded-2xl transition-all text-gray-400 hover:text-gray-900 group duration-500"
+                  className="p-2.5 hover:bg-white/5 rounded-2xl transition-all text-gray-400 hover:text-white group duration-500"
                 >
                   <IoClose className="w-6 h-6 group-hover:rotate-90 transition-transform duration-500" />
                 </button>
               </div>
-              <div className="px-8 pb-8 flex-1 overflow-y-auto custom-scrollbar">{children}</div>
+              <div className="px-8 pb-8 flex-1 overflow-y-auto custom-scrollbar text-gray-300">{children}</div>
             </div>
           </motion.div>
         </>
