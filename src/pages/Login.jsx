@@ -480,7 +480,7 @@ const Login = () => {
             transition={{ duration: 0.8 }}
             className="mb-10"
           >
-            <div className="inline-block p-8 rounded-[3rem] bg-zinc-900/30 backdrop-blur-2xl border border-white/10 shadow-2xl mb-10 ring-1 ring-white/5">
+            <div className="inline-block p-8 rounded-[3rem] shadow-2xl mb-10 ">
               <img className="h-28 w-auto drop-shadow-2xl" src='./fav.png' alt="Logo"/>
             </div>
             <h1 className="text-6xl font-black text-white tracking-tighter mb-6 leading-none">
