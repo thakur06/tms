@@ -1,70 +1,224 @@
-import { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+import { useState, useEffect, useMemo, useRef } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   IoChevronBack,
   IoChevronForward,
   IoCalendar,
-  IoTime,
-  IoCheckmarkCircle,
+  IoSave,
   IoTrash,
   IoAdd,
-  IoLocationOutline,
-  IoLayersOutline,
+  IoCheckmarkCircle,
+  IoChatbubbleEllipsesOutline,
+  IoSearch,
+  IoClose,
 } from "react-icons/io5";
 import { formatDate, formatTime } from "../utils/formatters";
-import SubmitTimesheetModal from "./SubmitTimesheetModal";
-import AddTimeModal from "./AddTimeModal";
 import { toast, Zoom } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
+import SubmitTimesheetModal from "./SubmitTimesheetModal";
+
+// --- Internal Searchable Select Component ---
+function SearchableSelect({ options, value, onChange, placeholder, className }) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const wrapperRef = useRef(null);
+
+  const selectedOption = options.find((o) => String(o.value) === String(value));
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredOptions = options.filter((o) =>
+    (o.label || "").toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className={`relative ${className}`} ref={wrapperRef}>
+      <div
+        className="w-full flex items-center justify-between p-2 pl-3 bg-zinc-900 border border-transparent rounded hover:bg-white/5 cursor-pointer text-sm text-gray-200"
+        onClick={() => {
+          setIsOpen(!isOpen);
+          if (!isOpen) setSearch("");
+        }}
+      >
+        <span className="truncate select-none">
+          {selectedOption ? selectedOption.label : (value || <span className="text-gray-500">{placeholder}</span>)}
+        </span>
+        <IoSearch className="text-gray-600 ml-2 shrink-0" size={14} />
+      </div>
+
+      {isOpen && (
+        <div className="absolute z-[9999] top-full left-0 w-[200px] mt-1 bg-zinc-900 border border-amber-500/20 rounded-xl shadow-2xl max-h-[100px] overflow-hidden flex flex-col hide-y-scroll">
+          <div className="p-2 border-b border-white/5 sticky top-0 bg-zinc-900">
+            <input
+              autoFocus
+              type="text"
+              className="w-full bg-black/20 text-xs text-white p-2 rounded border border-white/10 focus:border-amber-500/50 focus:outline-none"
+              placeholder="Search..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              onClick={(e) => e.stopPropagation()} // Prevent closing
+            />
+          </div>
+          <div className="overflow-y-auto flex-1 p-1 hide-y-scroll">
+            {filteredOptions.length === 0 ? (
+              <div className="p-3 text-xs text-gray-500 text-center">No results</div>
+            ) : (
+              filteredOptions.map((opt) => (
+                <div
+                  key={opt.value}
+                  className={`p-2 text-xs rounded cursor-pointer transition-colors ${
+                    value === opt.value ? "bg-amber-500/20 text-amber-500" : "text-gray-300 hover:bg-white/5 hover:text-white"
+                  }`}
+                  onClick={() => {
+                    onChange(opt.value);
+                    setIsOpen(false);
+                  }}
+                >
+                  {opt.label || <i>(No Label)</i>}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// --- Internal Remarks Modal ---
+function RemarksModal({ isOpen, onClose, initialValue, onSave, title }) {
+  const [val, setVal] = useState(initialValue);
+  useEffect(() => setVal(initialValue), [initialValue, isOpen]);
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        exit={{ opacity: 0, scale: 0.95 }}
+        className="w-full max-w-md bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+      >
+        <div className="p-4 border-b border-white/5 flex justify-between items-center bg-zinc-900">
+          <h3 className="text-sm font-bold text-white uppercase tracking-wider">{title || "Add Remarks"}</h3>
+          <button onClick={onClose} className="text-gray-500 hover:text-white"><IoClose size={20}/></button>
+        </div>
+        <div className="p-4">
+          <textarea 
+            className="w-full bg-black/20 text-sm text-gray-200 p-3 rounded-xl border border-white/10 focus:border-amber-500/50 focus:outline-none min-h-[100px] resize-none"
+            placeholder="Enter details about this activity..."
+            value={val}
+            onChange={(e) => setVal(e.target.value)}
+            autoFocus
+          />
+        </div>
+        <div className="p-4 border-t border-white/5 bg-zinc-900/50 flex justify-end gap-2">
+           <button onClick={onClose} className="px-4 py-2 text-xs font-bold text-gray-400 hover:text-white transition-colors">Cancel</button>
+           <button 
+             onClick={() => { onSave(val); onClose(); }}
+             className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 rounded-lg text-xs font-black uppercase tracking-wider transition-colors"
+           >
+             Save Note
+           </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+// --- Time Parsing Helper ---
+const parseTimeInput = (input) => {
+  if (!input) return { hours: 0, valid: true };
+  
+  const str = input.toString().trim().toLowerCase();
+  if (str === "") return { hours: 0, valid: true };
+
+  // Case 1: "8h 30m", "8h", "30m"
+  if (str.includes("h") || str.includes("m")) {
+     let hours = 0;
+     let minutes = 0;
+     
+     const hMatch = str.match(/(\d+(\.\d+)?)h/);
+     if (hMatch) hours = parseFloat(hMatch[1]);
+     
+     const mMatch = str.match(/(\d+(\.\d+)?)m/);
+     if (mMatch) minutes = parseFloat(mMatch[1]);
+     
+     return { hours: hours + (minutes / 60), valid: true };
+  }
+  
+  // Case 2: "1:30"
+  if (str.includes(":")) {
+      const parts = str.split(":");
+      if (parts.length === 2) {
+          const h = parseFloat(parts[0]);
+          const m = parseFloat(parts[1]);
+          if (!isNaN(h) && !isNaN(m)) {
+              return { hours: h + (m / 60), valid: true };
+          }
+      }
+  }
+
+  // Case 3: Raw decimal "1.5" or integer "2"
+  const val = parseFloat(str);
+  if (!isNaN(val)) {
+      return { hours: val, valid: true };
+  }
+
+  return { hours: 0, valid: false };
+};
+
+// --- Format Helper for Display (Optional: format on blur?) --
+// keeping it simple: input shows what user types, but we could standardise.
+const formatDisplay = (h) => {
+    if(!h) return "";
+    const hours = Math.floor(h);
+    const mins = Math.round((h - hours) * 60);
+    if(mins === 0) return `${hours}`; // "8" instead of "8h" is cleaner? Or "8h"?
+    // User asked for "8h 30m" format support.
+    // Let's standardise to "8h 30m" if minutes exist, or just "8h"
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+};
+
 
 export default function WeeklyTimeLog({
   tasks,
   projects,
-  timeEntries,
-  setTimeEntries,
   clients,
 }) {
   const server = import.meta.env.VITE_SERVER_ADDRESS;
   const { user } = useAuth();
-  const [showSubmitModal, setShowSubmitModal] = useState(false);
-  const [showAddTimeModal, setShowAddTimeModal] = useState(false);
-  const [selectedDateForModal, setSelectedDateForModal] = useState("");
-  const [editingEntry, setEditingEntry] = useState(null);
-  const SubmitNotify = () =>
-    toast.success("Timesheet submitted successfully!", {
-      position: "top-center",
-      autoClose: 3000,
-      hideProgressBar: true,
-      closeOnClick: true,
-      pauseOnHover: true,
-      draggable: true,
-      progress: undefined,
-      theme: "colored",
-      transition: Zoom,
-    });
-
+  
+  // -- State --
   const [currentWeek, setCurrentWeek] = useState(() => {
     const today = new Date();
-    const day = today.getDay();
-    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+    const day = today.getDay(); // 0-6
+    const diff = today.getDate() - day + (day === 0 ? -6 : 1); // Adjust to Monday
     const monday = new Date(today);
     monday.setDate(diff);
+    monday.setHours(0, 0, 0, 0);
     return monday;
   });
 
-  // ... (keep helper functions same as original)
-  const normalizeDateStr = (date) => {
-    if (!date) return "";
-    if (typeof date === "string" && /^\d{4}-\d{2}-\d{2}/.test(date)) {
-      return date.split("T")[0];
-    }
-    const d = date instanceof Date ? date : new Date(date);
-    const year = d.getFullYear();
-    const month = String(d.getMonth() + 1).padStart(2, "0");
-    const day = String(d.getDate()).padStart(2, "0");
-    return `${year}-${month}-${day}`;
-  };
+  // Rows structure: { id, ..., days: { '2023-01-01': { id: 123, hours: 1.5, inputValue: "1h 30m", ... } } }
+  const [rows, setRows] = useState([]); 
+  const [deletedEntryIds, setDeletedEntryIds] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  
+  // Remarks Modal State
+  const [remarksModalState, setRemarksModalState] = useState({ open: false, rowId: null, dateStr: null, content: "" });
 
+  // -- Helpers --
   const getWeekDays = () => {
     const days = [];
     const start = new Date(currentWeek);
@@ -75,583 +229,586 @@ export default function WeeklyTimeLog({
     }
     return days;
   };
+  const weekDays = useMemo(() => getWeekDays(), [currentWeek]);
 
-  const weekDays = getWeekDays();
-
-  const getTimeEntriesForDate = (dateStr) => {
-    return timeEntries[dateStr] || [];
+  const normalizeDateStr = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
-  const getTotalTimeForDate = (dateStr) => {
-    const entries = getTimeEntriesForDate(dateStr);
-    return entries.reduce(
-      (total, entry) => total + entry.hours * 60 + entry.minutes,
-      0,
-    );
-  };
-
-  const getWeeklyTotal = () => {
-    return weekDays.reduce(
-      (total, day) => total + getTotalTimeForDate(formatDate(day)),
-      0,
-    );
-  };
-
-  const weeklyTotalMinutes = getWeeklyTotal();
-  const exceedsLimit = weeklyTotalMinutes > 2400; // 40 hours = 2400 minutes
-
-  const handleOpenAddTimeModal = (dateStr) => {
-    if (!user) {
-      toast.error("Please login to add time entries.", {
-        position: "top-center",
-        autoClose: 3000,
-        hideProgressBar: true,
-        theme: "colored",
-      });
-      return;
-    }
-    setSelectedDateForModal(dateStr);
-    setShowAddTimeModal(true);
-  };
-
-  const addTimeEntry = async (
-    dateStr,
-    taskName,
-    hours,
-    minutes,
-    metadata = {},
-  ) => {
-    try {
-      if (!user) {
-        toast.error("Please login to add time entries.");
-        return;
-      }
-
-      const token = localStorage.getItem("token");
-      const normalizedDate = normalizeDateStr(dateStr);
-      const payload = {
-        taskId: taskName,
-        project: metadata.project || "",
-        project_code: metadata.project_code || "",
-        client: metadata.client || "",
-        country: metadata.country || "US",
-        remarks: metadata.remarks || "",
-        date: normalizedDate,
-        hours: parseInt(hours) || 0,
-        minutes: parseInt(minutes) || 0,
-      };
-
-      const response = await fetch(`${server}/api/time-entries`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(payload),
-      });
-
-      if (!response.ok) throw new Error("Failed to save time entry");
-      const newEntry = await response.json();
-
-      await fetchUserEntries();
-      toast.success("Time entry added successfully!", { theme: "colored" });
-      return newEntry;
-    } catch (err) {
-      toast.error("Failed to save entry. Check server connection.");
-      throw err;
-    }
-  };
-
-  const handleSubmitTimesheet = async () => {
-    try {
-      if (!user) {
-        toast.error("Please login to submit timesheet.");
-        return;
-      }
-
-      // Calculate week start and end dates
-      const weekStart = new Date(currentWeek);
-      const weekEnd = new Date(currentWeek);
-      weekEnd.setDate(weekStart.getDate() + 6);
-
-      const weekStartStr = weekStart.toISOString().split("T")[0];
-      const weekEndStr = weekEnd.toISOString().split("T")[0];
-
-      // Calculate total hours for the week
-      const totalMinutes = weeklyTotalMinutes;
-      const totalHours = (totalMinutes / 60).toFixed(2);
-
-      // --- New Rule: 8 hours per day (Mon-Fri) ---
-      const weekdays = weekDays.slice(0, 5); // Assuming Monday is index 0 or handling Mon-Fri specifically
-      const workdayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
-      
-      for (let i = 0; i < 5; i++) {
-        const day = weekDays[i]; 
-        const dayName = day.toLocaleDateString("en-US", { weekday: "long" });
-        const dateStr = formatDate(day);
-        const dayTotal = getTotalTimeForDate(dateStr); // returns minutes
-
-        if (dayTotal < 480) { // 8 hours * 60 minutes
-          toast.error(
-            `${dayName} logging is ${formatTime(dayTotal)}. At least 8 hours are required for submission.`,
-            { theme: "colored" }
-          );
-          return;
-        }
-      }
-
-      if (totalMinutes < 2400) {
-        toast.error(
-          "Minimum 40 hours per week is required to submit timesheet.",
-        );
-        return;
-      }
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${server}/api/timesheets/submit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          weekStartDate: weekStartStr,
-          weekEndDate: weekEndStr,
-          totalHours: parseFloat(totalHours),
-        }),
-      });
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || "Failed to submit timesheet");
-      }
-
-      SubmitNotify();
-      console.log("Timesheet submitted successfully");
-    } catch (err) {
-      console.error("Submit timesheet error:", err);
-      toast.error(err.message || "Failed to submit timesheet");
-    }
-  };
-
-  const deleteTimeEntry = async (dateStr, entryId, entryIndex) => {
-    if (!entryId && entryIndex === undefined) {
-      console.error("Cannot delete: No entryId or index provided");
-      return;
-    }
-
-    try {
-      if (entryId) {
-        const token = localStorage.getItem("token");
-        const res = await fetch(`${server}/api/time-entries/${entryId}`, {
-          method: "DELETE",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (!res.ok) throw new Error("Delete failed");
-      }
-
-      setTimeEntries((prev) => {
-        const updated = { ...prev };
-        if (!updated[dateStr]) return updated;
-        updated[dateStr] = updated[dateStr].filter((entry, index) => {
-          if (entryId) return entry.id !== entryId;
-          return index !== entryIndex;
-        });
-        if (updated[dateStr].length === 0) delete updated[dateStr];
-        return updated;
-      });
-
-      toast.success("Entry deleted", { theme: "colored" });
-      if (user) fetchUserEntries();
-    } catch (err) {
-      toast.error("Failed to delete from server");
-      console.error(err);
-    }
-  };
-
-  const navigateWeek = (direction) => {
-    setCurrentWeek((prev) => {
-      const newDate = new Date(prev);
-      newDate.setDate(prev.getDate() + direction * 7);
-      return newDate;
-    });
-  };
-
-  const goToToday = () => {
-    const today = new Date();
-    const day = today.getDay();
-    const diff = today.getDate() - day + (day === 0 ? -6 : 1);
-    const monday = new Date(today);
-    monday.setDate(diff);
-    setCurrentWeek(monday);
-  };
-
-  const updateTimeEntry = async (entryId, updatedData) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`${server}/api/time-entries/${entryId}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          taskId: updatedData.taskName,
-          hours: updatedData.hours,
-          minutes: updatedData.minutes,
-          project: updatedData.project,
-          project_code: updatedData.project_code,
-          client: updatedData.client || "",
-          country: updatedData.country || "US",
-          remarks: updatedData.remarks,
-          entry_date: updatedData.entry_date,
-        }),
-      });
-
-      if (!response.ok) throw new Error("Update failed");
-      await fetchUserEntries();
-      toast.success("Entry updated!", { theme: "colored" });
-    } catch (error) {
-      toast.error("Update failed");
-      throw error;
-    }
-  };
-
+  // -- Data Fetching --
   const fetchUserEntries = async () => {
     if (!user) return;
+    setLoading(true);
     try {
       const token = localStorage.getItem("token");
       const res = await fetch(`${server}/api/time-entries/user/me`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       if (!res.ok) throw new Error("Failed to fetch");
       const data = await res.json();
 
-      const entriesByDate = {};
-      data.forEach((entry) => {
-        const utcDate = new Date(entry.entry_date);
-        const dateStr = normalizeDateStr(utcDate);
-        if (!entriesByDate[dateStr]) entriesByDate[dateStr] = [];
-        entriesByDate[dateStr].push({
-          id: entry.id,
-          taskName: entry.task_id,
-          hours: entry.hours,
-          minutes: entry.minutes,
-          project: entry.project_name,
-          project_code: entry.project_code,
-          user: entry.user_name,
-          location: entry.location,
-          remarks: entry.remarks,
-          client: entry.client || "",
-          country: entry.country || "US",
-        });
+      const weekStartStr = normalizeDateStr(weekDays[0]);
+      const weekEndStr = normalizeDateStr(weekDays[6]);
+      
+      const newRowsMap = new Map(); 
+      
+      data.forEach(entry => {
+        const dateStr = normalizeDateStr(entry.entry_date);
+        if (dateStr < weekStartStr || dateStr > weekEndStr) return;
+
+        const key = `${entry.project_code || entry.project_name}-${entry.task_id}`;
+        
+        if (!newRowsMap.has(key)) {
+          newRowsMap.set(key, {
+            id: `row-${key}`,
+            projectId: entry.project_name,
+            projectCode: entry.project_code,
+            taskId: entry.task_id,
+            client: entry.client,
+            days: {}
+          });
+        }
+        
+        const row = newRowsMap.get(key);
+        // Storing as decimal hours for UI
+        const decimalHours = entry.hours + (entry.minutes / 60);
+        
+        row.days[dateStr] = {
+            id: entry.id,
+            hours: decimalHours, 
+            inputValue: decimalHours > 0 ? formatDisplay(decimalHours) : "", // Init formatted
+            remarks: entry.remarks
+        };
       });
-      setTimeEntries(entriesByDate);
+
+      // If no rows, maybe add one empty row?
+      const loadedRows = Array.from(newRowsMap.values());
+      const finalRows = loadedRows.length > 0 ? loadedRows : [{ id: `new-${Date.now()}`, projectId: "", taskId: "", days: {} }];
+      
+      setRows(finalRows);
+      setDeletedEntryIds([]);
     } catch (err) {
-      console.error("Failed to fetch time entries", err);
-      toast.error("Failed to load time entries", { theme: "colored" });
+      console.error(err);
+      toast.error("Failed to load time entries");
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    if (user) fetchUserEntries();
-  }, [user]);
+    fetchUserEntries();
+  }, [user, currentWeek]);
+
+  // -- Handlers --
+  const handleAddRow = () => {
+    setRows(prev => [
+      ...prev, 
+      { 
+        id: `new-${Date.now()}`, 
+        projectId: "", 
+        taskId: "", 
+        days: {} 
+      }
+    ]);
+  };
+
+  const handleRowChange = (rowId, field, value, metadata = {}) => {
+    setRows(prev => prev.map(row => {
+      if (row.id !== rowId) return row;
+      const updated = { ...row, [field]: value };
+      if (field === 'projectId') {
+         updated.projectCode = metadata.code || ""; 
+         updated.client = metadata.client || "";
+      }
+      return updated;
+    }));
+  };
+
+  const handleDayChange = (rowId, dateStr, value) => {
+    // 1. Update inputValue immediately for typing
+    setRows(prev => prev.map(row => {
+      if (row.id !== rowId) return row;
+      
+      const newDays = { ...row.days };
+      // Just update the inputValue temporarily to allow typing
+      // We will parse properly on Blur or we can parse dynamically but that might jumpiness if user types "1.5"
+      // Better to parse immediately for totals calculation, but keep inputValue as is.
+      
+      const parsed = parseTimeInput(value);
+      
+      const currentCell = newDays[dateStr] || {};
+      
+      if (value === "") {
+          if (currentCell.id) {
+             newDays[dateStr] = { ...currentCell, hours: 0, inputValue: "" }; 
+          } else {
+             delete newDays[dateStr];
+          }
+      } else {
+         newDays[dateStr] = { 
+            ...currentCell, 
+            hours: parsed.valid ? parsed.hours : 0,
+            inputValue: value 
+         };
+      }
+      return { ...row, days: newDays };
+    }));
+  };
+  
+  const handleDayBlur = (rowId, dateStr) => {
+      // On blur, reformat the input value to standard "Xh Ym" for consistency
+      setRows(prev => prev.map(row => {
+          if (row.id !== rowId) return row;
+          const cell = row.days[dateStr];
+          if(!cell) return row;
+          
+          if (cell.hours > 0) {
+              const formatted = formatDisplay(cell.hours);
+              return { 
+                  ...row, 
+                  days: { 
+                      ...row.days, 
+                      [dateStr]: { ...cell, inputValue: formatted } 
+                  } 
+              };
+          }
+          return row;
+      }));
+  };
+
+  const handleRemarksSave = (val) => {
+      const { rowId, dateStr } = remarksModalState;
+      setRows(prev => prev.map(row => {
+          if (row.id !== rowId) return row;
+          const newDays = { ...row.days };
+          newDays[dateStr] = { ...(newDays[dateStr] || {}), remarks: val };
+          // If hours didn't exist, maybe init? But usually remarks attached to hours.
+          // We'll allow remarks even if hours empty, though backend might reject if hours=0 create. 
+          // Logic usually implies time entry exists.
+          return { ...row, days: newDays };
+      }));
+  };
+
+  const handleDeleteRow = (rowId) => {
+    const row = rows.find(r => r.id === rowId);
+    if (row) {
+        const idsToDelete = Object.values(row.days)
+            .filter(d => d.id)
+            .map(d => d.id);
+        setDeletedEntryIds(prev => [...prev, ...idsToDelete]);
+    }
+    setRows(prev => prev.filter(r => r.id !== rowId));
+  };
+
+  const handleSave = async () => {
+     if (!user) return;
+     
+     // Validate
+     for (const row of rows) {
+        if (Object.keys(row.days).some(d => row.days[d].hours > 0) && (!row.projectId || !row.taskId)) {
+            toast.error("Please select Project and Task for all rows with time entries.");
+            return;
+        }
+     }
+
+     const operations = []; 
+
+     // 1. Process deletions
+     deletedEntryIds.forEach(id => {
+        operations.push({ type: 'delete', data: { id } });
+     });
+
+     // 2. Process Rows
+     rows.forEach(row => {
+        Object.entries(row.days).forEach(([dateStr, cell]) => {
+            // FIX: Robust calculation to ensure minutes are captured
+            // e.g. 1.5 -> 1h 30m. 0.0833 -> 5m.
+            const totalMins = Math.round((cell.hours || 0) * 60);
+            const hours = Math.floor(totalMins / 60);
+            const minutes = totalMins % 60;
+            
+            if (cell.id) {
+                // Existing
+                if (totalMins > 0) {
+                    operations.push({
+                        type: 'update',
+                        data: {
+                            id: cell.id,
+                            taskId: row.taskId,
+                            project: row.projectId,
+                            project_code: row.projectCode,
+                            client: row.client,
+                            date: dateStr,
+                            hours,
+                            minutes,
+                            remarks: cell.remarks || ""
+                        }
+                    });
+                } else {
+                    operations.push({ type: 'delete', data: { id: cell.id } });
+                }
+            } else {
+                // New
+                if (totalMins > 0) {
+                     operations.push({
+                        type: 'create',
+                        data: {
+                            taskId: row.taskId,
+                            project: row.projectId,
+                            project_code: row.projectCode,
+                            client: row.client,
+                            date: dateStr,
+                            hours,
+                            minutes,
+                            remarks: cell.remarks || ""
+                        }
+                    });
+                }
+            }
+        });
+     });
+
+     if (operations.length === 0) {
+         toast.info("No changes to save.");
+         return;
+     }
+
+     try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`${server}/api/time-entries/bulk`, {
+            method: "POST",
+            headers: { 
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${token}` 
+            },
+            body: JSON.stringify({ operations })
+        });
+
+        if (!res.ok) throw new Error("Bulk save failed");
+        
+        toast.success("Timesheet saved successfully!", { theme: 'colored' });
+        fetchUserEntries();
+     } catch (err) {
+         console.error(err);
+         toast.error("Failed to save timesheet");
+     }
+  };
+
+  const getDayTotal = (dateStr) => {
+    return rows.reduce((acc, row) => {
+        const cell = row.days[dateStr];
+        return acc + (cell?.hours || 0);
+    }, 0);
+  };
+  
+  const weeklyTotalHours = weekDays.reduce((acc, day) => acc + getDayTotal(normalizeDateStr(day)), 0);
+
+  const navigateWeek = (dir) => {
+    setCurrentWeek(prev => {
+        const d = new Date(prev);
+        d.setDate(prev.getDate() + (dir * 7));
+        return d;
+    });
+  };
+
+  // Safe mapping with filter
+  const projectOptions = projects
+    .filter(p => p && p.name && p.status !== 'Inactive')
+    .map(p => ({ label: p.name, value: p.name, code: p.code, client: p.client }));
+    
+  const taskOptions = tasks
+    .filter(t => t && t.task_name)
+    .map(t => ({ label: t.task_name, value: t.task_id }));
 
   return (
-    <div className="w-full space-y-6">
-      {/* --- HEADER SECTION --- */}
-      <header className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
-        {/* Logged-in User Info */}
-        <div className="space-y-1">
-          <nav className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
-            <span>Workspace</span>
-            <span className="opacity-30">/</span>
-            <span className="text-amber-500/60">Timesheet</span>
-          </nav>
-          <div className="flex items-center gap-4">
-            <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-amber-500">
-              <IoCalendar size={28} />
-            </div>
+    <div className="w-full space-y-6 animate-in fade-in duration-500">
+        {/* HEADER */}
+        <div className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-6">
             <div>
-              <h1 className="text-2xl font-black text-white tracking-tight leading-none uppercase">
-                Weekly Timesheet
-              </h1>
-              <p className="text-gray-500 mt-1.5 text-xs font-bold italic">
-                {user?.name ? `Tracking for ${user.name}` : "Not signed in"}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        {/* Navigation & Controls */}
-        <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
-          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 w-full sm:w-auto">
-            <button
-              onClick={() => navigateWeek(-1)}
-              className="p-2.5 hover:bg-white rounded-lg transition-colors text-gray-600 hover:text-[#161efd]"
-            >
-              <IoChevronBack size={18} />
-            </button>
-            <button
-              onClick={goToToday}
-              className="px-4 py-1.5 text-sm font-semibold text-gray-700 hover:bg-white hover:text-[#161efd] rounded-lg transition-colors whitespace-nowrap"
-            >
-              Today
-            </button>
-            <button
-              onClick={() => navigateWeek(1)}
-              className="p-2.5 hover:bg-white rounded-lg transition-colors text-gray-600 hover:text-[#161efd]"
-            >
-              <IoChevronForward size={18} />
-            </button>
-          </div>
-
-          <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
-            <div
-              className={`flex items-center gap-3 px-5 py-2 rounded-xl border w-full sm:w-auto justify-between ${exceedsLimit ? "bg-red-500/10 border-red-500/20" : "bg-amber-500/10 border-amber-500/20"}`}
-            >
-              <div className="flex flex-col">
-                <span
-                  className={`text-[10px] uppercase tracking-wider font-bold ${exceedsLimit ? "text-red-500" : "text-amber-500"}`}
-                >
-                  Weekly Total
-                </span>
-                <span
-                  className={`text-xl font-bold font-mono ${exceedsLimit ? "text-red-500" : "text-white"}`}
-                >
-                  {formatTime(weeklyTotalMinutes)}
-                </span>
-              </div>
-              <IoTime
-                size={24}
-                className={exceedsLimit ? "text-red-500" : "text-amber-500"}
-              />
-            </div>
-
-            <button
-              onClick={() => setShowSubmitModal(true)}
-              className="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 active:scale-95"
-            >
-              <IoCheckmarkCircle size={20} />
-              <span>Submit</span>
-            </button>
-          </div>
-        </div>
-      </header>
-
-      {/* --- MAIN GRID --- */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-7 gap-4">
-        {weekDays.map((day, index) => {
-          const dateStr = formatDate(day);
-          const dayEntries = getTimeEntriesForDate(dateStr);
-          const dayTotal = getTotalTimeForDate(dateStr);
-          const isToday = formatDate(new Date()) === dateStr;
-          const dayName = day.toLocaleDateString("en-US", { weekday: "short" });
-          const isWeekend =
-            dayName.toUpperCase() === "SAT" || dayName.toUpperCase() === "SUN";
-
-          const dayColors = [
-            "from-amber-400 to-amber-600 text-amber-500 bg-zinc-900 border-white/5", // Mon
-            "from-yellow-400 to-yellow-600 text-yellow-500 bg-zinc-900 border-white/5", // Tue
-            "from-orange-400 to-orange-600 text-orange-500 bg-zinc-900 border-white/5", // Wed
-            "from-amber-500 to-yellow-500 text-amber-500 bg-zinc-900 border-white/5", // Thu
-            "from-orange-500 to-red-500 text-orange-500 bg-zinc-900 border-white/5", // Fri
-            "from-yellow-500 to-amber-500 text-yellow-500 bg-zinc-900 border-white/5", // Sat
-            "from-red-500 to-orange-500 text-red-500 bg-zinc-900 border-white/5" // Sun
-          ];
-
-          // Map 0-6 (Sun-Sat) to a Monday-start or rotating index. 
-          // getDay() returns 0 for Sun, 1 for Mon...
-          // We want Mon as index 0 for the Workday-first feel if needed, but simple wrap is fine.
-          const colorClass = dayColors[day.getDay()];
-
-          return (
-            <motion.div
-              key={dateStr}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className={`flex flex-col ui-card overflow-hidden h-full min-h-[300px] ${
-                isToday
-                  ? "border-amber-500/50 shadow-[0_0_20px_rgba(251,191,36,0.15)] ring-1 ring-amber-500/30"
-                  : ""
-              }`}
-            >
-              {/* Day Header */}
-              <div
-                className={`p-4 border-b border-white/5 relative overflow-hidden ${
-                  isToday
-                    ? "bg-zinc-800/80"
-                    : "bg-zinc-900/50"
-                }`}
-              >
-                {/* Visual Color Accent */}
-                <div className={`absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r ${colorClass}`} />
-                <div className={`absolute top-0 right-0 w-24 h-24 rounded-full bg-linear-to-br -mr-12 -mt-12 opacity-30 ${colorClass}`} />
-                <div className="flex justify-between items-start">
-                  <div>
-                    <h4
-                      className={`text-2xl font-black leading-none mb-1 relative z-10 ${
-                        isToday
-                          ? "text-amber-500"
-                          : colorClass.split(' ').find(c => c.startsWith('text-'))
-                      }`}
-                    >
-                      {day.getDate()}
-                    </h4>
-                    <p
-                      className={`text-[10px] font-black uppercase tracking-widest relative z-10 ${
-                        isToday
-                          ? "text-amber-400"
-                          : colorClass.split(' ').find(c => c.startsWith('text-'))
-                      }`}
-                    >
-                      {dayName}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[10px] font-bold text-gray-500 block uppercase tracking-wider">
-                      Total
-                    </span>
-                    <span
-                      className={`font-mono font-bold block ${dayTotal > 0 ? "text-white" : "text-gray-500"}`}
-                    >
-                      {formatTime(dayTotal)}
-                    </span>
-                    {dayTotal > 0 && !isWeekend && (
-                      <div
-                        className={`mt-1.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter flex items-center justify-end gap-1 ${
-                          dayTotal >= 480
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "bg-amber-100 text-amber-700"
-                        }`}
-                      >
-                        {dayTotal >= 480 ? (
-                          <>
-                            <IoCheckmarkCircle size={10} />
-                            DONE
-                          </>
-                        ) : (
-                          <>
-                            <IoTime size={10} />
-                            LOG 8H
-                          </>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Entries Body */}
-              <div className="p-3 flex-1 space-y-2 overflow-y-auto hide-y-scroll md:max-h-[290px] max-h-[265px]">
-                {dayEntries.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center py-8 opacity-30 text-sm font-medium text-gray-500">
-                    <IoCalendar size={24} className="mb-2" />
-                    <p>No entries</p>
-                  </div>
-                ) : (
-                  dayEntries.map((entry, entryIndex) => (
-                    <div
-                      key={entry.id || entryIndex}
-                      className="group relative p-3 bg-zinc-800/50 border border-white/5 rounded-xl hover:bg-zinc-800 hover:border-amber-500/20 transition-all"
-                    >
-                      <div className="flex justify-between items-start mb-1.5">
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-amber-500/10 text-amber-500 rounded border border-amber-500/20 truncate max-w-[80px]">
-                          {entry.project_code || "N/A"}
-                        </span>
-                        <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                          <button
-                            onClick={() => {
-                              setEditingEntry(entry);
-                              setSelectedDateForModal(dateStr);
-                              setShowAddTimeModal(true);
-                            }}
-                            className="p-1 text-gray-500 hover:text-amber-500 rounded hover:bg-amber-500/10 transition-colors"
-                          >
-                            <IoLayersOutline size={12} />
-                          </button>
-                        </div>
-                      </div>
-
-                      <h5
-                        className="text-xs font-bold text-gray-200 truncate mb-1"
-                        title={entry.taskName}
-                      >
-                        {entry.taskName}
-                      </h5>
-
-                      <div className="flex items-center gap-3 text-[10px] font-medium text-gray-500 mb-2">
-                        <span className="flex items-center gap-1 text-amber-500">
-                          <IoTime size={10} />
-                          {entry.hours}h {entry.minutes}m
-                        </span>
-                        {entry.location && (
-                          <span className="flex items-center gap-1 text-emerald-500">
-                            <IoLocationOutline size={10} />
-                            {entry.location}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex justify-end gap-2 pt-2 border-t border-white/5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                        <button
-                          onClick={() =>
-                            deleteTimeEntry(dateStr, entry.id, entryIndex)
-                          }
-                          className="text-[10px] text-red-500 hover:text-red-400 font-semibold"
-                        >
-                          DELETE
-                        </button>
-                      </div>
+                 <nav className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+                    <span>Workspace</span>
+                    <span className="opacity-30">/</span>
+                    <span className="text-amber-500">Weekly Log</span>
+                </nav>
+                <div className="flex items-center gap-4">
+                    <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-500">
+                        <IoCalendar size={24} />
                     </div>
-                  ))
-                )}
-              </div>
+                    <div>
+                        <h1 className="text-3xl font-black text-white tracking-tight uppercase">
+                            Weekly Timesheet
+                        </h1>
+                        <p className="text-gray-500 font-bold text-sm mt-1">
+                             {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                        </p>
+                    </div>
+                </div>
+            </div>
 
-              {/* Add Button Area */}
-              <div className="p-3 border-t border-white/5 bg-zinc-900/50">
-                <button
-                  onClick={() => handleOpenAddTimeModal(dateStr)}
-                  className="w-full py-2.5 flex items-center justify-center gap-2 text-xs font-bold text-gray-500 hover:text-amber-500 border border-dashed border-white/10 rounded-xl hover:border-amber-500 hover:bg-amber-500/10 transition-all"
-                >
-                  <IoAdd size={14} />
-                  Add Entry
-                </button>
-              </div>
-            </motion.div>
-          );
-        })}
-      </div>
+            <div className="flex items-center gap-3 w-full xl:w-auto">
+                 {/* Week Nav */}
+                 <div className="flex items-center bg-zinc-900 p-1 rounded-xl border border-white/5">
+                    <button onClick={() => navigateWeek(-1)} className="p-2 hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-white transition-colors">
+                        <IoChevronBack size={18} />
+                    </button>
+                    <button onClick={() => {
+                        const today = new Date();
+                        const day = today.getDay();
+                        const diff = today.getDate() - day + (day === 0 ? -6 : 1);
+                        const monday = new Date(today);
+                        monday.setDate(diff);
+                        monday.setHours(0,0,0,0);
+                        setCurrentWeek(monday);
+                    }} className="px-4 text-xs font-bold uppercase text-gray-400 hover:text-white transition-colors">
+                        Current Week
+                    </button>
+                    <button onClick={() => navigateWeek(1)} className="p-2 hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-white transition-colors">
+                        <IoChevronForward size={18} />
+                    </button>
+                 </div>
 
-      <SubmitTimesheetModal
-        isOpen={showSubmitModal}
-        onClose={() => setShowSubmitModal(false)}
-        weeklyTotal={weeklyTotalMinutes}
-        weekRange={`${weekDays[0].toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${weekDays[6].toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}
-        onSubmit={handleSubmitTimesheet}
-      />
+                 {/* Total Badge */}
+                 <div className={`flex items-center gap-3 px-5 py-2 rounded-xl border ${weeklyTotalHours >= 40 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-amber-500/10 border-amber-500/20 text-amber-500'}`}>
+                    <div className="flex flex-col items-end">
+                        <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">Total Hours</span>
+                        <span className="text-xl font-mono font-bold leading-none">{weeklyTotalHours.toFixed(1)}</span>
+                    </div>
+                 </div>
 
-      <div className="relative z-[9999]">
-        <AddTimeModal
-          isOpen={showAddTimeModal}
-          onClose={() => {
-            setShowAddTimeModal(false);
-            setEditingEntry(null);
-          }}
-          dateStr={selectedDateForModal}
-          tasks={tasks}
-          projects={projects}
-          entry={editingEntry}
-          onAdd={addTimeEntry}
-          onUpdate={updateTimeEntry}
-          clients={clients}
+                 <button
+                    onClick={handleSave}
+                    className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-bold hover:bg-gray-200 transition-colors shadow-lg shadow-white/10 active:scale-95"
+                 >
+                    <IoSave size={18} />
+                    <span>Save Changes</span>
+                 </button>
+                 
+                 <button
+                    onClick={() => setShowSubmitModal(true)}
+                    className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20 active:scale-95"
+                 >
+                    <IoCheckmarkCircle size={18} />
+                    <span>Submit</span>
+                 </button>
+            </div>
+        </div>
+
+        {/* GRID CONTAINER */}
+        <div className="overflow-x-auto rounded-2xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl shadow-xl scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-white/10 hover:scrollbar-thumb-amber-500/20">
+            <table className="w-full border-collapse min-w-[1000px] table-fixed">
+                <thead>
+                    <tr className="border-b border-white/5 bg-zinc-900">
+                        <th className="p-4 text-xs font-black uppercase text-gray-500 w-[150px]">Project</th>
+                        <th className="p-4 text-xs font-black uppercase text-gray-500 w-[150px] border-r border-white/5">Task</th>
+                        {weekDays.map(day => {
+                                    const isToday = normalizeDateStr(day) === normalizeDateStr(new Date());
+                                    const dateObj = new Date(day);
+                                    const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6; // 0=Sun, 6=Sat
+                                    
+                                    return (
+                                        <th key={day.toISOString()} className="px-2 py-4 text-center border-b border-white/5 min-w-[80px]">
+                                            <div className="flex flex-col items-center gap-1">
+                                                <span className={`text-[10px] font-bold uppercase tracking-widest ${
+                                                    isToday ? 'text-amber-500' : 
+                                                    isWeekend ? 'text-red-500' : 'text-gray-500'
+                                                }`}>
+                                                    {day.toLocaleDateString("en-US", { weekday: "short" })}
+                                                </span>
+                                                <div className={`flex flex-col items-center justify-center w-8 h-8 rounded-full border ${
+                                                    isToday 
+                                                        ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-500/30' 
+                                                        : isWeekend
+                                                            ? 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                            : 'bg-transparent text-gray-300 border-transparent'
+                                                }`}>
+                                                    <span className="text-sm font-bold leading-none">
+                                                        {day.getDate()}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        </th>
+                                    );
+                                })}
+                        <th className="p-4 text-xs font-black uppercase text-gray-500 w-[50px] text-center"></th>
+                    </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                    {rows.map((row) => (
+                        <tr key={row.id} className="group hover:bg-white/2 transition-colors">
+                            <td className="p-2 align-top">
+                                <SearchableSelect 
+                                    options={projectOptions}
+                                    value={row.projectId}
+                                    placeholder="Select Project"
+                                    onChange={(val) => {
+                                        const proj = projects.find(p => p.name === val);
+                                        handleRowChange(row.id, 'projectId', val, { code: proj?.code, client: proj?.client });
+                                    }}
+                                />
+                            </td>
+                            <td className="p-2 border-r border-white/5 align-top">
+                                <SearchableSelect 
+                                    options={taskOptions}
+                                    value={row.taskId}
+                                    placeholder="Select Task"
+                                    onChange={(val) => handleRowChange(row.id, 'taskId', val)}
+                                />
+                            </td>
+                            {weekDays.map(day => {
+                                const dateStr = normalizeDateStr(day);
+                                const cell = row.days[dateStr];
+                                const hasRemarks = cell?.remarks && cell.remarks.trim().length > 0;
+                                return (
+                                    <td key={dateStr} className="p-2 align-top">
+                                        <div className="relative group/cell flex items-center justify-center gap-1">
+                                            {/* Hours Input */}
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                placeholder="H"
+                                                className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-white/10 focus:border-amber-500/50 hover:bg-white/5 transition-all ${
+                                                    Math.floor(cell?.hours || 0) > 0 ? 'text-white font-bold' : 'text-gray-600'
+                                                }`}
+                                                value={Math.floor(cell?.hours || 0) || ""}
+                                                onChange={(e) => {
+                                                    const h = parseInt(e.target.value) || 0;
+                                                    const m = Math.round(((cell?.hours || 0) % 1) * 60);
+                                                    const newTotal = h + (m / 60);
+                                                    handleDayChange(row.id, dateStr, newTotal.toString()); 
+                                                }}
+                                            />
+                                            <span className="text-gray-600 text-[10px]">:</span>
+                                            {/* Minutes Input */}
+                                            <input
+                                                type="number"
+                                                min="0"
+                                                max="59"
+                                                placeholder="M"
+                                                className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-white/10 focus:border-amber-500/50 hover:bg-white/5 transition-all ${
+                                                    Math.round(((cell?.hours || 0) % 1) * 60) > 0 ? 'text-white font-bold' : 'text-gray-600'
+                                                }`}
+                                                value={Math.round(((cell?.hours || 0) % 1) * 60) || ""}
+                                                onChange={(e) => {
+                                                    const h = Math.floor(cell?.hours || 0);
+                                                    let m = parseInt(e.target.value) || 0;
+                                                    if(m > 59) m = 59; 
+                                                    if(m < 0) m = 0;
+                                                    const newTotal = h + (m / 60);
+                                                    handleDayChange(row.id, dateStr, newTotal.toString());
+                                                }}
+                                            />
+
+                                            {(cell?.hours > 0 || hasRemarks) && (
+                                                <button 
+                                                    tabIndex={-1}
+                                                    onClick={() => setRemarksModalState({ open: true, rowId: row.id, dateStr, content: cell?.remarks || "" })}
+                                                    className={`absolute -top-1 -right-1 p-0.5 rounded-full bg-zinc-900 border border-white/10 hover:bg-white/10 transition-colors z-10 ${hasRemarks ? 'text-amber-500 opacity-100' : 'text-gray-600 opacity-0 group-hover/cell:opacity-100'}`}
+                                                    title={cell?.remarks || "Add Remarks"}
+                                                >
+                                                    <IoChatbubbleEllipsesOutline size={10} />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </td>
+                                );
+                            })}
+                            <td className="p-2 text-center align-top">
+                                <button 
+                                    onClick={() => handleDeleteRow(row.id)}
+                                    className="p-2 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                    title="Delete Row"
+                                >
+                                    <IoTrash size={16} />
+                                </button>
+                            </td>
+                        </tr>
+                    ))}
+                    
+                    {/* ADD ROW BTN */}
+                    <tr>
+                        <td colSpan={2 + 7 + 1} className="p-2">
+                            <button
+                                onClick={handleAddRow}
+                                className="w-full py-3 flex items-center justify-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest hover:text-amber-500 hover:bg-amber-500/5 border border-dashed border-white/10 hover:border-amber-500/50 rounded-lg transition-all"
+                            >
+                                <IoAdd size={16} />
+                                Add Project Line
+                            </button>
+                        </td>
+                    </tr>
+                </tbody>
+                <tfoot className="bg-zinc-900 border-t border-white/5">
+                    <tr>
+                        <td className="p-4 text-xs font-black uppercase text-gray-500 text-right" colSpan={2}>Daily Total</td>
+                        {weekDays.map(day => {
+                            const total = getDayTotal(normalizeDateStr(day));
+                            return (
+                                <td key={day} className="p-4 text-center">
+                                    <span className={`font-mono font-bold ${total > 0 ? 'text-white' : 'text-gray-600'}`}>
+                                        {total > 0 ? total.toFixed(1)+"h" : '-'}
+                                    </span>
+                                </td>
+                            );
+                        })}
+                        <td></td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <SubmitTimesheetModal 
+            isOpen={showSubmitModal}
+            onClose={() => setShowSubmitModal(false)}
+            weeklyTotal={weeklyTotalHours * 60} 
+            weekRange={`${weekDays[0].toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${weekDays[6].toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}
+            onSubmit={async () => {
+                await handleSave();
+                 try {
+                     const token = localStorage.getItem("token");
+                     const weekStartStr = normalizeDateStr(weekDays[0]);
+                     const weekEndStr = normalizeDateStr(weekDays[6]);
+                     
+                     if ((weeklyTotalHours * 60) < 2400) {
+                         toast.error("Minimum 40 hours required");
+                         return;
+                     }
+                     
+                     const res = await fetch(`${server}/api/timesheets/submit`, {
+                        method: "POST",
+                        headers: {
+                          "Content-Type": "application/json",
+                          Authorization: `Bearer ${token}`,
+                        },
+                        body: JSON.stringify({
+                          weekStartDate: weekStartStr,
+                          weekEndDate: weekEndStr,
+                          totalHours: weeklyTotalHours,
+                        }),
+                      });
+                      
+                      if(!res.ok) throw new Error("Submit failed");
+                      toast.success("Submitted successfully!", { theme: 'colored' });
+                } catch(e) {
+                    toast.error(e.message);
+                }
+            }}
         />
-      </div>
+
+        <AnimatePresence>
+            {remarksModalState.open && (
+                <RemarksModal 
+                    isOpen={remarksModalState.open}
+                    onClose={() => setRemarksModalState({ ...remarksModalState, open: false })}
+                    initialValue={remarksModalState.content}
+                    onSave={handleRemarksSave}
+                    title="Time Entry Details"
+                />
+            )}
+        </AnimatePresence>
 
     </div>
   );

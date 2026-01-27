@@ -7,6 +7,7 @@ import {
   IoAddOutline,
   IoBusinessOutline,
   IoLocationOutline,
+  IoCheckmarkCircle,
   IoCodeSlashOutline
 } from "react-icons/io5"
 
@@ -15,6 +16,9 @@ export default function Projects() {
   const [showProjectModal, setShowProjectModal] = useState(false)
   const [editingProject, setEditingProject] = useState(null)
   const [isLoading, setIsLoading] = useState(true)
+  const [filterStatus, setFilterStatus] = useState('All')
+  const [filterLocation, setFilterLocation] = useState('All')
+  
   const [stats, setStats] = useState({
     total: 0,
     byLocation: {},
@@ -49,6 +53,7 @@ export default function Projects() {
     code: project.code || project.project_code || "N/A",
     location: project.location || project.project_location || "Not specified",
     client: project.client || "Not specified",
+    status: project.status || "Active",
   })
 
   useEffect(() => {
@@ -63,15 +68,26 @@ export default function Projects() {
           
           // Calculate stats
           const locationCounts = {}
+          let activeCount = 0;
+          let closedCount = 0;
+          
           transformedData.forEach(project => {
             const location = project.location || 'Unknown'
             locationCounts[location] = (locationCounts[location] || 0) + 1
+            
+            const status = (project.status || 'Active').toLowerCase();
+            if (status === 'active' || status === 'planning') {
+                activeCount++;
+            } else {
+                closedCount++;
+            }
           })
           
           setStats({
             total: transformedData.length,
-            byLocation: locationCounts,
-            active: transformedData.length // Assuming all are active
+            closed: closedCount,
+            active: activeCount,
+            byLocation: locationCounts
           })
         } else {
           notifyError("Failed to fetch projects")
@@ -244,13 +260,13 @@ export default function Projects() {
           whileHover={{ scale: 1.03, y: -3 }}
           className="ui-card p-4 flex items-center gap-4 group relative overflow-hidden transition-all shadow-sm hover:shadow-xl bg-zinc-900 border-white/5"
         >
-          <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="relative z-10 p-3 bg-emerald-500/10 text-emerald-500 rounded-xl border border-emerald-500/20 shadow-sm group-hover:shadow-emerald-500/20 transition-all">
-            <IoLocationOutline size={24} className="group-hover:scale-110 transition-transform" />
+          <div className="absolute inset-0 bg-linear-to-br from-rose-500/5 via-transparent to-rose-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="relative z-10 p-3 bg-rose-500/10 text-rose-500 rounded-xl border border-rose-500/20 shadow-sm group-hover:shadow-rose-500/20 transition-all">
+            <IoCheckmarkCircle size={24} className="group-hover:scale-110 transition-transform" />
           </div>
           <div className="relative z-10 min-w-0">
-            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-emerald-500 transition-colors">Top Location</p>
-            <p className="text-lg font-black text-white truncate transition-all">{getTopLocation()}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-500 group-hover:text-rose-500 transition-colors">Closed Projects</p>
+            <p className="text-xl font-black text-white truncate transition-all">{stats.closed}</p>
           </div>
         </motion.div>
 
@@ -273,7 +289,10 @@ export default function Projects() {
       </div>
 
       {/* Main Content */}
-            <div className="mb-8">
+      {/* Main Content */}
+      <div className="mb-8 space-y-4">
+        <div className="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
+            <div>
               <nav className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
                 <span>Management</span>
                 <span className="opacity-30">/</span>
@@ -291,26 +310,70 @@ export default function Projects() {
                 </div>
               </div>
             </div>
-            <ProjectsList 
-              projects={projects} 
-              onDeleteProject={handleDeleteProject}
-              onEditProject={(project) => {
-                 setEditingProject(project)
-                 setShowProjectModal(true)
-              }}
-              headerAction={
+
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-3">
+                <select 
+                    value={filterStatus}
+                    className="bg-zinc-900 text-xs font-bold text-gray-300 border border-white/10 rounded-lg h-10 px-3 focus:outline-none focus:border-amber-500"
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                >
+                    <option value="All">All Status</option>
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+
+                <select 
+                    value={filterLocation}
+                    className="bg-zinc-900 text-xs font-bold text-gray-300 border border-white/10 rounded-lg h-10 px-3 focus:outline-none focus:border-amber-500"
+                    onChange={(e) => setFilterLocation(e.target.value)}
+                >
+                    <option value="All">All Locations</option>
+                    {Object.keys(stats.byLocation).map(loc => (
+                        <option key={loc} value={loc}>{loc}</option>
+                    ))}
+                </select>
+
+                {(filterStatus !== 'All' || filterLocation !== 'All') && (
+                    <button
+                        onClick={() => {
+                            setFilterStatus('All');
+                            setFilterLocation('All');
+                        }}
+                        className="text-xs font-bold text-amber-500 hover:text-amber-400 px-2"
+                    >
+                        Clear Filters
+                    </button>
+                )}
+
                 <button
                   onClick={() => {
                     setEditingProject(null)
                     setShowProjectModal(true)
                   }}
-                  className="ui-btn ui-btn-primary w-full sm:w-auto text-xs uppercase font-black tracking-widest h-11 px-6 shadow-blue-500/20"
+                  className="ui-btn ui-btn-primary text-xs uppercase font-black tracking-widest h-10 px-6 shadow-blue-500/20 flex items-center gap-2"
                 >
                   <IoAddOutline size={18} />
                   New Project
                 </button>
-              }
-            />
+            </div>
+        </div>
+      </div>
+
+      <ProjectsList 
+        projects={projects.filter(p => {
+            const matchesStatus = filterStatus === 'All' || (p.status || 'Active') === filterStatus;
+            const matchesLocation = filterLocation === 'All' || (p.location || 'Unknown') === filterLocation;
+            return matchesStatus && matchesLocation;
+        })} 
+        onDeleteProject={handleDeleteProject}
+        onEditProject={(project) => {
+            setEditingProject(project)
+            setShowProjectModal(true)
+        }}
+        // Action moved to filter bar
+        headerAction={null}
+      />
 
       {/* Create/Edit Project Modal */}
       <CreateProjectModal

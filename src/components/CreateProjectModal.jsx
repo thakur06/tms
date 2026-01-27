@@ -11,7 +11,7 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject, p
     name: '',
     client: '',
     location: '',
-    status: 'planning'
+    status: 'Active'
   })
   const [isLoading, setIsLoading] = useState(false)
 
@@ -23,10 +23,10 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject, p
           name: projectToEdit.name || '',
           client: projectToEdit.client || '',
           location: projectToEdit.location || '',
-          status: projectToEdit.status || 'planning'
+          status: projectToEdit.status || 'Active'
         })
       } else {
-        setFormData({ name: '', client: '', location: '', status: 'planning' })
+        setFormData({ name: '', client: '', location: '', status: 'Active' })
       }
     }
   }, [isOpen, projectToEdit])
@@ -56,7 +56,7 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject, p
   }
 
   const handleClose = () => {
-    setFormData({ name: '', client: '', location: '', status: 'planning' })
+    setFormData({ name: '', client: '', location: '', status: 'Active' })
     onClose()
   }
 
@@ -147,6 +147,25 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject, p
                 placeholder="London, UK"
                 disabled={isLoading}
               />
+            </div>
+            
+            {/* Status */}
+            <div className="space-y-2 col-span-2 sm:col-span-1">
+              <label className="ui-label flex items-center gap-2 text-gray-400">
+                <IoRocketOutline size={14} className="text-amber-500" />
+                Status
+              </label>
+              <select
+                value={formData.status}
+                onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+                className="ui-input w-full bg-zinc-950 border-white/10 text-white focus:border-amber-500 focus:ring-amber-500/20"
+                disabled={isLoading}
+              >
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+                <option value="Completed">Completed</option>
+                <option value="Planning">Planning</option>
+              </select>
             </div>
           </div>
 
