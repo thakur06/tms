@@ -94,7 +94,7 @@ const MultiSelect = ({
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-full flex items-center justify-between px-4 py-3 border rounded-xl text-xs font-bold transition-all bg-zinc-900 ${
+          className={`w-full flex items-center justify-between px-3 py-2 border rounded-xl text-xs font-bold transition-all bg-zinc-900 ${
             isOpen
               ? "border-amber-500 ring-4 ring-amber-500/20"
               : "border-white/10 text-white"
@@ -130,7 +130,7 @@ const MultiSelect = ({
                     size={12}
                   />
                   <input
-                    className="w-full pl-8 pr-3 py-2 bg-black/20 rounded-lg text-xs outline-none focus:focus:ring-2 focus:ring-amber-500/20 transition-all font-bold text-white placeholder-gray-500"
+                    className="w-full pl-8 pr-3 py-1.5 bg-black/20 rounded-lg text-xs outline-none focus:focus:ring-2 focus:ring-amber-500/20 transition-all font-bold text-white placeholder-gray-500"
                     placeholder={`Search ${label}...`}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -150,7 +150,7 @@ const MultiSelect = ({
                       onChange(newSelected);
                       setSearch(""); 
                     }}
-                    className="w-full px-3 py-2.5 text-left text-xs text-gray-400 hover:bg-amber-500/10 hover:text-amber-500 transition-all flex items-center justify-between rounded-lg font-bold"
+                    className="w-full px-3 py-1.5 text-left text-xs text-gray-400 hover:bg-amber-500/10 hover:text-amber-500 transition-all flex items-center justify-between rounded-lg font-bold"
                   >
                     {opt}
                     {selectedValues.includes(opt) && (
@@ -752,15 +752,17 @@ export const Analytics = () => {
         </div>
       </header>
       {/* Filters Section */}
-      <div className="relative z-10 p-6 border border-white/5 shadow-sm rounded-2xl space-y-6 bg-zinc-900">
-        {/* Row 1: Date Range (Global) */}
-        <div className="flex flex-col md:flex-row gap-4 items-center border-b border-white/5 pb-6">
-          <div className="w-full md:w-auto">
-            <label className="text-sm font-bold text-gray-400 block mb-2 uppercase tracking-tight">
-              Date Range
+      {/* Filters Section */}
+      <div className="relative z-10 p-4 border border-white/5 shadow-sm rounded-2xl bg-zinc-900">
+        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-12 gap-4 items-end">
+          
+          {/* 1. Date Range (Span 4 on XL) */}
+          <div className="xl:col-span-4 flex flex-col gap-2">
+            <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
+              <FiCalendar className="text-amber-500" /> Date Range
             </label>
-            <div className="flex gap-4">
-              <div className="w-40 relative z-30">
+            <div className="flex gap-2">
+              <div className="w-1/2 relative z-30">
                 <DatePicker
                   selected={startDate}
                   onChange={setStartDate}
@@ -768,11 +770,11 @@ export const Analytics = () => {
                   startDate={startDate}
                   endDate={endDate}
                   customInput={
-                    <CustomInput placeholder="Start Date" icon={FiCalendar} />
+                    <CustomInput placeholder="Start" icon={null} />
                   }
                 />
               </div>
-              <div className="w-40 relative z-20">
+              <div className="w-1/2 relative z-20">
                 <DatePicker
                   selected={endDate}
                   onChange={setEndDate}
@@ -781,72 +783,70 @@ export const Analytics = () => {
                   endDate={endDate}
                   minDate={startDate}
                   customInput={
-                    <CustomInput placeholder="End Date" icon={FiCalendar} />
+                    <CustomInput placeholder="End" icon={null} />
                   }
                 />
               </div>
             </div>
           </div>
-          <div className="flex-1 flex justify-end items-end h-[60px]">
+
+          {/* 2. Departments (Span 3 on XL) */}
+          <div className="xl:col-span-3 flex flex-col gap-1">
+             <div className="flex gap-2">
+                <div className="flex-1">
+                   <MultiSelect
+                    label="By Department"
+                    options={deptsList}
+                    selectedValues={tempSelectedDepts}
+                    onChange={setTempSelectedDepts}
+                    icon={FiLayers}
+                  />
+                </div>
+                <button
+                onClick={handleFetchDepts}
+                disabled={isLoading}
+                className="mt-6 h-[38px] w-[38px] bg-zinc-800 hover:bg-amber-500 hover:text-zinc-900 text-amber-500 border border-white/10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 shrink-0"
+                title="Apply Dept Filter"
+                >
+                  <IoSearchOutline size={16} />
+                </button>
+             </div>
+          </div>
+
+          {/* 3. Users (Span 3 on XL) */}
+          <div className="xl:col-span-3 flex flex-col gap-1">
+             <div className="flex gap-2">
+                <div className="flex-1">
+                  <MultiSelect
+                    label="By User"
+                    options={usersList.map((u) => u.name)}
+                    selectedValues={tempSelectedUsers}
+                    onChange={setTempSelectedUsers}
+                    icon={FiUsers}
+                  />
+                </div>
+                <button
+                  onClick={handleFetchUsers}
+                  disabled={isLoading}
+                  className="mt-6 h-[38px] w-[38px] bg-zinc-800 hover:bg-amber-500 hover:text-zinc-900 text-amber-500 border border-white/10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 shrink-0"
+                  title="Apply User Filter"
+                >
+                  <IoSearchOutline size={16} />
+                </button>
+             </div>
+          </div>
+
+          {/* 4. Clear (Span 2 on XL) */}
+          <div className="xl:col-span-2 flex items-end h-full pb-px">
             <button
                onClick={handleClearFilters}
-               className="flex items-center gap-2 px-4 py-2 bg-white/5 border border-white/10 text-gray-300 hover:text-amber-500 hover:bg-amber-500/10 rounded-xl transition-all font-bold text-xs uppercase tracking-wider shadow-sm group"
+               className="w-full h-[38px] flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all font-bold text-[10px] uppercase tracking-wider shadow-sm group"
             >
-               <IoRefreshOutline className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
-               Clear Filters
-            </button>
-          </div>
-        </div>
-
-        {/* Row 2: Split Columns */}
-        <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
-          {/* Column 1: Departments */}
-          <div className="bg-white/5 rounded-xl p-5 border border-white/5 flex flex-col gap-4 shadow-sm">
-            <div className="flex items-center gap-2 text-amber-500 font-bold border-b border-white/10 pb-2 uppercase text-sm tracking-tight">
-              <FiLayers /> By Department
-            </div>
-            <MultiSelect
-              label="Select Departments"
-              options={deptsList}
-              selectedValues={tempSelectedDepts}
-              onChange={setTempSelectedDepts}
-            />
-            <button
-              onClick={handleFetchDepts}
-              disabled={isLoading}
-              className="mt-2 w-full h-[40px] bg-amber-600 hover:bg-amber-500 text-zinc-900 rounded-lg flex items-center justify-center gap-2 transition-all font-bold text-sm shadow-md shadow-amber-500/20"
-            >
-              {isLoading ? (
-                <div className="w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />
-              ) : (
-                "Fetch Dept Data"
-              )}
+               <IoRefreshOutline className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500" />
+               Reset
             </button>
           </div>
 
-          {/* Column 2: Users */}
-          <div className="bg-white/5 rounded-xl p-5 border border-white/5 flex flex-col gap-4 shadow-sm">
-            <div className="flex items-center gap-2 text-amber-500 font-black border-b border-white/10 pb-2 uppercase text-sm tracking-tight">
-              <FiUsers /> By User
-            </div>
-            <MultiSelect
-              label="Select Users"
-              options={usersList.map((u) => u.name)}
-              selectedValues={tempSelectedUsers}
-              onChange={setTempSelectedUsers}
-            />
-            <button
-              onClick={handleFetchUsers}
-              disabled={isLoading}
-              className="mt-2 w-full h-[40px] bg-amber-600 hover:bg-amber-500 text-zinc-900 rounded-lg flex items-center justify-center gap-2 transition-all font-black text-sm shadow-md shadow-amber-500/20 uppercase tracking-wider active:scale-95"
-            >
-              {isLoading ? (
-                <div className="w-4 h-4 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />
-              ) : (
-                "Fetch User Data"
-              )}
-            </button>
-          </div>
         </div>
       </div>
 

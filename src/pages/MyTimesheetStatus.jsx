@@ -116,7 +116,7 @@ export default function MyTimesheetStatus() {
 
       {/* Filters */}
       <div className="flex justify-end">
-        <div className="flex flex-wrap items-center gap-1.5 p-1 bg-zinc-900 rounded-2xl border border-white/5">
+        <div className="flex flex-wrap items-center md:gap-1.5 gap-0.5 p-1 bg-zinc-900 rounded-2xl border border-white/5">
           {[
             { id: 'all', label: 'All', icon: IoFilterOutline },
             { id: 'pending', label: 'Pending', icon: IoTime },
@@ -129,7 +129,7 @@ export default function MyTimesheetStatus() {
                 setActiveFilter(filter.id);
                 setCurrentPage(1);
               }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
+              className={`flex items-center md:gap-2 gap-0.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
                 activeFilter === filter.id
                   ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
