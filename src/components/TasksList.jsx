@@ -42,146 +42,83 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
       {/* Controls Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white">Tasks Overview</h2>
-          <p className="text-sm text-slate-400 mt-1">
-            {filteredTasks.length} tasks
+          <h2 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+            Tasks Repository
+          </h2>
+          <p className="text-[10px] text-gray-500 mt-1 font-black uppercase tracking-widest italic leading-none">
+            Manage and track all unit objectives
           </p>
         </div>
 
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full lg:w-auto">
           {headerAction}
           <div className="relative w-full sm:w-64">
-            <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+            <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
             <input 
               type="text"
               placeholder="Search tasks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="ui-input pl-10 py-2 h-10 w-full"
+              className="ui-input pl-10 py-2 h-10 w-full bg-zinc-900 border-white/10 text-white placeholder-gray-500 focus:border-amber-500"
             />
           </div>
         </div>
       </div>
 
-      {/* Table */}
-      <div className="ui-card overflow-hidden">
+      {/* Minimalist Grid */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {currentTasks.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={smoothTransition}
-            className="text-center py-16"
+            className="col-span-full text-center py-20 bg-zinc-900/50 rounded-3xl border border-dashed border-white/10"
           >
-            <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/10">
-              <IoLayersOutline size={32} className="text-slate-500" />
-            </div>
-            <h3 className="text-lg font-bold text-white mb-2">No tasks found</h3>
-            <p className="text-slate-400 text-sm mb-6">Try adjusting your search or filter</p>
-            <button 
-              onClick={() => {setSearchQuery('');}}
-              className="text-sm font-semibold text-indigo-400 hover:text-indigo-300 underline"
-            >
-              Clear search
-            </button>
+            <IoLayersOutline size={40} className="text-gray-600 mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-white">No tasks found</h3>
+            <p className="text-gray-500 text-sm">Try adjusting your search query</p>
           </motion.div>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-white/[0.02] border-b border-white/5">
-                <tr>
-                  <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
-                    Task ID
-                  </th>
-                  <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
-                    Task Name
-                  </th>
-                  {/* <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
-                    Department
-                  </th> */}
-                  <th className="text-left py-4 px-6 text-xs font-bold text-slate-500 uppercase tracking-widest">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-white/5">
-                {currentTasks.map((task, index) => (
-                  <motion.tr
-                    key={task.task_id}
-                    initial={{ opacity: 0, y: 5 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ ...smoothTransition, delay: index * 0.02 }}
-                    className="group hover:bg-white/[0.02] transition-colors"
-                  >
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-2">
-                        <IoDocumentText className="text-slate-600 group-hover:text-indigo-400 transition-colors" size={16} />
-                        <span className="font-mono text-sm text-slate-400 group-hover:text-white transition-colors">
-                          {task.task_id}
-                        </span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-6">
-                      <div 
-                        className="text-sm font-medium text-slate-300 group-hover:text-white transition-colors cursor-pointer"
-                        onClick={() => toggleRow(task.task_id)}
-                      >
-                        {task.task_name}
-                        {/* <AnimatePresence>
-                          {expandedRow === task.task_id && (
-                            <motion.div 
-                              initial={{ opacity: 0, height: 0, marginTop: 0 }}
-                              animate={{ opacity: 1, height: "auto", marginTop: 8 }}
-                              exit={{ opacity: 0, height: 0, marginTop: 0 }}
-                              transition={smoothTransition}
-                              className="overflow-hidden"
-                            >
-                              <div className="text-xs text-slate-400 bg-white/5 p-3 rounded-lg border border-white/5">
-                                <div className="flex items-center gap-2 mb-1">
-                                  <IoPerson size={12} className="text-slate-500" />
-                                  <span className="font-semibold text-slate-300">Task ID:</span> {task.task_id}
-                                </div>
-                                <div className="flex items-center gap-2">
-                                  <span className="font-semibold text-slate-300">Department:</span> {task.task_dept || 'Not assigned'}
-                                </div>
-                              </div>
-                            </motion.div>
-                          )}
-                        </AnimatePresence> */}
-                      </div>
-                    </td>
-                    {/* <td className="py-4 px-6">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium border ${deptColors[task.task_dept] || deptColors.default}`}>
-                        {task.task_dept || 'Unassigned'}
-                      </span>
-                    </td> */}
-                    <td className="py-4 px-6">
-                      <div className="flex items-center gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
-                        {/* <button
-                          onClick={() => toggleRow(task.task_id)}
-                          className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-lg transition-colors"
-                        >
-                          <IoEllipsisVertical size={16} />
-                        </button> */}
-                        <button
-                          onClick={() => setTaskToDelete(task)}
-                          className="p-2 text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
-                        >
-                          <IoTrash size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </motion.tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+          currentTasks.map((task, index) => (
+            <motion.div
+              key={task.task_id}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className="group bg-zinc-900 p-4 rounded-xl border border-white/5 hover:border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/5 transition-all flex flex-col gap-3 relative"
+            >
+              <div className="flex items-start justify-between">
+                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-zinc-900 transition-all shrink-0">
+                  <IoDocumentText size={16} />
+                </div>
+                <button
+                  onClick={() => setTaskToDelete(task)}
+                  className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                  title="Delete Task"
+                >
+                  <IoTrash size={14} />
+                </button>
+              </div>
+
+              <div className="space-y-1">
+                <h4 className="font-bold text-gray-200 text-sm line-clamp-2 group-hover:text-amber-500 transition-colors leading-tight">
+                  {task.task_name}
+                </h4>
+                <div className="mt-2">
+                  <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest bg-white/5 px-1.5 py-0.5 rounded border border-white/10 italic">
+                    #{task.task_id}
+                  </span>
+                </div>
+              </div>
+            </motion.div>
+          ))
         )}
+      </div>
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 border-t border-white/5">
-            <div className="text-sm text-slate-500">
-              Showing <span className="text-white font-medium">{(currentPage - 1) * tasksPerPage + 1}</span> to <span className="text-white font-medium">{Math.min(currentPage * tasksPerPage, filteredTasks.length)}</span> of <span className="text-white font-medium">{filteredTasks.length}</span> tasks
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 border-t border-gray-100 bg-gray-50/50">
+            <div className="text-sm text-gray-500 font-medium italic">
+              Showing <span className="text-gray-900 font-black">{(currentPage - 1) * tasksPerPage + 1}</span> to <span className="text-gray-900 font-black">{Math.min(currentPage * tasksPerPage, filteredTasks.length)}</span> of <span className="text-gray-900 font-black">{filteredTasks.length}</span> tasks
             </div>
             
             <div className="flex items-center gap-2">
@@ -211,10 +148,10 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
                         key={i}
                         onClick={() => setCurrentPage(i)}
                         whileTap={{ scale: 0.95 }}
-                        className={`w-8 h-8 text-sm font-medium rounded-lg transition-colors ${
+                        className={`w-8 h-8 text-sm font-black rounded-lg transition-all ${
                           currentPage === i 
-                            ? 'bg-indigo-600 text-white shadow-lg shadow-indigo-500/25' 
-                            : 'text-slate-400 hover:bg-white/5 hover:text-white'
+                            ? 'bg-[#161efd] text-white shadow-lg shadow-blue-500/20' 
+                            : 'text-gray-500 hover:bg-gray-100'
                         }`}
                       >
                         {i}
@@ -236,7 +173,6 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
             </div>
           </div>
         )}
-      </div>
 
       {/* Delete Modal */}
       <AnimatePresence>
@@ -254,26 +190,26 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
               animate={{ scale: 1, opacity: 1 }} 
               exit={{ scale: 0.95, opacity: 0 }} 
               transition={smoothTransition}
-              className="relative w-full max-w-sm ui-card p-6 border border-white/10 shadow-2xl"
+              className="relative w-full max-w-sm ui-modal p-6 shadow-2xl"
             >
               <div className="text-center">
-                <div className="w-14 h-14 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
+                <div className="w-14 h-14 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-100">
                   <IoTrash size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-white mb-2">Delete Task</h3>
-                <p className="text-sm text-slate-400 mb-6 leading-relaxed">
-                  Are you sure you want to delete <span className="text-white font-semibold">{taskToDelete.task_name}</span>? This action cannot be undone.
+                <h3 className="text-xl font-black text-gray-900 mb-2">Delete Task</h3>
+                <p className="text-sm text-gray-500 mb-6 leading-relaxed font-medium">
+                  Are you sure you want to delete <span className="text-gray-900 font-black">{taskToDelete.task_name}</span>? This action cannot be undone.
                 </p>
                 <div className="flex gap-3">
                   <button 
                     onClick={() => setTaskToDelete(null)} 
-                    className="flex-1 py-2.5 text-sm font-bold text-slate-300 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                    className="flex-1 py-2.5 text-sm font-black text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all uppercase tracking-wider"
                   >
                     Cancel
                   </button>
                   <button 
                     onClick={() => { onDeleteTask(taskToDelete.task_id); setTaskToDelete(null); }} 
-                    className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-bold hover:bg-red-500 shadow-lg shadow-red-900/20 transition-all"
+                    className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-black hover:bg-red-700 shadow-lg shadow-red-500/20 transition-all uppercase tracking-wider"
                   >
                     Delete
                   </button>

@@ -113,38 +113,29 @@ export default function AddTimeModal({
       isOpen={isOpen} 
       onClose={onClose} 
       title={
-        <div className="flex items-center justify-between w-full pr-8"> 
-          <div className="flex items-center gap-4">
-            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider hidden sm:block">
-              {isEditMode ? "Manage" : "New"}
-            </span>
-            
-            <div className="h-4 w-[1px] bg-white/10 hidden sm:block"></div>
-
-            <div className="flex items-center gap-3">
-              <span className="text-lg font-black bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent tracking-tight">
-                {isEditMode ? "Edit Time" : "Add Time"}
-              </span>
-              <span className="text-[10px] font-mono bg-white/10 text-slate-300 px-2 py-0.5 rounded border border-white/5">
-                {dateStr}
-              </span>
+        <div className="flex items-center justify-between w-full h-12 transition-all"> 
+          <div className="flex flex-col">
+            <h2 className="text-xl font-black text-gray-900 tracking-tight leading-none uppercase">
+              {isEditMode ? "Edit Entry" : "Track Time"}
+            </h2>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{isEditMode ? "Modify existing" : "Record new activity"}</span>
+              <span className="w-1 h-1 rounded-full bg-gray-300"></span>
+              <span className="text-[10px] font-mono font-bold text-[#161efd]">{dateStr}</span>
             </div>
           </div>
     
-          <div className="flex items-center">
-            <button
-              onClick={validateAndSubmit}
-              disabled={isSubmitting}
-              className="flex items-center ml-5 gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold rounded-lg shadow-lg shadow-indigo-500/20 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? (
-                 <div className="w-3 h-3 border-2 border-white/50 border-t-white rounded-full animate-spin" />
-              ) : (
-                <IoCheckmarkCircle size={16} />
-              )}
-              {isEditMode ? "Update" : "Save"}
-            </button>
-          </div>
+          <button
+            onClick={validateAndSubmit}
+            disabled={isSubmitting}
+            className="ui-btn ui-btn-primary h-10 px-6 text-xs font-black shadow-none hover:shadow-lg hover:shadow-blue-500/10"
+          >
+            {isSubmitting ? (
+               <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+            ) : (
+              isEditMode ? "Update" : "Save Entry"
+            )}
+          </button>
         </div>
       }
       shellClassName="z-[9999]"
@@ -163,9 +154,9 @@ export default function AddTimeModal({
               onChange={(e) => setSearch(p => ({ ...p, project: e.target.value }))} 
             />
             {dropdowns.project && (
-              <div className="absolute top-full left-0 w-full mt-1 bg-[#1e293b] border border-slate-700 rounded-xl shadow-xl max-h-40 overflow-y-auto z-50">
+              <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-xl max-h-40 overflow-y-auto z-50">
                 {fProjects.map(p => (
-                  <div key={p.id} className="p-2.5 hover:bg-slate-800 text-slate-300 text-xs font-bold cursor-pointer" 
+                  <div key={p.id} className="p-2.5 hover:bg-blue-50 text-gray-700 text-xs font-bold cursor-pointer" 
                     onClick={() => {
                       // Auto-set client and country (region) from project
                       setFormData(prev => ({ 
@@ -195,7 +186,7 @@ export default function AddTimeModal({
             {/* <div className="flex justify-between items-center mb-1">
               <label className="ui-label">Task <span className="text-rose-500">*</span></label>
               <select 
-                className="text-[9px] font-black bg-slate-800 text-slate-300 rounded px-1 h-6 outline-none border border-slate-700 focus:border-indigo-500" 
+                className="text-[9px] font-black bg-gray-800 text-slate-300 rounded px-1 h-6 outline-none border border-slate-700 focus:border-indigo-500" 
                 value={selectedDept} 
                 onChange={(e) => setSelectedDept(e.target.value)}
               >
@@ -211,73 +202,72 @@ export default function AddTimeModal({
                 onFocus={() => setDropdowns(p => ({ ...p, task: true }))} 
                 onChange={(e) => setSearch(p => ({ ...p, task: e.target.value }))} 
               />
-              <IoFolder className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <IoFolder className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
             </div>
             {dropdowns.task && (
-              <div className="absolute top-full left-0 w-full mt-1 bg-[#1e293b] border border-slate-700 rounded-xl shadow-xl max-h-48 overflow-y-auto z-50">
+              <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-100 rounded-xl shadow-xl max-h-48 overflow-y-auto z-50">
                 {fTasks.map(t => (
-                  <div key={t.task_id} className="p-3 hover:bg-slate-800 text-slate-300 cursor-pointer border-b border-slate-700 last:border-0 text-xs font-bold" onClick={() => handleSelect('task', t.task_name)}>
+                  <div key={t.task_id} className="p-3 hover:bg-blue-50 text-gray-700 cursor-pointer border-b border-gray-50 last:border-0 text-xs font-bold" onClick={() => handleSelect('task', t.task_name)}>
                     {t.task_name}
                   </div>
                 ))}
-                {fTasks.length === 0 && <div className="p-3 text-slate-500 text-xs italic">No tasks found</div>}
+                {fTasks.length === 0 && <div className="p-3 text-gray-400 text-xs italic">No tasks found</div>}
               </div>
             )}
           </div>
 
           {/* AUTO INFO DISPLAY (Client & Region) */}
-          <div className="grid grid-cols-2 gap-3 items-center">
-             <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block mb-1">Client</span>
-                <div className="text-xs font-bold text-slate-300 truncate">
-                  {formData.client || <span className="text-slate-600 italic">Auto-selected</span>}
+          <div className="flex items-center gap-6 py-1 px-1">
+             <div className="flex-1">
+                <span className="text-[10px] text-gray-400 uppercase font-black tracking-widest block mb-0.5">Client</span>
+                <div className="text-sm font-bold text-gray-900 truncate">
+                  {formData.client || <span className="text-gray-300 italic">Not set</span>}
                 </div>
              </div>
-             <div className="p-3 bg-slate-900/50 border border-slate-800 rounded-xl">
-                <span className="text-[10px] text-slate-500 uppercase font-bold block mb-1">Region</span>
-                 <div className="flex items-center gap-1.5 text-xs font-bold text-slate-300">
-                    <IoLocation className="text-indigo-500" size={12}/>
-                    {formData.country || <span className="text-slate-600 italic">Auto-selected</span>}
+             <div className="h-8 w-[1px] bg-gray-100"></div>
+             <div className="flex-1">
+                <span className="text-[10px] text-gray-400 uppercase font-black tracking-widest block mb-0.5">Region</span>
+                 <div className="flex items-center gap-1.5 text-sm font-bold text-gray-900">
+                    <IoLocation className="text-[#161efd]/50" size={14}/>
+                    {formData.country || <span className="text-gray-300 italic">Not set</span>}
                  </div>
              </div>
           </div>
 
           {/* DURATION */}
           <div className="flex flex-col">
-            <label className="ui-label mb-1 tracking-tight">
-              Duration <span className="text-rose-500">*</span>
-            </label>
-            <div className="flex items-center gap-1 bg-slate-900 px-2 rounded-xl h-[42px] border border-slate-700">
-              <div className="flex-1 flex flex-col items-center justify-center">
+            <label className="ui-label mb-2 tracking-tight">Time Duration <span className="text-rose-500">*</span></label>
+            <div className="flex items-center gap-4 bg-gray-50/50 p-2 rounded-2xl border border-gray-100 w-fit">
+              <div className="flex items-center gap-2">
                 <input 
                   type="text" 
                   inputMode="numeric" 
-                  className="w-full bg-transparent text-center text-white text-lg font-black outline-none focus:text-indigo-400 leading-none h-6" 
+                  className="w-12 h-10 bg-white border border-gray-200 rounded-xl text-center text-gray-900 text-lg font-black outline-none focus:border-[#161efd] focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" 
                   placeholder="0" 
                   value={formData.hours} 
                   onChange={(e) => handleTimeChange('hours', e.target.value)} 
                 />
-                <p className="text-[7px] text-slate-500 font-bold uppercase leading-none mt-0.5">Hrs</p>
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Hrs</span>
               </div>
               
-              <span className="text-slate-600 font-bold self-center pb-2">:</span>
+              <span className="text-gray-300 font-black text-xl">:</span>
               
-              <div className="flex-1 flex flex-col items-center justify-center">
+              <div className="flex items-center gap-2">
                 <input 
                   type="text" 
                   inputMode="numeric" 
-                  className="w-full bg-transparent text-center text-white text-lg font-black outline-none focus:text-indigo-400 leading-none h-6" 
+                  className="w-12 h-10 bg-white border border-gray-200 rounded-xl text-center text-gray-900 text-lg font-black outline-none focus:border-[#161efd] focus:ring-4 focus:ring-blue-500/5 transition-all shadow-sm" 
                   placeholder="00" 
                   value={formData.minutes} 
                   onChange={(e) => handleTimeChange('minutes', e.target.value)} 
                 />
-                <p className="text-[7px] text-slate-500 font-bold uppercase leading-none mt-0.5">Min</p>
+                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Min</span>
               </div>
             </div>
           </div>
 
           <textarea 
-            className="w-full p-3 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 transition-all resize-none text-slate-300" 
+            className="w-full p-3 bg-gray-50 border border-gray-100 rounded-xl text-xs font-bold outline-none focus:border-[#161efd] focus:bg-white transition-all resize-none text-gray-700" 
             rows="2" 
             placeholder="Remarks (Optional)..." 
             value={formData.remarks} 

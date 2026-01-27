@@ -13,6 +13,8 @@ import NotFound from './pages/NotFound';
 import ProtectedRoutes from "./security/ProtectedRoutes";
 import PublicRoute from "./security/PublicRoute";
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastContainer, Zoom } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 import { Outlet } from 'react-router-dom';
 import Layout from './components/Layout';
@@ -59,6 +61,19 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppContent />
+        <ToastContainer 
+          position="top-right"
+          autoClose={3000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+          transition={Zoom}
+        />
       </AuthProvider>
     </BrowserRouter>
   );

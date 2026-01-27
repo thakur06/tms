@@ -11,6 +11,7 @@ import { useTheme } from '../context/ThemeContext';
 import CreateUserModal from './CreateUserModal';
 import { toast } from 'react-toastify';
 import LogoutConfirmationModal from './LogoutConfirmationModal';
+import UserAvatar from './UserAvatar';
 
 export default function Header({ onMenuClick }) {
    const server=import.meta.env.VITE_SERVER_ADDRESS;
@@ -136,28 +137,29 @@ export default function Header({ onMenuClick }) {
 
   return (
     <>
-      <header className="sticky top-0 z-30 h-20 px-6 sm:px-8 flex items-center justify-between border-b transition-colors duration-300
-        border-slate-600 backdrop-blur-md
-        bg-[#030712]/80 ">
+      <header className="sticky top-0 z-30 h-20 px-6 sm:px-8 flex items-center justify-between border-b transition-all duration-300 border-white/5 backdrop-blur-xl bg-zinc-950/80 shadow-sm">
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuClick}
             className="lg:hidden p-2 -ml-2 rounded-lg transition-colors 
-              text-slate-500 hover:bg-slate-100 hover:text-slate-900
-              dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
+              text-gray-400 hover:bg-white/5 hover:text-white"
           >
             <IoMenu className="w-6 h-6" />
           </button>
           
           <div>
-            <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white transition-colors">{getPageTitle()}</h2>
-            <p className="text-xs text-slate-500 dark:text-slate-400 hidden sm:block">Welcome back, {user?.name?.split(' ')[0]}</p>
+            <nav className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">
+              <span>Overview</span>
+              <span className="opacity-20">/</span>
+              <span className="text-amber-500">{getPageTitle()}</span>
+            </nav>
+            <h2 className="text-xl font-black tracking-tight text-white transition-colors uppercase leading-none">{getPageTitle()}</h2>
           </div>
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
           {/* Search - hidden on small mobile */}
-          <div className="hidden md:flex relative group">
+          {/* <div className="hidden md:flex relative group">
             <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 transition-colors
               text-slate-400 group-focus-within:text-indigo-600
               dark:text-slate-500 dark:group-focus-within:text-indigo-400" />
@@ -171,10 +173,10 @@ export default function Header({ onMenuClick }) {
                 bg-slate-100 border-transparent text-slate-900 placeholder:text-slate-500 focus:bg-white focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20
                 dark:bg-white/5 dark:border-white/5 dark:text-slate-200 dark:focus:bg-white/10 dark:focus:border-indigo-500/50 dark:focus:ring-0"
             />
-          </div>
+          </div> */}
 
           {/* Theme Toggle */}
-          <button 
+          {/* <button 
             onClick={toggleTheme}
             className="p-2.5 rounded-full transition-colors
               text-slate-500 hover:bg-slate-100 hover:text-indigo-600
@@ -182,19 +184,16 @@ export default function Header({ onMenuClick }) {
             title={`Theme: ${theme.charAt(0).toUpperCase() + theme.slice(1)}`}
           >
             {getThemeIcon()}
-          </button>
+          </button> */}
 
           {/* Notifications */}
           <div className="relative">
             <button 
               onClick={() => setNotifOpen(!notifOpen)}
-              className="relative p-2.5 rounded-full transition-colors
-              text-slate-500 hover:bg-slate-100 hover:text-indigo-600
-              dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white">
+              className="relative p-2.5 rounded-xl transition-all duration-200 text-gray-500 hover:bg-blue-50 hover:text-[#161efd] border border-transparent hover:border-blue-100">
               <IoNotificationsOutline className="w-5 h-5" />
               {notifications.some(n => n.type === 'warning') && (
-                <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full box-content border-2 
-                  border-white dark:border-[#030712]" />
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full box-content border-2 border-white" />
               )}
             </button>
             <AnimatePresence>
@@ -206,27 +205,26 @@ export default function Header({ onMenuClick }) {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     className="absolute right-0 sm:right-0 top-full mt-2 w-80 max-sm:fixed max-sm:inset-x-4 max-sm:mx-auto max-sm:top-20 max-sm:w-auto rounded-2xl shadow-xl z-20 border overflow-hidden
-                      bg-white border-slate-200 shadow-slate-200/50
-                      dark:bg-[#1e293b] dark:border-white/10 dark:shadow-black/50"
+                      bg-zinc-900 border-white/10 shadow-black/50"
                   >
-                    <div className="px-4 py-3 border-b border-slate-100 dark:border-white/5 bg-slate-50/50 dark:bg-white/5 flex justify-between items-center">
-                      <span className="font-semibold text-sm text-slate-900 dark:text-white">Notifications</span>
-                      <span className="text-[10px] bg-indigo-100 text-indigo-600 dark:bg-indigo-500/20 dark:text-indigo-400 px-2 py-0.5 rounded-full">{notifications.length} New</span>
+                    <div className="px-4 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center">
+                      <span className="font-semibold text-sm text-white">Notifications</span>
+                      <span className="text-[10px] bg-indigo-100 text-indigo-600 px-2 py-0.5 rounded-full">{notifications.length} New</span>
                     </div>
                     <div className="max-h-[300px] overflow-y-auto">
                       {notifications.length === 0 ? (
-                        <div className="p-8 text-center text-slate-500 dark:text-slate-400 text-sm">No new notifications</div>
+                        <div className="p-8 text-center text-gray-500 text-sm">No new notifications</div>
                       ) : (
                         notifications.map(n => (
-                          <div key={n.id} className="p-4 border-b border-slate-100 dark:border-white/5 hover:bg-slate-50 dark:hover:bg-white/2 transition-colors">
+                          <div key={n.id} className="p-4 border-b border-white/5 hover:bg-white/5 transition-colors">
                             <div className="flex gap-3">
                               <div className={`mt-0.5 shrink-0 ${n.type === 'warning' ? 'text-red-500' : 'text-emerald-500'}`}>
                                 {n.type === 'warning' ? <IoWarningOutline size={18} /> : <IoCheckmarkCircleOutline size={18} />}
                               </div>
                               <div>
-                                <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-200 line-clamp-1">{n.title}</h4>
-                                <p className="text-xs text-slate-600 dark:text-slate-400 mt-1">{n.message}</p>
-                                <p className="text-[10px] text-slate-400 dark:text-slate-500 mt-2">{n.time}</p>
+                                <h4 className="text-sm font-semibold text-gray-200 line-clamp-1">{n.title}</h4>
+                                <p className="text-xs text-gray-400 mt-1">{n.message}</p>
+                                <p className="text-[10px] text-gray-600 mt-2">{n.time}</p>
                               </div>
                             </div>
                           </div>
@@ -243,17 +241,16 @@ export default function Header({ onMenuClick }) {
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center gap-3 pl-2 pr-1 py-1.5 rounded-full transition-colors border border-transparent 
-                hover:bg-slate-100 hover:border-slate-200
-                dark:hover:bg-white/5 dark:hover:border-white/5"
+              className="flex items-center gap-3 pl-2 pr-2 py-1.5 rounded-xl transition-all duration-200 border border-white/5 hover:bg-white/5 hover:border-white/10 shadow-sm"
             >
-              <div className="h-8 w-8 rounded-full bg-linear-to-tr from-indigo-500 to-purple-500 grid place-items-center text-white font-bold text-xs ring-2 
-                ring-white dark:ring-[#030712]">
-                {initials}
-              </div>
-              <span className="hidden md:block text-sm font-medium text-slate-700 dark:text-slate-200">{user?.name}</span>
-              <IoChevronDown className={`w-4 h-4 transition-transform ${userMenuOpen ? 'rotate-180' : ''} 
-                text-slate-400 dark:text-slate-500`} />
+              <UserAvatar 
+                name={user?.name} 
+                email={user?.email} 
+                size="sm" 
+                className="rounded-lg shadow-md border border-white/5" 
+              />
+              <span className="hidden md:block text-sm font-bold text-gray-200">{user?.name}</span>
+              <IoChevronDown className={`w-4 h-4 transition-transform duration-300 ${userMenuOpen ? 'rotate-180' : ''} text-gray-500`} />
             </button>
 
             <AnimatePresence>
@@ -269,20 +266,18 @@ export default function Header({ onMenuClick }) {
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                     className="absolute right-0 top-full mt-2 w-56 p-2 rounded-2xl shadow-xl z-20 border
-                      bg-white border-slate-200 shadow-slate-200/50
-                      dark:bg-[#1e293b] dark:border-white/10 dark:shadow-black/50"
+                      bg-zinc-900 border-white/10 shadow-black/50"
                   >
-                    <div className="px-3 py-2 border-b mb-1 border-slate-100 dark:border-white/5">
-                      <p className="text-sm font-semibold text-slate-900 dark:text-white">{user?.name}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400 text-truncate">{user?.email}</p>
+                    <div className="px-3 py-2 border-b mb-1 border-white/5">
+                      <p className="text-sm font-semibold text-white">{user?.name}</p>
+                      <p className="text-xs text-gray-500 text-truncate">{user?.email}</p>
                     </div>
 
                     {user?.is_manager && (
                       <button
                         onClick={() => { setUserMenuOpen(false); setShowCreateUserModal(true); }}
                         className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors
-                          text-slate-600 hover:bg-slate-100
-                          dark:text-slate-300 dark:hover:bg-white/5"
+                          text-gray-400 hover:bg-white/5 hover:text-white"
                       >
                         <IoPersonAddOutline className="w-4 h-4" />
                         Add New User
@@ -292,8 +287,7 @@ export default function Header({ onMenuClick }) {
                     <button
                       onClick={() => { setUserMenuOpen(false); setShowLogoutConfirm(true); }}
                       className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors
-                        text-red-600 hover:bg-red-50
-                        dark:text-red-400 dark:hover:bg-red-500/10"
+                        text-red-500 hover:bg-red-500/10"
                     >
                       <IoLogOutOutline className="w-4 h-4" />
                       Sign Out

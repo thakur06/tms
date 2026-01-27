@@ -57,20 +57,18 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {/* Sidebar */}
       <aside 
-        className={`fixed top-0 left-0 h-full w-64 bg-[#020617]/90 backdrop-blur-2xl border-r border-white/5 z-50 transition-transform duration-300 transform lg:translate-x-0 ${
+        className={`fixed top-0 left-0 h-full w-64 bg-zinc-950 border-r border-white/5 z-50 transition-transform duration-300 transform lg:translate-x-0 ${
           isOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo Area */}
-          <div className="h-20 flex items-center gap-3 px-6 border-b border-white/5 bg-gradient-to-r from-indigo-500/5 to-purple-500/5">
-            <div className="relative flex items-center justify-center rounded-xl">
-              <img src="/logo.png" alt="logo" className="h-28 w-40 object-contain drop-shadow-[0_0_10px_rgba(99,102,241,0.3)]" />
-            </div>
+          <div className="h-24 flex items-center justify-center border-b border-white/5 bg-black/20">
+            <img src="/logo.png" alt="logo" className="h-16 object-contain brightness-0 invert" />
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto custom-scrollbar">
+          <nav className="flex-1 px-4 py-6 space-y-1 overflow-y-auto">
             {visibleLinks
               .map((link, index) => {
               const active = isActive(link.path);
@@ -86,26 +84,26 @@ export default function Sidebar({ isOpen, onClose }) {
                   <Link
                     to={link.path}
                     onClick={() => window.innerWidth < 1024 && onClose()}
-                    className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                    className={`relative flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-300 group ${
                       active 
-                        ? 'text-white bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 shadow-lg shadow-indigo-500/10' 
-                        : 'text-slate-400 hover:text-white hover:bg-white/5 hover:border hover:border-white/10'
+                        ? 'text-zinc-950 bg-amber-500 shadow-xl shadow-amber-500/20 font-black' 
+                        : 'text-zinc-400 hover:text-amber-500 hover:bg-white/5 font-bold'
                     }`}
                   >
                     {active && (
                       <motion.div 
                         layoutId="activeIndicator"
-                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-gradient-to-b from-indigo-500 to-purple-500 rounded-r-full shadow-[0_0_12px_rgba(99,102,241,0.5)]"
+                        className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-white rounded-r-full shadow-lg"
                         transition={{ type: 'spring', stiffness: 300, damping: 30 }}
                       />
                     )}
-                    <Icon className={`w-5 h-5 transition-all duration-200 ${active ? 'text-indigo-400 scale-110' : 'group-hover:text-indigo-400 group-hover:scale-110'}`} />
-                    <span className="font-medium text-sm tracking-wide">{link.label}</span>
+                    <Icon className={`w-5 h-5 transition-all duration-300 ${active ? 'text-white scale-110 drop-shadow-md' : 'group-hover:text-[#161efd] group-hover:scale-110'}`} />
+                    <span className="text-sm font-bold tracking-tight">{link.label}</span>
                     {active && (
                       <motion.div
                         initial={{ scale: 0 }}
                         animate={{ scale: 1 }}
-                        className="ml-auto w-1.5 h-1.5 rounded-full bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,0.8)]"
+                        className="ml-auto w-1.5 h-1.5 rounded-full bg-white shadow-sm"
                       />
                     )}
                   </Link>

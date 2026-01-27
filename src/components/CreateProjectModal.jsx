@@ -63,33 +63,33 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject, p
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-[#030712]/80 backdrop-blur-md">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       <motion.div 
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="ui-card w-full max-w-md p-0 overflow-hidden shadow-2xl shadow-indigo-500/10"
+        className="ui-card w-full max-w-md p-0 overflow-hidden shadow-2xl border-gray-100"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Section */}
-        <div className="relative px-8 pt-8 pb-6 border-b border-white/5 bg-white/[0.02]">
+        <div className="relative px-8 pt-8 pb-6 border-b border-gray-100 bg-gray-50/30">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/30 shadow-[0_0_15px_rgba(99,102,241,0.2)]">
-                <IoRocketOutline className="w-6 h-6 text-indigo-400" />
+              <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center border border-blue-100 shadow-sm">
+                <IoRocketOutline className="w-6 h-6 text-[#161efd]" />
               </div>
               <div>
-                <h2 className="text-2xl font-bold text-white tracking-tight">
+                <h2 className="text-2xl font-black text-gray-900 tracking-tight">
                   {projectToEdit ? 'Edit Project' : 'New Project'}
                 </h2>
-                <p className="text-sm font-medium text-slate-400">
+                <p className="text-sm font-bold text-gray-400">
                   {projectToEdit ? 'Update project details' : 'Expand your production portfolio'}
                 </p>
               </div>
             </div>
             <button
               onClick={handleClose}
-              className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-all active:scale-90"
+              className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all active:scale-90"
             >
               <IoClose size={24} />
             </button>

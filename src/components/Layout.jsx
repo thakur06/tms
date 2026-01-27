@@ -6,7 +6,7 @@ export default function Layout({ children }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (
-    <div className="ui-page selection:bg-primary-glow selection:text-white">
+    <div className="ui-page selection:bg-amber-500/20 selection:text-amber-500 bg-zinc-950 text-gray-200">
       {/* Sidebar Navigation */}
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 

@@ -14,7 +14,7 @@ import {
 import { formatDate, formatTime } from "../utils/formatters";
 import SubmitTimesheetModal from "./SubmitTimesheetModal";
 import AddTimeModal from "./AddTimeModal";
-import { ToastContainer, toast, Zoom } from "react-toastify";
+import { toast, Zoom } from "react-toastify";
 import { useAuth } from "../context/AuthContext";
 
 export default function WeeklyTimeLog({
@@ -180,6 +180,26 @@ export default function WeeklyTimeLog({
       // Calculate total hours for the week
       const totalMinutes = weeklyTotalMinutes;
       const totalHours = (totalMinutes / 60).toFixed(2);
+
+      // --- New Rule: 8 hours per day (Mon-Fri) ---
+      const weekdays = weekDays.slice(0, 5); // Assuming Monday is index 0 or handling Mon-Fri specifically
+      const workdayNames = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
+      
+      for (let i = 0; i < 5; i++) {
+        const day = weekDays[i]; 
+        const dayName = day.toLocaleDateString("en-US", { weekday: "long" });
+        const dateStr = formatDate(day);
+        const dayTotal = getTotalTimeForDate(dateStr); // returns minutes
+
+        if (dayTotal < 480) { // 8 hours * 60 minutes
+          toast.error(
+            `${dayName} logging is ${formatTime(dayTotal)}. At least 8 hours are required for submission.`,
+            { theme: "colored" }
+          );
+          return;
+        }
+      }
+
       if (totalMinutes < 2400) {
         toast.error(
           "Minimum 40 hours per week is required to submit timesheet.",
@@ -346,36 +366,45 @@ export default function WeeklyTimeLog({
       {/* --- HEADER SECTION --- */}
       <header className="flex flex-col xl:flex-row items-start xl:items-center justify-between gap-4">
         {/* Logged-in User Info */}
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-            <IoCalendar size={24} />
-          </div>
-          <div>
-            <h2 className="text-2xl font-bold text-white">Weekly Timesheet</h2>
-            <p className="text-slate-400 text-sm">
-              {user?.name ? `Tracking for ${user.name}` : "Not signed in"}
-            </p>
+        <div className="space-y-1">
+          <nav className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
+            <span>Workspace</span>
+            <span className="opacity-30">/</span>
+            <span className="text-amber-500/60">Timesheet</span>
+          </nav>
+          <div className="flex items-center gap-4">
+            <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-amber-500">
+              <IoCalendar size={28} />
+            </div>
+            <div>
+              <h1 className="text-2xl font-black text-white tracking-tight leading-none uppercase">
+                Weekly Timesheet
+              </h1>
+              <p className="text-gray-500 mt-1.5 text-xs font-bold italic">
+                {user?.name ? `Tracking for ${user.name}` : "Not signed in"}
+              </p>
+            </div>
           </div>
         </div>
 
         {/* Navigation & Controls */}
         <div className="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
-          <div className="flex items-center bg-white/5 p-1 rounded-xl border border-white/10 w-full sm:w-auto">
+          <div className="flex items-center bg-gray-100 p-1 rounded-xl border border-gray-200 w-full sm:w-auto">
             <button
               onClick={() => navigateWeek(-1)}
-              className="p-2.5 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white"
+              className="p-2.5 hover:bg-white rounded-lg transition-colors text-gray-600 hover:text-[#161efd]"
             >
               <IoChevronBack size={18} />
             </button>
             <button
               onClick={goToToday}
-              className="px-4 py-1.5 text-sm font-semibold text-slate-300 hover:bg-white/10 hover:text-white rounded-lg transition-colors whitespace-nowrap"
+              className="px-4 py-1.5 text-sm font-semibold text-gray-700 hover:bg-white hover:text-[#161efd] rounded-lg transition-colors whitespace-nowrap"
             >
               Today
             </button>
             <button
               onClick={() => navigateWeek(1)}
-              className="p-2.5 hover:bg-white/10 rounded-lg transition-colors text-slate-400 hover:text-white"
+              className="p-2.5 hover:bg-white rounded-lg transition-colors text-gray-600 hover:text-[#161efd]"
             >
               <IoChevronForward size={18} />
             </button>
@@ -383,29 +412,29 @@ export default function WeeklyTimeLog({
 
           <div className="flex flex-col sm:flex-row items-center gap-3 w-full sm:w-auto">
             <div
-              className={`flex items-center gap-3 px-5 py-2 rounded-xl border w-full sm:w-auto justify-between ${exceedsLimit ? "bg-red-500/10 border-red-500/20" : "bg-indigo-500/10 border-indigo-500/20"}`}
+              className={`flex items-center gap-3 px-5 py-2 rounded-xl border w-full sm:w-auto justify-between ${exceedsLimit ? "bg-red-500/10 border-red-500/20" : "bg-amber-500/10 border-amber-500/20"}`}
             >
               <div className="flex flex-col">
                 <span
-                  className={`text-[10px] uppercase tracking-wider font-bold ${exceedsLimit ? "text-red-400" : "text-indigo-400"}`}
+                  className={`text-[10px] uppercase tracking-wider font-bold ${exceedsLimit ? "text-red-500" : "text-amber-500"}`}
                 >
                   Weekly Total
                 </span>
                 <span
-                  className={`text-xl font-bold font-mono ${exceedsLimit ? "text-red-300" : "text-indigo-300"}`}
+                  className={`text-xl font-bold font-mono ${exceedsLimit ? "text-red-500" : "text-white"}`}
                 >
                   {formatTime(weeklyTotalMinutes)}
                 </span>
               </div>
               <IoTime
                 size={24}
-                className={exceedsLimit ? "text-red-400" : "text-indigo-400"}
+                className={exceedsLimit ? "text-red-500" : "text-amber-500"}
               />
             </div>
 
             <button
               onClick={() => setShowSubmitModal(true)}
-              className="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-900/20 transition-all flex items-center justify-center gap-2 active:scale-95"
+              className="w-full sm:w-auto px-6 py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-bold shadow-lg shadow-emerald-500/20 transition-all flex items-center justify-center gap-2 active:scale-95"
             >
               <IoCheckmarkCircle size={20} />
               <span>Submit</span>
@@ -425,6 +454,21 @@ export default function WeeklyTimeLog({
           const isWeekend =
             dayName.toUpperCase() === "SAT" || dayName.toUpperCase() === "SUN";
 
+          const dayColors = [
+            "from-amber-400 to-amber-600 text-amber-500 bg-zinc-900 border-white/5", // Mon
+            "from-yellow-400 to-yellow-600 text-yellow-500 bg-zinc-900 border-white/5", // Tue
+            "from-orange-400 to-orange-600 text-orange-500 bg-zinc-900 border-white/5", // Wed
+            "from-amber-500 to-yellow-500 text-amber-500 bg-zinc-900 border-white/5", // Thu
+            "from-orange-500 to-red-500 text-orange-500 bg-zinc-900 border-white/5", // Fri
+            "from-yellow-500 to-amber-500 text-yellow-500 bg-zinc-900 border-white/5", // Sat
+            "from-red-500 to-orange-500 text-red-500 bg-zinc-900 border-white/5" // Sun
+          ];
+
+          // Map 0-6 (Sun-Sat) to a Monday-start or rotating index. 
+          // getDay() returns 0 for Sun, 1 for Mon...
+          // We want Mon as index 0 for the Workday-first feel if needed, but simple wrap is fine.
+          const colorClass = dayColors[day.getDay()];
+
           return (
             <motion.div
               key={dateStr}
@@ -433,54 +477,72 @@ export default function WeeklyTimeLog({
               transition={{ delay: index * 0.05 }}
               className={`flex flex-col ui-card overflow-hidden h-full min-h-[300px] ${
                 isToday
-                  ? "border-indigo-500/50 shadow-[0_0_20px_rgba(99,102,241,0.15)] ring-1 ring-indigo-500/30"
+                  ? "border-amber-500/50 shadow-[0_0_20px_rgba(251,191,36,0.15)] ring-1 ring-amber-500/30"
                   : ""
               }`}
             >
               {/* Day Header */}
               <div
-                className={`p-4 border-b border-white/5 ${
+                className={`p-4 border-b border-white/5 relative overflow-hidden ${
                   isToday
-                    ? "bg-indigo-500/20"
-                    : isWeekend
-                      ? "bg-rose-500/10"
-                      : "bg-white/[0.02]"
+                    ? "bg-zinc-800/80"
+                    : "bg-zinc-900/50"
                 }`}
               >
+                {/* Visual Color Accent */}
+                <div className={`absolute top-0 left-0 right-0 h-1.5 bg-linear-to-r ${colorClass}`} />
+                <div className={`absolute top-0 right-0 w-24 h-24 rounded-full bg-linear-to-br -mr-12 -mt-12 opacity-30 ${colorClass}`} />
                 <div className="flex justify-between items-start">
                   <div>
                     <h4
-                      className={`text-2xl font-black leading-none mb-1 ${
+                      className={`text-2xl font-black leading-none mb-1 relative z-10 ${
                         isToday
-                          ? "text-white"
-                          : isWeekend
-                            ? "text-rose-400"
-                            : "text-slate-300"
+                          ? "text-amber-500"
+                          : colorClass.split(' ').find(c => c.startsWith('text-'))
                       }`}
                     >
                       {day.getDate()}
                     </h4>
                     <p
-                      className={`text-xs font-bold uppercase tracking-wider ${
+                      className={`text-[10px] font-black uppercase tracking-widest relative z-10 ${
                         isToday
-                          ? "text-indigo-300"
-                          : isWeekend
-                            ? "text-rose-400/70"
-                            : "text-slate-500"
+                          ? "text-amber-400"
+                          : colorClass.split(' ').find(c => c.startsWith('text-'))
                       }`}
                     >
                       {dayName}
                     </p>
                   </div>
                   <div className="text-right">
-                    <span className="text-[10px] font-bold text-slate-500 block uppercase tracking-wider">
+                    <span className="text-[10px] font-bold text-gray-500 block uppercase tracking-wider">
                       Total
                     </span>
                     <span
-                      className={`font-mono font-bold ${dayTotal > 0 ? "text-white" : "text-slate-600"}`}
+                      className={`font-mono font-bold block ${dayTotal > 0 ? "text-white" : "text-gray-500"}`}
                     >
                       {formatTime(dayTotal)}
                     </span>
+                    {dayTotal > 0 && !isWeekend && (
+                      <div
+                        className={`mt-1.5 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-tighter flex items-center justify-end gap-1 ${
+                          dayTotal >= 480
+                            ? "bg-emerald-100 text-emerald-700"
+                            : "bg-amber-100 text-amber-700"
+                        }`}
+                      >
+                        {dayTotal >= 480 ? (
+                          <>
+                            <IoCheckmarkCircle size={10} />
+                            Complete
+                          </>
+                        ) : (
+                          <>
+                            <IoTime size={10} />
+                            Log 8h
+                          </>
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -488,7 +550,7 @@ export default function WeeklyTimeLog({
               {/* Entries Body */}
               <div className="p-3 flex-1 space-y-2 overflow-y-auto hide-y-scroll md:max-h-[290px] max-h-[265px]">
                 {dayEntries.length === 0 ? (
-                  <div className="h-full flex flex-col items-center justify-center py-8 opacity-20 text-sm font-medium text-slate-400">
+                  <div className="h-full flex flex-col items-center justify-center py-8 opacity-30 text-sm font-medium text-gray-500">
                     <IoCalendar size={24} className="mb-2" />
                     <p>No entries</p>
                   </div>
@@ -496,10 +558,10 @@ export default function WeeklyTimeLog({
                   dayEntries.map((entry, entryIndex) => (
                     <div
                       key={entry.id || entryIndex}
-                      className="group relative p-3 bg-white/[0.03] border border-white/5 rounded-xl hover:bg-white/[0.06] hover:border-white/10 transition-all"
+                      className="group relative p-3 bg-zinc-800/50 border border-white/5 rounded-xl hover:bg-zinc-800 hover:border-amber-500/20 transition-all"
                     >
                       <div className="flex justify-between items-start mb-1.5">
-                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-white/10 text-slate-300 rounded border border-white/5 truncate max-w-[80px]">
+                        <span className="text-[10px] font-bold px-1.5 py-0.5 bg-amber-500/10 text-amber-500 rounded border border-amber-500/20 truncate max-w-[80px]">
                           {entry.project_code || "N/A"}
                         </span>
                         <div className="flex gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
@@ -509,7 +571,7 @@ export default function WeeklyTimeLog({
                               setSelectedDateForModal(dateStr);
                               setShowAddTimeModal(true);
                             }}
-                            className="p-1 text-slate-400 hover:text-indigo-400 rounded hover:bg-indigo-500/10 transition-colors"
+                            className="p-1 text-gray-500 hover:text-amber-500 rounded hover:bg-amber-500/10 transition-colors"
                           >
                             <IoLayersOutline size={12} />
                           </button>
@@ -517,37 +579,31 @@ export default function WeeklyTimeLog({
                       </div>
 
                       <h5
-                        className="text-xs font-bold text-slate-200 truncate mb-1"
+                        className="text-xs font-bold text-gray-200 truncate mb-1"
                         title={entry.taskName}
                       >
                         {entry.taskName}
                       </h5>
 
-                      <div className="flex items-center gap-3 text-[10px] font-medium text-slate-500 mb-2">
-                        <span className="flex items-center gap-1 text-indigo-300/80">
+                      <div className="flex items-center gap-3 text-[10px] font-medium text-gray-500 mb-2">
+                        <span className="flex items-center gap-1 text-amber-500">
                           <IoTime size={10} />
                           {entry.hours}h {entry.minutes}m
                         </span>
                         {entry.location && (
-                          <span className="flex items-center gap-1 text-emerald-300/80">
+                          <span className="flex items-center gap-1 text-emerald-500">
                             <IoLocationOutline size={10} />
                             {entry.location}
                           </span>
                         )}
                       </div>
 
-                      {/* {entry.remarks && (
-                        <p className="text-[10px] text-slate-400 italic border-l-2 border-white/10 pl-2 mb-2 line-clamp-1">
-                          "{entry.remarks}"
-                        </p>
-                      )} */}
-
                       <div className="flex justify-end gap-2 pt-2 border-t border-white/5 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         <button
                           onClick={() =>
                             deleteTimeEntry(dateStr, entry.id, entryIndex)
                           }
-                          className="text-[10px] text-red-400 hover:text-red-300 font-semibold"
+                          className="text-[10px] text-red-500 hover:text-red-400 font-semibold"
                         >
                           DELETE
                         </button>
@@ -558,10 +614,10 @@ export default function WeeklyTimeLog({
               </div>
 
               {/* Add Button Area */}
-              <div className="p-3 border-t border-white/5 bg-white/[0.02]">
+              <div className="p-3 border-t border-white/5 bg-zinc-900/50">
                 <button
                   onClick={() => handleOpenAddTimeModal(dateStr)}
-                  className="w-full py-2.5 flex items-center justify-center gap-2 text-xs font-bold text-slate-400 hover:text-indigo-300 border border-dashed border-slate-700/50 rounded-xl hover:border-indigo-500/50 hover:bg-indigo-500/5 transition-all"
+                  className="w-full py-2.5 flex items-center justify-center gap-2 text-xs font-bold text-gray-500 hover:text-amber-500 border border-dashed border-white/10 rounded-xl hover:border-amber-500 hover:bg-amber-500/10 transition-all"
                 >
                   <IoAdd size={14} />
                   Add Entry
@@ -597,14 +653,6 @@ export default function WeeklyTimeLog({
         />
       </div>
 
-      <ToastContainer
-        position="top-center"
-        transition={Zoom}
-        theme="dark"
-        autoClose={2000}
-        style={{ zIndex: 99999 }}
-        hideProgressBar={true}
-      />
     </div>
   );
 }

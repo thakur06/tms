@@ -1,7 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ToastContainer, toast, Zoom } from "react-toastify";
-
-import "react-toastify/dist/ReactToastify.css";
+import { toast, Zoom } from "react-toastify";
 import "react-datepicker/dist/react-datepicker.css";
 import DatePicker from "react-datepicker";
 import {
@@ -50,11 +48,11 @@ const formatDuration = (hours, minutes) => {
 
 const CustomInput = ({ value, onClick, placeholder, icon: Icon }) => (
   <button
-    className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-left text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent flex items-center gap-3"
+    className="w-full border border-gray-700 rounded-xl px-4 py-3 text-left text-gray-100 placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-yellow-500/20 focus:border-yellow-500 flex items-center gap-3 transition-all shadow-sm"
     onClick={onClick}
   >
-    {Icon && <Icon className="text-indigo-400" size={18} />}
-    <span className={value ? "text-white" : "text-slate-400"}>
+    {Icon && <Icon className="text-yellow-500" size={18} />}
+    <span className={value ? "text-gray-100 font-bold" : "text-gray-500"}>
       {value || placeholder}
     </span>
   </button>
@@ -88,23 +86,23 @@ const MultiSelect = ({
 
   return (
     <div className="space-y-2 multiselect-container">
-      <label className="text-sm font-medium text-slate-300 flex items-center gap-2">
-        {Icon && <Icon className="text-indigo-400" size={14} />}
+      <label className="text-[10px] font-black text-gray-400 flex items-center gap-2 uppercase tracking-widest">
+        {Icon && <Icon className="text-yellow-500" size={14} />}
         {label}
       </label>
       <div className="relative">
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className={`w-full flex items-center justify-between px-3 py-3 bg-white/5 border rounded-xl text-xs font-medium transition-all ${
+          className={`w-full flex items-center justify-between px-4 py-3 border rounded-xl text-xs font-bold transition-all ${
             isOpen
-              ? "border-indigo-500 bg-white/10 text-white"
-              : "border-white/10 text-slate-400"
+              ? "border-yellow-500 ring-4 ring-yellow-500/20"
+              : "border-gray-700 text-gray-100"
           }`}
         >
           <span
             className={
-              selectedValues.length > 0 ? "text-white" : "text-slate-500"
+              selectedValues.length > 0 ? "text-gray-100" : "text-gray-500"
             }
           >
             {selectedValues.length > 0
@@ -112,7 +110,7 @@ const MultiSelect = ({
               : `Select ${label}...`}
           </span>
           <IoChevronDown
-            className={`text-indigo-400 transition-transform ${isOpen ? "rotate-180" : ""}`}
+            className={`text-yellow-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
             size={14}
           />
         </button>
@@ -120,19 +118,19 @@ const MultiSelect = ({
         <AnimatePresence>
           {isOpen && (
             <motion.div
-              initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: "auto" }}
-              exit={{ opacity: 0, height: 0 }}
-              className="absolute top-full left-0 right-0 mt-2 bg-[#0f172a] border border-white/10 rounded-xl overflow-hidden z-50 shadow-xl"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 10 }}
+              className="absolute top-full left-0 right-0 mt-2 border border-gray-700 rounded-xl overflow-hidden z-50 shadow-2xl"
             >
-              <div className="p-2 border-b border-white/5">
+              <div className="p-2 border-b border-gray-700">
                 <div className="relative">
                   <IoSearchOutline
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                     size={12}
                   />
                   <input
-                    className="w-full pl-8 pr-3 py-1.5 bg-black/20 rounded-lg text-xs outline-none border border-transparent focus:border-indigo-500/50 text-white"
+                    className="w-full pl-8 pr-3 py-2 bg-gray-900 rounded-lg text-xs outline-none focus:focus:ring-2 focus:ring-yellow-500/20 transition-all font-bold text-gray-100"
                     placeholder={`Search ${label}...`}
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
@@ -150,21 +148,21 @@ const MultiSelect = ({
                         ? selectedValues.filter((s) => s !== opt)
                         : [...selectedValues, opt];
                       onChange(newSelected);
-                      setSearch(""); // Clear search after selection
+                      setSearch(""); 
                     }}
-                    className="w-full px-3 py-2 text-left text-xs text-slate-300 hover:bg-white/5 hover:text-white transition-all flex items-center justify-between rounded-lg"
+                    className="w-full px-3 py-2.5 text-left text-xs text-gray-300 hover:bg-yellow-500/10 hover:text-yellow-500 transition-all flex items-center justify-between rounded-lg font-bold"
                   >
                     {opt}
                     {selectedValues.includes(opt) && (
                       <IoCheckmarkCircle
-                        className="text-indigo-400"
+                        className="text-yellow-500"
                         size={14}
                       />
                     )}
                   </button>
                 ))}
                 {filtered.length === 0 && (
-                  <div className="p-2 text-xs text-slate-500 text-center">
+                  <div className="p-4 text-xs text-gray-500 text-center italic">
                     No matches found
                   </div>
                 )}
@@ -241,6 +239,19 @@ export const Analytics = () => {
     };
     fetchBasics();
   }, [server]);
+
+  // Handle Clear Filters
+  const handleClearFilters = () => {
+    setTempSelectedUsers([]);
+    setTempSelectedDepts([]);
+    setSelectedUsers([]);
+    setSelectedDepts([]);
+    setStartDate(new Date(new Date().setDate(new Date().getDate() - 30)));
+    setEndDate(new Date());
+    setReportData([]);
+    setPageTitle("Overall Analytics");
+    toast.info("Filters cleared");
+  };
 
   // Core Fetch Logic (Just gets the raw data based on Date)
   const fetchRawData = async () => {
@@ -319,7 +330,7 @@ export const Analytics = () => {
     }
 
     // 2. Aggregate Entries
-    const allEntries = filteredUsers.flatMap((u) => u.entries);
+    const allEntries = (filteredUsers || []).flatMap((u) => u.entries || []);
 
     // 3. Compute Metrics
     const totalMinutes = allEntries.reduce(
@@ -460,7 +471,7 @@ export const Analytics = () => {
       label: "Active Projects",
       value: analytics.activeProjectsCount,
       icon: IoFolderOutline,
-      color: "from-blue-500 to-cyan-500",
+      color: "from-gray-700 to-gray-900",
       type: "projects",
       data: analytics.entriesByCat.project,
       detail: "Unique projects worked on",
@@ -468,30 +479,81 @@ export const Analytics = () => {
     {
       label: "Tasks Worked",
       value: analytics.tasksCount,
-      icon: IoStatsChartOutline, // Placeholder, maybe Change
-      color: "from-amber-500 to-orange-500",
+      icon: IoStatsChartOutline,
+      color: "from-gray-800 to-gray-900",
       type: "tasks",
-      data: Object.values(analytics.entriesByCat).flat(), // All entries
+      data: Object.values(analytics.entriesByCat).flat(),
       detail: "Unique tasks logged",
     },
     {
       label: "Total Time",
       value: analytics.totalTimeStr,
       icon: IoTimeOutline,
-      color: "from-emerald-500 to-teal-500",
+      color: "from-amber-600 to-yellow-500",
       type: "time",
       data: Object.values(analytics.entriesByCat).flat(),
       detail: "Total hours logged",
     },
-    // {
-    //   label: "Utilization",
-    //   value: `${analytics.utilization}%`,
-    //   icon: IoStatsChartOutline,
-    //   color: "from-purple-500 to-pink-500",
-    //   type: "utilization",
-    //   data: [], // No specific data list
-    //   detail: "Based on 8h/day capacity",
-    // },
+    {
+      label: "Business Development",
+      value: formatDuration(
+        0,
+        analytics.entriesByCat.bd.reduce(
+          (s, e) => s + e.hours * 60 + e.minutes,
+          0,
+        ),
+      ),
+      icon: MdBusiness,
+      color: "from-yellow-600 to-amber-500",
+      type: "bd",
+      data: analytics.entriesByCat.bd,
+      detail: "Business Development",
+    },
+    {
+      label: "Meetings",
+      value: formatDuration(
+        0,
+        analytics.entriesByCat.meetings.reduce(
+          (s, e) => s + e.hours * 60 + e.minutes,
+          0,
+        ),
+      ),
+      icon: MdMeetingRoom,
+      color: "from-amber-700 to-amber-900",
+      type: "meetings",
+      data: analytics.entriesByCat.meetings,
+      detail: "Daily Meetings",
+    },
+    {
+      label: "Public Holiday",
+      value: formatDuration(
+        0,
+        analytics.entriesByCat.holidays.reduce(
+          (s, e) => s + e.hours * 60 + e.minutes,
+          0,
+        ),
+      ),
+      icon: IoGameController,
+      color: "from-yellow-700 to-yellow-900",
+      type: "holidays",
+      data: analytics.entriesByCat.holidays,
+      detail: "Holidays",
+    },
+    {
+      label: "Team Building",
+      value: formatDuration(
+        0,
+        analytics.entriesByCat.tb.reduce(
+          (s, e) => s + e.hours * 60 + e.minutes,
+          0,
+        ),
+      ),
+      icon: IoPeopleSharp,
+      color: "from-amber-800 to-yellow-700",
+      type: "teambuilding",
+      data: analytics.entriesByCat.tb,
+      detail: "Team Building",
+    },
     {
       label: "PTO",
       value: formatDuration(
@@ -502,7 +564,7 @@ export const Analytics = () => {
         ),
       ),
       icon: RiBeerFill,
-      color: "from-red-500 to-rose-500",
+      color: "from-yellow-800 to-amber-700",
       type: "pto",
       data: analytics.entriesByCat.pto,
       detail: "Time off logged",
@@ -517,7 +579,7 @@ export const Analytics = () => {
         ),
       ),
       icon: MdModelTraining,
-      color: "from-green-500 to-lime-500",
+      color: "from-gray-700 to-amber-800",
       type: "training",
       data: analytics.entriesByCat.training,
       detail: "Training sessions",
@@ -532,71 +594,11 @@ export const Analytics = () => {
         ),
       ),
       icon: GiBrain,
-      color: "from-indigo-500 to-violet-500",
+      color: "from-gray-800 to-yellow-800",
       type: "rd",
       data: analytics.entriesByCat.rd,
       detail: "Research & Development",
     },
-    {
-         label: "Buisness Development",
-         value: formatDuration(
-           0,
-           analytics.entriesByCat.bd.reduce(
-             (s, e) => s + e.hours * 60 + e.minutes,
-             0,
-           ),
-         ),
-         icon: MdBusiness,
-         color: "from-yellow-400 to-yellow-600",
-         type: "bd",
-         data: analytics.entriesByCat.bd,
-         detail: "Buisness Development",
-       },
-       {
-         label: "Meetings",
-         value: formatDuration(
-           0,
-           analytics.entriesByCat.meetings.reduce(
-             (s, e) => s + e.hours * 60 + e.minutes,
-             0,
-           ),
-         ),
-         icon: MdMeetingRoom,
-         color: "from-grey-400 to-yellow-600",
-         type: "meetings",
-         data: analytics.entriesByCat.meetings,
-         detail: "Meetings",
-       },
-       {
-         label: "Public Holiday",
-         value: formatDuration(
-           0,
-           analytics.entriesByCat.holidays.reduce(
-             (s, e) => s + e.hours * 60 + e.minutes,
-             0,
-           ),
-         ),
-         icon: IoGameController,
-         color: "from-blue-400 to-blue-600",
-         type: "BD",
-         data: analytics.entriesByCat.holidays,
-         detail: "publicholiday",
-       },
-       {
-         label: "Team Building",
-         value: formatDuration(
-           0,
-           analytics.entriesByCat.tb.reduce(
-             (s, e) => s + e.hours * 60 + e.minutes,
-             0,
-           ),
-         ),
-         icon: IoPeopleSharp,
-         color: "from-red-400 to-red-600",
-         type: "teambuilding",
-         data: analytics.entriesByCat.tb,
-         detail: "Team Building",
-       },
   ];
 
   const handleCardClick = (card) => {
@@ -666,31 +668,30 @@ export const Analytics = () => {
 
   const renderModalContent = () => {
     // Simple list rendering based on type
-    // Simple list rendering based on type
     if (
       ["projects", "pto", "training", "rd", "tasks"].includes(modalContent.type)
     ) {
       return (
-        <div className="space-y-3">
+        <div className="space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar pr-1">
           {modalContent.data.map((item, idx) => (
             <div
               key={idx}
-              className="flex justify-between items-center p-3 bg-slate-50 dark:bg-slate-800 rounded-lg"
+              className="flex justify-between items-center p-3 rounded-lg border "
             >
               <div>
-                <div className="font-bold text-slate-900 dark:text-white">
+                <div className="font-bold text-gray-100">
                   {item.name}
                 </div>
                 {item.code && (
-                  <div className="text-xs text-slate-500">{item.code}</div>
+                  <div className="text-xs text-gray-400">{item.code}</div>
                 )}
                 {item.count && (
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-gray-400">
                     {item.count} entries
                   </div>
                 )}
               </div>
-              <div className="text-indigo-400 font-mono font-bold">
+              <div className="text-yellow-500 font-mono font-bold">
                 {item.totalDisplay}
               </div>
             </div>
@@ -705,20 +706,20 @@ export const Analytics = () => {
         {modalContent.data.map((item, idx) => (
           <div
             key={idx}
-            className="p-3 bg-slate-50 dark:bg-slate-800 rounded-lg"
+            className="p-3 border border-gray-700 rounded-lg"
           >
             <div className="flex justify-between">
-              <div className="font-semibold text-slate-900 dark:text-white">
+              <div className="font-bold text-gray-100">
                 {item.project}
               </div>
-              <div className="text-sm text-slate-400">
+              <div className="text-sm text-gray-400">
                 {new Date(item.date).toLocaleDateString()}
               </div>
             </div>
-            <div className="text-sm text-indigo-300">{item.task_id}</div>
-            <div className="flex justify-between mt-2 text-xs text-slate-500">
+            <div className="text-sm text-yellow-500 font-semibold">{item.task_id}</div>
+            <div className="flex justify-between mt-2 text-xs text-gray-400">
               <div>{item.user_name}</div>
-              <div className="font-mono text-slate-900 dark:text-white">
+              <div className="font-mono text-gray-200 font-bold">
                 {item.hours}h {item.minutes}m
               </div>
             </div>
@@ -729,32 +730,37 @@ export const Analytics = () => {
   };
 
   return (
-    <div className="space-y-8 pb-10 min-h-screen transition-colors duration-300">
-      <ToastContainer theme="colored" />
+    <div className="space-y-8 pb-10 p-3 min-h-screen transition-colors duration-300">
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-white flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
+        <div className="space-y-1">
+          <nav className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+            <span>Intelligence</span>
+            <span className="opacity-30">/</span>
+            <span className="text-yellow-500">Analytics</span>
+          </nav>
+          <div className="flex items-center gap-4">
+            <div className="p-3 rounded-2xl bg-yellow-500/10 border border-yellow-500/20 text-yellow-500 shadow-sm">
               <IoAnalytics size={28} />
             </div>
-            Analytics 
-          </h1>
-          <p className="text-slate-400 mt-2 text-sm">
-           Track your Project Management Activities here....
-          </p>
+            <div>
+              <h1 className="text-2xl font-black text-gray-100 tracking-tight leading-none">
+                Intelligent Analytics 
+              </h1>
+              <p className="text-gray-400 mt-1.5 text-xs font-bold italic">Track your Project Management Activities here....</p>
+            </div>
+          </div>
         </div>
       </header>
       {/* Filters Section */}
-      {/* Filters Section */}
-      <div className="relative z-10 p-6 bg-gradient-to-r from-white/5 to-white/10 dark:from-slate-900/50 dark:to-slate-800/50 backdrop-blur-sm rounded-2xl border border-white/10 shadow-lg space-y-6">
+      <div className="relative z-10 p-6 border border-gray-700 shadow-sm rounded-2xl space-y-6">
         {/* Row 1: Date Range (Global) */}
-        <div className="flex flex-col md:flex-row gap-4 items-center border-b border-white/5 pb-6">
+        <div className="flex flex-col md:flex-row gap-4 items-center border-b border-gray-700 pb-6">
           <div className="w-full md:w-auto">
-            <label className="text-sm font-medium text-slate-300 block mb-2">
+            <label className="text-sm font-bold text-gray-300 block mb-2 uppercase tracking-tight">
               Date Range
             </label>
             <div className="flex gap-4">
-              <div className="w-40 relative z-20">
+              <div className="w-40 relative z-30">
                 <DatePicker
                   selected={startDate}
                   onChange={setStartDate}
@@ -781,14 +787,22 @@ export const Analytics = () => {
               </div>
             </div>
           </div>
-          <div className="hidden md:block flex-1 h-[1px] bg-white/5 mx-4" />
+          <div className="flex-1 flex justify-end items-end h-[60px]">
+            <button
+               onClick={handleClearFilters}
+               className="flex items-center gap-2 px-4 py-2 bg-gray-700 border border-gray-600 text-gray-300 hover:text-yellow-500 hover:bg-yellow-500/10 rounded-xl transition-all font-bold text-xs uppercase tracking-wider shadow-sm group"
+            >
+               <IoRefreshOutline className="w-4 h-4 group-hover:rotate-180 transition-transform duration-500" />
+               Clear Filters
+            </button>
+          </div>
         </div>
 
         {/* Row 2: Split Columns */}
         <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
           {/* Column 1: Departments */}
-          <div className="bg-white/5 rounded-xl p-5 border border-white/5 flex flex-col gap-4">
-            <div className="flex items-center gap-2 text-indigo-400 font-medium border-b border-white/5 pb-2">
+          <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700 flex flex-col gap-4 shadow-sm">
+            <div className="flex items-center gap-2 text-yellow-500 font-bold border-b border-gray-700 pb-2 uppercase text-sm tracking-tight">
               <FiLayers /> By Department
             </div>
             <MultiSelect
@@ -800,10 +814,10 @@ export const Analytics = () => {
             <button
               onClick={handleFetchDepts}
               disabled={isLoading}
-              className="mt-2 w-full h-[40px] bg-indigo-600/20 hover:bg-indigo-600 hover:text-white text-indigo-300 border border-indigo-500/30 rounded-lg flex items-center justify-center gap-2 transition-all font-medium text-sm"
+              className="mt-2 w-full h-[40px] bg-yellow-600 hover:bg-yellow-500 text-gray-900 rounded-lg flex items-center justify-center gap-2 transition-all font-bold text-sm shadow-md shadow-yellow-500/20"
             >
               {isLoading ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-gray-900/30 border-t-gray-900 rounded-full animate-spin" />
               ) : (
                 "Fetch Dept Data"
               )}
@@ -811,8 +825,8 @@ export const Analytics = () => {
           </div>
 
           {/* Column 2: Users */}
-          <div className="bg-white/5 rounded-xl p-5 border border-white/5 flex flex-col gap-4">
-            <div className="flex items-center gap-2 text-emerald-400 font-medium border-b border-white/5 pb-2">
+          <div className="bg-gray-800/50 rounded-xl p-5 border border-gray-700 flex flex-col gap-4 shadow-sm">
+            <div className="flex items-center gap-2 text-amber-500 font-black border-b border-gray-700 pb-2 uppercase text-sm tracking-tight">
               <FiUsers /> By User
             </div>
             <MultiSelect
@@ -824,10 +838,10 @@ export const Analytics = () => {
             <button
               onClick={handleFetchUsers}
               disabled={isLoading}
-              className="mt-2 w-full h-[40px] bg-emerald-600/20 hover:bg-emerald-600 hover:text-white text-emerald-300 border border-emerald-500/30 rounded-lg flex items-center justify-center gap-2 transition-all font-medium text-sm"
+              className="mt-2 w-full h-[40px] bg-amber-600 hover:bg-amber-500 text-gray-900 rounded-lg flex items-center justify-center gap-2 transition-all font-black text-sm shadow-md shadow-amber-500/20 uppercase tracking-wider active:scale-95"
             >
               {isLoading ? (
-                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-gray-900/30 border-t-gray-900 rounded-full animate-spin" />
               ) : (
                 "Fetch User Data"
               )}
@@ -838,17 +852,16 @@ export const Analytics = () => {
 
       {/* Dynamic Title */}
       <motion.div
-        className="flex items-center gap-3 px-2"
+        className="flex items-center gap-3 px-2 border-l-4 border-yellow-500"
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         key={pageTitle}
       >
-        <div className="h-8 w-1 bg-indigo-500 rounded-full" />
-        <h2 className="text-2xl font-bold text-white">{pageTitle}</h2>
+        <h2 className="text-2xl font-bold text-gray-100">{pageTitle}</h2>
       </motion.div>
 
       {/* STATS CARDS */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
         {cards.map((card, i) => (
           <motion.div
             key={i}
@@ -860,26 +873,26 @@ export const Analytics = () => {
             className="relative group cursor-pointer"
             onClick={() => handleCardClick(card)}
           >
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/10 via-transparent to-purple-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm hover:border-indigo-500/30 transition-all shadow-lg hover:shadow-xl hover:shadow-indigo-500/10">
+            <div className="absolute inset-0 bg-linear-to-br from-yellow-500/5 via-transparent to-yellow-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+            <div className="bg-zinc-900 rounded-3xl p-6 cursor-pointer border border-white/5 hover:border-amber-500/20 transition-all group relative">
               <div className="flex justify-between items-start mb-4">
                 <div
-                  className={`p-3 rounded-xl bg-gradient-to-br ${card.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}
+                  className={`p-3 rounded-xl bg-linear-to-br ${card.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}
                 >
-                  <card.icon size={24} className="text-white" />
+                  <card.icon size={24} className="text-gray-100" />
                 </div>
                 {card.data && card.data.length > 0 && (
-                  <IoArrowUp className="text-slate-500 -rotate-45 group-hover:text-indigo-400 group-hover:scale-110 transition-all" />
+                  <IoArrowUp className="text-gray-500 -rotate-45 group-hover:text-yellow-500 group-hover:scale-110 transition-all font-bold" />
                 )}
               </div>
               <div>
-                <div className="text-slate-400 text-sm font-medium mb-1">
+                <div className="text-gray-400 text-xs font-bold uppercase tracking-tight mb-1">
                   {card.label}
                 </div>
-                <div className="text-2xl font-bold text-white tracking-tight group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-indigo-400 group-hover:to-purple-400 transition-all">
+                <div className="text-2xl font-black text-gray-100 tracking-tight group-hover:text-yellow-500 transition-all">
                   {card.value}
                 </div>
-                <div className="text-xs text-slate-500 mt-2">{card.detail}</div>
+                <div className="text-[10px] font-bold text-gray-500 mt-2 uppercase">{card.detail}</div>
               </div>
             </div>
           </motion.div>
@@ -893,11 +906,11 @@ export const Analytics = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm hover:border-indigo-500/20 transition-all"
+          className="p-6 border border-gray-700 rounded-2xl hover:border-yellow-500/50 transition-all shadow-sm"
         >
-          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-            <div className="p-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
-              <IoStatsChartOutline className="text-indigo-400" size={18} />
+          <h3 className="text-lg font-bold text-gray-100 mb-6 flex items-center gap-2">
+            <div className="p-2 bg-yellow-500/10 rounded-lg border border-yellow-500/20">
+              <IoStatsChartOutline className="text-yellow-500" size={18} />
             </div>
             Activity Trend
           </h3>
@@ -907,17 +920,17 @@ export const Analytics = () => {
                 <LineChart data={analytics.chartData}>
                   <defs>
                     <linearGradient id="colorActivity" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#818cf8" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#818cf8" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#fbbf24" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#fbbf24" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="rgba(255,255,255,0.1)"
+                    stroke="#374151"
                   />
                   <XAxis
                     dataKey="date"
-                    stroke="#94a3b8"
+                    stroke="#9ca3af"
                     fontSize={12}
                     tickFormatter={(str) =>
                       new Date(str).toLocaleDateString(undefined, {
@@ -926,32 +939,33 @@ export const Analytics = () => {
                       })
                     }
                   />
-                  <YAxis stroke="#94a3b8" fontSize={12} />
+                  <YAxis stroke="#9ca3af" fontSize={12} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#1e293b",
-                      borderColor: "#818cf8",
+                      backgroundColor: "#1f2937",
+                      borderColor: "#fbbf24",
                       borderRadius: "12px",
-                      boxShadow: "0 10px 40px rgba(0,0,0,0.5)"
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.3)",
+                      color: "#fbbf24"
                     }}
-                    itemStyle={{ color: "#fff" }}
-                    labelStyle={{ color: "#94a3b8" }}
+                    itemStyle={{ color: "#fbbf24" }}
+                    labelStyle={{ color: "#9ca3af" }}
                   />
                   <Line
                     type="monotone"
                     dataKey="hours"
-                    stroke="#818cf8"
+                    stroke="#fbbf24"
                     strokeWidth={3}
-                    dot={{ r: 5, fill: "#818cf8", strokeWidth: 2, stroke: "#1e293b" }}
-                    activeDot={{ r: 7, fill: "#a78bfa", stroke: "#818cf8", strokeWidth: 2 }}
+                    dot={{ r: 5, fill: "#fbbf24", strokeWidth: 2, stroke: "#1f2937" }}
+                    activeDot={{ r: 7, fill: "#f59e0b", stroke: "#fbbf24", strokeWidth: 2 }}
                     fill="url(#colorActivity)"
                   />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="text-slate-500 flex flex-col items-center">
-                <IoStatsChartOutline size={48} className="mb-2 opacity-20" />
-                <p>No activity data available</p>
+              <div className="text-gray-500 flex flex-col items-center">
+                <IoStatsChartOutline size={48} className="mb-2 opacity-10" />
+                <p className="text-sm font-bold uppercase tracking-widest text-gray-600">No activity data</p>
               </div>
             )}
           </div>
@@ -962,11 +976,11 @@ export const Analytics = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.4 }}
-          className="p-6 bg-white/5 border border-white/10 rounded-2xl backdrop-blur-sm hover:border-emerald-500/20 transition-all"
+          className="p-6 border border-gray-700 rounded-2xl hover:border-amber-500/20 transition-all shadow-sm"
         >
-          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-            <div className="p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
-              <IoLocationOutline className="text-emerald-400" size={18} />
+          <h3 className="text-lg font-bold text-gray-100 mb-6 flex items-center gap-2">
+            <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20">
+              <IoLocationOutline className="text-amber-500" size={18} />
             </div>
             Location Split
           </h3>
@@ -987,36 +1001,35 @@ export const Analytics = () => {
                       `${name} ${(percent * 100).toFixed(0)}%`
                     }
                   >
-                    {analytics.locationData.map((entry, index) => (
+                     {analytics.locationData.map((entry, index) => (
                       <Cell
                         key={`cell-${index}`}
                         fill={
-                          [
-                            "#818cf8",
-                            "#34d399",
-                            "#fbbf24",
-                            "#f87171",
-                            "#c084fc",
-                          ][index % 5]
+                          ["#6366f1", "#10b981", "#f59e0b", "#ef4444"][
+                            index % 4
+                          ]
                         }
                       />
                     ))}
                   </Pie>
-                  <Tooltip 
+                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#1e293b",
-                      borderColor: "#34d399",
+                      backgroundColor: "#ffffff",
+                      borderColor: "#e2e8f0",
+                      color: "#1e293b",
                       borderRadius: "12px",
-                      boxShadow: "0 10px 40px rgba(0,0,0,0.5)"
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
+                      border: "1px solid #e2e8f0"
                     }}
+                    itemStyle={{ color: "#1e293b" }}
                   />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="text-slate-500 flex flex-col items-center">
-                <IoLocationOutline size={48} className="mb-2 opacity-20" />
-                <p>No location data available</p>
+              <div className="text-gray-500 flex flex-col items-center">
+                <IoLocationOutline size={48} className="mb-2 opacity-10" />
+                <p className="text-sm font-bold uppercase tracking-widest text-gray-600">No location data</p>
               </div>
             )}
           </div>
@@ -1030,28 +1043,28 @@ export const Analytics = () => {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
             onClick={() => setModalOpen(false)}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
+              className="w-full max-w-2xl border border-gray-700 rounded-2xl overflow-hidden shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-6 border-b border-white/10 flex justify-between items-center">
+              <div className="p-6 border-b border-gray-700 flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-bold text-white">
+                  <h3 className="text-xl font-bold text-gray-100">
                     {modalContent.title}
                   </h3>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-gray-400">
                     {modalContent.detail}
                   </p>
                 </div>
                 <button
                   onClick={() => setModalOpen(false)}
-                  className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white"
+                  className="p-2 hover:bg-gray-700 rounded-lg text-gray-400 hover:text-gray-100"
                 >
                   <IoClose size={24} />
                 </button>

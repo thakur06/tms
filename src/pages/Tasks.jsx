@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useState } from "react"
-import { ToastContainer, toast, Zoom } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
+import { toast, Zoom } from "react-toastify"
 import TasksList from "../components/TasksList"
 import CreateTaskModal from "../components/CreateTaskModal"
+import { IoListOutline } from "react-icons/io5"
 
 export default function Tasks() {
    const server=import.meta.env.VITE_SERVER_ADDRESS;
@@ -232,15 +232,33 @@ export default function Tasks() {
         </div>
       ) : (
         <>
+          <div className="mb-8">
+            <nav className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
+              <span>Planning</span>
+              <span className="opacity-30">/</span>
+              <span className="text-[#161efd]">Tasks</span>
+            </nav>
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100 text-[#161efd] shadow-sm">
+                <IoListOutline size={28} />
+              </div>
+              <div>
+                <h1 className="text-2xl font-black text-gray-900 tracking-tight leading-none">
+                  Workspace Tasks
+                </h1>
+                <p className="text-gray-500 mt-1.5 text-xs font-bold italic">Manage and track unit objectives</p>
+              </div>
+            </div>
+          </div>
           <TasksList 
             tasks={tasks} 
             onDeleteTask={handleDeleteTask}
             headerAction={
               <button 
                 onClick={() => setShowTaskModal(true)}
-                className="ui-btn ui-btn-primary w-full sm:w-auto"
+                className="ui-btn ui-btn-primary w-full sm:w-auto text-xs uppercase font-black tracking-widest h-11 px-6 shadow-blue-500/20"
               >
-                + New Task
+                + Initialize Task
               </button>
             }
           />

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FiMail, FiLock, FiArrowLeft, FiShield, FiKey, FiCheckCircle, FiChevronRight } from 'react-icons/fi';
 import { useAuth } from '../context/AuthContext';
+import { motion } from 'framer-motion';
 const Login = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -181,8 +182,8 @@ const Login = () => {
       case 'login':
         return (
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <h2 className="text-3xl font-bold text-white mb-2 text-center">Welcome Back</h2>
-            <p className="text-slate-400 mb-8 text-center">Please enter your details to sign in.</p>
+            <h2 className="text-3xl font-black text-gray-900 mb-2 text-center tracking-tight">Welcome Back</h2>
+            <p className="text-gray-500 mb-8 text-center font-medium">Please enter your details to sign in.</p>
             
             <form className="space-y-5" onSubmit={handleLogin}>
               {info && (
@@ -251,11 +252,11 @@ const Login = () => {
       case 'forgot':
         return (
           <div className="animate-in fade-in slide-in-from-right duration-500">
-            <button onClick={() => setView('login')} className="flex items-center text-sm text-slate-400 hover:text-white mb-6 transition-colors">
+            <button onClick={() => setView('login')} className="flex items-center text-sm text-gray-400 hover:text-gray-900 mb-6 transition-colors font-bold">
               <FiArrowLeft className="mr-2" /> Back to Login
             </button>
-            <h2 className="text-3xl font-bold text-white mb-2 text-center">Reset Password</h2>
-            <p className="text-slate-400 mb-8 text-center">Enter your email and we'll send you an OTP code.</p>
+            <h2 className="text-3xl font-black text-gray-900 mb-2 text-center tracking-tight">Reset Password</h2>
+            <p className="text-gray-500 mb-8 text-center font-medium">Enter your email and we'll send you an OTP code.</p>
             
             <div className="space-y-6">
               {info && (
@@ -292,11 +293,11 @@ const Login = () => {
       case 'otp':
         return (
           <div className="animate-in fade-in slide-in-from-right duration-500 text-center">
-            <div className="inline-flex p-4 bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 rounded-full mb-6 shadow-[0_0_20px_rgba(99,102,241,0.2)]">
+            <div className="inline-flex p-4 bg-blue-50 text-[#161efd] border border-blue-100 rounded-full mb-6 shadow-lg shadow-blue-500/10">
               <FiShield size={32} />
             </div>
-            <h2 className="text-3xl font-bold text-white mb-2">Verify Email</h2>
-            <p className="text-slate-400 mb-8">We've sent a 6-digit code to <span className="text-white font-medium">{email || 'your email'}</span></p>
+            <h2 className="text-3xl font-black text-gray-900 mb-2 tracking-tight">Verify Email</h2>
+            <p className="text-gray-500 mb-8 font-medium">We've sent a 6-digit code to <span className="text-gray-900 font-black">{email || 'your email'}</span></p>
 
             {info && (
               <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl text-sm mb-6 text-left">
@@ -361,11 +362,11 @@ const Login = () => {
       case 'reset':
         return (
           <div className="animate-in fade-in slide-in-from-right duration-500">
-            <button onClick={() => setView('login')} className="flex items-center text-sm text-slate-400 hover:text-white mb-6 transition-colors">
+            <button onClick={() => setView('login')} className="flex items-center text-sm text-gray-400 hover:text-gray-900 mb-6 transition-colors font-bold">
               <FiArrowLeft className="mr-2" /> Back to Login
             </button>
-            <h2 className="text-3xl font-bold text-white mb-2 text-center">Set New Password</h2>
-            <p className="text-slate-400 mb-8 text-center">Create a new password for your account.</p>
+            <h2 className="text-3xl font-black text-gray-900 mb-2 text-center tracking-tight">Set New Password</h2>
+            <p className="text-gray-500 mb-8 text-center font-medium">Create a new password for your account.</p>
 
             {info && (
               <div className="bg-green-500/10 border border-green-500/20 text-green-400 px-4 py-3 rounded-xl text-sm mb-4">
@@ -424,29 +425,76 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-6 lg:p-8 relative overflow-hidden">
-      {/* Background Ambience */}
-      <div className="absolute inset-0 bg-[#030712]">
-        <div className="absolute top-0 -left-40 w-[600px] h-[600px] bg-indigo-600/20 rounded-full blur-[120px] animate-pulse"></div>
-        <div className="absolute bottom-0 -right-40 w-[600px] h-[600px] bg-purple-600/20 rounded-full blur-[120px] animate-pulse delay-1000"></div>
-        <div className="absolute inset-0 bg-[url('/fibre.png')] opacity-10 mix-blend-overlay"></div>
-      </div>
+    <div className="min-h-screen w-full flex bg-[#f8fafc] overflow-hidden">
+      {/* Left Side: Illustration / Branding */}
+      <div className="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-linear-to-br from-blue-700 via-blue-800 to-blue-900 items-center justify-center p-12">
+        <div className="absolute inset-0 bg-grid-white/[0.05] bg-size-[40px_40px]" />
+        <div className="absolute top-0 -left-20 w-96 h-96 bg-blue-500/20 rounded-full blur-[100px] animate-pulse" />
+        <div className="absolute bottom-0 -right-20 w-96 h-96 bg-indigo-500/20 rounded-full blur-[100px] animate-pulse delay-700" />
+        
+        <div className="relative z-10 max-w-lg text-center">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8 }}
+            className="mb-10"
+          >
+            <div className="inline-block p-6 rounded-[2.5rem] bg-white/10 backdrop-blur-xl border border-white/20 shadow-2xl mb-8">
+              <img className="h-24 w-auto drop-shadow-2xl" src='./fav.png' alt="Logo"/>
+            </div>
+            <h1 className="text-5xl font-black text-white tracking-tighter mb-6 leading-tight">
+              Engineering <br/> <span className="text-blue-300">The Future</span> of Biogas.
+            </h1>
+            <p className="text-blue-100/70 text-lg font-medium leading-relaxed mb-10 italic">
+              "Efficiency is not just a metric, it's our philosophy. Welcome to the workspace of high-performance analytics."
+            </p>
+          </motion.div>
 
-      <div className="w-full max-w-md relative z-10">
-        <div className="text-center mb-8">
-           <img className="h-16 mx-auto mb-4 drop-shadow-[0_0_15px_rgba(255,255,255,0.3)]" src='./fav.png' alt="Logo"/>
-           <h1 className="text-2xl font-bold tracking-tight text-white/90">Biogas Engineering</h1>
-        </div>
-
-        <div className="ui-card p-1">
-          <div className="bg-[#0b1221]/80 backdrop-blur-xl rounded-[1.2rem] p-6 sm:p-10 border border-white/5 shadow-2xl">
-            {renderForm()}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="p-6 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 text-left">
+              <div className="text-2xl font-black text-white mb-1">10X</div>
+              <div className="text-xs font-black text-blue-200 uppercase tracking-widest">Efficiency</div>
+            </div>
+            <div className="p-6 rounded-3xl bg-white/5 backdrop-blur-md border border-white/10 text-left">
+              <div className="text-2xl font-black text-white mb-1">Real-time</div>
+              <div className="text-xs font-black text-blue-200 uppercase tracking-widest">Analytics</div>
+            </div>
           </div>
         </div>
         
-        <p className="text-center text-slate-500 text-xs mt-8">
-          &copy; {new Date().getFullYear()} Biogas Engineering. All rights reserved.
-        </p>
+        <div className="absolute bottom-8 left-12 right-12 flex justify-between items-center text-blue-200/40 text-[10px] uppercase font-black tracking-[0.2em]">
+          <span>© {new Date().getFullYear()} BIOGAS ENGINEERING</span>
+          <span>ENTERPRISE SOLUTIONS</span>
+        </div>
+      </div>
+
+      {/* Right Side: Auth Forms */}
+      <div className="flex-1 flex items-center justify-center p-6 sm:p-12 lg:p-20 relative bg-[#f8fafc]">
+        {/* Mobile Background Elements */}
+        <div className="lg:hidden absolute inset-0 bg-linear-to-b from-blue-50/50 to-white -z-10" />
+        
+        <div className="w-full max-w-md">
+          <div className="lg:hidden text-center mb-10">
+            <img className="h-12 mx-auto mb-4" src='./fav.png' alt="Logo"/>
+            <h1 className="text-xl font-black text-gray-900 tracking-tight uppercase">Biogas Engineering</h1>
+          </div>
+
+          <div className="relative">
+             {renderForm()}
+          </div>
+
+          <div className="mt-12 pt-8 border-t border-gray-100">
+             <div className="flex flex-col sm:flex-row gap-4 justify-between items-center text-[10px] font-black uppercase tracking-widest text-gray-400">
+                <div className="flex gap-4">
+                  <a href="#" className="hover:text-[#161efd] transition-colors">Privacy Policy</a>
+                  <a href="#" className="hover:text-[#161efd] transition-colors">Contact Support</a>
+                </div>
+                <div className="sm:hidden lg:block text-center sm:text-right">
+                  System Version v2.4.0
+                </div>
+             </div>
+          </div>
+        </div>
       </div>
     </div>
   );

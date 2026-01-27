@@ -3,28 +3,26 @@ import DatePicker from "react-datepicker";
 import ExcelJS from "exceljs";
 import { saveAs } from "file-saver";
 import "react-datepicker/dist/react-datepicker.css";
-import {
-  FiCalendar,
-  FiDownload,
-  FiFilter,
-  FiUser,
-  FiClock,
-  FiFolder,
-  FiFileText,
-  FiMapPin,
-  FiChevronDown,
-  FiChevronUp,
-  FiHash,
-  FiList,
-  FiMail,
-  FiBriefcase
-} from "react-icons/fi";
+import { FiCalendar, FiDownload, FiFilter, FiUser, FiClock, FiFolder, FiFileText, FiMapPin, FiChevronDown, FiChevronUp, FiHash, FiList, FiMail, FiBriefcase } from "react-icons/fi";
 import { MdOutlineDateRange, MdOutlineCheckCircle, MdOutlineSortByAlpha } from "react-icons/md";
+
+const CustomInput = ({ value, onClick, placeholder, icon: Icon }) => (
+  <button
+    className="w-full bg-zinc-900 border border-white/10 rounded-xl px-4 py-3 text-left text-white placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 flex items-center gap-3 transition-all shadow-sm hover:bg-white/5"
+    onClick={onClick}
+    type="button"
+  >
+    {Icon && <Icon className="text-amber-500" size={18} />}
+    <span className={value ? "text-white font-bold" : "text-gray-500"}>
+      {value || placeholder}
+    </span>
+  </button>
+);
 
 export default function TimeReport() {
    const server=import.meta.env.VITE_SERVER_ADDRESS;
-  const [startDate, setStartDate] = useState(null);
-  const [endDate, setEndDate] = useState(null);
+  const [startDate, setStartDate] = useState(new Date(new Date().setDate(new Date().getDate() - 30)));
+  const [endDate, setEndDate] = useState(new Date());
   const [reportData, setReportData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [exporting, setExporting] = useState(false);
@@ -114,16 +112,6 @@ export default function TimeReport() {
     }
   };
 
-  const CustomInput = ({ value, onClick, placeholder }) => (
-    <button
-      className="ui-input w-full pl-12 font-semibold text-left flex items-center h-[50px] relative z-0"
-      onClick={onClick}
-      type="button"
-    >
-      {value || <span className="text-slate-500">{placeholder}</span>}
-      <FiCalendar className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-indigo-400 pointer-events-none" />
-    </button>
-  );
 
   const exportToExcel = async () => {
     if (!reportData) return;
@@ -151,11 +139,89 @@ export default function TimeReport() {
       dateRangeRow.height = 30;
 
       sheet.addRow([]);
-      sheet.addRow([]);
 
       const sortedUsersForExport = [...reportData.users].sort((a, b) =>
         a.user_name.localeCompare(b.user_name)
       );
+
+      // --- USER SUMMARY SECTION ---
+      const summaryTitleRow = sheet.addRow(["USER SUMMARY"]);
+      summaryTitleRow.font = { bold: true, size: 16, color: { argb: '065F46' } };
+      summaryTitleRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'D1FAE5' } };
+      summaryTitleRow.alignment = { horizontal: 'center', vertical: 'middle' };
+      summaryTitleRow.height = 38;
+      sheet.mergeCells('A' + summaryTitleRow.number + ':I' + summaryTitleRow.number);
+
+      sheet.addRow([]);
+      const summaryHeaders = sheet.addRow([
+        "Sr. No.", "User", "Email", "Department", "Total Entries", "Total Hours", "Total Minutes", "Total Time", "Avg. Hours/Day"
+      ]);
+      summaryHeaders.eachCell(cell => {
+        cell.font = { bold: true, size: 11 };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'E0F2FE' } };
+        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+        cell.alignment = { vertical: 'middle', horizontal: 'center' };
+      });
+      summaryHeaders.height = 32;
+
+      let grandTotalEntries = 0;
+      let grandTotalHours = 0;
+      let grandTotalMinutes = 0;
+
+      const reportStartDate = new Date(reportData.startDate);
+      const reportEndDate = new Date(reportData.endDate);
+      const daysDiff = Math.ceil((reportEndDate - reportStartDate) / (1000 * 60 * 60 * 24)) + 1;
+
+      sortedUsersForExport.forEach((user, index) => {
+        const totalMinutesSpent = user.total_hours * 60 + user.total_minutes;
+        const avgHoursPerDay = ((totalMinutesSpent / 60) / daysDiff).toFixed(2);
+        
+        const row = sheet.addRow([
+          index + 1,
+          user.user_name,
+          user.user_email || "N/A",
+          user.user_dept || "N/A",
+          user.entries.length,
+          user.total_hours,
+          user.total_minutes,
+          `${user.total_hours}h ${user.total_minutes}m`,
+          avgHoursPerDay
+        ]);
+
+        row.eachCell(cell => {
+          cell.border = { top: { style: 'thin', color: { argb: 'E2E8F0' } }, left: { style: 'thin', color: { argb: 'E2E8F0' } }, bottom: { style: 'thin', color: { argb: 'E2E8F0' } }, right: { style: 'thin', color: { argb: 'E2E8F0' } } };
+          cell.alignment = { vertical: 'middle' };
+        });
+
+        grandTotalEntries += user.entries.length;
+        grandTotalHours += user.total_hours;
+        grandTotalMinutes += user.total_minutes;
+      });
+
+      // Normalize grand total minutes
+      const finalGrandHours = grandTotalHours + Math.floor(grandTotalMinutes / 60);
+      const finalGrandMinutes = grandTotalMinutes % 60;
+
+      const totalRow = sheet.addRow([
+        "TOTAL",
+        `${sortedUsersForExport.length} Users`,
+        "", "",
+        grandTotalEntries,
+        finalGrandHours,
+        finalGrandMinutes,
+        `${finalGrandHours}h ${finalGrandMinutes}m`,
+        ""
+      ]);
+
+      totalRow.eachCell(cell => {
+        cell.font = { bold: true };
+        cell.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'EFF6FF' } };
+        cell.border = { top: { style: 'thin' }, left: { style: 'thin' }, bottom: { style: 'thin' }, right: { style: 'thin' } };
+      });
+      sheet.mergeCells(`A${totalRow.number}:D${totalRow.number}`);
+
+      sheet.addRow([]);
+      sheet.addRow([]);
 
       const detailHeaderRow = sheet.addRow(["DETAILED TIME ENTRIES BY USER"]);
       detailHeaderRow.font = { bold: true, size: 16, color: { argb: '7C3AED' } };
@@ -224,176 +290,148 @@ export default function TimeReport() {
   };
 
   return (
-<div className="min-h-screen font-sans text-slate-200 relative pb-20">
+<div className="space-y-8 pb-20 p-3 min-h-screen transition-colors duration-300">
       <style>{`
         .react-datepicker {
           font-family: inherit !important;
           border: 1px solid rgba(255,255,255,0.1) !important;
           border-radius: 1rem !important;
-          box-shadow: 0 10px 40px rgba(0, 0, 0, 0.4) !important;
-          background: #1e293b !important;
+          box-shadow: 0 10px 40px -10px rgba(0,0,0,0.5) !important;
+          background: #18181b !important;
           overflow: hidden !important;
-          color: white !important;
+          color: #f4f4f5 !important;
         }
         .react-datepicker__header {
-          background: #0f172a !important;
+          background: #27272a !important;
           border-bottom: 1px solid rgba(255,255,255,0.1) !important;
           border-radius: 1rem 1rem 0 0 !important;
         }
         .react-datepicker__current-month {
-          color: white !important;
+          color: #f4f4f5 !important;
         }
         .react-datepicker__day--selected {
-          background: #6366f1 !important;
-          color: white !important;
+          background: #f59e0b !important;
+          color: #18181b !important;
+          font-weight: bold !important;
         }
         .react-datepicker__day:hover {
-          background: rgba(99,102,241,0.2) !important;
-          color: white !important;
+          background: rgba(245,158,11,0.2) !important;
+          color: #f59e0b !important;
         }
         .react-datepicker__day {
-          color: #94a3b8 !important;
+          color: #a1a1aa !important;
         }
         .react-datepicker__day--keyboard-selected {
-          background-color: rgba(99,102,241,0.2) !important;
-          color: white !important;
+          background-color: rgba(245,158,11,0.2) !important;
+          color: #f59e0b !important;
         }
         .react-datepicker__day--today {
-          color: #6366f1 !important;
+          color: #f59e0b !important;
           font-weight: bold !important;
         }
         .react-datepicker__day-name {
-          color: #64748b !important;
+          color: #71717a !important;
         }
         .react-datepicker-popper {
           z-index: 9999 !important;
         }
       `}</style>
 
-      <div className="max-w-7xl mx-auto space-y-8 p-6">
+      <div className="space-y-8">
         {/* --- Header Section --- */}
         <header className="relative flex flex-col md:flex-row md:items-end justify-between gap-6">
-          <div>
-            <nav className="flex items-center gap-2 text-xs font-medium text-slate-500 uppercase tracking-wide mb-4">
-              <span className="px-2 py-1 rounded bg-indigo-500/10 text-indigo-400 border border-indigo-500/20">Analytics</span>
-              <span className="text-slate-600">/</span>
+          <div className="space-y-1">
+            <nav className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
+              <span className="text-amber-500">Analytics</span>
+              <span className="opacity-30">/</span>
               <span>Reports</span>
             </nav>
-            <h1 className="text-4xl font-black text-white tracking-tight flex items-center gap-3">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-cyan-400">
-                Time Reports
-              </span>
-            </h1>
-            <p className="text-slate-400 mt-2 text-sm">Detailed workspace activity and productivity metrics</p>
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-amber-500/10 rounded-2xl border border-amber-500/20 text-amber-500 shadow-lg shadow-amber-500/10">
+                <FiFileText size={28} />
+              </div>
+              <div>
+                <h1 className="text-2xl font-black text-white tracking-tight leading-none uppercase">
+                  Time Reports
+                </h1>
+                <p className="text-gray-500 mt-1.5 text-xs font-bold italic">Detailed workspace activity and productivity metrics</p>
+              </div>
+            </div>
           </div>
 
           {/* Real-time Status Badge */}
-          <div className="flex items-center gap-3 px-4 py-2.5 bg-white/5 rounded-xl border border-white/10 backdrop-blur-md">
-            <div className="relative">
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500 animate-pulse"></span>
-            </div>
-            <span className="text-sm font-medium text-emerald-400">
+          <div className="flex items-center gap-2.5 px-3 py-1.5 bg-zinc-900 rounded-xl border border-white/10 shadow-sm">
+            <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500 animate-pulse"></span>
+            <span className="text-[10px] font-black uppercase tracking-wider text-emerald-500">
               {reportData ? `${reportData.users.length} Active Users` : 'System Ready'}
             </span>
           </div>
         </header>
 
-        {/* --- Configuration Card --- */}
-        <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 ui-card p-0 !overflow-visible">
-            <div className="ui-card-header">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-indigo-500/10 rounded-lg text-indigo-400">
-                  <MdOutlineDateRange className="w-5 h-5" />
+        {/* --- Filters Section --- */}
+        <section className="relative z-10 p-6 bg-zinc-900 border border-white/5 shadow-xl shadow-black/50 rounded-2xl space-y-6">
+            <div className="flex flex-col md:flex-row gap-6 items-center border-b border-white/5 pb-6">
+                <div className="w-full md:w-auto">
+                    <label className="text-sm font-bold text-gray-400 block mb-2 uppercase tracking-tight">
+                    Date Range
+                    </label>
+                    <div className="flex gap-4">
+                    <div className="w-40 relative z-30">
+                        <DatePicker
+                        selected={startDate}
+                        onChange={handleStartDateChange}
+                        selectsStart
+                        startDate={startDate}
+                        endDate={endDate}
+                        maxDate={today}
+                        customInput={<CustomInput placeholder="Start Date" icon={FiCalendar} />}
+                        />
+                    </div>
+                    <div className="w-40 relative z-20">
+                        <DatePicker
+                        selected={endDate}
+                        onChange={(date) => setEndDate(date)}
+                        selectsEnd
+                        startDate={startDate}
+                        endDate={endDate}
+                        minDate={startDate}
+                        maxDate={today}
+                        customInput={<CustomInput placeholder="End Date" icon={FiCalendar} />}
+                        />
+                    </div>
+                    </div>
                 </div>
-                <div>
-                  <h2 className="text-lg font-bold text-white">Date Range</h2>
-                  <p className="text-xs text-slate-400 uppercase tracking-wide">Select period for report</p>
-                </div>
-              </div>
-            </div>
 
-            <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                <div className="space-y-2">
-                  <label className="ui-label">Start Date</label>
-                  <div className="relative z-30">
-                    <DatePicker
-                      selected={startDate}
-                      onChange={handleStartDateChange}
-                      selectsStart
-                      startDate={startDate}
-                      endDate={endDate}
-                      maxDate={today}
-                      placeholderText="Select start date"
-                      dateFormat="MMM d, yyyy"
-                      customInput={<CustomInput placeholder="Select start date" />}
-                      popperPlacement="bottom-start"
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <label className="ui-label">End Date</label>
-                  <div className="relative z-20">
-                    <DatePicker
-                      selected={endDate}
-                      onChange={(date) => setEndDate(date)}
-                      selectsEnd
-                      startDate={startDate}
-                      endDate={endDate}
-                      minDate={startDate}
-                      maxDate={today}
-                      placeholderText="Select end date"
-                      dateFormat="MMM d, yyyy"
-                      customInput={<CustomInput placeholder="Select end date" />}
-                      popperPlacement="bottom-start"
-                    />
-                  </div>
-                </div>
-              </div>
+                <div className="flex-1 flex flex-col md:flex-row items-end justify-between gap-4 h-full pt-7">
+                    <button
+                        onClick={fetchReport}
+                        disabled={loading || !startDate || !endDate}
+                        className="ui-btn ui-btn-primary min-w-[200px]"
+                    >
+                        {loading ? (
+                            <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                        ) : (
+                            <FiFilter className="w-4 h-4" />
+                        )}
+                        Generate Report
+                    </button>
 
-              <div className="flex gap-4">
-                <button
-                  onClick={fetchReport}
-                  disabled={loading || !startDate || !endDate}
-                  className="ui-btn ui-btn-primary w-full md:w-auto min-w-[200px]"
-                >
-                  {loading ? (
-                    <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                  ) : (
-                    <FiFilter className="w-4 h-4" />
-                  )}
-                  Generate Report
-                </button>
-              </div>
+                    <button
+                        onClick={exportToExcel}
+                        disabled={!reportData || exporting}
+                        className="ui-btn bg-zinc-800 text-white hover:bg-zinc-700 border border-white/10 px-8"
+                    >
+                        {exporting ? (
+                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        ) : (
+                            <>
+                            <FiDownload className="w-4 h-4" />
+                            Export to Excel
+                            </>
+                        )}
+                    </button>
+                </div>
             </div>
-          </div>
-
-          {/* Quick Action Card */}
-          <div className="ui-card p-6 flex flex-col justify-between h-full bg-gradient-to-br from-indigo-500/10 to-purple-500/5 z-20">
-            <div className="mb-6">
-              <h3 className="text-lg font-bold text-white mb-2 flex items-center gap-2">
-                <FiDownload className="text-emerald-400" /> Export Data
-              </h3>
-              <p className="text-slate-400 text-sm leading-relaxed">
-                Download comprehensive report in .xlsx format for external analysis and record keeping.
-              </p>
-            </div>
-            <button
-              onClick={exportToExcel}
-              disabled={!reportData || exporting}
-              className="ui-btn w-full bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 hover:bg-emerald-600/30 hover:border-emerald-500/50"
-            >
-              {exporting ? (
-                <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <>
-                  <FiDownload className="w-4 h-4" />
-                  Export to Excel
-                </>
-              )}
-            </button>
-          </div>
         </section>
 
         {/* --- Data Display Section --- */}
@@ -401,14 +439,14 @@ export default function TimeReport() {
           <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
               <h3 className="text-xl font-bold text-white flex items-center gap-2">
-                <span className="w-1 h-6 bg-indigo-500 rounded-full"></span>
+                <span className="w-1 h-6 bg-amber-500 rounded-full"></span>
                 Report Results
               </h3>
               <div className="flex gap-2">
-                <div className="px-3 py-1.5 bg-indigo-500/10 text-indigo-300 border border-indigo-500/20 rounded-lg text-xs font-mono font-bold">
+                <div className="px-3 py-1.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-lg text-xs font-mono font-bold">
                   Total: {reportData.users.reduce((sum, user) => sum + user.total_hours, 0)} Hours
                 </div>
-                <div className="px-3 py-1.5 bg-white/5 text-slate-300 border border-white/10 rounded-lg text-xs font-mono">
+                <div className="px-3 py-1.5 bg-zinc-800 text-gray-400 border border-white/10 rounded-lg text-xs font-mono">
                   {formatDateNoTime(reportData.startDate)} - {formatDateNoTime(reportData.endDate)}
                 </div>
               </div>
@@ -418,17 +456,17 @@ export default function TimeReport() {
               {sortedUsers.map((user, index) => (
                 <div
                   key={user.user_name}
-                  className="group ui-card hover:border-indigo-500/30 hover:translate-y-[-2px] transition-all duration-300"
+                  className="group ui-card hover:border-amber-500/30 hover:translate-y-[-2px] transition-all duration-300 border-white/5 bg-zinc-900/50"
                 >
                   <div className="p-5">
                     {/* Profile Section */}
                     <div className="flex items-center gap-4 mb-5">
-                      <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-lg font-bold text-white shadow-lg shadow-indigo-500/20 group-hover:shadow-indigo-500/40 transition-shadow">
+                      <div className="w-12 h-12 bg-amber-500/10 rounded-xl flex items-center justify-center text-lg font-bold text-amber-500 shadow-lg shadow-amber-500/10 group-hover:shadow-amber-500/30 transition-shadow border border-amber-500/20">
                         {user.user_name.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-bold text-white truncate text-lg">{user.user_name}</h4>
-                        <p className="text-xs text-indigo-300 truncate font-medium bg-indigo-500/10 inline-block px-2 py-0.5 rounded border border-indigo-500/20 mt-1">
+                        <h4 className="font-black text-white truncate text-base">{user.user_name}</h4>
+                        <p className="text-[9px] text-amber-500 truncate font-black tracking-widest uppercase bg-amber-500/10 inline-block px-2 py-0.5 rounded border border-amber-500/20 mt-0.5">
                           {user.user_dept || 'General Dept'}
                         </p>
                       </div>
@@ -436,32 +474,32 @@ export default function TimeReport() {
 
                     {/* Stat Pills */}
                     <div className="flex gap-3 mb-5">
-                      <div className="flex-1 bg-white/5 rounded-xl p-3 text-center border border-white/5">
-                        <div className="text-[10px] uppercase text-slate-500 font-bold tracking-wider mb-1">Hours</div>
-                        <div className="text-xl font-black text-white">{user.total_hours}h</div>
+                      <div className="flex-1 bg-zinc-800/50 rounded-xl p-2.5 text-center border border-white/5">
+                        <div className="text-[8px] uppercase text-gray-500 font-black tracking-widest mb-0.5">Hours</div>
+                        <div className="text-lg font-black text-white">{user.total_hours}h</div>
                       </div>
-                      <div className="flex-1 bg-white/5 rounded-xl p-3 text-center border border-white/5">
-                        <div className="text-[10px] uppercase text-slate-500 font-bold tracking-wider mb-1">Entries</div>
-                        <div className="text-xl font-black text-white">{user.entries.length}</div>
+                      <div className="flex-1 bg-zinc-800/50 rounded-xl p-2.5 text-center border border-white/5">
+                        <div className="text-[8px] uppercase text-gray-500 font-black tracking-widest mb-0.5">Entries</div>
+                        <div className="text-lg font-black text-white">{user.entries.length}</div>
                       </div>
                     </div>
 
                     {/* Summary Info */}
                     <div className="pt-4 border-t border-white/5">
-                      <div className="text-sm text-slate-400">
+                      <div className="text-sm text-gray-400">
                         {user.entries.length > 0 ? (
                           <div className="space-y-2">
-                            <div className="flex justify-between items-center bg-white/[0.02] p-2 rounded-lg">
+                            <div className="flex justify-between items-center bg-zinc-800/30 p-2 rounded-lg border border-white/5">
                               <span className="text-xs font-semibold">Projects Active</span>
-                              <span className="font-mono font-bold text-indigo-400">{[...new Set(user.entries.map(e => e.project))].length}</span>
+                              <span className="font-mono font-bold text-amber-500">{[...new Set(user.entries.map(e => e.project))].length}</span>
                             </div>
-                            <div className="flex justify-between items-center bg-white/[0.02] p-2 rounded-lg">
+                            <div className="flex justify-between items-center bg-zinc-800/30 p-2 rounded-lg border border-white/5">
                               <span className="text-xs font-semibold">Avg Hours / Day</span>
-                              <span className="font-mono font-bold text-emerald-400">{(user.total_hours / user.entries.length).toFixed(1)}h</span>
+                              <span className="font-mono font-bold text-emerald-500">{(user.total_hours / user.entries.length).toFixed(1)}h</span>
                             </div>
                           </div>
                         ) : (
-                          <p className="italic text-center py-2 opacity-50">No time entries recorded</p>
+                          <p className="italic text-center py-2 opacity-30">No time entries recorded</p>
                         )}
                       </div>
                     </div>

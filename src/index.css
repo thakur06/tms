@@ -1,87 +1,92 @@
 @import 'tailwindcss';
 
+@font-face {
+  font-family: 'Poppins';
+  src: url('/Poppins-Regular.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* Typography */
-  font-family: 'Outfit', 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: 'Poppins', sans-serif;
+  font-size: 14px;
   line-height: 1.5;
   font-weight: 400;
+  letter-spacing: -0.01em;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 
-  /* --- Light Mode (Default) --- */
-  --app-bg: #020617;
-  /* Slate-950/Black */
+  /* --- Midnight Gold Theme (Dark by Default) --- */
+  --app-bg: #09090b;
+  /* Deep Zinc Black */
   --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-surface: rgba(15, 23, 42, 0.6);
-  /* Slate-900 with opacity */
+  --glass-surface: rgba(18, 18, 20, 0.85);
   --glass-highlight: rgba(255, 255, 255, 0.05);
 
-  /* Accents */
-  --primary: #818cf8;
-  /* Indigo-400 */
-  --primary-glow: rgba(99, 102, 241, 0.3);
-  --secondary: #f472b6;
-  /* Pink-400 */
-  --secondary-glow: rgba(244, 114, 182, 0.3);
-  --accent: #22d3ee;
-  /* Cyan-400 */
+  /* Primary Gold/Amber */
+  --primary: #facc15;
+  /* Vibrant Yellow/Gold */
+  --primary-glow: rgba(250, 204, 21, 0.15);
+  --primary-light: rgba(250, 204, 21, 0.1);
+  --primary-dark: #eab308;
+
+  /* Accent Orange */
+  --accent: #f97316;
+  --accent-glow: rgba(249, 115, 22, 0.2);
+
+  /* Grayscale */
+  --secondary: #ffffff;
+  --secondary-glow: rgba(255, 255, 255, 0.1);
 
   /* Functional Colors */
-  --success: #34d399;
-  --warning: #fbbf24;
-  --danger: #f87171;
-  --text-main: #f1f5f9;
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --text-main: #fafafa;
   --text-muted: #94a3b8;
-  --text-inverse: #020617;
+  --text-inverse: #09090b;
 
   /* Shadows */
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-  --shadow-neon: 0 0 25px var(--primary-glow);
+  --shadow-glass: 0 4px 24px -1px rgba(0, 0, 0, 0.4);
+  --shadow-neon: 0 0 20px var(--primary-glow);
+  --shadow-elevated: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
 
-  /* Gradients - Deep Spatial Feel */
-  --bg-gradient:
-    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15) 0%, transparent 25%),
-    linear-gradient(to bottom right, #020617 0%, #0f172a 100%);
+  /* Gradients */
+  --bg-gradient: radial-gradient(circle at top center, #18181b 0%, #09090b 100%);
+  --gradient-primary: linear-gradient(135deg, #facc15 0%, #f59e0b 100%);
 }
 
 .dark {
-  /* --- Dark Mode (Cosmic Glass) --- */
-  --app-bg: #020617;
-  /* Slate-950/Black */
+  --app-bg: #09090b;
   --glass-border: rgba(255, 255, 255, 0.08);
-  --glass-surface: rgba(15, 23, 42, 0.6);
-  /* Slate-900 with opacity */
+  --glass-surface: rgba(18, 18, 20, 0.85);
   --glass-highlight: rgba(255, 255, 255, 0.05);
 
-  /* Accents */
-  --primary: #818cf8;
-  /* Indigo-400 */
-  --primary-glow: rgba(99, 102, 241, 0.3);
-  --secondary: #f472b6;
-  /* Pink-400 */
-  --secondary-glow: rgba(244, 114, 182, 0.3);
-  --accent: #22d3ee;
-  /* Cyan-400 */
+  --primary: #facc15;
+  --primary-glow: rgba(250, 204, 21, 0.15);
+  --primary-light: rgba(250, 204, 21, 0.1);
+  --primary-dark: #eab308;
 
-  /* Functional Colors */
-  --success: #34d399;
-  --warning: #fbbf24;
-  --danger: #f87171;
-  --text-main: #f1f5f9;
+  --secondary: #ffffff;
+  --secondary-glow: rgba(255, 255, 255, 0.1);
+  --accent: #f97316;
+
+  --success: #22c55e;
+  --warning: #f59e0b;
+  --danger: #ef4444;
+  --text-main: #fafafa;
   --text-muted: #94a3b8;
-  --text-inverse: #020617;
+  --text-inverse: #09090b;
 
-  /* Shadows */
-  --shadow-glass: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
-  --shadow-neon: 0 0 25px var(--primary-glow);
+  --shadow-glass: 0 4px 24px -1px rgba(0, 0, 0, 0.4);
+  --shadow-neon: 0 0 20px var(--primary-glow);
+  --shadow-elevated: 0 20px 40px -12px rgba(0, 0, 0, 0.5);
 
-  /* Gradients - Deep Spatial Feel */
-  --bg-gradient:
-    radial-gradient(circle at 15% 50%, rgba(99, 102, 241, 0.15) 0%, transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(236, 72, 153, 0.15) 0%, transparent 25%),
-    linear-gradient(to bottom right, #020617 0%, #0f172a 100%);
+  --bg-gradient: radial-gradient(circle at top center, #18181b 0%, #09090b 100%);
+  --gradient-primary: linear-gradient(135deg, #facc15 0%, #f59e0b 100%);
 }
 
 *,
@@ -94,6 +99,11 @@ html {
   scroll-behavior: smooth;
 }
 
+::selection {
+  background-color: var(--primary);
+  color: white;
+}
+
 body {
   margin: 0;
   min-height: 100vh;
@@ -102,8 +112,8 @@ body {
   background-attachment: fixed;
   color: var(--text-main);
   overflow-x: hidden;
-  font-family: 'Outfit', sans-serif;
-  /* Prefer Outfit/Inter */
+  font-family: 'Poppins', sans-serif;
+  /* Use Poppins for consistent look */
   transition: background 0.3s ease, color 0.3s ease;
 }
 
@@ -189,23 +199,27 @@ body {
   }
 
   .ui-card:hover {
-    border-color: rgba(255, 255, 255, 0.2);
-    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.3);
+    border-color: var(--primary-glow);
+    box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.5);
     transform: translateY(-2px);
   }
 
   /* Inputs */
   .ui-input {
-    @apply w-full px-4 py-3 rounded-xl outline-none transition-all duration-200 text-sm font-medium;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid var(--glass-border);
+    @apply w-full px-4 py-3 rounded-xl outline-none transition-all duration-200 text-sm font-black;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     color: var(--text-main);
   }
 
   .ui-input:focus {
     border-color: var(--primary);
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.05);
     box-shadow: 0 0 0 4px var(--primary-glow);
+  }
+
+  .ui-label {
+    @apply text-xs font-black text-gray-600 mb-1.5 block uppercase tracking-widest;
   }
 
   /* Buttons */
@@ -214,10 +228,13 @@ body {
   }
 
   .ui-btn-primary {
-    @apply text-white;
-    background: linear-gradient(135deg, var(--primary), #4f46e5);
-    box-shadow: 0 0 20px var(--primary-glow);
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    @apply text-zinc-950 font-black;
+    background: var(--primary);
+    box-shadow: 0 10px 20px -5px var(--primary-glow);
+  }
+
+  .ui-btn-secondary {
+    @apply text-white bg-zinc-800 border border-white/10;
   }
 
   .ui-btn-primary:hover:not(:disabled) {
@@ -227,9 +244,30 @@ body {
 
   /* Utilities */
   .text-gradient {
-    background: linear-gradient(to right, var(--primary), var(--secondary));
+    background: linear-gradient(to right, var(--primary), #4f46e5);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+  }
+
+  /* Modal System */
+  .ui-modal-overlay {
+    @apply fixed inset-0 z-9998 bg-black/60 backdrop-blur-sm;
+  }
+
+  .ui-modal {
+    @apply w-full bg-white border border-gray-200 rounded-2xl overflow-hidden shadow-2xl;
+  }
+
+  .ui-modal-header {
+    @apply p-6 border-b border-gray-100 flex items-center justify-between;
+  }
+
+  .ui-modal-title {
+    @apply text-xl font-bold text-gray-900;
+  }
+
+  .ui-modal-body {
+    @apply p-6;
   }
 
   .glass-panel {
@@ -245,5 +283,10 @@ body {
   .hide-y-scroll::-webkit-scrollbar {
     width: 0px;
     background: transparent;
+  }
+
+  /* Toast Container Override */
+  .Toastify__toast-container {
+    z-index: 99999 !important;
   }
 }

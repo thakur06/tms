@@ -104,7 +104,7 @@ export default function AssignManagerModal({ isOpen, onClose, user, onSuccess })
                 </h2>
                 <button
                   onClick={onClose}
-                  className="p-2 hover:bg-white/10 rounded-xl transition-colors text-slate-400 hover:text-white"
+                  className="p-2 hover:bg-gray-100 rounded-xl transition-all text-gray-400 hover:text-gray-900 hover:rotate-90 duration-300"
                 >
                   <IoClose className="w-5 h-5" />
                 </button>
@@ -112,34 +112,36 @@ export default function AssignManagerModal({ isOpen, onClose, user, onSuccess })
 
               <div className="ui-modal-body flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
                 {user && (
-                  <div className="p-4 bg-white/5 rounded-xl border border-white/10">
-                    <p className="text-sm text-slate-400 mb-1">User</p>
-                    <p className="text-white font-semibold">{user.name}</p>
-                    <p className="text-xs text-slate-500">{user.email}</p>
+                  <div className="p-4 bg-gray-50 rounded-xl border border-gray-100 shadow-sm">
+                    <p className="text-[10px] text-gray-400 mb-1 uppercase tracking-widest font-black">User</p>
+                    <p className="text-gray-900 font-black text-lg">{user.name}</p>
+                    <div className="flex items-center gap-2 text-xs text-gray-500 font-medium">
+                      <span>{user.email}</span>
+                    </div>
                   </div>
                 )}
 
                 <div>
-                  <label className="ui-label flex items-center gap-2 mb-2">
+                  <label className="flex items-center gap-3 mb-2 cursor-pointer group">
                     <input
                       type="checkbox"
                       checked={isManager}
                       onChange={(e) => setIsManager(e.target.checked)}
-                      className="w-4 h-4 rounded border-slate-700 bg-slate-900 text-indigo-600 focus:ring-indigo-500 focus:ring-offset-0"
+                      className="w-5 h-5 rounded border-gray-300 bg-white text-[#161efd] focus:ring-[#161efd] transition-all"
                     />
-                    <span>Mark as Manager</span>
+                    <span className="text-sm font-black text-gray-900 uppercase tracking-wider">Mark as Manager</span>
                   </label>
-                  <p className="text-xs text-slate-500 ml-6">
+                  <p className="text-xs text-gray-400 ml-8 font-medium">
                     Managers can approve timesheets for their team members
                   </p>
                 </div>
 
                 <div>
-                  <label className="ui-label mb-2">Reporting Manager</label>
+                  <label className="text-xs font-black text-gray-400 uppercase tracking-widest mb-2 block">Reporting Manager</label>
                   <select
                     value={selectedManager}
                     onChange={(e) => setSelectedManager(e.target.value)}
-                    className="ui-input"
+                    className="ui-input font-bold"
                   >
                     <option value="">No Manager</option>
                     {managers
@@ -150,22 +152,22 @@ export default function AssignManagerModal({ isOpen, onClose, user, onSuccess })
                         </option>
                       ))}
                   </select>
-                  <p className="text-xs text-slate-500 mt-2">
+                  <p className="text-xs text-gray-400 mt-2 font-medium">
                     Select the manager who will approve this user's timesheets
                   </p>
                 </div>
 
-                <div className="flex gap-3 pt-4">
+                <div className="flex gap-4 pt-4">
                   <button
                     onClick={onClose}
-                    className="flex-1 py-3 text-sm font-bold text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-colors border border-transparent hover:border-white/10"
+                    className="flex-1 py-3 text-xs font-black text-gray-400 hover:text-gray-900 hover:bg-gray-50 rounded-xl transition-all uppercase tracking-wider"
                   >
                     Cancel
                   </button>
                   <button
                     onClick={handleSave}
                     disabled={loading}
-                    className="flex-1 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow-lg shadow-indigo-900/20 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50"
+                    className="flex-1 py-3 bg-[#161efd] hover:bg-blue-700 text-white rounded-xl font-black shadow-lg shadow-blue-500/20 transition-all flex items-center justify-center gap-2 active:scale-95 disabled:opacity-50 uppercase tracking-widest text-xs"
                   >
                     {loading ? (
                       <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />

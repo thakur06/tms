@@ -47,7 +47,7 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
   if (!isOpen) return null
 
   return (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-[#030712]/80 backdrop-blur-md">
+    <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
       {/* 1. Added 'layout' to the container so it animates its size */}
       <motion.div 
         layout 
@@ -55,18 +55,20 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="ui-card w-full max-w-md p-0 overflow-hidden shadow-2xl shadow-indigo-500/10"
+        className="ui-card w-full max-w-md p-0 overflow-hidden shadow-2xl border-gray-100"
       >
         {/* Header */}
-        <div className="relative px-8 pt-8 pb-4 border-b border-white/5 bg-white/[0.02]">
+        <div className="relative px-8 pt-8 pb-4 border-b border-gray-100 bg-gray-50/30">
           <div className="flex items-start justify-between">
             <motion.div layout="position">
-              <h2 className="text-2xl font-bold text-white tracking-tight">Create Task</h2>
-              <p className="text-sm text-slate-400 mt-1">Define new workspace objectives</p>
+              <h2 className="text-lg font-black text-gray-900 tracking-tight flex items-center gap-2 uppercase">
+                Initialize New Task
+              </h2>
+              <p className="text-[10px] text-gray-400 mt-1 font-black uppercase tracking-widest italic">Define new workspace objectives</p>
             </motion.div>
             <button
               onClick={handleClose}
-              className="p-2 text-slate-400 hover:text-white hover:bg-white/10 rounded-full transition-all duration-300"
+              className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-xl transition-all duration-300"
             >
               <IoClose size={24} />
             </button>
@@ -76,7 +78,7 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           {/* Input: Task Name */}
           <motion.div layout className="space-y-2">
-            <label className="ui-label flex items-center gap-2">
+            <label className="text-[10px] uppercase font-black tracking-widest text-gray-400 group-focus-within:text-[#161efd] transition-colors">
               <IoFlagOutline className="text-indigo-400" />
               Identification
             </label>
@@ -84,7 +86,7 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
               type="text"
               value={formData.task_name}
               onChange={(e) => setFormData({ ...formData, task_name: e.target.value })}
-              className="ui-input w-full"
+              className="ui-input w-full text-xs py-2.5"
               placeholder="e.g. System Architecture Audit"
               disabled={isLoading}
             />
@@ -101,16 +103,16 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
               <button
                 type="button"
                 onClick={() => setIsDeptOpen(!isDeptOpen)}
-                className={`w-full flex items-center justify-between px-4 py-3 bg-[#030712]/50 border rounded-xl text-sm font-medium transition-all duration-300 ${
+                className={`w-full flex items-center justify-between px-4 py-3 bg-white border rounded-xl text-sm font-black transition-all duration-300 ${
                   isDeptOpen 
-                    ? 'border-indigo-500 shadow-[0_0_15px_rgba(99,102,241,0.3)] text-white' 
-                    : 'border-white/10 text-slate-400 hover:border-white/20 hover:text-slate-200'
+                    ? 'border-[#161efd] shadow-[0_0_15px_rgba(22,30,253,0.1)] text-gray-900' 
+                    : 'border-gray-200 text-gray-900'
                 }`}
               >
-                <span className={formData.task_dept ? 'text-white' : 'text-slate-500'}>
+                <span className={formData.task_dept ? 'text-gray-900' : 'text-gray-400'}>
                   {formData.task_dept || 'Select department...'}
                 </span>
-                <IoChevronDown className={`text-indigo-400 transition-transform duration-500 ${isDeptOpen ? 'rotate-180' : ''}`} />
+                <IoChevronDown className={`text-[#161efd] transition-transform duration-500 ${isDeptOpen ? 'rotate-180' : ''}`} />
               </button>
 
               <AnimatePresence>
@@ -166,14 +168,14 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
             <button
               type="submit"
               disabled={isLoading || !formData.task_name || !formData.task_dept}
-              className="ui-btn ui-btn-primary w-full h-12 justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="ui-btn ui-btn-primary w-full h-11 justify-center gap-3 disabled:opacity-50 disabled:cursor-not-allowed text-xs uppercase tracking-widest font-black"
             >
               {isLoading ? (
-                <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
               ) : (
                 <>
-                  <IoAddCircle size={20} className="text-indigo-200" />
-                  <span>Initialize Task</span>
+                  <IoAddCircle size={18} />
+                  <span>Create Task</span>
                 </>
               )}
             </button>

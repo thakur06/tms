@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { ToastContainer, toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+import { toast } from "react-toastify";
 import {
   ResponsiveContainer,
   LineChart,
@@ -17,10 +16,16 @@ import {
 } from "recharts";
 import StatsCards from "../components/StatsCards";
 import { useAuth } from "../context/AuthContext";
+import {
+  IoAnalyticsOutline,
+  IoCalendarOutline,
+  IoDocumentTextOutline,
+  IoTimeOutline,
+  IoCheckmarkCircleOutline,
+} from "react-icons/io5";
 import { formatTime } from "../utils/formatters";
 import {
-  IoCalendarOutline,
-  IoTimeOutline,
+
   IoStatsChartOutline,
   IoFolderOutline,
   IoCheckmarkCircle,
@@ -30,7 +35,6 @@ import {
   IoBusinessOutline,
   IoLocationOutline,
   IoPeopleOutline,
-  IoAnalyticsOutline,
   IoConstructOutline,
   IoPeopleCircle,
   IoPeopleSharp,
@@ -271,12 +275,66 @@ export default function Dashboard() {
     };
   }, [timeEntries, projectsList]);
 
+  const colorMap = {
+    indigo: {
+      bg: "bg-amber-500/10",
+      text: "text-amber-500",
+      border: "border-amber-500/20",
+      accent: "from-amber-400 to-amber-600",
+      light: "bg-amber-500/5",
+      glow: "shadow-amber-500/10"
+    },
+    blue: {
+      bg: "bg-yellow-500/10",
+      text: "text-yellow-500",
+      border: "border-yellow-500/20",
+      accent: "from-yellow-400 to-yellow-600",
+      light: "bg-yellow-500/5",
+      glow: "shadow-yellow-500/10"
+    },
+    emerald: {
+      bg: "bg-orange-500/10",
+      text: "text-orange-500",
+      border: "border-orange-500/20",
+      accent: "from-orange-400 to-orange-600",
+      light: "bg-orange-500/5",
+      glow: "shadow-orange-500/10"
+    },
+    rose: {
+      bg: "bg-red-500/10",
+      text: "text-red-500",
+      border: "border-red-500/20",
+      accent: "from-red-400 to-red-600",
+      light: "bg-red-500/5",
+      glow: "shadow-red-500/10"
+    },
+    amber: {
+      bg: "bg-amber-500/10",
+      text: "text-amber-500",
+      border: "border-amber-500/20",
+      accent: "from-amber-400 to-amber-600",
+      light: "bg-amber-500/5",
+      glow: "shadow-amber-500/10"
+    },
+    violet: {
+      bg: "bg-orange-500/10",
+      text: "text-orange-500",
+      border: "border-orange-500/20",
+      accent: "from-orange-400 to-orange-600",
+      light: "bg-orange-500/5",
+      glow: "shadow-orange-500/10"
+    }
+  };
+
   const cards = [
     {
       label: "Active Projects",
       value: analytics.activeProjectsCount,
       icon: IoFolderOutline,
       color: "indigo",
+      trend: "2.5%",
+      trendType: "up",
+      hint: "Across all departments",
       data: analytics.entriesByCat.project,
       type: "projects",
       detail: "Worked on this week",
@@ -285,7 +343,10 @@ export default function Dashboard() {
       label: "Tasks Worked",
       value: analytics.tasksCount,
       icon: IoCheckmarkCircle,
-      color: "cyan",
+      color: "blue",
+      trend: "14%",
+      trendType: "up",
+      hint: "High productivity today",
       data: timeEntries,
       type: "tasks",
       detail: "Tasks this week",
@@ -295,12 +356,16 @@ export default function Dashboard() {
       value: analytics.totalTimeStr,
       icon: IoTimeOutline,
       color: "emerald",
+      trend: "5.2h",
+      trendType: "up",
+      unit: "Logged",
+      hint: "Approaching weekly goal",
       data: timeEntries,
       type: "time",
       detail: "Logged this week",
     },
     {
-      label: "PTO",
+      label: "Leave / PTO",
       value: formatDuration(
         0,
         analytics.entriesByCat.pto.reduce(
@@ -310,6 +375,9 @@ export default function Dashboard() {
       ),
       icon: RiBeerFill,
       color: "rose",
+      trend: "0.0h",
+      trendType: "neutral",
+      hint: "Planned time off",
       data: analytics.entriesByCat.pto,
       type: "pto",
       detail: "Time off",
@@ -324,7 +392,8 @@ export default function Dashboard() {
         ),
       ),
       icon: MdModelTraining,
-      color: "yellow",
+      color: "amber",
+      hint: "Upskilling activities",
       data: analytics.entriesByCat.training,
       type: "training",
       detail: "Learning hours",
@@ -340,12 +409,13 @@ export default function Dashboard() {
       ),
       icon: GiBrain,
       color: "blue",
+      hint: "Innovation & Research",
       data: analytics.entriesByCat.rd,
       type: "rd",
       detail: "Research time",
     },
     {
-      label: "Buisness Development",
+      label: "Business Dev",
       value: formatDuration(
         0,
         analytics.entriesByCat.bd.reduce(
@@ -354,10 +424,11 @@ export default function Dashboard() {
         ),
       ),
       icon: MdBusiness,
-      color: "from-yellow-400 to-yellow-600",
-      type: "red",
+      color: "indigo",
+      hint: "Strategic growth",
+      type: "bd",
       data: analytics.entriesByCat.bd,
-      detail: "Buisness Development",
+      detail: "Business Development",
     },
     {
       label: "Meetings",
@@ -369,10 +440,11 @@ export default function Dashboard() {
         ),
       ),
       icon: MdMeetingRoom,
-      color: "green",
+      color: "violet",
+      hint: "Internal syncs",
       type: "meetings",
       data: analytics.entriesByCat.meetings,
-      detail: "Meetings",
+      detail: "Daily Meetings",
     },
     {
       label: "Public Holiday",
@@ -384,10 +456,11 @@ export default function Dashboard() {
         ),
       ),
       icon: IoGameController,
-      color: "red",
-      type: "BD",
+      color: "amber",
+      hint: "National & public breaks",
+      type: "holidays",
       data: analytics.entriesByCat.holidays,
-      detail: "publicholiday",
+      detail: "Holidays",
     },
     {
       label: "Team Building",
@@ -399,7 +472,8 @@ export default function Dashboard() {
         ),
       ),
       icon: IoPeopleSharp,
-      color: "orange",
+      color: "violet",
+      hint: "Strategic collaboration",
       type: "teambuilding",
       data: analytics.entriesByCat.tb,
       detail: "Team Building",
@@ -471,20 +545,20 @@ export default function Dashboard() {
           {modalContent.data.map((item, idx) => (
             <div
               key={idx}
-              className="flex justify-between items-center p-3 bg-slate-800 rounded-lg"
+              className="flex justify-between items-center p-4 bg-gray-50 border border-gray-100 rounded-xl hover:bg-blue-50 hover:border-blue-100 transition-all"
             >
               <div>
-                <div className="font-bold text-white">{item.name}</div>
+                <div className="font-bold text-gray-900">{item.name}</div>
                 {item.code && (
-                  <div className="text-xs text-slate-500">{item.code}</div>
+                  <div className="text-xs text-gray-400 font-medium">{item.code}</div>
                 )}
                 {item.count && (
-                  <div className="text-xs text-slate-500">
+                  <div className="text-xs text-gray-400 font-medium">
                     {item.count} entries
                   </div>
                 )}
               </div>
-              <div className="text-indigo-400 font-mono font-bold">
+              <div className="text-[#161efd] font-mono font-black text-lg">
                 {item.totalDisplay}
               </div>
             </div>
@@ -496,19 +570,19 @@ export default function Dashboard() {
     return (
       <div className="space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
         {modalContent.data.map((item, idx) => (
-          <div key={idx} className="p-3 bg-slate-800 rounded-lg">
+          <div key={idx} className="p-4 bg-zinc-900 border border-white/5 rounded-xl hover:bg-white/5 transition-all">
             <div className="flex justify-between">
-              <div className="font-semibold text-white">
+              <div className="font-bold text-gray-200">
                 {item.project_name || item.project}
               </div>
-              <div className="text-sm text-slate-400">
+              <div className="text-xs text-gray-500 font-medium">
                 {new Date(item.entry_date).toLocaleDateString()}
               </div>
             </div>
-            <div className="text-sm text-indigo-300">{item.task_id}</div>
-            <div className="flex justify-between mt-2 text-xs text-slate-500">
+            <div className="text-sm text-amber-500 font-semibold mt-1">{item.task_id}</div>
+            <div className="flex justify-between mt-3 text-xs text-gray-500 font-medium">
               <div>{item.entry_date}</div>
-              <div className="font-mono text-white">
+              <div className="font-mono text-white font-bold">
                 {item.hours}h {item.minutes}m
               </div>
             </div>
@@ -520,34 +594,37 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-8 pb-10 p-3">
-      <ToastContainer position="top-right" autoClose={3000} theme="dark" />
 
-      <div className="relative overflow-hidden rounded-3xl p-8 border border-white/10 bg-gradient-to-r from-indigo-600/20 to-purple-600/20 backdrop-blur-2xl">
-        <div className="absolute inset-0 bg-grid-white/[0.02] bg-[size:20px_20px]" />
+      <div className="relative overflow-hidden rounded-3xl p-8 border border-white/5 bg-zinc-900 shadow-2xl">
+        <div className="absolute inset-0 bg-linear-to-br from-amber-500/10 via-transparent to-orange-500/10" />
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-          <div className="flex-1">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="p-2.5 bg-indigo-500/20 rounded-xl border border-indigo-500/30">
-                <IoAnalyticsOutline className="text-indigo-400" size={24} />
+          <div className="flex-1 space-y-1">
+            <nav className="flex items-center gap-2 text-xs font-black text-amber-500/60 uppercase tracking-widest mb-2">
+              <span>Overview</span>
+              <span className="opacity-30">/</span>
+              <span className="text-white">Dashboard</span>
+            </nav>
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-amber-500/20 rounded-2xl border border-amber-500/30 text-amber-500 shadow-lg shadow-amber-500/10">
+                <IoAnalyticsOutline size={28} />
               </div>
-              <h1 className="text-3xl font-black text-white tracking-tight">
-                Analytics Dashboard
-              </h1>
+              <div>
+                <h1 className="text-2xl font-black text-white tracking-tight leading-none">
+                  Activity Hub
+                </h1>
+                <p className="text-gray-400 mt-1.5 text-xs font-bold italic">Real-time workspace insights and productivity metrics.</p>
+              </div>
             </div>
-            <p className="text-slate-400 max-w-2xl text-lg">
-              Real-time insights into your projects, time tracking, and
-              productivity metrics.
-            </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link to="/time-log" className="ui-btn ui-btn-primary">
+            <Link to="/time-log" className="px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20 active:scale-95 text-xs uppercase tracking-widest">
               <IoCalendarOutline size={18} />
               Time Log
             </Link>
             <button
               onClick={() => window.location.reload()}
-              className="ui-btn ui-btn-secondary"
+              className="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-black transition-all border border-white/5 active:scale-95 text-xs uppercase tracking-widest"
             >
               Refresh Data
             </button>
@@ -555,40 +632,43 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
-        {cards.map((card, idx) => (
-          <motion.div
-            key={idx}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: idx * 0.05 }}
-            whileHover={{ scale: 1.05, y: -5 }}
-            whileTap={{ scale: 0.98 }}
-            className="ui-card p-6 cursor-pointer hover:border-indigo-500/50 transition-all group relative overflow-hidden"
-            onClick={() => handleCardClick(card)}
-          >
-            <div className="absolute inset-0 bg-gradient-to-br from-indigo-500/5 via-transparent to-purple-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-            <div className="relative z-10">
-              <div className="flex justify-between items-start mb-4">
-                <div
-                  className={`p-3 rounded-xl bg-${card.color}-500/10 text-${card.color}-400 border border-${card.color}-500/20 shadow-lg shadow-${card.color}-500/10 group-hover:shadow-${card.color}-500/30 transition-all`}
-                >
-                  <card.icon size={24} className="group-hover:scale-110 transition-transform" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+        {cards.map((card, idx) => {
+          const colors = colorMap[card.color] || colorMap.indigo;
+          return (
+            <motion.div
+              key={idx}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: idx * 0.04 }}
+              whileHover={{ y: -4 }}
+              className="bg-zinc-900 rounded-3xl p-6 cursor-pointer border border-white/5 hover:border-amber-500/20 transition-all group relative"
+              onClick={() => handleCardClick(card)}
+            >
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className={`${colors.text} p-2 rounded-xl bg-zinc-800 transition-colors`}>
+                    <card.icon size={22} />
+                  </div>
+                  <div className="text-gray-400 text-[10px] font-black uppercase tracking-widest">
+                    {card.label}
+                  </div>
                 </div>
+                
+                <div className="space-y-1">
+                  <div className="text-3xl font-black text-white tracking-tighter">
+                    {card.value}
+                  </div>
+                  <p className="text-[10px] text-gray-500 font-bold italic truncate">
+                    {card.detail}
+                  </p>
+                </div>
+
+                <div className={`absolute bottom-6 right-6 w-1 h-1 rounded-full ${colors.text.replace('text-', 'bg-')} opacity-40 shadow-[0_0_8px_currentColor]`} />
               </div>
-              <div>
-                <div className="text-slate-400 text-sm font-medium">
-                  {card.label}
-                </div>
-                <div className="text-2xl font-bold text-white mt-1 group-hover:text-gradient transition-all">
-                  {card.value}
-                </div>
-                <div className="text-xs text-slate-500 mt-2">{card.detail}</div>
-              </div>
-            </div>
-          </motion.div>
-        ))}
+            </motion.div>
+          );
+        })}
       </div>
 
       {/* --- Charts Grid --- */}
@@ -598,11 +678,11 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="ui-card p-6 bg-slate-900 border-slate-800 hover:border-indigo-500/30 transition-all"
+          className="ui-card p-6 bg-zinc-900 border-white/5 hover:border-amber-500/20 transition-all shadow-sm"
         >
           <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-            <div className="p-2 bg-indigo-500/10 rounded-lg border border-indigo-500/20">
-              <IoStatsChartOutline className="text-indigo-400" />
+            <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-amber-500">
+              <IoStatsChartOutline />
             </div>
             Daily Activity
           </h3>
@@ -616,41 +696,44 @@ export default function Dashboard() {
                       <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
                     </linearGradient>
                   </defs>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#334155" opacity={0.3} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
                   <XAxis
                     dataKey="date"
-                    stroke="#94a3b8"
+                    stroke="#64748b"
                     fontSize={12}
+                    tickLine={false}
+                    axisLine={false}
                     tickFormatter={(str) =>
                       new Date(str).toLocaleDateString(undefined, {
                         weekday: "short",
                       })
                     }
                   />
-                  <YAxis stroke="#94a3b8" fontSize={12} />
+                  <YAxis stroke="#64748b" fontSize={12} tickLine={false} axisLine={false} />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#1e293b",
-                      borderColor: "#6366f1",
-                      color: "#f8fafc",
+                      backgroundColor: "#18181b",
+                      borderColor: "#27272a",
+                      color: "#f4f4f5",
                       borderRadius: "12px",
-                      boxShadow: "0 10px 40px rgba(0,0,0,0.5)"
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.5)",
+                      border: "1px solid #27272a"
                     }}
-                    itemStyle={{ color: "#fff" }}
+                    itemStyle={{ color: "#e4e4e7" }}
                   />
                   <Line
                     type="monotone"
                     dataKey="hours"
-                    stroke="#6366f1"
+                    stroke="#f59e0b"
                     strokeWidth={3}
-                    dot={{ r: 5, fill: "#6366f1", strokeWidth: 2, stroke: "#1e293b" }}
-                    activeDot={{ r: 7, fill: "#818cf8", stroke: "#6366f1", strokeWidth: 2 }}
+                    dot={{ r: 5, fill: "#f59e0b", strokeWidth: 2, stroke: "#18181b" }}
+                    activeDot={{ r: 7, fill: "#fbbf24", stroke: "#18181b", strokeWidth: 2 }}
                     fill="url(#colorHours)"
                   />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <div className="text-slate-500 flex flex-col items-center">
+              <div className="text-gray-500 flex flex-col items-center">
                 <IoStatsChartOutline size={48} className="mb-2 opacity-20" />
                 <p>No activity data available</p>
               </div>
@@ -659,9 +742,9 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Location Split Chart */}
-        <div className="ui-card p-6 bg-slate-900 border-slate-800">
+        <div className="ui-card p-6 bg-zinc-900 border-white/5">
           <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-            <IoLocationOutline className="text-emerald-400" />
+            <IoLocationOutline className="text-amber-500" />
             Work Location
           </h3>
           <div className="h-[300px] w-full flex items-center justify-center">
@@ -690,16 +773,20 @@ export default function Dashboard() {
                   </Pie>
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: "#1e293b",
-                      borderColor: "#334155",
-                      color: "#f8fafc",
+                      backgroundColor: "#ffffff",
+                      borderColor: "#e2e8f0",
+                      color: "#1e293b",
+                      borderRadius: "12px",
+                      boxShadow: "0 10px 40px rgba(0,0,0,0.1)",
+                      border: "1px solid #e2e8f0"
                     }}
+                    itemStyle={{ color: "#1e293b" }}
                   />
                   <Legend />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="text-slate-500">No location data available</div>
+              <div className="text-gray-500">No location data available</div>
             )}
           </div>
         </div>
@@ -708,10 +795,10 @@ export default function Dashboard() {
       {/* --- Projects & Clients Grid --- */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Projects List */}
-        <div className="ui-card p-0 overflow-hidden bg-slate-900 border-slate-800">
+        <div className="ui-card p-0 overflow-hidden bg-zinc-900 border-white/5">
           <div className="p-6 border-b border-white/5">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <IoFolderOutline className="text-amber-400" />
+              <IoFolderOutline className="text-amber-500" />
               Top Projects
             </h3>
           </div>
@@ -723,30 +810,30 @@ export default function Dashboard() {
                   className="p-4 hover:bg-white/5 transition-colors flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-400 font-bold text-xs">
+                    <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 font-bold text-xs ring-1 ring-amber-500/20">
                       {i + 1}
                     </div>
                     <div>
-                      <div className="font-medium text-white">
+                      <div className="font-medium text-gray-200">
                         {project.name}
                       </div>
-                      <div className="text-xs text-slate-500">
+                      <div className="text-xs text-gray-500">
                         {project.code}
                       </div>
                     </div>
                   </div>
                   <div className="text-right">
-                    <div className="font-mono text-indigo-400 font-bold">
+                    <div className="font-mono text-amber-500 font-bold">
                       {project.totalTime}
                     </div>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-gray-600">
                       {project.progress.toFixed(0)}%
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="p-8 text-center text-slate-500">
+              <div className="p-8 text-center text-gray-500">
                 No project activity this week
               </div>
             )}
@@ -754,10 +841,10 @@ export default function Dashboard() {
         </div>
 
         {/* Top Clients List */}
-        <div className="ui-card p-0 overflow-hidden bg-slate-900 border-slate-800">
+        <div className="ui-card p-0 overflow-hidden bg-zinc-900 border-white/5">
           <div className="p-6 border-b border-white/5">
             <h3 className="text-lg font-bold text-white flex items-center gap-2">
-              <IoPeopleOutline className="text-rose-400" />
+              <IoPeopleOutline className="text-rose-500" />
               Top Clients
             </h3>
           </div>
@@ -769,16 +856,16 @@ export default function Dashboard() {
                   className="p-4 hover:bg-white/5 transition-colors flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-400 font-bold text-xs">
+                    <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500 font-bold text-xs ring-1 ring-rose-500/20">
                       {client.name.charAt(0)}
                     </div>
-                    <div className="font-medium text-white">{client.name}</div>
+                    <div className="font-medium text-gray-200">{client.name}</div>
                   </div>
                   <div className="text-right">
-                    <div className="font-mono text-indigo-400 font-bold">
+                    <div className="font-mono text-rose-500 font-bold">
                       {client.totalTime}
                     </div>
-                    <div className="w-24 h-1.5 bg-slate-700 rounded-full mt-2 overflow-hidden">
+                    <div className="w-24 h-1.5 bg-zinc-800 rounded-full mt-2 overflow-hidden">
                       <div
                         className="h-full bg-rose-500 rounded-full"
                         style={{ width: `${client.percentage}%` }}
@@ -788,7 +875,7 @@ export default function Dashboard() {
                 </div>
               ))
             ) : (
-              <div className="p-8 text-center text-slate-500">
+              <div className="p-8 text-center text-gray-500">
                 No client details available
               </div>
             )}
@@ -797,22 +884,22 @@ export default function Dashboard() {
       </div>
 
       {/* --- Recent Activity Table --- */}
-      <div className="ui-card p-0 overflow-hidden bg-slate-900 border-slate-800">
+      <div className="ui-card p-0 overflow-hidden bg-zinc-900 border-white/5">
         <div className="p-6 border-b border-white/5 flex justify-between items-center">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <IoConstructOutline className="text-cyan-400" />
+            <IoConstructOutline className="text-cyan-500" />
             Recent Activity
           </h3>
           <Link
             to="/time-log"
-            className="text-xs font-medium text-indigo-400 hover:text-indigo-300"
+            className="text-xs font-semibold text-amber-500 hover:text-amber-400 hover:underline"
           >
             View All
           </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-slate-400">
-            <thead className="bg-white/5 text-xs uppercase font-semibold text-slate-300">
+          <table className="w-full text-left text-sm text-gray-400">
+            <thead className="bg-white/5 text-xs uppercase font-bold text-gray-500">
               <tr>
                 <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4">Project</th>
@@ -829,27 +916,27 @@ export default function Dashboard() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className="hover:bg-gradient-to-r hover:from-indigo-500/5 hover:to-purple-500/5 transition-all group"
+                    className="hover:bg-white/5 transition-all group"
                   >
-                    <td className="px-6 py-4 text-white font-medium">
+                    <td className="px-6 py-4 text-gray-200 font-semibold">
                       {new Date(entry.entry_date).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-white group-hover:text-indigo-300 transition-colors">
+                      <div className="text-gray-200 group-hover:text-amber-500 transition-colors font-medium">
                         {entry.project_name || entry.project}
                       </div>
-                      <div className="text-xs opacity-50">{entry.client}</div>
+                      <div className="text-xs text-gray-500">{entry.client}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-lg bg-slate-800 text-slate-300 text-xs border border-white/10 group-hover:border-indigo-500/30 group-hover:bg-indigo-500/10 transition-all">
+                      <span className="inline-flex items-center px-3 py-1 rounded-lg bg-zinc-800 text-gray-400 text-xs border border-white/10 group-hover:border-amber-500/30 group-hover:bg-amber-500/10 transition-all font-bold">
                         {entry.task_id}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right font-mono text-indigo-400 font-bold">
+                    <td className="px-6 py-4 text-right font-mono text-amber-500 font-black">
                       {entry.hours}h {entry.minutes}m
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-emerald-400 flex justify-end gap-1 items-center text-xs font-bold uppercase">
+                      <span className="text-emerald-500 flex justify-end gap-1.5 items-center text-xs font-bold uppercase tracking-wider">
                         <IoCheckmarkCircle className="group-hover:scale-110 transition-transform" /> Logged
                       </span>
                     </td>
@@ -857,7 +944,7 @@ export default function Dashboard() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="p-8 text-center text-slate-500">
+                  <td colSpan="5" className="p-8 text-center text-gray-500">
                     No recent activity
                   </td>
                 </tr>
@@ -875,31 +962,31 @@ export default function Dashboard() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
             onClick={() => setModalOpen(false)}
           >
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-2xl bg-slate-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
+              className="w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-6 border-b border-white/10 flex justify-between items-center">
+              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
                 <div>
-                  <h3 className="text-xl font-bold text-white">
+                  <h3 className="text-xl font-black text-white">
                     {modalContent.title}
                   </h3>
-                  <p className="text-sm text-slate-400">
+                  <p className="text-sm text-gray-400 font-medium">
                     {modalContent.detail}
                   </p>
                 </div>
-                <button
-                  onClick={() => setModalOpen(false)}
-                  className="p-2 hover:bg-white/10 rounded-lg text-slate-400 hover:text-white"
-                >
-                  <IoClose size={24} />
-                </button>
+                  <button
+                    onClick={() => setModalOpen(false)}
+                    className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                  >
+                    <IoClose size={24} />
+                  </button>
               </div>
               <div className="p-6">{renderModalContent()}</div>
             </motion.div>

@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react"
-import { ToastContainer, toast, Zoom } from "react-toastify"
-import "react-toastify/dist/ReactToastify.css"
+import { toast, Zoom } from "react-toastify"
 import ProjectsList from "../components/ProjectsList"
 import CreateProjectModal from "../components/CreateProjectModal"
 import { motion } from "framer-motion"
@@ -218,14 +217,6 @@ export default function Projects() {
 
   return (
     <div className="space-y-6">
-      <ToastContainer
-        position="top-center"
-        autoClose={2000}
-        hideProgressBar
-        theme="dark"
-        transition={Zoom}
-        style={{ zIndex: 9999 }}
-      />
 
       {/* Stats Section */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -234,15 +225,15 @@ export default function Projects() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1 }}
           whileHover={{ scale: 1.03, y: -3 }}
-          className="ui-card p-4 flex items-center gap-4 group relative overflow-hidden"
+          className="ui-card p-4 flex items-center gap-4 group relative overflow-hidden transition-all shadow-sm hover:shadow-xl border-gray-100"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="relative z-10 p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20 shadow-[0_0_15px_rgba(59,130,246,0.15)] group-hover:shadow-[0_0_25px_rgba(59,130,246,0.3)] transition-all">
+          <div className="absolute inset-0 bg-linear-to-br from-blue-500/5 via-transparent to-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="relative z-10 p-3 bg-blue-50 text-[#161efd] rounded-xl border border-blue-100 shadow-sm group-hover:shadow-blue-200 transition-all">
             <IoBusinessOutline size={24} className="group-hover:scale-110 transition-transform" />
           </div>
           <div className="relative z-10">
-            <p className="text-sm text-slate-400">Total Projects</p>
-            <p className="text-2xl font-bold text-white group-hover:text-gradient transition-all">{stats.total}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Total Projects</p>
+            <p className="text-xl font-black text-gray-900 transition-all">{stats.total}</p>
           </div>
         </motion.div>
 
@@ -251,15 +242,15 @@ export default function Projects() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
           whileHover={{ scale: 1.03, y: -3 }}
-          className="ui-card p-4 flex items-center gap-4 group relative overflow-hidden"
+          className="ui-card p-4 flex items-center gap-4 group relative overflow-hidden transition-all shadow-sm hover:shadow-xl border-gray-100"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/5 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="relative z-10 p-3 bg-emerald-500/10 text-emerald-400 rounded-xl border border-emerald-500/20 shadow-[0_0_15px_rgba(16,185,129,0.15)] group-hover:shadow-[0_0_25px_rgba(16,185,129,0.3)] transition-all">
+          <div className="absolute inset-0 bg-linear-to-br from-emerald-500/5 via-transparent to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="relative z-10 p-3 bg-emerald-50 text-emerald-600 rounded-xl border border-emerald-100 shadow-sm group-hover:shadow-emerald-200 transition-all">
             <IoLocationOutline size={24} className="group-hover:scale-110 transition-transform" />
           </div>
           <div className="relative z-10 min-w-0">
-            <p className="text-sm text-slate-400">Top Location</p>
-            <p className="text-xl font-bold text-white truncate group-hover:text-gradient-success transition-all">{getTopLocation()}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Top Location</p>
+            <p className="text-lg font-black text-gray-900 truncate transition-all">{getTopLocation()}</p>
           </div>
         </motion.div>
 
@@ -268,42 +259,58 @@ export default function Projects() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
           whileHover={{ scale: 1.03, y: -3 }}
-          className="ui-card p-4 flex items-center gap-4 group relative overflow-hidden"
+          className="ui-card p-4 flex items-center gap-4 group relative overflow-hidden transition-all shadow-sm hover:shadow-xl border-gray-100"
         >
-          <div className="absolute inset-0 bg-gradient-to-br from-amber-500/5 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-          <div className="relative z-10 p-3 bg-amber-500/10 text-amber-400 rounded-xl border border-amber-500/20 shadow-[0_0_15px_rgba(245,158,11,0.15)] group-hover:shadow-[0_0_25px_rgba(245,158,11,0.3)] transition-all">
+          <div className="absolute inset-0 bg-linear-to-br from-amber-500/5 via-transparent to-amber-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+          <div className="relative z-10 p-3 bg-amber-50 text-amber-600 rounded-xl border border-amber-100 shadow-sm group-hover:shadow-amber-200 transition-all">
             <IoCodeSlashOutline size={24} className="group-hover:scale-110 transition-transform" />
           </div>
           <div className="relative z-10">
-            <p className="text-sm text-slate-400">Active Projects</p>
-            <p className="text-2xl font-bold text-white group-hover:text-gradient transition-all">{stats.active}</p>
+            <p className="text-[10px] font-black uppercase tracking-widest text-gray-400">Active Projects</p>
+            <p className="text-xl font-black text-gray-900 transition-all">{stats.active}</p>
           </div>
         </motion.div>
       </div>
 
       {/* Main Content */}
-      <div className="overflow-hidden">
-        <ProjectsList 
-          projects={projects} 
-          onDeleteProject={handleDeleteProject}
-          onEditProject={(project) => {
-             setEditingProject(project)
-             setShowProjectModal(true)
-          }}
-          headerAction={
-            <button
-              onClick={() => {
-                setEditingProject(null)
-                setShowProjectModal(true)
+            <div className="mb-8">
+              <nav className="flex items-center gap-2 text-xs font-black text-gray-500 uppercase tracking-widest mb-2">
+                <span>Management</span>
+                <span className="opacity-30">/</span>
+                <span className="text-[#161efd]">Projects</span>
+              </nav>
+              <div className="flex items-center gap-4">
+                <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100 text-[#161efd] shadow-sm">
+                  <IoBusinessOutline size={28} />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-black text-gray-900 tracking-tight leading-none">
+                    Project Directory
+                  </h1>
+                  <p className="text-gray-500 mt-1.5 text-xs font-bold italic">Global workspace initiative tracking</p>
+                </div>
+              </div>
+            </div>
+            <ProjectsList 
+              projects={projects} 
+              onDeleteProject={handleDeleteProject}
+              onEditProject={(project) => {
+                 setEditingProject(project)
+                 setShowProjectModal(true)
               }}
-              className="ui-btn ui-btn-primary w-full sm:w-auto"
-            >
-              <IoAddOutline size={18} />
-              New Project
-            </button>
-          }
-        />
-      </div>
+              headerAction={
+                <button
+                  onClick={() => {
+                    setEditingProject(null)
+                    setShowProjectModal(true)
+                  }}
+                  className="ui-btn ui-btn-primary w-full sm:w-auto text-xs uppercase font-black tracking-widest h-11 px-6 shadow-blue-500/20"
+                >
+                  <IoAddOutline size={18} />
+                  New Project
+                </button>
+              }
+            />
 
       {/* Create/Edit Project Modal */}
       <CreateProjectModal
