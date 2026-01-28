@@ -102,7 +102,7 @@ export default function ComplianceTable({
                                                 ${hours > 0 ? (isLow ? 'text-amber-500 bg-amber-500/10' : 'text-white bg-white/5') : 'text-gray-700'}
                                                 ${isMissing && dateStr < new Date().toISOString().split('T')[0] ? 'bg-red-500/5 text-red-500/50' : ''}
                                             `}>
-                                                {hours > 0 ? Number(hours).toFixed(1) : '-'}
+                                                {hours > 0 ? Number(hours).toFixed(1)+"h" : '-'}
                                             </div>
                                         </td>
                                     );
@@ -110,7 +110,7 @@ export default function ComplianceTable({
 
                                 {/* Total */}
                                 <td className="p-4 text-center font-mono font-black text-white bg-zinc-900 group-hover:bg-zinc-800 transition-colors border-l border-white/5">
-                                    {Number(item.totalHours).toFixed(1)}
+                                    {Number(item.totalHours).toFixed(1)+"h"}
                                 </td>
 
                                 {/* Actions */}

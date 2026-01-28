@@ -219,7 +219,7 @@ export default function TimesheetReviewPage() {
                             </div>
                         </td>
                         <td className="p-4 border-r border-white/5">
-                             <span className="text-gray-200 font-bold truncate">{row.task}</span>
+                             <span className="text-gray-200 font-bold truncate text-wrap max-w-3">{row.task}</span>
                         </td>
                         {weekDays.map(day => {
                             const dateStr = day.toISOString().split('T')[0];
@@ -229,7 +229,7 @@ export default function TimesheetReviewPage() {
                                 <td key={dateStr} className="p-2 text-center relative group/cell">
                                     {cell?.hours > 0 ? (
                                         <div className="flex flex-col items-center">
-                                            <span className="text-white font-mono font-bold">{cell.hours.toFixed(1)}</span>
+                                            <span className="text-white font-mono font-bold">{cell.hours.toFixed(1)+"h"}</span>
                                             {cell.remarks && (
                                                 <div className="absolute top-1 right-1">
                                                      <IoChatbubbleEllipsesOutline size={10} className="text-amber-500/50" />
@@ -265,12 +265,12 @@ export default function TimesheetReviewPage() {
                        const dayTotal = rows.reduce((acc, r) => acc + (r.days[dateStr]?.hours || 0), 0);
                        return (
                            <td key={dateStr} className="p-4 text-center text-white font-mono">
-                               {dayTotal > 0 ? dayTotal.toFixed(1) : '-'}
+                               {dayTotal > 0 ? dayTotal.toFixed(1)+"h" : '-'}
                            </td>
                        );
                   })}
                   <td className="p-4 text-center text-amber-500 bg-amber-500/5">
-                      {parseFloat(timesheet.total_hours).toFixed(1)}h
+                      {parseFloat(timesheet.total_hours).toFixed(1)+"h"}
                   </td>
               </tr>
           </tfoot>
