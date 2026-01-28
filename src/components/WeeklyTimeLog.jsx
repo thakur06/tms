@@ -56,7 +56,7 @@ function SearchableSelect({ options, value, onChange, placeholder, className }) 
       </div>
 
       {isOpen && (
-        <div className="absolute z-[9999] top-full left-0 w-[200px] mt-1 bg-zinc-900 border border-amber-500/20 rounded-xl shadow-2xl max-h-[100px] overflow-hidden flex flex-col hide-y-scroll">
+        <div className="absolute z-9999 top-full left-0 w-[200px] mt-1 bg-zinc-900 border border-amber-500/20 rounded-xl shadow-2xl max-h-[100px] overflow-hidden flex flex-col hide-y-scroll">
           <div className="p-2 border-b border-white/5 sticky top-0 bg-zinc-900">
             <input
               autoFocus
