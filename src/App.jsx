@@ -7,6 +7,7 @@ import TimeReports from './pages/TimeReports';
 import TimesheetApprovalsPage from './pages/TimesheetApprovalsPage';
 import MyTimesheetStatus from './pages/MyTimesheetStatus';
 import UserManagement from './pages/UserManagement';
+import ComplianceReportPage from './pages/ComplianceReportPage';
 import Header from './components/Header';
 import Login from './pages/Login';
 import NotFound from './pages/NotFound';
@@ -45,6 +46,7 @@ function AppContent() {
         <Route path="/projects" element={<Projects />} />
         <Route path="/reports" element={<TimeReports />} />
         <Route path="/approvals" element={<TimesheetApprovalsPage />} />
+        <Route path="/compliance" element={<ComplianceReportPage />} />
         <Route path="/my-submissions" element={<MyTimesheetStatus />} />
         <Route path="/users" element={<UserManagement />} />
         <Route path="/analytics" element={<Analytics />} />

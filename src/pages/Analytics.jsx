@@ -86,9 +86,23 @@ const MultiSelect = ({
 
   return (
     <div className="space-y-2 multiselect-container">
-      <label className="text-[10px] font-black text-gray-400 flex items-center gap-2 uppercase tracking-widest">
-        {Icon && <Icon className="text-amber-500" size={14} />}
-        {label}
+      <label className="text-[10px] font-black text-gray-400 flex items-center justify-between uppercase tracking-widest">
+        <div className="flex items-center gap-2">
+            {Icon && <Icon className="text-amber-500" size={14} />}
+            {label}
+        </div>
+        {selectedValues.length > 0 && (
+            <button 
+                onClick={(e) => {
+                    e.stopPropagation();
+                    onChange([]);
+                }}
+                className="text-amber-500 hover:text-white transition-colors"
+                title="Clear Selection"
+            >
+                <IoClose size={14} />
+            </button>
+        )}
       </label>
       <div className="relative">
         <button
@@ -107,7 +121,7 @@ const MultiSelect = ({
           >
             {selectedValues.length > 0
               ? `${selectedValues.length} selected`
-              : `Select ${label}...`}
+              : `All`} 
           </span>
           <IoChevronDown
             className={`text-amber-500 transition-transform ${isOpen ? "rotate-180" : ""}`}
@@ -123,7 +137,7 @@ const MultiSelect = ({
               exit={{ opacity: 0, y: 10 }}
               className="absolute top-full left-0 right-0 mt-2 border border-white/10 rounded-xl overflow-hidden z-50 shadow-2xl bg-zinc-900"
             >
-              <div className="p-2 border-b border-white/5">
+              <div className="p-2 border-b border-white/5 space-y-2">
                 <div className="relative">
                   <IoSearchOutline
                     className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
@@ -137,6 +151,20 @@ const MultiSelect = ({
                     autoFocus
                   />
                 </div>
+                <div className="flex justify-between px-1">
+                    <button 
+                        onClick={() => onChange(options)}
+                        className="text-[10px] text-amber-500 hover:text-amber-400 font-bold uppercase tracking-wider"
+                    >
+                        Select All
+                    </button>
+                    <button 
+                        onClick={() => onChange([])}
+                        className="text-[10px] text-gray-500 hover:text-white font-bold uppercase tracking-wider"
+                    >
+                        Clear
+                    </button>
+                </div>
               </div>
               <div className="max-h-48 overflow-y-auto custom-scrollbar p-1">
                 {filtered.map((opt) => (
@@ -148,7 +176,7 @@ const MultiSelect = ({
                         ? selectedValues.filter((s) => s !== opt)
                         : [...selectedValues, opt];
                       onChange(newSelected);
-                      setSearch(""); 
+                      // setSearch(""); // Keep search open
                     }}
                     className="w-full px-3 py-1.5 text-left text-xs text-gray-400 hover:bg-amber-500/10 hover:text-amber-500 transition-all flex items-center justify-between rounded-lg font-bold"
                   >
@@ -192,10 +220,14 @@ export const Analytics = () => {
   // Applied Filters (Used for analytics calculation)
   const [selectedUsers, setSelectedUsers] = useState([]);
   const [selectedDepts, setSelectedDepts] = useState([]);
+  const [selectedProjects, setSelectedProjects] = useState([]);
+  const [selectedLocations, setSelectedLocations] = useState([]);
 
   // Temporary Filters (Connected to UI inputs)
   const [tempSelectedUsers, setTempSelectedUsers] = useState([]);
   const [tempSelectedDepts, setTempSelectedDepts] = useState([]);
+  const [tempSelectedProjects, setTempSelectedProjects] = useState([]);
+  const [tempSelectedLocations, setTempSelectedLocations] = useState([]);
 
   const [pageTitle, setPageTitle] = useState("Overall Analytics");
 
@@ -207,6 +239,11 @@ export const Analytics = () => {
     type: "",
     detail: "",
   });
+
+  // Derived Lists
+  const locationsList = useMemo(() => {
+     return [...new Set(projectsList.map(p => p.location).filter(Boolean))];
+  }, [projectsList]);
 
   // Fetch Filters Data (Users, Projects for global counts)
   useEffect(() => {
@@ -244,90 +281,138 @@ export const Analytics = () => {
   const handleClearFilters = () => {
     setTempSelectedUsers([]);
     setTempSelectedDepts([]);
+    setTempSelectedProjects([]);
+    setTempSelectedLocations([]);
+    
     setSelectedUsers([]);
     setSelectedDepts([]);
+    setSelectedProjects([]);
+    setSelectedLocations([]);
+
+    // Default to last 30 days
     setStartDate(new Date(new Date().setDate(new Date().getDate() - 30)));
     setEndDate(new Date());
-    setReportData([]);
+
     setPageTitle("Overall Analytics");
     toast.info("Filters cleared");
+    // Trigger re-fetch with clean state? 
+    // Effect dependency on [startDate] might handle it or we call fetch manually later
+    // For now, let's just let the user click "Apply Filters" or "Fetch"
   };
 
-  // Core Fetch Logic (Just gets the raw data based on Date)
-  const fetchRawData = async () => {
-    if (!startDate || !endDate) return null;
+  // Core Fetch Logic
+  const fetchReportData = async (filters = {}) => {
+    if (!startDate || !endDate) return;
     setIsLoading(true);
     try {
       const token = localStorage.getItem("token");
       const startStr = startDate.toISOString().split("T")[0];
       const endStr = endDate.toISOString().split("T")[0];
-
+      
+      const params = {
+          startDate: startStr,
+          endDate: endStr,
+          users: filters.users,
+          projects: filters.projects,
+          locations: filters.locations,
+          depts: filters.depts
+      };
+      
+      // Axios handles array params serialization? 
+      // Default: indices (users[0]=a). We might need paramsSerializer for comma handling or repeated keys.
+      // Let's use `qs` or just let backend handle axios default.
+      // Backend (Express) usually understands `users[]`.
+      // My backend implementation used parseArray checked for single or array.
+      
       const response = await axios.get(`${server}/api/reports/time-entries`, {
-        params: { startDate: startStr, endDate: endStr },
+        params,
         headers: { Authorization: `Bearer ${token}` },
       });
-      return response.data.users || [];
+      
+      setReportData(response.data.users || []);
     } catch (error) {
       console.error("Failed to fetch report data", error);
       toast.error("Failed to load analytics data");
-      return [];
     } finally {
       setIsLoading(false);
     }
   };
 
-  // 1. Fetch User Data Button
-  const handleFetchUsers = async () => {
-    // Always refresh data to be safe, or check if dates changed. For simplicity, refetch.
-    const data = await fetchRawData();
-    if (data) {
-      setReportData(data);
+  // Apply Filters Button Handler
+  const handleApplyFilters = () => {
+      // Commit temps to actuals
       setSelectedUsers(tempSelectedUsers);
-      setSelectedDepts([]); // Clear dept filter
-
-      // Set Title
-      if (tempSelectedUsers.length === 0) setPageTitle("All Users Analytics");
-      else setPageTitle(`Data for ${tempSelectedUsers.join(", ")}`);
-    }
+      setSelectedDepts(tempSelectedDepts);
+      setSelectedProjects(tempSelectedProjects);
+      setSelectedLocations(tempSelectedLocations);
+      
+      fetchReportData({
+          users: tempSelectedUsers,
+          depts: tempSelectedDepts,
+          projects: tempSelectedProjects,
+          locations: tempSelectedLocations
+      });
+      
+      // Update Title
+      if (tempSelectedUsers.length > 0) setPageTitle("Filtered: Specific Users");
+      else if (tempSelectedProjects.length > 0) setPageTitle("Filtered: Specific Projects");
+      else if (tempSelectedDepts.length > 0) setPageTitle("Filtered: Specific Departments");
+      else setPageTitle("Overall Analytics");
   };
 
-  // 2. Fetch Dept Data Button
-  const handleFetchDepts = async () => {
-    const data = await fetchRawData();
-    if (data) {
-      setReportData(data);
-      setSelectedDepts(tempSelectedDepts);
-      setSelectedUsers([]); // Clear user filter
+  const handleExportExcel = async () => {
+      if (!startDate || !endDate) return;
+      try {
+          const token = localStorage.getItem("token");
+          const startStr = startDate.toISOString().split("T")[0];
+          const endStr = endDate.toISOString().split("T")[0];
+          
+          const params = {
+            startDate: startStr,
+            endDate: endStr,
+            users: selectedUsers,
+            projects: selectedProjects,
+            locations: selectedLocations,
+            depts: selectedDepts
+          };
 
-      // Set Title
-      if (tempSelectedDepts.length === 0)
-        setPageTitle("All Departments Analytics");
-      else setPageTitle(`Data for ${tempSelectedDepts.join(", ")}`);
-    }
+          const response = await axios.get(`${server}/api/reports/export`, {
+             params,
+             headers: { Authorization: `Bearer ${token}` },
+             responseType: 'blob' // Important
+          });
+          
+          // Create download link
+          const url = window.URL.createObjectURL(new Blob([response.data]));
+          const link = document.createElement('a');
+          link.href = url;
+          link.setAttribute('download', `TimeReport_${startStr}_to_${endStr}.xlsx`);
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+          
+          toast.success("Excel exported successfully!");
+      } catch (err) {
+          console.error("Export failed", err);
+          toast.error("Failed to export Excel");
+      }
   };
 
   // Initial Fetch on mount
   useEffect(() => {
-    // Initial load - acts getting everything
-    handleFetchUsers();
+    // Initial load: 30 days, no extra filters
+    fetchReportData({
+        users: [],
+        depts: [],
+        projects: [],
+        locations: []
+    });
   }, []); // Only on mount
 
   // Metrics Calculation
   const analytics = useMemo(() => {
-    // 1. Filter Data based on selection
+    // Data is already filtered by backend
     let filteredUsers = reportData;
-
-    if (selectedUsers.length > 0) {
-      filteredUsers = filteredUsers.filter((u) =>
-        selectedUsers.includes(u.user_name),
-      );
-    }
-
-    if (selectedDepts.length > 0) {
-      filteredUsers = filteredUsers.filter((u) =>
-        selectedDepts.includes(u.user_dept),
-      );
-    }
 
     // 2. Aggregate Entries
     const allEntries = (filteredUsers || []).flatMap((u) => u.entries || []);
@@ -754,10 +839,10 @@ export const Analytics = () => {
       {/* Filters Section */}
       {/* Filters Section */}
       <div className="relative z-10 p-4 border border-white/5 shadow-sm rounded-2xl bg-zinc-900">
-        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-12 gap-4 items-end">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 items-end">
           
-          {/* 1. Date Range (Span 4 on XL) */}
-          <div className="xl:col-span-4 flex flex-col gap-2">
+          {/* 1. Date Range */}
+          <div className="flex flex-col gap-2">
             <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest flex items-center gap-2">
               <FiCalendar className="text-amber-500" /> Date Range
             </label>
@@ -790,61 +875,68 @@ export const Analytics = () => {
             </div>
           </div>
 
-          {/* 2. Departments (Span 3 on XL) */}
-          <div className="xl:col-span-3 flex flex-col gap-1">
-             <div className="flex gap-2">
-                <div className="flex-1">
-                   <MultiSelect
-                    label="By Department"
-                    options={deptsList}
-                    selectedValues={tempSelectedDepts}
-                    onChange={setTempSelectedDepts}
-                    icon={FiLayers}
-                  />
-                </div>
-                <button
-                onClick={handleFetchDepts}
-                disabled={isLoading}
-                className="mt-6 h-[38px] w-[38px] bg-zinc-800 hover:bg-amber-500 hover:text-zinc-900 text-amber-500 border border-white/10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 shrink-0"
-                title="Apply Dept Filter"
-                >
-                  <IoSearchOutline size={16} />
-                </button>
-             </div>
+          {/* 2. Departments & Locations */}
+          <div className="space-y-3">
+             <MultiSelect
+                label="By Department"
+                options={deptsList}
+                selectedValues={tempSelectedDepts}
+                onChange={setTempSelectedDepts}
+                icon={FiLayers}
+              />
+              <MultiSelect
+                label="By Location"
+                options={locationsList}
+                selectedValues={tempSelectedLocations}
+                onChange={setTempSelectedLocations}
+                icon={IoLocationOutline}
+              />
           </div>
 
-          {/* 3. Users (Span 3 on XL) */}
-          <div className="xl:col-span-3 flex flex-col gap-1">
-             <div className="flex gap-2">
-                <div className="flex-1">
-                  <MultiSelect
-                    label="By User"
-                    options={usersList.map((u) => u.name)}
-                    selectedValues={tempSelectedUsers}
-                    onChange={setTempSelectedUsers}
-                    icon={FiUsers}
-                  />
-                </div>
-                <button
-                  onClick={handleFetchUsers}
-                  disabled={isLoading}
-                  className="mt-6 h-[38px] w-[38px] bg-zinc-800 hover:bg-amber-500 hover:text-zinc-900 text-amber-500 border border-white/10 rounded-xl flex items-center justify-center transition-all shadow-sm active:scale-95 shrink-0"
-                  title="Apply User Filter"
-                >
-                  <IoSearchOutline size={16} />
-                </button>
-             </div>
+          {/* 3. Users & Projects */}
+          <div className="space-y-3">
+              <MultiSelect
+                label="By User"
+                options={usersList.map((u) => u.name)}
+                selectedValues={tempSelectedUsers}
+                onChange={setTempSelectedUsers}
+                icon={FiUsers}
+              />
+              <MultiSelect
+                label="By Project"
+                options={projectsList.map(p => p.name)}
+                selectedValues={tempSelectedProjects}
+                onChange={setTempSelectedProjects}
+                icon={IoFolderOutline}
+              />
           </div>
 
-          {/* 4. Clear (Span 2 on XL) */}
-          <div className="xl:col-span-2 flex items-end h-full pb-px">
-            <button
-               onClick={handleClearFilters}
-               className="w-full h-[38px] flex items-center justify-center gap-2 bg-white/5 border border-white/10 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all font-bold text-[10px] uppercase tracking-wider shadow-sm group"
-            >
-               <IoRefreshOutline className="w-3.5 h-3.5 group-hover:rotate-180 transition-transform duration-500" />
-               Reset
-            </button>
+          {/* 4. Actions */}
+          <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
+                   <button
+                    onClick={handleApplyFilters}
+                    className="flex-1 ui-btn ui-btn-primary h-12 flex items-center justify-center gap-2 text-xs uppercase font-black tracking-widest"
+                  >
+                    <IoFilter size={16} />
+                    Apply Filters
+                  </button>
+                  <button
+                    onClick={handleClearFilters}
+                    className="w-12 h-12 flex items-center justify-center rounded-xl border border-white/10 hover:bg-white/5 hover:border-red-500/50 hover:text-red-500 transition-all text-gray-400"
+                    title="Clear Filters"
+                  >
+                    <IoClose size={20} />
+                  </button>
+              </div>
+
+               <button
+                  onClick={handleExportExcel}
+                  className="w-full h-12 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-500 font-bold text-xs uppercase tracking-widest hover:bg-emerald-500/20 transition-all"
+                >
+                  <IoArrowUp size={16} className="rotate-45" />
+                  Export to Excel
+                </button>
           </div>
 
         </div>

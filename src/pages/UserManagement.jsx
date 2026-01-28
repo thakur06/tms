@@ -14,6 +14,7 @@ import CreateUserModal from '../components/CreateUserModal';
 import UserHierarchyModal from '../components/UserHierarchyModal';
 import UserAvatar from '../components/UserAvatar';
 import DeleteUserConfirmationModal from '../components/DeleteUserConfirmationModal';
+import { useNavigate } from 'react-router-dom';
 
 export default function UserManagement() {
    const server=import.meta.env.VITE_SERVER_ADDRESS;
@@ -35,7 +36,7 @@ export default function UserManagement() {
   // Filter Dropdown States
   const [isDeptOpen, setIsDeptOpen] = useState(false);
   const [deptSearch, setDeptSearch] = useState('');
-
+  const navigate = useNavigate(); 
   useEffect(() => {
     fetchUsers(1);
     fetchMetadata();
@@ -158,6 +159,14 @@ export default function UserManagement() {
             Send Alerts
           </button>
  
+          <button
+            onClick={() => navigate('/compliance')}
+            className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-white rounded-xl font-bold border border-white/10 transition-all active:scale-95 uppercase tracking-wider text-[10px]"
+          >
+             <IoCheckmarkCircle size={18} className="text-emerald-500" />
+             Check Status
+          </button>
+
           <button
             onClick={() => setIsAddModalOpen(true)}
             className="w-full sm:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black shadow-lg shadow-amber-500/20 transition-all active:scale-95 uppercase tracking-wider text-[10px]"

@@ -14,6 +14,7 @@ import {
 } from "react-icons/io5";
 import { formatDate, formatTime } from "../utils/formatters";
 import { toast, Zoom } from "react-toastify";
+import axios from 'axios';
 import { useAuth } from "../context/AuthContext";
 import SubmitTimesheetModal from "./SubmitTimesheetModal";
 
@@ -299,9 +300,38 @@ export default function WeeklyTimeLog({
     }
   };
 
+  const [timesheetStatus, setTimesheetStatus] = useState(null);
+
   useEffect(() => {
     fetchUserEntries();
+    fetchTimesheetStatus();
   }, [user, currentWeek]);
+
+  const fetchTimesheetStatus = async () => {
+      try {
+          const token = localStorage.getItem("token");
+          // Re-using the my-status endpoint which returns list. 
+          // We need to filter for current week. 
+          // Ideally backend has a "get status for date range" but "my-status" is all history.
+          // Let's filter client side for now or modify backend. 
+          // Actually, "my-status" returns all submissions. 
+          const startDate = normalizeDateStr(weekDays[0]);
+          const endDate = normalizeDateStr(weekDays[6]);
+
+          const response = await axios.get(`${server}/api/timesheets/my-status`, {
+            headers: { Authorization: `Bearer ${token}` },
+            params: { startDate, endDate }
+          });    
+          const submissions = response.data;
+          
+          const weekStartStr = normalizeDateStr(weekDays[0]);
+          const currentSubmission = submissions.find(s => s.week_start_date.startsWith(weekStartStr));
+          
+          setTimesheetStatus(currentSubmission ? currentSubmission.status : null);
+      } catch (e) { console.error("Status fetch fail", e); }
+  };
+  
+  const isLocked = timesheetStatus === 'pending' || timesheetStatus === 'approved';
 
   // -- Handlers --
   const handleAddRow = () => {
@@ -445,7 +475,7 @@ export default function WeeklyTimeLog({
                             date: dateStr,
                             hours,
                             minutes,
-                            remarks: cell.remarks || ""
+                            remarks: cell.remarks || row.remarks || ""
                         }
                     });
                 } else {
@@ -464,7 +494,7 @@ export default function WeeklyTimeLog({
                             date: dateStr,
                             hours,
                             minutes,
-                            remarks: cell.remarks || ""
+                            remarks: cell.remarks || row.remarks || ""
                         }
                     });
                 }
@@ -581,7 +611,10 @@ export default function WeeklyTimeLog({
 
                  <button
                     onClick={handleSave}
-                    className="flex items-center gap-2 px-6 py-3 bg-white text-black rounded-xl font-bold hover:bg-gray-200 transition-colors shadow-lg shadow-white/10 active:scale-95"
+                    disabled={isLocked}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-colors shadow-lg shadow-white/10 active:scale-95 ${
+                        isLocked ? 'bg-zinc-800 text-gray-500 cursor-not-allowed opacity-50' : 'bg-white text-black hover:bg-gray-200'
+                    }`}
                  >
                     <IoSave size={18} />
                     <span>Save Changes</span>
@@ -589,13 +622,23 @@ export default function WeeklyTimeLog({
                  
                  <button
                     onClick={() => setShowSubmitModal(true)}
-                    className="flex items-center gap-2 px-6 py-3 bg-emerald-600 text-white rounded-xl font-bold hover:bg-emerald-500 transition-colors shadow-lg shadow-emerald-500/20 active:scale-95"
+                    disabled={isLocked}
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-colors shadow-lg shadow-emerald-500/20 active:scale-95 ${
+                        isLocked ? 'bg-zinc-800 text-gray-500 cursor-not-allowed opacity-50' : 'bg-emerald-600 text-white hover:bg-emerald-500'
+                    }`}
                  >
                     <IoCheckmarkCircle size={18} />
-                    <span>Submit</span>
+                    <span>{timesheetStatus === 'pending' ? 'Pending Approval' : timesheetStatus === 'approved' ? 'Approved' : 'Submit'}</span>
                  </button>
             </div>
         </div>
+
+        {isLocked && (
+            <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 p-4 rounded-xl text-sm font-bold flex items-center gap-3">
+                 <IoCheckmarkCircle size={20} />
+                 <span>This timesheet has been submitted ({timesheetStatus}). You cannot make changes unless it is rejected.</span>
+            </div>
+        )}
 
         {/* GRID CONTAINER */}
         <div className="overflow-x-auto rounded-2xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl shadow-xl scrollbar-thin scrollbar-track-black/20 scrollbar-thumb-white/10 hover:scrollbar-thumb-amber-500/20">
@@ -637,9 +680,17 @@ export default function WeeklyTimeLog({
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
+                    <AnimatePresence>
                     {rows.map((row) => (
-                        <tr key={row.id} className="group hover:bg-white/2 transition-colors">
+                        <motion.tr 
+                            key={row.id} 
+                            initial={{ opacity: 0 }} 
+                            animate={{ opacity: 1 }} 
+                            exit={{ opacity: 0 }}
+                            className="group hover:bg-white/5 transition-colors"
+                        >
                             <td className="p-2 align-top">
+                                <div className={isLocked ? "pointer-events-none opacity-50" : ""}>
                                 <SearchableSelect 
                                     options={projectOptions}
                                     value={row.projectId}
@@ -649,14 +700,17 @@ export default function WeeklyTimeLog({
                                         handleRowChange(row.id, 'projectId', val, { code: proj?.code, client: proj?.client });
                                     }}
                                 />
+                                </div>
                             </td>
                             <td className="p-2 border-r border-white/5 align-top">
+                                <div className={isLocked ? "pointer-events-none opacity-50" : ""}>
                                 <SearchableSelect 
                                     options={taskOptions}
                                     value={row.taskId}
                                     placeholder="Select Task"
                                     onChange={(val) => handleRowChange(row.id, 'taskId', val)}
                                 />
+                                </div>
                             </td>
                             {weekDays.map(day => {
                                 const dateStr = normalizeDateStr(day);
@@ -664,11 +718,12 @@ export default function WeeklyTimeLog({
                                 const hasRemarks = cell?.remarks && cell.remarks.trim().length > 0;
                                 return (
                                     <td key={dateStr} className="p-2 align-top">
-                                        <div className="relative group/cell flex items-center justify-center gap-1">
+                                        <div className={`relative group/cell flex items-center justify-center gap-1 ${isLocked ? 'pointer-events-none opacity-50' : ''}`}>
                                             {/* Hours Input */}
                                             <input
                                                 type="number"
                                                 min="0"
+                                                disabled={isLocked}
                                                 placeholder="H"
                                                 className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-white/10 focus:border-amber-500/50 hover:bg-white/5 transition-all ${
                                                     Math.floor(cell?.hours || 0) > 0 ? 'text-white font-bold' : 'text-gray-600'
@@ -681,12 +736,13 @@ export default function WeeklyTimeLog({
                                                     handleDayChange(row.id, dateStr, newTotal.toString()); 
                                                 }}
                                             />
-                                            <span className="text-gray-600 text-[10px]">:</span>
+                                            <span className="text-gray-600 text-[10px] border-b border-white/10">:</span>
                                             {/* Minutes Input */}
                                             <input
                                                 type="number"
                                                 min="0"
                                                 max="59"
+                                                disabled={isLocked}
                                                 placeholder="M"
                                                 className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-white/10 focus:border-amber-500/50 hover:bg-white/5 transition-all ${
                                                     Math.round(((cell?.hours || 0) % 1) * 60) > 0 ? 'text-white font-bold' : 'text-gray-600'
@@ -702,20 +758,23 @@ export default function WeeklyTimeLog({
                                                 }}
                                             />
 
+                                            {/* Remarks Trigger */}
                                             {(cell?.hours > 0 || hasRemarks) && (
                                                 <button 
                                                     tabIndex={-1}
+                                                    disabled={isLocked}
                                                     onClick={() => setRemarksModalState({ open: true, rowId: row.id, dateStr, content: cell?.remarks || "" })}
-                                                    className={`absolute -top-1 -right-1 p-0.5 rounded-full bg-zinc-900 border border-white/10 hover:bg-white/10 transition-colors z-10 ${hasRemarks ? 'text-amber-500 opacity-100' : 'text-gray-600 opacity-0 group-hover/cell:opacity-100'}`}
+                                                    className={`absolute -top-2 -right-1 p-0.5 rounded-full bg-zinc-900 border border-white/10 hover:bg-white/10 transition-colors z-10 ${hasRemarks ? 'text-amber-500 opacity-100' : 'text-gray-600 opacity-0 group-hover/cell:opacity-100'}`}
                                                     title={cell?.remarks || "Add Remarks"}
                                                 >
-                                                    <IoChatbubbleEllipsesOutline size={10} />
+                                                    <IoChatbubbleEllipsesOutline size={12} />
                                                 </button>
                                             )}
                                         </div>
                                     </td>
                                 );
                             })}
+                            
                             <td className="p-2 text-center align-top">
                                 <button 
                                     onClick={() => handleDeleteRow(row.id)}
@@ -725,12 +784,13 @@ export default function WeeklyTimeLog({
                                     <IoTrash size={16} />
                                 </button>
                             </td>
-                        </tr>
+                        </motion.tr>
                     ))}
+                    </AnimatePresence>
                     
                     {/* ADD ROW BTN */}
                     <tr>
-                        <td colSpan={2 + 7 + 1} className="p-2">
+                        <td colSpan={2 + 7 + 2} className="p-2"> 
                             <button
                                 onClick={handleAddRow}
                                 className="w-full py-3 flex items-center justify-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest hover:text-amber-500 hover:bg-amber-500/5 border border-dashed border-white/10 hover:border-amber-500/50 rounded-lg transition-all"
@@ -754,6 +814,7 @@ export default function WeeklyTimeLog({
                                 </td>
                             );
                         })}
+                        <td></td>
                         <td></td>
                     </tr>
                 </tfoot>
