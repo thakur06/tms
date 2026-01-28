@@ -778,7 +778,10 @@ export default function WeeklyTimeLog({
                             <td className="p-2 text-center align-top">
                                 <button 
                                     onClick={() => handleDeleteRow(row.id)}
-                                    className="p-2 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all opacity-0 group-hover:opacity-100"
+                                    disabled={isLocked}
+                                    className={`p-2 transition-all opacity-0 group-hover:opacity-100 rounded-lg ${
+                                        isLocked ? 'text-gray-800 cursor-not-allowed' : 'text-gray-600 hover:text-red-500 hover:bg-red-500/10'
+                                    }`}
                                     title="Delete Row"
                                 >
                                     <IoTrash size={16} />
@@ -793,7 +796,12 @@ export default function WeeklyTimeLog({
                         <td colSpan={2 + 7 + 2} className="p-2"> 
                             <button
                                 onClick={handleAddRow}
-                                className="w-full py-3 flex items-center justify-center gap-2 text-xs font-bold text-gray-500 uppercase tracking-widest hover:text-amber-500 hover:bg-amber-500/5 border border-dashed border-white/10 hover:border-amber-500/50 rounded-lg transition-all"
+                                disabled={isLocked}
+                                className={`w-full py-3 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest border border-dashed rounded-lg transition-all ${
+                                    isLocked 
+                                    ? 'bg-zinc-800/10 border-white/5 text-gray-700 cursor-not-allowed opacity-50' 
+                                    : 'text-gray-500 hover:text-amber-500 hover:bg-amber-500/5 border-white/10 hover:border-amber-500/50'
+                                }`}
                             >
                                 <IoAdd size={16} />
                                 Add Project Line
@@ -851,8 +859,13 @@ export default function WeeklyTimeLog({
                         }),
                       });
                       
-                      if(!res.ok) throw new Error("Submit failed");
+                      if(!res.ok) {
+                          const errorData = await res.json();
+                          throw new Error(errorData.error || "Submit failed");
+                      }
+                      
                       toast.success("Submitted successfully!", { theme: 'colored' });
+                      fetchTimesheetStatus(); // Refresh status to lock UI
                 } catch(e) {
                     toast.error(e.message);
                 }
