@@ -41,7 +41,11 @@ export default function ComplianceReportPage() {
   }, [currentWeekStart]);
 
   const normalizeDateStr = (date) => {
-    return date.toISOString().split('T')[0];
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   useEffect(() => {
@@ -98,10 +102,9 @@ export default function ComplianceReportPage() {
           const matchesDept = selectedDept === "All" || dept === selectedDept;
           
           let matchesStatus = true;
-          if (statusFilter === 'submitted') matchesStatus = item.status === 'pending';
-          else if (statusFilter === 'draft') matchesStatus = item.status === 'draft';
-          else if (statusFilter === 'not_submitted') matchesStatus = item.status === 'not_submitted';
-          else if (statusFilter !== 'All') matchesStatus = item.status === statusFilter;
+          if (statusFilter !== 'All') {
+              matchesStatus = item.status === statusFilter;
+          }
 
           return matchesSearch && matchesDept && matchesStatus;
       });
@@ -194,9 +197,8 @@ export default function ComplianceReportPage() {
                     className="w-full appearance-none bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-8 text-white focus:outline-none focus:border-amber-500/50 transition-colors cursor-pointer"
                 >
                     <option value="All" className="bg-zinc-900">All Status</option>
-                    <option value="submitted" className="bg-zinc-900">Pending Approval</option>
-                    <option value="draft" className="bg-zinc-900">Draft / In Progress</option>
-                    <option value="not_submitted" className="bg-zinc-900">Not Submitted (0 hrs)</option>
+                    <option value="pending" className="bg-zinc-900">Pending Approval</option>
+                    <option value="not_submitted" className="bg-zinc-900">Not Submitted</option>
                     <option value="approved" className="bg-zinc-900">Approved</option>
                     <option value="rejected" className="bg-zinc-900">Rejected</option>
                 </select>

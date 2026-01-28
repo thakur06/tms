@@ -57,7 +57,6 @@ export default function TimesheetApprovalsPage() {
       );
       toast.success('Timesheet approved successfully');
       fetchTimesheets();
-      if (showDetailsModal) setShowDetailsModal(false);
     } catch (error) {
       console.error('Failed to approve timesheet:', error);
       toast.error(error.response?.data?.error || 'Failed to approve timesheet');

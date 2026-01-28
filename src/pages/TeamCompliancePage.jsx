@@ -28,6 +28,8 @@ export default function TeamCompliancePage() {
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
+  const [selectedDept, setSelectedDept] = useState("All");
+  const [allDepts, setAllDepts] = useState(["All"]);
 
   // Calculate week days
   const weekDays = useMemo(() => {
@@ -42,12 +44,32 @@ export default function TeamCompliancePage() {
   }, [currentWeekStart]);
 
   const normalizeDateStr = (date) => {
-    return date.toISOString().split('T')[0];
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
   };
 
   useEffect(() => {
     fetchTeamCompliance();
+    if (user?.role === 'admin') {
+      fetchDepartments();
+    }
   }, [currentWeekStart]);
+
+  const fetchDepartments = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const res = await axios.get(`${server}/api/dept`, { 
+           headers: { Authorization: `Bearer ${token}` }
+      });
+      const depts = Array.isArray(res.data) ? res.data.map(d => d.dept_name || d.name || d) : [];
+      setAllDepts(['All', ...depts]);
+    } catch (e) { 
+      console.error("Failed to fetch depts", e); 
+    }
+  };
 
   const fetchTeamCompliance = async () => {
     setLoading(true);
@@ -73,18 +95,19 @@ export default function TeamCompliancePage() {
   const filteredData = useMemo(() => {
       return reportData.filter(item => {
           const name = item.user?.name || "";
+          const dept = item.user?.dept || "";
           
           const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
+          const matchesDept = selectedDept === "All" || dept === selectedDept;
           
           let matchesStatus = true;
-          if (statusFilter === 'submitted') matchesStatus = item.status === 'pending';
-          else if (statusFilter === 'draft') matchesStatus = item.status === 'draft';
-          else if (statusFilter === 'not_submitted') matchesStatus = item.status === 'not_submitted';
-          else if (statusFilter !== 'All') matchesStatus = item.status === statusFilter;
+          if (statusFilter !== 'All') {
+              matchesStatus = item.status === statusFilter;
+          }
 
-          return matchesSearch && matchesStatus;
+          return matchesSearch && matchesDept && matchesStatus;
       });
-  }, [reportData, searchTerm, statusFilter]);
+  }, [reportData, searchTerm, statusFilter, selectedDept]);
 
   const navigateWeek = (dir) => {
       setCurrentWeekStart(prev => {
@@ -144,6 +167,21 @@ export default function TeamCompliancePage() {
                 />
             </div>
             
+            {user?.role === 'admin' && (
+                <div className="relative w-full md:w-64">
+                    <IoFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <select 
+                        value={selectedDept}
+                        onChange={(e) => setSelectedDept(e.target.value)}
+                        className="w-full appearance-none bg-black/20 border border-white/10 rounded-xl py-2.5 pl-10 pr-8 text-white focus:outline-none focus:border-amber-500/50 transition-colors cursor-pointer font-bold"
+                    >
+                        {allDepts.map(dept => (
+                            <option key={dept} value={dept} className="bg-zinc-900">{dept}</option>
+                        ))}
+                    </select>
+                </div>
+            )}
+            
             <div className="relative w-full md:w-56">
                 <IoFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
                 <select 
@@ -152,9 +190,8 @@ export default function TeamCompliancePage() {
                     className="w-full appearance-none bg-black/20 border border-white/10 rounded-xl py-2.5 pl-10 pr-8 text-white focus:outline-none focus:border-amber-500/50 transition-colors cursor-pointer font-bold"
                 >
                     <option value="All" className="bg-zinc-900">All Submissions</option>
-                    <option value="submitted" className="bg-zinc-900">Pending Approval</option>
-                    <option value="draft" className="bg-zinc-900">Draft / In Progress</option>
-                    <option value="not_submitted" className="bg-zinc-900">Not Submitted (0 hrs)</option>
+                    <option value="pending" className="bg-zinc-900">Pending Approval</option>
+                    <option value="not_submitted" className="bg-zinc-900">Not Submitted</option>
                     <option value="approved" className="bg-zinc-900">Approved</option>
                     <option value="rejected" className="bg-zinc-900">Rejected</option>
                 </select>

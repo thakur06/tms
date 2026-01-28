@@ -134,12 +134,14 @@ export default function ComplianceTable({
                                                 </button>
                                             </>
                                         )}
-                                        <button 
-                                            onClick={() => onAction('view', item)}
-                                            className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-wider text-gray-400 transition-all active:scale-95 border border-white/5"
-                                        >
-                                            Details
-                                        </button>
+                                        {enableActions && (
+                                            <button 
+                                                onClick={() => onAction('view', item)}
+                                                className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-wider text-gray-400 transition-all active:scale-95 border border-white/5"
+                                            >
+                                                Details
+                                            </button>
+                                        )}
                                     </div>
                                 </td>
                             </motion.tr>
