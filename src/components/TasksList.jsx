@@ -18,7 +18,7 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [expandedRow, setExpandedRow] = useState(null);
   
-  const tasksPerPage = 10;
+  const tasksPerPage = 15;
 
   const filteredTasks = useMemo(() => {
     return tasks.filter(t => {
@@ -66,7 +66,7 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
       </div>
 
       {/* Minimalist Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {currentTasks.length === 0 ? (
           <motion.div 
             initial={{ opacity: 0 }}
