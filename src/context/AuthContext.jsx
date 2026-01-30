@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { decodeToken } from '../utils/jwt';
 
 const AuthContext = createContext();
 
@@ -16,7 +17,21 @@ export const AuthProvider = ({ children }) => {
     return !!localStorage.getItem('token');
   });
   const [user, setUser] = useState(() => {
+    const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
+    
+    if (token) {
+        const decoded = decodeToken(token);
+        const storedUser = userStr ? JSON.parse(userStr) : {};
+        if (decoded) {
+            return {
+                ...storedUser,
+                id: decoded.id,
+                email: decoded.email,
+                role: decoded.role || 'employee'
+            };
+        }
+    }
     return userStr ? JSON.parse(userStr) : null;
   });
 
@@ -37,15 +52,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = (token, userData) => {
     localStorage.setItem('token', token);
-    if (userData) {
+    const decoded = decodeToken(token);
+    
+    if (userData || decoded) {
       // Ensure we store all relevant user data including role and reportsCount
       const cleanUserData = {
-        id: userData.id,
-        name: userData.name,
-        email: userData.email,
-        dept: userData.dept,
-        role: userData.role || 'employee',
-        reportsCount: parseInt(userData.reportsCount) || 0
+        id: userData?.id || decoded?.id,
+        name: userData?.name || decoded?.name,
+        email: userData?.email || decoded?.email,
+        dept: userData?.dept || decoded?.dept,
+        role: decoded?.role || userData?.role || 'employee',
+        reportsCount: parseInt(userData?.reportsCount || decoded?.reportsCount) || 0
       };
       localStorage.setItem('user', JSON.stringify(cleanUserData));
       setUser(cleanUserData);

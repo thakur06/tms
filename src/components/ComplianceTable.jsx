@@ -46,7 +46,9 @@ export default function ComplianceTable({
                             </th>
                         ))}
                         <th className="p-4 text-center text-[10px] font-black uppercase text-gray-500 tracking-widest w-[80px] bg-zinc-900">Total</th>
-                        <th className="p-4 text-right text-[10px] font-black uppercase text-gray-500 tracking-widest sticky right-0 bg-zinc-900 z-10">Actions</th>
+                        {enableActions && (
+                            <th className="p-4 text-right text-[10px] font-black uppercase text-gray-500 tracking-widest sticky right-0 bg-zinc-900 z-10">Actions</th>
+                        )}
                     </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5 text-xs font-medium">
@@ -114,36 +116,36 @@ export default function ComplianceTable({
                                 </td>
 
                                 {/* Actions */}
-                                <td className="p-4 text-right sticky right-0 bg-zinc-900 group-hover:bg-zinc-800 transition-colors border-l border-white/5 z-10">
-                                    <div className="flex items-center justify-end gap-2">
-                                        {isPending && enableActions && (
-                                            <>
-                                                <button 
-                                                    onClick={() => onAction('approve', item)}
-                                                    className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 text-[10px] font-black uppercase tracking-wider transition-all active:scale-95"
-                                                    title="Quick Approve"
-                                                >
-                                                    Approve
-                                                </button>
-                                                <button 
-                                                    onClick={() => onAction('reject', item)}
-                                                    className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-wider transition-all active:scale-95"
-                                                    title="Quick Reject"
-                                                >
-                                                    Reject
-                                                </button>
-                                            </>
-                                        )}
-                                        {enableActions && (
+                                {enableActions && (
+                                    <td className="p-4 text-right sticky right-0 bg-zinc-900 group-hover:bg-zinc-800 transition-colors border-l border-white/5 z-10">
+                                        <div className="flex items-center justify-end gap-2">
+                                            {isPending && (
+                                                <>
+                                                    <button 
+                                                        onClick={() => onAction('approve', item)}
+                                                        className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 text-[10px] font-black uppercase tracking-wider transition-all active:scale-95"
+                                                        title="Quick Approve"
+                                                    >
+                                                        Approve
+                                                    </button>
+                                                    <button 
+                                                        onClick={() => onAction('reject', item)}
+                                                        className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-wider transition-all active:scale-95"
+                                                        title="Quick Reject"
+                                                    >
+                                                        Reject
+                                                    </button>
+                                                </>
+                                            )}
                                             <button 
                                                 onClick={() => onAction('view', item)}
                                                 className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-wider text-gray-400 transition-all active:scale-95 border border-white/5"
                                             >
                                                 Details
                                             </button>
-                                        )}
-                                    </div>
-                                </td>
+                                        </div>
+                                    </td>
+                                )}
                             </motion.tr>
                         );
                     })}

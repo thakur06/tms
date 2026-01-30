@@ -34,20 +34,29 @@ export default function TimeLog() {
 
   // ✅ Fetch data from backend
   useEffect(() => {
+    const token = localStorage.getItem('token');
+    const headers = {
+        'Authorization': `Bearer ${token}`
+    };
+
     const fetchProjects = async () => {
       try {
-        const res = await fetch(`${server}/api/projects`)
+        const res = await fetch(`${server}/api/projects`, { headers })
         const data = await res.json()
-        setProjects(data)
+        if (Array.isArray(data)) {
+            setProjects(data)
+        }
       } catch (err) {
         console.error('Failed to fetch projects', err)
       }
     }
     const fetchTasks = async () => {
       try {
-        const res = await fetch(`${server}/api/tasks`)
+        const res = await fetch(`${server}/api/tasks`, { headers })
         const data = await res.json()
-        setTasks(data)
+        if (Array.isArray(data)) {
+            setTasks(data)
+        }
       } catch (err) {
         console.error('Failed to fetch tasks', err)
       }
@@ -55,9 +64,11 @@ export default function TimeLog() {
 
     const fetchClients = async () => {
       try {
-        const res = await fetch(`${server}/api/client`)
+        const res = await fetch(`${server}/api/client`, { headers })
         const data = await res.json()
-        setClients(data)
+        if (Array.isArray(data)) {
+            setClients(data)
+        }
       } catch (err) {
         console.error('Failed to fetch clients', err)
       }

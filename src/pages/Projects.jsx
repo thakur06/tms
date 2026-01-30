@@ -60,7 +60,9 @@ export default function Projects() {
     const fetchProjects = async () => {
       setIsLoading(true)
       try {
-        const response = await fetch(`${server}/api/projects`)
+        const response = await fetch(`${server}/api/projects`, {
+            headers: { Authorization: `Bearer ${token}` }
+        })
         if (response.ok) {
           const data = await response.json()
           const transformedData = data.map(transformProject)

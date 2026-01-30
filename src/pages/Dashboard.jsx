@@ -642,29 +642,29 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.04 }}
               whileHover={{ y: -4 }}
-              className="bg-zinc-900 rounded-3xl p-6 cursor-pointer border border-white/5 hover:border-amber-500/20 transition-all group relative"
+              className="bg-zinc-900 rounded-3xl p-4 cursor-pointer border border-white/5 hover:border-amber-500/20 transition-all group relative"
               onClick={() => handleCardClick(card)}
             >
               <div className="relative z-10">
-                <div className="flex items-center gap-3 mb-6">
-                  <div className={`${colors.text} p-2 rounded-xl bg-zinc-800 transition-colors`}>
-                    <card.icon size={22} />
+                <div className="flex items-center gap-3 mb-4">
+                  <div className={`${colors.text} p-1.5 rounded-lg bg-zinc-800 transition-colors`}>
+                    <card.icon size={18} />
                   </div>
-                  <div className="text-gray-400 text-[10px] font-black uppercase tracking-widest">
+                  <div className="text-gray-400 text-[9px] font-black uppercase tracking-widest">
                     {card.label}
                   </div>
                 </div>
                 
-                <div className="space-y-1">
-                  <div className="text-3xl font-black text-white tracking-tighter">
+                <div className="space-y-0.5">
+                  <div className="text-2xl font-black text-white tracking-tighter">
                     {card.value}
                   </div>
-                  <p className="text-[10px] text-gray-500 font-bold italic truncate">
+                  <p className="text-[9px] text-gray-500 font-bold italic truncate">
                     {card.detail}
                   </p>
                 </div>
 
-                <div className={`absolute bottom-6 right-6 w-1 h-1 rounded-full ${colors.text.replace('text-', 'bg-')} opacity-40 shadow-[0_0_8px_currentColor]`} />
+                <div className={`absolute bottom-4 right-4 w-1 h-1 rounded-full ${colors.text.replace('text-', 'bg-')} opacity-40 shadow-[0_0_8px_currentColor]`} />
               </div>
             </motion.div>
           );

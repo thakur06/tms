@@ -1,9 +1,10 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import { IoArrowBack, IoSearch, IoFilter, IoDownloadOutline } from 'react-icons/io5';
+import { IoArrowBack, IoSearch, IoFilter, IoChevronBack, IoChevronForward } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import ComplianceTable from '../components/ComplianceTable';
+import MultiSelect from '../components/MultiSelect';
 import { toast } from 'react-toastify';
 
 export default function ComplianceReportPage() {
@@ -25,8 +26,12 @@ export default function ComplianceReportPage() {
 
   // Filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedDept, setSelectedDept] = useState("All");
-  const [allDepts, setAllDepts] = useState(["All"]);
+  const [selectedDepts, setSelectedDepts] = useState([]);
+  const [allDepts, setAllDepts] = useState([]);
+
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 20;
 
   // Calculate week days
   const weekDays = useMemo(() => {
@@ -93,22 +98,34 @@ export default function ComplianceReportPage() {
 
   // Filter Data
   const filteredData = useMemo(() => {
-      return reportData.filter(item => {
-          // Fix: Access nested user object
-          const name = item.user?.name || ""; 
-          const dept = item.user?.dept || "";
-          
-          const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
-          const matchesDept = selectedDept === "All" || dept === selectedDept;
-          
-          let matchesStatus = true;
-          if (statusFilter !== 'All') {
-              matchesStatus = item.status === statusFilter;
-          }
+    const filtered = reportData.filter(item => {
+      const name = item.user?.name || ""; 
+      const dept = item.user?.dept || "";
+      
+      const matchesSearch = name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesDept = selectedDepts.length === 0 || selectedDepts.includes(dept);
+      
+      let matchesStatus = true;
+      if (statusFilter !== 'All') {
+          matchesStatus = item.status === statusFilter;
+      }
 
-          return matchesSearch && matchesDept && matchesStatus;
-      });
-  }, [reportData, searchTerm, selectedDept, statusFilter]);
+      return matchesSearch && matchesDept && matchesStatus;
+    });
+    // Reset to page 1 when filters change
+    return filtered;
+  }, [reportData, searchTerm, selectedDepts, statusFilter]);
+
+  // Handle page reset
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedDepts, statusFilter]);
+
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  const paginatedData = filteredData.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   // Navigate functions
   const handlePrevWeek = () => {
@@ -161,31 +178,28 @@ export default function ComplianceReportPage() {
         </div>
 
         {/* Filters */}
-        <div className="flex flex-col md:flex-row gap-4 bg-zinc-900/50 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
-            <div className="relative flex-1">
-                <IoSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+        <div className="flex flex-col md:flex-row md:items-center gap-4 bg-zinc-900/50 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
+            <div className="relative flex-1 group">
+                <IoSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors" size={16} />
                 <input 
                     type="text" 
-                    placeholder="Search by name..." 
+                    placeholder="Search members..." 
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-4 text-white focus:outline-none focus:border-amber-500/50 transition-colors"
+                    className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-11 pr-4 text-[13px] font-bold text-white focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/50 transition-all placeholder-gray-500 shadow-sm"
                 />
             </div>
             
             {user?.role === 'admin' && (
-                <div className="relative w-full md:w-64">
-                    <IoFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
-                    <select 
-                        value={selectedDept}
-                        onChange={(e) => setSelectedDept(e.target.value)}
-                        className="w-full appearance-none bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-8 text-white focus:outline-none focus:border-amber-500/50 transition-colors cursor-pointer"
-                    >
-                        {allDepts.map(dept => (
-                            <option key={dept} value={dept} className="bg-zinc-900">{dept}</option>
-                        ))}
-                    </select>
-                </div>
+                <MultiSelect 
+                    label="Dept"
+                    options={allDepts}
+                    selectedValues={selectedDepts}
+                    onChange={setSelectedDepts}
+                    icon={IoFilter}
+                    className="md:w-64"
+                    showLabel={false}
+                />
             )}
 
             {/* Status Filter */}
@@ -194,7 +208,7 @@ export default function ComplianceReportPage() {
                 <select 
                     value={statusFilter}
                     onChange={(e) => setStatusFilter(e.target.value)}
-                    className="w-full appearance-none bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-8 text-white focus:outline-none focus:border-amber-500/50 transition-colors cursor-pointer"
+                    className="w-full appearance-none bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-8 text-[13px] font-bold text-white focus:outline-none focus:border-amber-500/50 transition-colors cursor-pointer"
                 >
                     <option value="All" className="bg-zinc-900">All Status</option>
                     <option value="pending" className="bg-zinc-900">Pending Approval</option>
@@ -206,24 +220,66 @@ export default function ComplianceReportPage() {
         </div>
 
         {/* Content */}
-        <div className="bg-zinc-900/30 border border-white/5 rounded-2xl overflow-hidden shadow-2xl min-h-[500px]">
-            {loading ? (
-                 <div className="flex items-center justify-center h-[400px]">
-                     <div className="animate-spin w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full" />
-                 </div>
-            ) : (
-                <ComplianceTable 
-                    data={filteredData} 
-                    weekDays={weekDays} 
-                    onAction={(action, item) => {
-                        if (action === 'view' && item.timesheetId) {
-                            navigate(`/approvals/review/${item.timesheetId}`);
-                        } else if (action === 'view') {
-                            toast.info("No submitted timesheet for this period");
-                        }
-                    }} 
-                    enableActions={false} 
-                />
+        <div className="bg-zinc-900/30 border border-white/5 rounded-2xl overflow-hidden shadow-2xl flex flex-col min-h-[500px]">
+            <div className="flex-1">
+                {loading ? (
+                    <div className="flex items-center justify-center h-[400px]">
+                        <div className="animate-spin w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full" />
+                    </div>
+                ) : (
+                    <ComplianceTable 
+                        data={paginatedData} 
+                        weekDays={weekDays} 
+                        onAction={(action, item) => {
+                            if (action === 'view' && item.timesheetId) {
+                                navigate(`/approvals/review/${item.timesheetId}`);
+                            } else if (action === 'view') {
+                                toast.info("No submitted timesheet for this period");
+                            }
+                        }} 
+                        enableActions={false} 
+                    />
+                )}
+            </div>
+
+            {/* Pagination Controls */}
+            {!loading && totalPages > 1 && (
+                <div className="px-6 py-4 border-t border-white/5 bg-black/20 flex items-center justify-between">
+                    <p className="text-xs text-gray-500 font-bold">
+                        Showing <span className="text-white">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-white">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of <span className="text-white">{filteredData.length}</span> members
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                            className="p-2 rounded-lg bg-zinc-900 border border-white/5 text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:text-gray-400 transition-all overflow-hidden"
+                        >
+                            <IoChevronBack size={16} />
+                        </button>
+                        <div className="flex items-center gap-1">
+                            {[...Array(totalPages)].map((_, i) => (
+                                <button
+                                    key={i + 1}
+                                    onClick={() => setCurrentPage(i + 1)}
+                                    className={`w-8 h-8 rounded-lg text-xs font-black transition-all ${
+                                        currentPage === i + 1
+                                            ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+                                            : "text-gray-500 hover:text-white hover:bg-white/5"
+                                    }`}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+                        </div>
+                        <button
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                            className="p-2 rounded-lg bg-zinc-900 border border-white/5 text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:text-gray-400 transition-all overflow-hidden"
+                        >
+                            <IoChevronForward size={16} />
+                        </button>
+                    </div>
+                </div>
             )}
         </div>
     </div>

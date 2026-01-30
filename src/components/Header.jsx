@@ -28,11 +28,12 @@ export default function Header({ onMenuClick }) {
   // Mapping paths to titles
   const getPageTitle = () => {
     switch(location.pathname) {
+      case '/': return 'Home';
       case '/dashboard': return 'Dashboard';
       case '/projects': return 'Projects';
       case '/tasks': return 'Tasks';
       case '/time-log': return 'Time Log';
-      case '/reports': return 'Reports';
+      case '/reports-analytics': return 'Reports & Analytics';
       case '/my-submissions': return 'My Submissions';
       case '/approvals': return 'Approvals';
       case '/users': return 'User Management';

@@ -139,7 +139,10 @@ export default function Tasks() {
     try {
       const response = await fetch(`${server}/api/tasks/${taskId}`, {
         method: "PATCH",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+        },
         body: JSON.stringify({ logged: loggedHours }),
       })
       if (!response.ok) throw new Error()
@@ -176,7 +179,7 @@ export default function Tasks() {
 
   const handleCreateTask = async (taskData) => {
     try {
-      const response = await fetch("${server}/api/tasks", {
+      const response = await fetch(`${server}/api/tasks`, {
         method: "POST",
         headers: { "Content-Type": "application/json",
           Authorization: `Bearer ${token}`

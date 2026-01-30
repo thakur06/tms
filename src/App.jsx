@@ -1,9 +1,9 @@
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import Dashboard from './pages/Dashboard';
+import Home from './pages/Home';
 import Tasks from './pages/Tasks';
 import Projects from './pages/Projects';
 import TimeLog from './pages/TimeLog';
-import TimeReports from './pages/TimeReports';
 import TimesheetApprovalsPage from './pages/TimesheetApprovalsPage';
 import MyTimesheetStatus from './pages/MyTimesheetStatus';
 import UserManagement from './pages/UserManagement';
@@ -15,6 +15,7 @@ import Login from './pages/Login';
 import NotFound from './pages/NotFound';
 import ProtectedRoutes from "./security/ProtectedRoutes";
 import PublicRoute from "./security/PublicRoute";
+import AdminRoute from "./security/AdminRoute";
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastContainer, Zoom } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -41,19 +42,35 @@ function AppContent() {
           </Layout>
         </ProtectedRoutes>
       }>
-        <Route path="/" element={<Dashboard />} />
+        <Route path="/" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/time-log" element={<TimeLog />} />
-        <Route path="/tasks" element={<Tasks />} />
-        <Route path="/projects" element={<Projects />} />
-        <Route path="/reports" element={<TimeReports />} />
+        <Route path="/tasks" element={
+          <AdminRoute>
+            <Tasks />
+          </AdminRoute>
+        } />
+        <Route path="/projects" element={
+          <AdminRoute>
+            <Projects />
+          </AdminRoute>
+        } />
+        {/* <Route path="/reports" element={<TimeReports />} /> */}
         <Route path="/approvals" element={<TimesheetApprovalsPage />} />
         <Route path="/approvals/review/:timesheetId" element={<TimesheetReviewPage />} />
         <Route path="/compliance" element={<ComplianceReportPage />} />
         <Route path="/team-compliance" element={<TeamCompliancePage />} />
         <Route path="/my-submissions" element={<MyTimesheetStatus />} />
-        <Route path="/users" element={<UserManagement />} />
-        <Route path="/analytics" element={<Analytics />} />
+        <Route path="/users" element={
+          <AdminRoute>
+            <UserManagement />
+          </AdminRoute>
+        } />
+        <Route path="/reports-analytics" element={
+          <AdminRoute>
+            <Analytics />
+          </AdminRoute>
+        } />
       </Route>
 
       {/* 404 Not Found */}

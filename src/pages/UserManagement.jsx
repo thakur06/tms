@@ -178,13 +178,13 @@ export default function UserManagement() {
       </header>
 
       {/* Controls */}
-      <div className="flex flex-col md:flex-row gap-4">
+      <div className="flex flex-col md:flex-row md:items-center gap-4">
         <div className="relative flex-1 group">
           <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors w-5 h-5" />
           <input
             type="text"
             placeholder="Search by name or email..."
-            className="w-full bg-zinc-900 border border-white/10 rounded-xl px-10 py-3 text-xs font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all shadow-sm text-white placeholder-gray-500"
+            className="w-full bg-zinc-900 border border-white/10 rounded-xl pl-11 pr-4 py-2 text-[11px] font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all shadow-sm text-white placeholder-gray-500"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -194,7 +194,7 @@ export default function UserManagement() {
         <div className="relative min-w-[200px] group">
           <button
             onClick={() => setIsDeptOpen(!isDeptOpen)}
-            className={`w-full flex items-center justify-between px-4 py-3 bg-zinc-900 border rounded-xl text-xs font-bold transition-all shadow-sm ${
+            className={`w-full flex items-center justify-between px-4 py-2 bg-zinc-900 border rounded-xl text-[11px] font-bold transition-all shadow-sm ${
               isDeptOpen || deptFilter !== 'All' ? 'border-amber-500 text-amber-500' : 'border-white/10 text-gray-400'
             }`}
           >

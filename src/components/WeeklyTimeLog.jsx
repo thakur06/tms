@@ -17,6 +17,7 @@ import { toast, Zoom } from "react-toastify";
 import axios from 'axios';
 import { useAuth } from "../context/AuthContext";
 import SubmitTimesheetModal from "./SubmitTimesheetModal";
+import confetti from 'canvas-confetti';
 
 // --- Internal Searchable Select Component ---
 function SearchableSelect({ options, value, onChange, placeholder, className }) {
@@ -56,8 +57,8 @@ function SearchableSelect({ options, value, onChange, placeholder, className }) 
       </div>
 
       {isOpen && (
-        <div className="absolute z-9999 top-full left-0 w-[200px] mt-1 bg-zinc-900 border border-amber-500/20 rounded-xl shadow-2xl max-h-[100px] overflow-hidden flex flex-col hide-y-scroll">
-          <div className="p-2 border-b border-white/5 sticky top-0 bg-zinc-900">
+        <div className="absolute z-9999 top-full left-0 w-[240px] mt-2 bg-zinc-950/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-h-[250px] overflow-hidden flex flex-col hide-y-scroll ring-1 ring-white/5">
+          <div className="p-3 border-b border-white/5 sticky top-0 bg-zinc-900/50">
             <input
               autoFocus
               type="text"
@@ -546,13 +547,17 @@ export default function WeeklyTimeLog({
   };
 
   // Safe mapping with filter
-  const projectOptions = projects
-    .filter(p => p && p.name && p.status !== 'Inactive')
-    .map(p => ({ label: p.name, value: p.name, code: p.code, client: p.client }));
+  const projectOptions = Array.isArray(projects) 
+    ? projects
+        .filter(p => p && p.name && p.status !== 'Inactive')
+        .map(p => ({ label: p.name, value: p.name, code: p.code, client: p.client }))
+    : [];
     
-  const taskOptions = tasks
-    .filter(t => t && t.task_name)
-    .map(t => ({ label: t.task_name, value: t.task_id }));
+  const taskOptions = Array.isArray(tasks)
+    ? tasks
+        .filter(t => t && t.task_name)
+        .map(t => ({ label: t.task_name, value: t.task_id }))
+    : [];
 
   return (
     <div className="w-full space-y-6 animate-in fade-in duration-500">
@@ -581,7 +586,7 @@ export default function WeeklyTimeLog({
 
             <div className="flex items-center gap-3 w-full xl:w-auto">
                  {/* Week Nav */}
-                 <div className="flex items-center bg-zinc-900 p-1 rounded-xl border border-white/5">
+                 <div className="flex items-center bg-zinc-900 p-1 rounded-xl border border-white/5 shadow-inner">
                     <button onClick={() => navigateWeek(-1)} className="p-2 hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-white transition-colors">
                         <IoChevronBack size={18} />
                     </button>
@@ -593,42 +598,66 @@ export default function WeeklyTimeLog({
                         monday.setDate(diff);
                         monday.setHours(0,0,0,0);
                         setCurrentWeek(monday);
-                    }} className="px-4 text-xs font-bold uppercase text-gray-400 hover:text-white transition-colors">
-                        Current Week
+                    }} className="px-4 text-[10px] font-black uppercase text-gray-400 hover:text-white transition-colors tracking-widest">
+                        Current
                     </button>
                     <button onClick={() => navigateWeek(1)} className="p-2 hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-white transition-colors">
                         <IoChevronForward size={18} />
                     </button>
                  </div>
 
-                 {/* Total Badge */}
-                 <div className={`flex items-center gap-3 px-5 py-2 rounded-xl border ${weeklyTotalHours >= 40 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-500' : 'bg-amber-500/10 border-amber-500/20 text-amber-500'}`}>
-                    <div className="flex flex-col items-end">
-                        <span className="text-[10px] uppercase font-bold tracking-wider opacity-80">Total Hours</span>
-                        <span className="text-xl font-mono font-bold leading-none">{weeklyTotalHours.toFixed(1)}</span>
+                 {/* Total Badge & Progress */}
+                 <div className="flex flex-col gap-2 min-w-[200px]">
+                    <div className={`flex items-center justify-between px-5 py-2 rounded-xl border transition-all duration-500 bg-zinc-900/50 backdrop-blur-md shadow-inner ${weeklyTotalHours >= 40 ? 'border-emerald-500/30 text-emerald-500' : 'border-amber-500/30 text-amber-500'}`}>
+                        <div className="flex flex-col">
+                            <span className="text-[9px] uppercase font-black tracking-widest opacity-60">Weekly Progress</span>
+                            <span className="text-xl font-mono font-black leading-none">{weeklyTotalHours.toFixed(1)}<span className="text-xs opacity-40 ml-1">/ 40h</span></span>
+                        </div>
+                        <div className={`p-2 rounded-lg ${weeklyTotalHours >= 40 ? 'bg-emerald-500/20' : 'bg-amber-500/20'}`}>
+                            <IoCheckmarkCircle size={20} />
+                        </div>
+                    </div>
+                    {/* Mini Progress Bar */}
+                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
+                        <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${Math.min((weeklyTotalHours / 40) * 100, 100)}%` }}
+                            className={`h-full transition-all duration-1000 ${
+                                weeklyTotalHours >= 40 
+                                ? 'bg-linear-to-r from-emerald-600 to-emerald-400 shadow-[0_0_15px_rgba(16,185,129,0.3)]' 
+                                : 'bg-linear-to-r from-amber-600 to-amber-400 shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+                            }`}
+                        />
                     </div>
                  </div>
 
                  <button
                     onClick={handleSave}
                     disabled={isLocked}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-colors shadow-lg shadow-white/10 active:scale-95 ${
-                        isLocked ? 'bg-zinc-800 text-gray-500 cursor-not-allowed opacity-50' : 'bg-white text-black hover:bg-gray-200'
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all active:scale-95 border shadow-2xl relative overflow-hidden group ${
+                        isLocked 
+                        ? 'bg-zinc-800/10 border-white/5 text-gray-700 cursor-not-allowed shadow-none' 
+                        : 'bg-white text-zinc-950 border-white hover:bg-zinc-200 hover:shadow-white/20'
                     }`}
                  >
-                    <IoSave size={18} />
+                    <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                    <IoSave size={16} />
                     <span>Save Changes</span>
                  </button>
+
                  
-                 <button
+                  <button
                     onClick={() => setShowSubmitModal(true)}
                     disabled={isLocked}
-                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-bold transition-colors shadow-lg shadow-emerald-500/20 active:scale-95 ${
-                        isLocked ? 'bg-zinc-800 text-gray-500 cursor-not-allowed opacity-50' : 'bg-emerald-600 text-white hover:bg-emerald-500'
+                    className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[11px] transition-all active:scale-95 border shadow-2xl relative overflow-hidden group ${
+                        isLocked 
+                        ? 'bg-zinc-800/10 border-white/5 text-gray-700 cursor-not-allowed shadow-none' 
+                        : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-500 hover:shadow-emerald-500/30'
                     }`}
                  >
-                    <IoCheckmarkCircle size={18} />
-                    <span>{timesheetStatus === 'pending' ? 'Pending Approval' : timesheetStatus === 'approved' ? 'Approved' : 'Submit'}</span>
+                    <div className="absolute inset-0 bg-linear-to-tr from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                    <IoCheckmarkCircle size={16} />
+                    <span>{timesheetStatus === 'pending' ? 'Pending Approval' : timesheetStatus === 'approved' ? 'Approved' : 'Finalize & Submit'}</span>
                  </button>
             </div>
         </div>
@@ -725,7 +754,7 @@ export default function WeeklyTimeLog({
                                                 min="0"
                                                 disabled={isLocked}
                                                 placeholder="H"
-                                                className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-white/10 focus:border-amber-500/50 hover:bg-white/5 transition-all ${
+                                                className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-white/10 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10 hover:bg-white/5 transition-all ${
                                                     Math.floor(cell?.hours || 0) > 0 ? 'text-white font-bold' : 'text-gray-600'
                                                 }`}
                                                 value={Math.floor(cell?.hours || 0) || ""}
@@ -744,7 +773,7 @@ export default function WeeklyTimeLog({
                                                 max="59"
                                                 disabled={isLocked}
                                                 placeholder="M"
-                                                className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-white/10 focus:border-amber-500/50 hover:bg-white/5 transition-all ${
+                                                className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-white/10 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10 hover:bg-white/5 transition-all ${
                                                     Math.round(((cell?.hours || 0) % 1) * 60) > 0 ? 'text-white font-bold' : 'text-gray-600'
                                                 }`}
                                                 value={Math.round(((cell?.hours || 0) % 1) * 60) || ""}
@@ -793,7 +822,7 @@ export default function WeeklyTimeLog({
                     
                     {/* ADD ROW BTN */}
                     <tr>
-                        <td colSpan={2 + 7 + 2} className="p-2"> 
+                        <td colSpan={2 + 7 + 1} className="p-2"> 
                             <button
                                 onClick={handleAddRow}
                                 disabled={isLocked}
@@ -814,15 +843,20 @@ export default function WeeklyTimeLog({
                         <td className="p-4 text-xs font-black uppercase text-gray-500 text-right" colSpan={2}>Daily Total</td>
                         {weekDays.map(day => {
                             const total = getDayTotal(normalizeDateStr(day));
+                            let colorClass = 'text-gray-600';
+                            if (total > 0) {
+                                if (total < 8) colorClass = 'text-red-500';
+                                else if (total === 8) colorClass = 'text-emerald-500';
+                                else colorClass = 'text-orange-500';
+                            }
                             return (
                                 <td key={day} className="p-4 text-center">
-                                    <span className={`font-mono font-bold ${total > 0 ? 'text-white' : 'text-gray-600'}`}>
+                                    <span className={`font-mono font-bold ${colorClass}`}>
                                         {total > 0 ? total.toFixed(1)+"h" : '-'}
                                     </span>
                                 </td>
                             );
                         })}
-                        <td></td>
                         <td></td>
                     </tr>
                 </tfoot>
@@ -863,8 +897,14 @@ export default function WeeklyTimeLog({
                           const errorData = await res.json();
                           throw new Error(errorData.error || "Submit failed");
                       }
-                      
+                       
                       toast.success("Submitted successfully!", { theme: 'colored' });
+                      confetti({
+                        particleCount: 150,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#f59e0b', '#10b981', '#ffffff']
+                      });
                       fetchTimesheetStatus(); // Refresh status to lock UI
                 } catch(e) {
                     toast.error(e.message);
