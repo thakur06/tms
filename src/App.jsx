@@ -12,6 +12,7 @@ import TeamCompliancePage from './pages/TeamCompliancePage';
 import TimesheetReviewPage from './pages/TimesheetReviewPage';
 import Header from './components/Header';
 import Login from './pages/Login';
+import ProjectAssignments from './pages/ProjectAssignments';
 import NotFound from './pages/NotFound';
 import ProtectedRoutes from "./security/ProtectedRoutes";
 import PublicRoute from "./security/PublicRoute";
@@ -55,6 +56,11 @@ function AppContent() {
             <Projects />
           </AdminRoute>
         } />
+        <Route path="/project-assignments" element={
+          <AdminRoute>
+            <ProjectAssignments />
+          </AdminRoute>
+        } />
         {/* <Route path="/reports" element={<TimeReports />} /> */}
         <Route path="/approvals" element={<TimesheetApprovalsPage />} />
         <Route path="/approvals/review/:timesheetId" element={<TimesheetReviewPage />} />
@@ -84,7 +90,7 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <AppContent />
-        <ToastContainer 
+        <ToastContainer
           position="top-center"
           autoClose={2000}
           hideProgressBar={true}

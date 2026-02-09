@@ -27,9 +27,9 @@ export default function Sidebar({ isOpen, onClose }) {
   const [openFolders, setOpenFolders] = useState(['Workspace', 'Performance', 'Leadership', 'Governance', 'Insights']);
 
   const toggleFolder = (folder) => {
-    setOpenFolders(prev => 
-      prev.includes(folder) 
-        ? prev.filter(f => f !== folder) 
+    setOpenFolders(prev =>
+      prev.includes(folder)
+        ? prev.filter(f => f !== folder)
         : [...prev, folder]
     );
   };
@@ -67,17 +67,18 @@ export default function Sidebar({ isOpen, onClose }) {
       adminOnly: true,
       links: [
         { path: '/projects', label: 'Projects', icon: IoBriefcaseOutline, activeIcon: IoBriefcase },
+        { path: '/project-assignments', label: 'Project Assignments', icon: IoLayersOutline, activeIcon: IoLayers },
         { path: '/tasks', label: 'Tasks', icon: IoListOutline, activeIcon: IoList },
         { path: '/users', label: 'User Management', icon: IoPersonOutline, activeIcon: IoPerson },
       ]
     },
     {
-        name: 'Insights',
-        icon: IoStatsChartOutline,
-        adminOnly: true,
-        links: [
-            { path: '/reports-analytics', label: 'Reports & Analytics', icon: IoStatsChartOutline, activeIcon: IoStatsChart },
-        ]
+      name: 'Insights',
+      icon: IoStatsChartOutline,
+      adminOnly: true,
+      links: [
+        { path: '/reports-analytics', label: 'Reports & Analytics', icon: IoStatsChartOutline, activeIcon: IoStatsChart },
+      ]
     }
   ];
 
@@ -94,28 +95,26 @@ export default function Sidebar({ isOpen, onClose }) {
   // Filter links within a group
   const getVisibleLinks = (links) => {
     return links.filter(link => {
-        if (user?.role === 'admin') return true;
-        if (link.adminOnly && user?.role !== 'admin') return false;
-        if (link.hideIfNoReports && (parseInt(user?.reportsCount) || 0) <= 0) return false;
-        return true;
+      if (user?.role === 'admin') return true;
+      if (link.adminOnly && user?.role !== 'admin') return false;
+      if (link.hideIfNoReports && (parseInt(user?.reportsCount) || 0) <= 0) return false;
+      return true;
     });
   };
 
   return (
     <>
       {/* Mobile Overlay */}
-      <div 
-        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${
-          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-        }`}
+      <div
+        className={`fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300 ${isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+          }`}
         onClick={onClose}
       />
 
       {/* Sidebar */}
-      <aside 
-        className={`fixed top-0 left-0 h-full w-64 bg-zinc-950 border-r border-white/5 z-50 transition-transform duration-300 transform lg:translate-x-0 ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
+      <aside
+        className={`fixed top-0 left-0 h-full w-64 bg-zinc-950 border-r border-white/5 z-50 transition-transform duration-300 transform lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          }`}
       >
         <div className="flex flex-col h-full">
           {/* Logo Area */}
@@ -130,7 +129,7 @@ export default function Sidebar({ isOpen, onClose }) {
               .map((group, groupIdx) => {
                 const visibleGroupLinks = getVisibleLinks(group.links);
                 if (visibleGroupLinks.length === 0) return null;
-                
+
                 const isOpen = openFolders.includes(group.name);
                 const GroupIcon = group.icon;
 
@@ -178,11 +177,10 @@ export default function Sidebar({ isOpen, onClose }) {
                                 <Link
                                   to={link.path}
                                   onClick={() => window.innerWidth < 1024 && onClose()}
-                                  className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${
-                                    active 
-                                      ? 'text-zinc-950 bg-amber-500 shadow-lg shadow-amber-500/20 font-black' 
+                                  className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${active
+                                      ? 'text-zinc-950 bg-amber-500 shadow-lg shadow-amber-500/20 font-black'
                                       : 'text-gray-400 hover:text-white hover:bg-white/5 font-bold'
-                                  }`}
+                                    }`}
                                 >
                                   <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'text-white scale-110' : 'text-gray-500 group-hover:text-amber-500 group-hover:scale-110'}`} />
                                   <span className="text-[11px] font-bold tracking-tight">{link.label}</span>
@@ -202,7 +200,7 @@ export default function Sidebar({ isOpen, onClose }) {
                     </AnimatePresence>
                   </div>
                 );
-            })}
+              })}
           </nav>
 
 
