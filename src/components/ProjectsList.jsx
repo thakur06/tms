@@ -1,14 +1,14 @@
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  IoSearchOutline, 
+import {
+  IoSearchOutline,
   IoTrashOutline,
-  IoChevronBackOutline, 
+  IoChevronBackOutline,
   IoChevronForwardOutline,
   IoLocationOutline,
   IoEllipsisHorizontal,
   IoBusinessOutline,
   IoPencilOutline,
-  
+
 } from 'react-icons/io5'
 import { useState, useEffect, useMemo } from 'react'
 
@@ -26,10 +26,10 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
   }
 
   const filteredProjects = useMemo(() => {
-    return projects.filter(p => 
-      p.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.code?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.client?.toLowerCase().includes(searchQuery.toLowerCase())
+    return projects.filter(p =>
+      String(p.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(p.code || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+      String(p.client || '').toLowerCase().includes(searchQuery.toLowerCase())
     )
   }, [projects, searchQuery])
 
@@ -64,7 +64,7 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
           {headerAction}
           <div className="relative w-full sm:w-64">
             <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-            <input 
+            <input
               type="text"
               placeholder="Search projects..."
               value={searchQuery}
@@ -77,7 +77,7 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
 
       {/* Projects Grid */}
       {filteredProjects.length === 0 ? (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={transition}
@@ -88,7 +88,7 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
           </div>
           <h3 className="text-lg font-bold text-white mb-2">No projects found</h3>
           <p className="text-gray-500 text-sm mb-6">Try adjusting your search criteria</p>
-          <button 
+          <button
             onClick={() => setSearchQuery('')}
             className="text-sm font-semibold text-amber-500 hover:text-amber-400 underline"
           >
@@ -98,12 +98,12 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
           {displayedProjects.map((project, index) => (
-            <ProjectCard 
-              key={project.id || index} 
-              project={project} 
+            <ProjectCard
+              key={project.id || index}
+              project={project}
               index={index}
               getStatusColor={getStatusColor}
-              onDelete={() => { setProjectToDelete(project); setShowDeleteModal(true); }} 
+              onDelete={() => { setProjectToDelete(project); setShowDeleteModal(true); }}
               onEdit={() => onEditProject && onEditProject(project)}
             />
           ))}
@@ -112,7 +112,7 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={transition}
@@ -121,7 +121,7 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
           <div className="text-sm text-gray-500 font-medium">
             Page <span className="text-white font-bold">{page}</span> of <span className="text-white font-bold">{totalPages}</span>
           </div>
-          
+
           <div className="flex items-center gap-2">
             <button
               disabled={page === 1}
@@ -135,31 +135,30 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
               {(() => {
                 const pages = []
                 const maxVisible = 5
-                
+
                 let start = Math.max(1, page - Math.floor(maxVisible / 2))
                 let end = Math.min(totalPages, start + maxVisible - 1)
-                
+
                 if (end - start < maxVisible - 1) {
                   start = Math.max(1, end - maxVisible + 1)
                 }
-                
+
                 for (let i = start; i <= end; i++) {
                   pages.push(
                     <motion.button
                       key={i}
                       onClick={() => setPage(i)}
                       whileTap={{ scale: 0.95 }}
-                      className={`w-8 h-8 text-sm font-bold rounded-lg transition-all ${
-                        page === i 
-                          ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20' 
+                      className={`w-8 h-8 text-sm font-bold rounded-lg transition-all ${page === i
+                          ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20'
                           : 'text-gray-500 hover:bg-white/10 hover:text-white'
-                      }`}
+                        }`}
                     >
                       {i}
                     </motion.button>
                   )
                 }
-                
+
                 return pages
               })()}
             </div>
@@ -179,17 +178,17 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
       <AnimatePresence>
         {showDeleteModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              onClick={() => setShowDeleteModal(false)} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowDeleteModal(false)}
               className="absolute inset-0 bg-[#000000]/60 backdrop-blur-sm"
             />
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              exit={{ scale: 0.95, opacity: 0 }} 
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
               transition={transition}
               className="relative w-full max-w-sm ui-modal p-6 shadow-2xl bg-zinc-900 border-white/5"
             >
@@ -202,14 +201,14 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
                   Are you sure you want to delete <span className="text-white font-black">{projectToDelete?.name}</span>?
                 </p>
                 <div className="flex gap-3">
-                  <button 
-                    onClick={() => setShowDeleteModal(false)} 
+                  <button
+                    onClick={() => setShowDeleteModal(false)}
                     className="flex-1 py-2.5 text-sm font-black text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all uppercase tracking-wider"
                   >
                     Cancel
                   </button>
-                  <button 
-                    onClick={() => { onDeleteProject(projectToDelete.id); setShowDeleteModal(false); }} 
+                  <button
+                    onClick={() => { onDeleteProject(projectToDelete.id); setShowDeleteModal(false); }}
                     className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-black hover:bg-red-700 shadow-lg shadow-red-500/20 transition-all uppercase tracking-wider"
                   >
                     Delete
@@ -226,7 +225,7 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
 
 function ProjectCard({ project, index, getStatusColor, onDelete, onEdit }) {
   const [showMenu, setShowMenu] = useState(false)
-  
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -243,15 +242,15 @@ function ProjectCard({ project, index, getStatusColor, onDelete, onEdit }) {
               {project.status || 'Active'}
             </span>
           </div>
-          
+
           <div className="relative">
-            <button 
+            <button
               onClick={() => setShowMenu(!showMenu)}
               className="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
             >
               <IoEllipsisHorizontal size={16} />
             </button>
-            
+
             <AnimatePresence>
               {showMenu && (
                 <>
@@ -268,14 +267,14 @@ function ProjectCard({ project, index, getStatusColor, onDelete, onEdit }) {
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
                     className="absolute right-0 top-8 bg-zinc-900 rounded-lg shadow-xl border border-white/10 py-1 z-20 w-40"
                   >
-                    <button 
+                    <button
                       onClick={(e) => { e.stopPropagation(); onEdit(); setShowMenu(false); }}
                       className="w-full px-3 py-2 text-left text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
                     >
                       <IoPencilOutline size={14} />
                       Edit Project
                     </button>
-                    <button 
+                    <button
                       onClick={(e) => { e.stopPropagation(); onDelete(); setShowMenu(false); }}
                       className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-white/5 transition-colors flex items-center gap-2"
                     >
@@ -294,7 +293,7 @@ function ProjectCard({ project, index, getStatusColor, onDelete, onEdit }) {
           <h3 className="text-base font-black text-white mb-3 line-clamp-2 leading-tight group-hover:text-amber-500 transition-colors">
             {project.name}
           </h3>
-          
+
           <div className="space-y-3">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center border border-blue-500/20">
