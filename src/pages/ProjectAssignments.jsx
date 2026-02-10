@@ -8,14 +8,38 @@ import {
     IoPersonOutline, IoPieChartOutline, IoLayersOutline,
     IoCalendarOutline, IoArrowUpOutline, IoArrowDownOutline
 } from 'react-icons/io5';
+// Add custom styles for recharts
+const rechartsStyles = `
+    .recharts-wrapper {
+        outline: none !important;
+    }
+    .recharts-surface {
+        outline: none !important;
+    }
+    .recharts-layer path {
+        outline: none !important;
+    }
+`;
+
 import {
-    PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend
+    PieChart, Pie, Cell, ResponsiveContainer, Tooltip, Legend,
+    BarChart, Bar, XAxis, YAxis, CartesianGrid, ReferenceLine, LabelList
 } from 'recharts';
 import { toast } from 'react-toastify';
 import UserAvatar from '../components/UserAvatar';
 import SearchableSelect from '../components/SearchableSelect';
+import { IoCloseOutline, IoStatsChartOutline, IoGridOutline } from 'react-icons/io5';
 
-const COLORS = ['#F59E0B', '#10B981', '#3B82F6', '#8B5CF6', '#EC4899', '#F43F5E', '#06B6D4'];
+const COLORS = [
+    '#F59E0B', // Yellow/Amber
+    '#3B82F6', // Blue
+    '#8B5CF6', // Purple
+    '#38BDF8', // Light Blue
+    '#EC4899', // Pink
+    '#14B8A6', // Teal
+    '#EF4444', // Red
+    '#10B981', // Green
+];
 
 export default function ProjectAssignments() {
     const server = import.meta.env.VITE_SERVER_ADDRESS;
@@ -41,9 +65,12 @@ export default function ProjectAssignments() {
         user_id: '',
         project_id: '',
         allocation_percentage: 100,
-        start_date: new Date().toISOString().split('T')[0],
         end_date: new Date().toISOString().split('T')[0]
     });
+
+    // Analytics State
+    const [activeTab, setActiveTab] = useState('list'); // 'list' or 'analytics'
+    const [selectedAnalyticsUser, setSelectedAnalyticsUser] = useState(null);
 
     useEffect(() => {
         fetchData();
@@ -170,6 +197,7 @@ export default function ProjectAssignments() {
 
     return (
         <div className="w-full space-y-6">
+            <style>{rechartsStyles}</style>
             {/* Header */}
             <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-1">
@@ -294,175 +322,424 @@ export default function ProjectAssignments() {
                 </div>
             </div>
 
+            {/* Tab Navigation */}
+            <div className="flex items-center gap-1 bg-zinc-900/50 p-1 rounded-xl w-fit border border-white/5 mb-6">
+                <button
+                    onClick={() => setActiveTab('list')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'list'
+                        ? 'bg-amber-500 text-zinc-950 shadow-lg shadow-amber-500/20'
+                        : 'text-gray-500 hover:text-white hover:bg-white/5'
+                        }`}
+                >
+                    <IoGridOutline size={16} />
+                    List View
+                </button>
+                <button
+                    onClick={() => setActiveTab('analytics')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'analytics'
+                        ? 'bg-amber-500 text-zinc-950 shadow-lg shadow-amber-500/20'
+                        : 'text-gray-500 hover:text-white hover:bg-white/5'
+                        }`}
+                >
+                    <IoStatsChartOutline size={16} />
+                    Analytics
+                </button>
+            </div>
+
             {loading ? (
                 <div className="p-20 text-center">
                     <div className="w-10 h-10 border-3 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto" />
                     <p className="text-gray-500 mt-4 font-medium italic">Loading assignments...</p>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <AnimatePresence mode='popLayout'>
-                        {filteredUsers.map((user, idx) => (
-                            <motion.div
-                                key={user.user_id}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: idx * 0.05 }}
-                                onClick={(e) => {
-                                    // Don't open if clicking buttons inside
-                                    if (e.target.closest('button')) return;
-                                    setFormData({
-                                        user_id: user.user_id,
-                                        project_id: '',
-                                        allocation_percentage: 100,
-                                        start_date: selectedDate,
-                                        end_date: new Date().toISOString().split('T')[0]
-                                    });
-                                    setIsAssignModalOpen(true);
-                                }}
-                                className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 hover:border-amber-500/20 transition-all group overflow-hidden cursor-pointer"
-                            >
-                                <div className="flex flex-col sm:flex-row gap-6">
-                                    {/* Left Column: Stats & Projects */}
-                                    <div className="flex-1 space-y-6">
-                                        <div className="flex items-center gap-4">
-                                            <UserAvatar name={user.user_name} email={user.user_email} size="lg" />
-                                            <div>
-                                                <h3 className="text-lg font-black text-white">{user.user_name}</h3>
-                                                <p className="text-xs text-gray-500 font-bold">{user.user_dept}</p>
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-3">
-                                            <div className="flex items-center justify-between">
-                                                <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Total Load</span>
-                                                <span className={`text-xs font-black ${user.total_allocation > 100 ? 'text-red-500' : 'text-emerald-500'}`}>
-                                                    {user.total_allocation}%
-                                                </span>
-                                            </div>
-                                            <div className="h-2 bg-white/5 rounded-full overflow-hidden">
-                                                <motion.div
-                                                    initial={{ width: 0 }}
-                                                    animate={{ width: `${Math.min(user.total_allocation, 100)}%` }}
-                                                    className={`h-full rounded-full ${user.total_allocation > 100 ? 'bg-red-500' : 'bg-emerald-500'}`}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="space-y-2 max-h-[160px] overflow-y-auto pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
-                                            {user.projects.length > 0 ? (
-                                                user.projects.map(proj => (
-                                                    <div key={proj.id} className="group/item flex items-center justify-between p-3 rounded-2xl bg-black/20 border border-white/5 hover:border-amber-500/30 transition-all">
-                                                        <div className="flex items-center gap-3 h-8">
-                                                            <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/5">
-                                                                {proj.project_code}
-                                                            </div>
-                                                            <div>
-                                                                <p className="text-xs font-black text-gray-200">{proj.project_name}</p>
-                                                                <div className="flex flex-col">
-                                                                    <p className="text-[10px] text-gray-300 font-bold">{proj.allocation_percentage}% allocation</p>
-                                                                    <p className="text-[10px] text-gray-400 font-medium italic">
-                                                                        {new Date(proj.start_date).toLocaleDateString()} - {proj.end_date.startsWith('9999') ? 'Ongoing' : new Date(proj.end_date).toLocaleDateString()}
-                                                                    </p>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <div className="flex items-center gap-1  group-hover/item:opacity-100 transition-opacity">
-                                                            <button
-                                                                onClick={() => {
-                                                                    setSelectedAssignment(proj);
-                                                                    setFormData({
-                                                                        ...formData,
-                                                                        allocation_percentage: proj.allocation_percentage,
-                                                                        start_date: proj.start_date.split('T')[0],
-                                                                        end_date: proj.end_date.split('T')[0]
-                                                                    });
-                                                                    setIsEditModalOpen(true);
-                                                                }}
-                                                                className="p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                                                            >
-                                                                <IoPencilOutline size={14} />
-                                                            </button>
-                                                            <button
-                                                                onClick={() => handleDeleteClick(proj)}
-                                                                className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                                                            >
-                                                                <IoTrashOutline size={14} />
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/2 border border-dashed border-white/10 opacity-50 h-[58px]">
-                                                    <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-gray-600">
-                                                        <IoLayersOutline size={14} />
-                                                    </div>
+                <>
+                    {activeTab === 'list' ? (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                            <AnimatePresence mode='popLayout'>
+                                {filteredUsers.map((user, idx) => (
+                                    <motion.div
+                                        key={user.user_id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.05 }}
+                                        onClick={(e) => {
+                                            // Don't open if clicking buttons inside
+                                            if (e.target.closest('button')) return;
+                                            setFormData({
+                                                user_id: user.user_id,
+                                                project_id: '',
+                                                allocation_percentage: 100,
+                                                start_date: selectedDate,
+                                                end_date: new Date().toISOString().split('T')[0]
+                                            });
+                                            setIsAssignModalOpen(true);
+                                        }}
+                                        className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 hover:border-amber-500/20 transition-all group overflow-hidden cursor-pointer"
+                                    >
+                                        <div className="flex flex-col sm:flex-row gap-6">
+                                            {/* Left Column: Stats & Projects */}
+                                            <div className="flex-1 space-y-6">
+                                                <div className="flex items-center gap-4">
+                                                    <UserAvatar name={user.user_name} email={user.user_email} size="lg" />
                                                     <div>
-                                                        <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider">No Projects Assigned</p>
-                                                        <p className="text-[9px] text-gray-600 font-bold italic">Click card to assign first project</p>
+                                                        <h3 className="text-lg font-black text-white">{user.user_name}</h3>
+                                                        <p className="text-xs text-gray-500 font-bold">{user.user_dept}</p>
                                                     </div>
                                                 </div>
-                                            )}
-                                        </div>
-                                    </div>
 
-                                    {/* Right Column: Pie Chart */}
-                                    <div className="w-full sm:w-48 h-48 shrink-0 relative group">
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <PieChart>
-                                                <Pie
-                                                    data={user.projects.length > 0 ? user.projects : [{ project_name: 'Free', allocation_percentage: 100 }]}
-                                                    cx="50%"
-                                                    cy="50%"
-                                                    innerRadius={50}
-                                                    outerRadius={70}
-                                                    paddingAngle={user.projects.length > 0 ? 5 : 0}
-                                                    dataKey="allocation_percentage"
-                                                    nameKey="project_name"
-                                                    stroke="none"
-                                                >
+                                                <div className="space-y-3">
+                                                    <div className="flex items-center justify-between">
+                                                        <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Total Load</span>
+                                                        <span className={`text-xs font-black ${user.total_allocation > 100 ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                            {user.total_allocation}%
+                                                        </span>
+                                                    </div>
+                                                    <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                                                        <motion.div
+                                                            initial={{ width: 0 }}
+                                                            animate={{ width: `${Math.min(user.total_allocation, 100)}%` }}
+                                                            className={`h-full rounded-full ${user.total_allocation > 100 ? 'bg-red-500' : 'bg-emerald-500'}`}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="space-y-2 max-h-[110px] overflow-y-auto pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                                                     {user.projects.length > 0 ? (
-                                                        user.projects.map((entry, index) => (
-                                                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                        user.projects.map(proj => (
+                                                            <div key={proj.id} className="group/item flex items-center justify-between p-3 rounded-2xl bg-black/20 border border-white/5 hover:border-amber-500/30 transition-all">
+                                                                <div className="flex items-center gap-3 h-8">
+                                                                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/5">
+                                                                        {proj.project_code}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-xs font-black text-gray-200">{proj.project_name}</p>
+                                                                        <div className="flex flex-col">
+                                                                            <p className="text-[10px] text-gray-300 font-bold"><span className="text-blue-500 font-extrabold text-sm">{proj.allocation_percentage}%</span> allocation</p>
+                                                                            <p className="text-[10px] text-gray-400 font-medium italic">
+                                                                                {new Date(proj.start_date).toLocaleDateString()} - {proj.end_date.startsWith('9999') ? 'Ongoing' : new Date(proj.end_date).toLocaleDateString()}
+                                                                            </p>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex items-center gap-1  group-hover/item:opacity-100 transition-opacity">
+                                                                    <button
+                                                                        onClick={() => {
+                                                                            setSelectedAssignment(proj);
+                                                                            setFormData({
+                                                                                ...formData,
+                                                                                allocation_percentage: proj.allocation_percentage,
+                                                                                start_date: proj.start_date.split('T')[0],
+                                                                                end_date: proj.end_date.split('T')[0]
+                                                                            });
+                                                                            setIsEditModalOpen(true);
+                                                                        }}
+                                                                        className="p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                                                                    >
+                                                                        <IoPencilOutline size={14} />
+                                                                    </button>
+                                                                    <button
+                                                                        onClick={() => handleDeleteClick(proj)}
+                                                                        className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                                                    >
+                                                                        <IoTrashOutline size={14} />
+                                                                    </button>
+                                                                </div>
+                                                            </div>
                                                         ))
                                                     ) : (
-                                                        <Cell fill="#10B981" /> /* Emerald-500 */
+                                                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/2 border border-dashed border-white/10 opacity-50 h-[58px]">
+                                                            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-gray-600">
+                                                                <IoLayersOutline size={14} />
+                                                            </div>
+                                                            <div>
+                                                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider">No Projects Assigned</p>
+                                                                <p className="text-[9px] text-gray-600 font-bold italic">Click card to assign first project</p>
+                                                            </div>
+                                                        </div>
                                                     )}
-                                                </Pie>
-                                                {user.projects.length > 0 && (
-                                                    <Tooltip
-                                                        formatter={(value) => `${value}%`}
-                                                        contentStyle={{
-                                                            backgroundColor: '#D3D3D3',
-                                                            border: 'none',
-                                                            borderRadius: '12px',
-                                                            fontSize: '10px',
-                                                            fontWeight: '900',
-                                                            color: '#000000',
-                                                            boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
-                                                            zIndex: 1000
-                                                        }}
-                                                        itemStyle={{
-                                                            color: '#000000',
-                                                            textTransform: 'uppercase',
-                                                            letterSpacing: '0.05em'
-                                                        }}
-                                                    />
-                                                )}
-                                            </PieChart>
-                                        </ResponsiveContainer>
-                                        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 group-hover:opacity-0 transition-opacity duration-300">
-                                            <span className="text-[10px] font-black text-gray-500 uppercase">Load</span>
-                                            <span className={`text-lg font-black ${user.total_allocation > 100 ? 'text-red-500' : 'text-white'}`}>
-                                                {user.total_allocation}%
-                                            </span>
+                                                </div>
+                                            </div>
+
+                                            {/* Right Column: Pie Chart */}
+                                            <div className="w-full sm:w-48 h-48 shrink-0 relative group">
+                                                <ResponsiveContainer width="100%" height="100%">
+                                                    <PieChart>
+                                                        <Pie
+                                                            data={user.projects.length > 0 ? user.projects : [{ project_name: 'Free', allocation_percentage: 100 }]}
+                                                            cx="50%"
+                                                            cy="50%"
+                                                            innerRadius={50}
+                                                            outerRadius={70}
+                                                            paddingAngle={user.projects.length > 0 ? 5 : 0}
+                                                            dataKey="allocation_percentage"
+                                                            nameKey="project_name"
+                                                            stroke="none"
+                                                            onMouseEnter={(_, index) => {
+                                                                // Track which user's pie is hovered
+                                                                window._hoveredPieId = user.user_id + '_' + index;
+                                                                const el = document.getElementById(`load-info-${user.user_id}`);
+                                                                if (el) el.style.opacity = '0';
+                                                            }}
+                                                            onMouseLeave={() => {
+                                                                window._hoveredPieId = null;
+                                                                const el = document.getElementById(`load-info-${user.user_id}`);
+                                                                if (el) el.style.opacity = '1';
+                                                            }}
+                                                        >
+                                                            {user.projects.length > 0 ? (
+                                                                user.projects.map((entry, index) => (
+                                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                                                                ))
+                                                            ) : (
+                                                                <Cell fill="#3B3B3B" /> /* Emerald-500 */
+                                                            )}
+                                                        </Pie>
+                                                        {user.projects.length > 0 && (
+                                                            <Tooltip
+                                                                formatter={(value) => `${value}%`}
+                                                                contentStyle={{
+                                                                    backgroundColor: '#D3D3D3',
+                                                                    border: 'none',
+                                                                    borderRadius: '12px',
+                                                                    fontSize: '10px',
+                                                                    fontWeight: '900',
+                                                                    color: '#000000',
+                                                                    boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
+                                                                    zIndex: 1000
+                                                                }}
+                                                                itemStyle={{
+                                                                    color: '#000000',
+                                                                    textTransform: 'uppercase',
+                                                                    letterSpacing: '0.05em'
+                                                                }}
+                                                            />
+                                                        )}
+                                                    </PieChart>
+                                                </ResponsiveContainer>
+                                                <div
+                                                    id={`load-info-${user.user_id}`}
+                                                    className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 transition-opacity duration-300"
+                                                >
+                                                    <span className="text-[10px] font-black text-gray-500 uppercase">Load</span>
+                                                    <span className={`text-lg font-black ${user.total_allocation > 100 ? 'text-red-500' : 'text-white'}`}>
+                                                        {user.total_allocation}%
+                                                    </span>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
+                                    </motion.div>
+                                ))}
+                            </AnimatePresence>
+                        </div>
+                    ) : (
+                        <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 h-[500px] flex flex-col relative overflow-hidden">
+                            <h3 className="text-xl font-black text-white mb-6 flex items-center gap-3">
+                                <IoStatsChartOutline className="text-amber-500" />
+                                Workload Analytics
+                            </h3>
+
+                            {filteredUsers.length === 0 ? (
+                                <div className="flex-1 flex flex-col items-center justify-center text-gray-500 opacity-50">
+                                    <IoStatsChartOutline size={48} className="mb-4" />
+                                    <p className="font-bold text-sm">No user data to display</p>
                                 </div>
-                            </motion.div>
-                        ))}
-                    </AnimatePresence>
-                </div>
+                            ) : (
+                                <div className="flex-1 w-full min-h-0 focus:outline-none outline-none">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart
+                                            data={filteredUsers}
+                                            margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                                            className="focus:outline-none outline-none"
+                                        >
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                                            <XAxis
+                                                dataKey="user_name"
+                                                tick={({ x, y, payload }) => {
+                                                    const user = filteredUsers[payload.index];
+                                                    let fill = '#3B82F6'; // Default Blue
+                                                    if (user && user.total_allocation >= 100) fill = '#EF4444'; // Red
+                                                    if (user && user.total_allocation === 0) fill = '#10B981'; // Green
+                                                    return (
+                                                        <g transform={`translate(${x},${y})`}>
+                                                            <text
+                                                                x={0}
+                                                                y={0}
+                                                                dy={16}
+                                                                textAnchor="end"
+                                                                fill={fill}
+                                                                transform="rotate(-45)"
+                                                                fontSize={10}
+                                                                fontWeight={700}
+                                                            >
+                                                                {payload.value}
+                                                            </text>
+                                                        </g>
+                                                    );
+                                                }}
+                                                axisLine={{ stroke: '#ffffff10' }}
+                                                tickLine={{ stroke: '#ffffff10' }}
+                                                interval={0}
+                                                height={60}
+                                            />
+                                            <YAxis
+                                                tick={{ fill: '#6b7280', fontSize: 10, fontWeight: 700 }}
+                                                axisLine={{ stroke: '#ffffff10' }}
+                                                tickLine={{ stroke: '#ffffff10' }}
+                                                domain={[0, 'auto']}
+                                            />
+                                            <Tooltip
+                                                cursor={{ fill: '#ffffff05' }}
+                                                contentStyle={{
+                                                    backgroundColor: '#09090b',
+                                                    border: '1px solid #ffffff10',
+                                                    borderRadius: '12px',
+                                                    fontSize: '12px',
+                                                    fontWeight: 'bold',
+                                                    boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.5)'
+                                                }}
+                                                itemStyle={{ color: '#fff' }}
+                                            />
+                                            <Bar
+                                                dataKey="total_allocation"
+                                                name="Total Load %"
+                                                radius={[4, 4, 0, 0]}
+                                                cursor="pointer"
+                                                activeBar={false}
+                                                onClick={(data) => {
+                                                    if (data) {
+                                                        setSelectedAnalyticsUser(data);
+                                                    }
+                                                }}
+                                            >
+                                                {filteredUsers.map((entry, index) => (
+                                                    <Cell
+                                                        key={`cell-${index}`}
+                                                        fill={COLORS[index % COLORS.length]}
+                                                        fillOpacity={0.9}
+                                                        stroke="none"
+                                                    />
+                                                ))}
+                                                <LabelList
+                                                    dataKey="total_allocation"
+                                                    position="top"
+                                                    fill="#9CA3AF"
+                                                    fontSize={10}
+                                                    fontWeight={700}
+                                                    formatter={(val) => `${val}%`}
+                                                />
+                                            </Bar>
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
+                            )}
+
+                            <p className="text-center text-xs text-gray-500 font-bold mt-4">
+                                Click on any bar to view details
+                            </p>
+
+                            {/* Slide-over Side Panel */}
+                            <AnimatePresence>
+                                {selectedAnalyticsUser && (
+                                    <>
+                                        {/* Backdrop */}
+                                        <motion.div
+                                            initial={{ opacity: 0 }}
+                                            animate={{ opacity: 1 }}
+                                            exit={{ opacity: 0 }}
+                                            onClick={() => setSelectedAnalyticsUser(null)}
+                                            className="absolute inset-0 bg-black/60 backdrop-blur-sm z-40"
+                                        />
+
+                                        {/* Drawer */}
+                                        <motion.div
+                                            initial={{ x: '100%' }}
+                                            animate={{ x: 0 }}
+                                            exit={{ x: '100%' }}
+                                            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                            className="absolute top-0 right-0 h-full w-full max-w-sm bg-black border-l border-white/10 z-50 shadow-2xl overflow-hidden flex flex-col"
+                                        >
+                                            <div className="p-6 border-b border-white/10 flex items-center justify-between bg-zinc-900/50">
+                                                <div className="flex items-center gap-3">
+                                                    <UserAvatar name={selectedAnalyticsUser.user_name} email={selectedAnalyticsUser.user_email} size="md" />
+                                                    <div>
+                                                        <h4 className="text-lg font-black text-white">{selectedAnalyticsUser.user_name}</h4>
+                                                        <p className="text-xs text-gray-400 font-bold">{selectedAnalyticsUser.user_dept}</p>
+                                                    </div>
+                                                </div>
+                                                <button
+                                                    onClick={() => setSelectedAnalyticsUser(null)}
+                                                    className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
+                                                >
+                                                    <IoCloseOutline size={20} />
+                                                </button>
+                                            </div>
+
+                                            <div className="p-6 flex-1 overflow-y-auto">
+                                                <div className="flex items-center justify-between mb-6">
+                                                    <span className="text-[10px] uppercase font-black text-gray-500 tracking-widest">Utilized Capacity</span>
+                                                    <span className={`text-xl font-black ${selectedAnalyticsUser.total_allocation > 100 ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                        {selectedAnalyticsUser.total_allocation}%
+                                                    </span>
+                                                </div>
+
+                                                <div className="space-y-3">
+                                                    <h5 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-4">Assigned Projects</h5>
+                                                    {selectedAnalyticsUser.projects.length > 0 ? (
+                                                        selectedAnalyticsUser.projects.map(proj => (
+                                                            <div key={proj.id} className="p-4 rounded-2xl bg-zinc-900/80 border border-white/5 space-y-3">
+                                                                <div className="flex items-start justify-between">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/5">
+                                                                            {proj.project_code}
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="text-sm font-black text-white">{proj.project_name}</p>
+                                                                            <p className="text-[10px] text-gray-400">{proj.project_client}</p>
+                                                                        </div>
+                                                                    </div>
+                                                                    <span className="text-blue-500 font-black text-lg">{proj.allocation_percentage}%</span>
+                                                                </div>
+                                                                <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 bg-black/40 p-2 rounded-lg">
+                                                                    <IoCalendarOutline />
+                                                                    {new Date(proj.start_date).toLocaleDateString()}
+                                                                    <span>→</span>
+                                                                    {proj.end_date.startsWith('9999') ? 'Ongoing' : new Date(proj.end_date).toLocaleDateString()}
+                                                                </div>
+                                                            </div>
+                                                        ))
+                                                    ) : (
+                                                        <div className="p-8 text-center border border-dashed border-white/10 rounded-2xl">
+                                                            <p className="text-gray-500 text-sm font-bold">No projects assigned</p>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="p-4 border-t border-white/10 bg-zinc-900/30">
+                                                <button
+                                                    onClick={() => {
+                                                        setFormData({
+                                                            user_id: selectedAnalyticsUser.user_id,
+                                                            project_id: '',
+                                                            allocation_percentage: 100,
+                                                            start_date: selectedDate,
+                                                            end_date: new Date().toISOString().split('T')[0]
+                                                        });
+                                                        setSelectedAnalyticsUser(null);
+                                                        setIsAssignModalOpen(true);
+                                                    }}
+                                                    className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black uppercase tracking-wider text-xs transition-all shadow-lg shadow-amber-500/10"
+                                                >
+                                                    Assign New Project
+                                                </button>
+                                            </div>
+                                        </motion.div>
+                                    </>
+                                )}
+                            </AnimatePresence>
+                        </div>
+                    )}
+                </>
             )}
 
             {/* Modals */}

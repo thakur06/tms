@@ -17,6 +17,7 @@ import NotFound from './pages/NotFound';
 import ProtectedRoutes from "./security/ProtectedRoutes";
 import PublicRoute from "./security/PublicRoute";
 import AdminRoute from "./security/AdminRoute";
+import AdminOrManagerRoute from "./security/AdminOrManagerRoute";
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { ToastContainer, Zoom } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -57,9 +58,9 @@ function AppContent() {
           </AdminRoute>
         } />
         <Route path="/project-assignments" element={
-          <AdminRoute>
+          <AdminOrManagerRoute>
             <ProjectAssignments />
-          </AdminRoute>
+          </AdminOrManagerRoute>
         } />
         {/* <Route path="/reports" element={<TimeReports />} /> */}
         <Route path="/approvals" element={<TimesheetApprovalsPage />} />

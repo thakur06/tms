@@ -53,10 +53,11 @@ export default function Sidebar({ isOpen, onClose }) {
     },
     {
       name: 'Leadership',
-      icon: IoPeopleOutline, // Need to make sure this is imported or use IoPersonOutline
+      icon: IoPeopleOutline,
       adminOrManager: true,
       links: [
         { path: '/approvals', label: 'Approvals', icon: IoCheckmarkCircleOutline, activeIcon: IoCheckmarkCircle, hideIfNoReports: true },
+        { path: '/project-assignments', label: 'Project Assignments', icon: IoLayersOutline, activeIcon: IoLayers },
         { path: '/team-compliance', label: 'Team Compliance', icon: IoCalendarOutline, activeIcon: IoCalendar },
         { path: '/compliance', label: 'Compliance Report', icon: IoDocumentTextOutline, activeIcon: IoDocumentText },
       ]
@@ -67,7 +68,6 @@ export default function Sidebar({ isOpen, onClose }) {
       adminOnly: true,
       links: [
         { path: '/projects', label: 'Projects', icon: IoBriefcaseOutline, activeIcon: IoBriefcase },
-        { path: '/project-assignments', label: 'Project Assignments', icon: IoLayersOutline, activeIcon: IoLayers },
         { path: '/tasks', label: 'Tasks', icon: IoListOutline, activeIcon: IoList },
         { path: '/users', label: 'User Management', icon: IoPersonOutline, activeIcon: IoPerson },
       ]
@@ -88,7 +88,9 @@ export default function Sidebar({ isOpen, onClose }) {
   const isGroupVisible = (group) => {
     if (user?.role === 'admin') return true;
     if (group.adminOnly && user?.role !== 'admin') return false;
-    if (group.adminOrManager && user?.role !== 'admin' && (parseInt(user?.reportsCount) || 0) <= 0) return false;
+    // Show leadership group if user is an admin or manager
+    if (group.adminOrManager && (user?.role === 'admin' || user?.role === 'manager')) return true;
+    if (group.adminOrManager && (parseInt(user?.reportsCount) || 0) <= 0) return false;
     return true;
   };
 
@@ -178,8 +180,8 @@ export default function Sidebar({ isOpen, onClose }) {
                                   to={link.path}
                                   onClick={() => window.innerWidth < 1024 && onClose()}
                                   className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${active
-                                      ? 'text-zinc-950 bg-amber-500 shadow-lg shadow-amber-500/20 font-black'
-                                      : 'text-gray-400 hover:text-white hover:bg-white/5 font-bold'
+                                    ? 'text-zinc-950 bg-amber-500 shadow-lg shadow-amber-500/20 font-black'
+                                    : 'text-gray-400 hover:text-white hover:bg-white/5 font-bold'
                                     }`}
                                 >
                                   <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'text-white scale-110' : 'text-gray-500 group-hover:text-amber-500 group-hover:scale-110'}`} />

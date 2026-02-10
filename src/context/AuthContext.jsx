@@ -19,18 +19,19 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const token = localStorage.getItem('token');
     const userStr = localStorage.getItem('user');
-    
+
     if (token) {
-        const decoded = decodeToken(token);
-        const storedUser = userStr ? JSON.parse(userStr) : {};
-        if (decoded) {
-            return {
-                ...storedUser,
-                id: decoded.id,
-                email: decoded.email,
-                role: decoded.role || 'employee'
-            };
-        }
+      const decoded = decodeToken(token);
+      const storedUser = userStr ? JSON.parse(userStr) : {};
+      if (decoded) {
+        return {
+          ...storedUser,
+          id: decoded.id,
+          email: decoded.email,
+          role: decoded.role || 'employee',
+          isManager: !!decoded.is_manager || !!storedUser.isManager
+        };
+      }
     }
     return userStr ? JSON.parse(userStr) : null;
   });
@@ -53,7 +54,7 @@ export const AuthProvider = ({ children }) => {
   const login = (token, userData) => {
     localStorage.setItem('token', token);
     const decoded = decodeToken(token);
-    
+
     if (userData || decoded) {
       // Ensure we store all relevant user data including role and reportsCount
       const cleanUserData = {
@@ -62,6 +63,7 @@ export const AuthProvider = ({ children }) => {
         email: userData?.email || decoded?.email,
         dept: userData?.dept || decoded?.dept,
         role: decoded?.role || userData?.role || 'employee',
+        isManager: !!userData?.isManager || !!decoded?.is_manager,
         reportsCount: parseInt(userData?.reportsCount || decoded?.reportsCount) || 0
       };
       localStorage.setItem('user', JSON.stringify(cleanUserData));
