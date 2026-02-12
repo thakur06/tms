@@ -406,43 +406,53 @@ export default function ProjectAssignments() {
                                                 <div className="space-y-2 max-h-[110px] overflow-y-auto pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                                                     {user.projects.length > 0 ? (
                                                         user.projects.map(proj => (
-                                                            <div key={proj.id} className="group/item flex items-center justify-between p-3 rounded-2xl bg-black/20 border border-white/5 hover:border-amber-500/30 transition-all">
-                                                                <div className="flex items-center gap-3 h-8">
-                                                                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/5">
-                                                                        {proj.project_code}
+                                                            <div key={proj.id} className="group/item relative p-3 rounded-2xl bg-black/40 border border-white/5 hover:border-amber-500/30 transition-all space-y-3">
+                                                                <div className="flex items-start justify-between gap-3">
+                                                                    <div className="flex items-center gap-3">
+                                                                        <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/5 shrink-0">
+                                                                            {proj.project_code}
+                                                                        </div>
+                                                                        <div className="min-w-0">
+                                                                            <p className="text-xs font-black text-white truncate">{proj.project_name}</p>
+                                                                            <p className="text-[10px] text-gray-400 font-bold truncate">{proj.project_client}</p>
+                                                                        </div>
                                                                     </div>
-                                                                    <div>
-                                                                        <p className="text-xs font-black text-gray-200">{proj.project_name}</p>
-                                                                        <div className="flex flex-col">
-                                                                            <p className="text-[10px] text-gray-300 font-bold"><span className="text-blue-500 font-extrabold text-sm">{proj.allocation_percentage}%</span> allocation</p>
-                                                                            <p className="text-[10px] text-gray-400 font-medium italic">
-                                                                                {new Date(proj.start_date).toLocaleDateString()} - {proj.end_date.startsWith('9999') ? 'Ongoing' : new Date(proj.end_date).toLocaleDateString()}
-                                                                            </p>
+                                                                    <div className="flex flex-col items-end gap-1 shrink-0">
+                                                                        <span className="text-blue-500 font-black text-sm">{proj.allocation_percentage}%</span>
+                                                                        <div className="flex items-center gap-1">
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    setSelectedAssignment(proj);
+                                                                                    setFormData({
+                                                                                        ...formData,
+                                                                                        allocation_percentage: proj.allocation_percentage,
+                                                                                        start_date: proj.start_date.split('T')[0],
+                                                                                        end_date: proj.end_date.split('T')[0]
+                                                                                    });
+                                                                                    setIsEditModalOpen(true);
+                                                                                }}
+                                                                                className="p-1.5 text-gray-500 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                                                                            >
+                                                                                <IoPencilOutline size={12} />
+                                                                            </button>
+                                                                            <button
+                                                                                onClick={(e) => {
+                                                                                    e.stopPropagation();
+                                                                                    handleDeleteClick(proj);
+                                                                                }}
+                                                                                className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                                                            >
+                                                                                <IoTrashOutline size={12} />
+                                                                            </button>
                                                                         </div>
                                                                     </div>
                                                                 </div>
-                                                                <div className="flex items-center gap-1  group-hover/item:opacity-100 transition-opacity">
-                                                                    <button
-                                                                        onClick={() => {
-                                                                            setSelectedAssignment(proj);
-                                                                            setFormData({
-                                                                                ...formData,
-                                                                                allocation_percentage: proj.allocation_percentage,
-                                                                                start_date: proj.start_date.split('T')[0],
-                                                                                end_date: proj.end_date.split('T')[0]
-                                                                            });
-                                                                            setIsEditModalOpen(true);
-                                                                        }}
-                                                                        className="p-2 text-gray-500 hover:text-white hover:bg-white/10 rounded-lg transition-all"
-                                                                    >
-                                                                        <IoPencilOutline size={14} />
-                                                                    </button>
-                                                                    <button
-                                                                        onClick={() => handleDeleteClick(proj)}
-                                                                        className="p-2 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
-                                                                    >
-                                                                        <IoTrashOutline size={14} />
-                                                                    </button>
+                                                                <div className="flex items-center gap-2 text-[9px] font-bold text-gray-500 bg-white/5 px-2 py-1 rounded-lg w-fit">
+                                                                    <IoCalendarOutline size={10} />
+                                                                    <span>{new Date(proj.start_date).toLocaleDateString()}</span>
+                                                                    <span className="opacity-30">→</span>
+                                                                    <span>{proj.end_date.startsWith('9999') ? 'Ongoing' : new Date(proj.end_date).toLocaleDateString()}</span>
                                                                 </div>
                                                             </div>
                                                         ))
