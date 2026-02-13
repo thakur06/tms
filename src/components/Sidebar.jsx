@@ -16,7 +16,8 @@ import {
   IoFolderOutline, IoFolderOpen,
   IoShieldCheckmarkOutline, IoShieldCheckmark,
   IoKeyOutline, IoKey,
-  IoLayersOutline, IoLayers
+  IoLayersOutline, IoLayers,
+  IoTicketOutline, IoTicket, IoTicketSharp
 } from 'react-icons/io5';
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -41,6 +42,8 @@ export default function Sidebar({ isOpen, onClose }) {
       links: [
         { path: '/', label: 'Home', icon: IoHomeOutline, activeIcon: IoHome },
         { path: '/dashboard', label: 'Dashboard', icon: IoAnalyticsOutline, activeIcon: IoAnalytics },
+        { path: '/tickets', label: 'Tickets', icon: IoTicketOutline, activeIcon: IoTicket },
+        { path: '/my-tickets', label: 'My Tickets', icon: IoTicketOutline, activeIcon: IoTicket },
         { path: '/time-log', label: 'Time Log', icon: IoTimeOutline, activeIcon: IoTime },
       ]
     },

@@ -859,16 +859,46 @@ export default function WeeklyTimeLog({
         weeklyTotal={weeklyTotalHours * 60}
         weekRange={`${weekDays[0].toLocaleDateString("en-US", { month: "short", day: "numeric" })} - ${weekDays[6].toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}
         onSubmit={async () => {
+          // --- VALIDATION BEFORE SUBMISSION ---
+
+          // 1. Validate Project/Task Selection
+          for (const row of rows) {
+            const hasHours = Object.keys(row.days).some(d => row.days[d].hours > 0);
+            if (hasHours && (!row.projectId || !row.taskId)) {
+              toast.error("Please select Project and Task for all rows with time entries before submitting.");
+              return;
+            }
+          }
+
+          // 2. Validate Weekly Total >= 40 hours
+          if (weeklyTotalHours < 40) {
+            toast.error(`Weekly total is ${weeklyTotalHours.toFixed(1)}h. Minimum 40 hours required to submit.`);
+            return;
+          }
+
+          // 3. Validate Monday-Friday >= 8 hours each
+          const weekdayNames = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday'];
+          const insufficientDays = [];
+
+          for (let i = 0; i < 5; i++) { // Monday to Friday (indices 0-4)
+            const dateStr = normalizeDateStr(weekDays[i]);
+            const dayTotal = getDayTotal(dateStr);
+            if (dayTotal < 8) {
+              insufficientDays.push(`${weekdayNames[i]} (${dayTotal.toFixed(1)}h)`);
+            }
+          }
+
+          if (insufficientDays.length > 0) {
+            toast.error(`Each weekday requires minimum 8 hours. Insufficient: ${insufficientDays.join(', ')}`);
+            return;
+          }
+
+          // --- ALL VALIDATIONS PASSED - PROCEED WITH SAVE & SUBMIT ---
           await handleSave();
           try {
             const token = localStorage.getItem("token");
             const weekStartStr = normalizeDateStr(weekDays[0]);
             const weekEndStr = normalizeDateStr(weekDays[6]);
-
-            if ((weeklyTotalHours * 60) < 2400) {
-              toast.error("Minimum 40 hours required");
-              return;
-            }
 
             const res = await fetch(`${server}/api/timesheets/submit`, {
               method: "POST",

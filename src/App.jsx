@@ -13,6 +13,9 @@ import TimesheetReviewPage from './pages/TimesheetReviewPage';
 import Header from './components/Header';
 import Login from './pages/Login';
 import ProjectAssignments from './pages/ProjectAssignments';
+import Tickets from './pages/Tickets';
+import MyTickets from './pages/MyTickets';
+import TicketViewPage from './pages/TicketViewPage';
 import NotFound from './pages/NotFound';
 import ProtectedRoutes from "./security/ProtectedRoutes";
 import PublicRoute from "./security/PublicRoute";
@@ -62,6 +65,9 @@ function AppContent() {
             <ProjectAssignments />
           </AdminOrManagerRoute>
         } />
+        <Route path="/tickets" element={<Tickets />} />
+        <Route path="/tickets/:id" element={<TicketViewPage />} />
+        <Route path="/my-tickets" element={<MyTickets />} />
         {/* <Route path="/reports" element={<TimeReports />} /> */}
         <Route path="/approvals" element={<TimesheetApprovalsPage />} />
         <Route path="/approvals/review/:timesheetId" element={<TimesheetReviewPage />} />

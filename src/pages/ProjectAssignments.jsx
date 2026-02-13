@@ -403,15 +403,13 @@ export default function ProjectAssignments() {
                                                     </div>
                                                 </div>
 
-                                                <div className="space-y-2 max-h-[110px] overflow-y-auto pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                                                <div className="space-y-2 max-h-[100px] overflow-y-auto pr-1 [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                                                     {user.projects.length > 0 ? (
                                                         user.projects.map(proj => (
-                                                            <div key={proj.id} className="group/item relative p-3 rounded-2xl bg-black/40 border border-white/5 hover:border-amber-500/30 transition-all space-y-3">
+                                                            <div key={proj.id} className="group/item relative p-2 rounded-2xl bg-black/40 border border-white/5 hover:border-amber-500/30 transition-all space-y-3">
                                                                 <div className="flex items-start justify-between gap-3">
-                                                                    <div className="flex items-center gap-3">
-                                                                        <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/5 shrink-0">
-                                                                            {proj.project_code}
-                                                                        </div>
+                                                                    <div className="flex items-center gap-2">
+
                                                                         <div className="min-w-0">
                                                                             <p className="text-xs font-black text-white truncate">{proj.project_name}</p>
                                                                             <p className="text-[10px] text-gray-400 font-bold truncate">{proj.project_client}</p>
@@ -559,6 +557,8 @@ export default function ProjectAssignments() {
                                         <BarChart
                                             data={filteredUsers}
                                             margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                                            className="focus:outline-none outline-none"
+                                            margin={{ top: 20, right: 30, left: 20, bottom: 80 }}
                                             className="focus:outline-none outline-none"
                                         >
                                             <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
