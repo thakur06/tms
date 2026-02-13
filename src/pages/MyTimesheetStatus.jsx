@@ -9,7 +9,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 export default function MyTimesheetStatus() {
-  const server=import.meta.env.VITE_SERVER_ADDRESS;
+  const server = import.meta.env.VITE_SERVER_ADDRESS;
   const { user } = useAuth();
   const [timesheets, setTimesheets] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -98,7 +98,7 @@ export default function MyTimesheetStatus() {
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div className="p-4 sm:p-6 md:p-8 w-full space-y-6">
       {/* Header */}
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1">
@@ -108,7 +108,7 @@ export default function MyTimesheetStatus() {
             <span className="text-amber-500">Submissions</span>
           </nav>
           <div className="flex items-center gap-4">
-           <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-amber-500">
+            <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-amber-500">
               <IoCalendar size={28} />
             </div>
             <div>
@@ -144,11 +144,10 @@ export default function MyTimesheetStatus() {
                 setActiveFilter(filter.id);
                 setCurrentPage(1);
               }}
-              className={`flex items-center md:gap-2 gap-0.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
-                activeFilter === filter.id
+              className={`flex items-center md:gap-2 gap-0.5 px-4 py-2 rounded-xl text-xs font-bold transition-all ${activeFilter === filter.id
                   ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20'
                   : 'text-gray-400 hover:text-white hover:bg-white/5'
-              }`}
+                }`}
             >
               <filter.icon size={14} />
               {filter.label}
@@ -173,7 +172,7 @@ export default function MyTimesheetStatus() {
         ) : (
           <>
             <AnimatePresence mode="wait">
-              <motion.div 
+              <motion.div
                 key={activeFilter + currentPage}
                 initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
@@ -181,7 +180,7 @@ export default function MyTimesheetStatus() {
                 transition={{ duration: 0.2 }}
                 className="space-y-4"
               >
-                  {paginatedTimesheets.map((timesheet, index) => (
+                {paginatedTimesheets.map((timesheet, index) => (
                   <motion.div
                     key={timesheet.id}
                     layoutIdx={timesheet.id}
@@ -258,7 +257,7 @@ export default function MyTimesheetStatus() {
             {totalPages > 1 && (
               <div className="flex items-center justify-between pt-6 border-t border-white/5">
                 <p className="text-sm text-gray-500 font-bold uppercase tracking-wider">
-                  Showing <span className="text-white">{(currentPage-1)*itemsPerPage + 1}</span> to <span className="text-white">{Math.min(currentPage*itemsPerPage, filteredTimesheets.length)}</span> of <span className="text-white">{filteredTimesheets.length}</span> submissions
+                  Showing <span className="text-white">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-white">{Math.min(currentPage * itemsPerPage, filteredTimesheets.length)}</span> of <span className="text-white">{filteredTimesheets.length}</span> submissions
                 </p>
                 <div className="flex gap-2">
                   <button
@@ -272,11 +271,10 @@ export default function MyTimesheetStatus() {
                     <button
                       key={i}
                       onClick={() => setCurrentPage(i + 1)}
-                      className={`w-10 h-10 rounded-xl text-sm font-black transition-all border ${
-                        currentPage === i + 1
+                      className={`w-10 h-10 rounded-xl text-sm font-black transition-all border ${currentPage === i + 1
                           ? 'bg-amber-500 text-zinc-900 border-amber-500/60 shadow-lg shadow-amber-500/20'
                           : 'bg-white/5 text-gray-400 border-white/5 hover:bg-white/10 hover:text-white'
-                      }`}
+                        }`}
                     >
                       {i + 1}
                     </button>

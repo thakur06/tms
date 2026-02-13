@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
-import { 
-  IoMenu, IoSearchOutline, IoNotificationsOutline, 
+import {
+  IoMenu, IoSearchOutline, IoNotificationsOutline,
   IoChevronDown, IoLogOutOutline, IoSunnyOutline, IoMoonOutline, IoDesktopOutline,
   IoPersonAddOutline, IoWarningOutline, IoCheckmarkCircleOutline
 } from 'react-icons/io5';
@@ -14,7 +14,7 @@ import LogoutConfirmationModal from './LogoutConfirmationModal';
 import UserAvatar from './UserAvatar';
 
 export default function Header({ onMenuClick }) {
-   const server=import.meta.env.VITE_SERVER_ADDRESS;
+  const server = import.meta.env.VITE_SERVER_ADDRESS;
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const [userMenuOpen, setUserMenuOpen] = useState(false);
@@ -27,7 +27,7 @@ export default function Header({ onMenuClick }) {
 
   // Mapping paths to titles
   const getPageTitle = () => {
-    switch(location.pathname) {
+    switch (location.pathname) {
       case '/': return 'Home';
       case '/dashboard': return 'Dashboard';
       case '/projects': return 'Projects';
@@ -53,13 +53,13 @@ export default function Header({ onMenuClick }) {
         const diffToMonday = today.getDate() - day + (day === 0 ? -6 : 1);
         const currentMonday = new Date(today);
         currentMonday.setDate(diffToMonday);
-        
+
         const prevMonday = new Date(currentMonday);
         prevMonday.setDate(currentMonday.getDate() - 7);
-        
+
         const prevSunday = new Date(prevMonday);
         prevSunday.setDate(prevMonday.getDate() + 6);
-        
+
         const startStr = prevMonday.toISOString().split('T')[0];
         const endStr = prevSunday.toISOString().split('T')[0];
 
@@ -67,11 +67,11 @@ export default function Header({ onMenuClick }) {
         const res = await fetch(`${server}/api/time-entries/user/me`, {
           headers: { 'Authorization': `Bearer ${localStorage.getItem('token')}` }
         });
-        
+
         if (!res.ok) return;
-        
+
         const data = await res.json();
-        
+
         // Filter for prev week
         const start = new Date(startStr);
         const end = new Date(endStr);
@@ -83,7 +83,7 @@ export default function Header({ onMenuClick }) {
         });
 
         const totalHours = prevWeekEntries.reduce((acc, curr) => acc + (curr.hours || 0) + ((curr.minutes || 0) / 60), 0);
-        
+
         const alerts = [];
         if (totalHours < 40) {
           alerts.push({
@@ -122,7 +122,7 @@ export default function Header({ onMenuClick }) {
   };
 
   const getThemeIcon = () => {
-    switch(theme) {
+    switch (theme) {
       case 'light': return <IoSunnyOutline className="w-5 h-5" />;
       case 'dark': return <IoMoonOutline className="w-5 h-5" />;
       default: return <IoDesktopOutline className="w-5 h-5" />;
@@ -138,7 +138,7 @@ export default function Header({ onMenuClick }) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 h-20 px-6 sm:px-8 flex items-center justify-between border-b transition-all duration-300 border-white/5 backdrop-blur-xl bg-zinc-950/80 shadow-sm">
+      <header className="sticky top-0 z-40 h-16 sm:h-20 px-4 sm:px-8 flex items-center justify-between border-b transition-all duration-300 border-white/5 backdrop-blur-xl bg-zinc-950/80 shadow-sm">
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuClick}
@@ -147,7 +147,7 @@ export default function Header({ onMenuClick }) {
           >
             <IoMenu className="w-6 h-6" />
           </button>
-          
+
           <div>
             <nav className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">
               <span>Overview</span>
@@ -189,7 +189,7 @@ export default function Header({ onMenuClick }) {
 
           {/* Notifications */}
           <div className="relative">
-            <button 
+            <button
               onClick={() => setNotifOpen(!notifOpen)}
               className="relative p-2.5 rounded-xl transition-all duration-200 text-gray-500 hover:bg-amber-500/10 hover:text-amber-500 border border-transparent hover:border-amber-500/20">
               <IoNotificationsOutline className="w-5 h-5" />
@@ -244,11 +244,11 @@ export default function Header({ onMenuClick }) {
               onClick={() => setUserMenuOpen(!userMenuOpen)}
               className="flex items-center gap-3 pl-2 pr-2 py-1.5 rounded-xl transition-all duration-200 border border-white/5 hover:bg-white/5 hover:border-white/10 shadow-sm"
             >
-              <UserAvatar 
-                name={user?.name} 
-                email={user?.email} 
-                size="sm" 
-                className="rounded-lg shadow-md border border-white/5" 
+              <UserAvatar
+                name={user?.name}
+                email={user?.email}
+                size="sm"
+                className="rounded-lg shadow-md border border-white/5"
               />
               <span className="hidden md:block text-sm font-bold text-gray-200">{user?.name}</span>
               <IoChevronDown className={`w-4 h-4 transition-transform duration-300 ${userMenuOpen ? 'rotate-180' : ''} text-gray-500`} />
@@ -257,9 +257,9 @@ export default function Header({ onMenuClick }) {
             <AnimatePresence>
               {userMenuOpen && (
                 <>
-                  <div 
-                    className="fixed inset-0 z-10" 
-                    onClick={() => setUserMenuOpen(false)} 
+                  <div
+                    className="fixed inset-0 z-10"
+                    onClick={() => setUserMenuOpen(false)}
                   />
                   <motion.div
                     initial={{ opacity: 0, y: 10, scale: 0.95 }}
@@ -284,7 +284,7 @@ export default function Header({ onMenuClick }) {
                         Add New User
                       </button>
                     )}
-                    
+
                     <button
                       onClick={() => { setUserMenuOpen(false); setShowLogoutConfirm(true); }}
                       className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors
@@ -301,9 +301,9 @@ export default function Header({ onMenuClick }) {
         </div>
       </header>
 
-      <CreateUserModal 
-        isOpen={showCreateUserModal} 
-        onClose={() => setShowCreateUserModal(false)} 
+      <CreateUserModal
+        isOpen={showCreateUserModal}
+        onClose={() => setShowCreateUserModal(false)}
         onUserCreated={(newUser) => {
           // You might trigger a global user refresh here if needed
           console.log("New user created:", newUser);

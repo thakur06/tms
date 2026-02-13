@@ -103,7 +103,7 @@ export default function Tickets() {
     return (
         <div className="flex flex-col h-full bg-zinc-950 overflow-hidden">
             {/* Header Section */}
-            <div className="px-6 py-6 bg-zinc-900/30 border-b border-white/5 backdrop-blur-xl shrink-0">
+            <div className="px-4 sm:px-6 py-4 sm:py-6 bg-zinc-900/30 border-b border-white/5 backdrop-blur-xl shrink-0">
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-1">
@@ -129,7 +129,7 @@ export default function Tickets() {
                 </div>
 
                 {/* Search and Filters Bar */}
-                <div className="max-w-7xl mx-auto mt-8 flex flex-col lg:flex-row items-center gap-4">
+                <div className="max-w-7xl mx-auto mt-6 sm:mt-8 flex flex-col lg:flex-row items-center gap-4">
                     {/* Search Bar */}
                     <div className="relative w-full lg:max-w-sm group">
                         <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors" size={18} />
@@ -186,7 +186,7 @@ export default function Tickets() {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
                 <div className="max-w-7xl mx-auto">
                     {loading ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -211,10 +211,10 @@ export default function Tickets() {
                                     animate={{ opacity: 1, y: 0 }}
                                     transition={{ delay: index * 0.02, duration: 0.4 }}
                                     onClick={() => navigate(`/tickets/${ticket.id}`)}
-                                    className="group relative bg-zinc-900/40 border border-white/5 rounded-[2.5rem] p-5 hover:border-amber-500/40 cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-black/60 flex flex-col h-full"
+                                    className="group relative bg-zinc-900/40 border border-white/5 rounded-2xl sm:rounded-[2.5rem] p-4 sm:p-5 hover:border-amber-500/40 cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-black/60 flex flex-col h-full"
                                 >
                                     {/* Hover Highlight Overlay */}
-                                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-[2.5rem] pointer-events-none" />
+                                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.03] to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-2xl sm:rounded-[2.5rem] pointer-events-none" />
 
                                     <div className="flex items-start justify-between mb-3 relative">
                                         <div className="flex flex-wrap gap-2">

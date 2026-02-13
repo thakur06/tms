@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  IoPerson, IoTrash, IoChevronBack, IoChevronForward, 
+import {
+  IoPerson, IoTrash, IoChevronBack, IoChevronForward,
   IoSearchOutline, IoLayersOutline, IoFilterOutline, IoCheckmarkCircle,
   IoEllipsisVertical, IoDocumentText
 } from 'react-icons/io5';
@@ -17,13 +17,13 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [taskToDelete, setTaskToDelete] = useState(null);
   const [expandedRow, setExpandedRow] = useState(null);
-  
+
   const tasksPerPage = 15;
 
   const filteredTasks = useMemo(() => {
     return tasks.filter(t => {
       const matchesSearch = (t.task_name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            (t.task_id || '').toString().includes(searchQuery);
+        (t.task_id || '').toString().includes(searchQuery);
       return matchesSearch;
     });
   }, [tasks, searchQuery]);
@@ -54,7 +54,7 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
           {headerAction}
           <div className="relative w-full sm:w-64">
             <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-            <input 
+            <input
               type="text"
               placeholder="Search tasks..."
               value={searchQuery}
@@ -66,9 +66,9 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
       </div>
 
       {/* Minimalist Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
         {currentTasks.length === 0 ? (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             className="col-span-full text-center py-20 bg-zinc-900/50 rounded-3xl border border-dashed border-white/10"
@@ -114,81 +114,80 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
         )}
       </div>
 
-        {/* Pagination */}
-        {totalPages > 1 && (
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 border-t border-white/5 bg-white/5 rounded-xl">
-            <div className="text-sm text-gray-400 font-medium italic">
-              Showing <span className="text-white font-black">{(currentPage - 1) * tasksPerPage + 1}</span> to <span className="text-white font-black">{Math.min(currentPage * tasksPerPage, filteredTasks.length)}</span> of <span className="text-white font-black">{filteredTasks.length}</span> tasks
-            </div>
-            
-            <div className="flex items-center gap-2">
-              <button
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage(p => p - 1)}
-                className="p-2 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                <IoChevronBack size={16} />
-              </button>
-
-              <div className="flex items-center gap-1">
-                {(() => {
-                  const pages = [];
-                  const maxVisible = 5;
-                  
-                  let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
-                  let end = Math.min(totalPages, start + maxVisible - 1);
-                  
-                  if (end - start < maxVisible - 1) {
-                    start = Math.max(1, end - maxVisible + 1);
-                  }
-                  
-                  for (let i = start; i <= end; i++) {
-                    pages.push(
-                      <motion.button
-                        key={i}
-                        onClick={() => setCurrentPage(i)}
-                        whileTap={{ scale: 0.95 }}
-                        className={`w-8 h-8 text-sm font-black rounded-lg transition-all ${
-                          currentPage === i 
-                            ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20' 
-                            : 'text-gray-500 hover:bg-white/5 hover:text-white'
-                        }`}
-                      >
-                        {i}
-                      </motion.button>
-                    );
-                  }
-                  
-                  return pages;
-                })()}
-              </div>
-
-              <button
-                disabled={currentPage === totalPages}
-                onClick={() => setCurrentPage(p => p + 1)}
-                className="p-2 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-              >
-                <IoChevronForward size={16} />
-              </button>
-            </div>
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 border-t border-white/5 bg-white/5 rounded-xl">
+          <div className="text-sm text-gray-400 font-medium italic">
+            Showing <span className="text-white font-black">{(currentPage - 1) * tasksPerPage + 1}</span> to <span className="text-white font-black">{Math.min(currentPage * tasksPerPage, filteredTasks.length)}</span> of <span className="text-white font-black">{filteredTasks.length}</span> tasks
           </div>
-        )}
+
+          <div className="flex items-center gap-2">
+            <button
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage(p => p - 1)}
+              className="p-2 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <IoChevronBack size={16} />
+            </button>
+
+            <div className="flex items-center gap-1">
+              {(() => {
+                const pages = [];
+                const maxVisible = 5;
+
+                let start = Math.max(1, currentPage - Math.floor(maxVisible / 2));
+                let end = Math.min(totalPages, start + maxVisible - 1);
+
+                if (end - start < maxVisible - 1) {
+                  start = Math.max(1, end - maxVisible + 1);
+                }
+
+                for (let i = start; i <= end; i++) {
+                  pages.push(
+                    <motion.button
+                      key={i}
+                      onClick={() => setCurrentPage(i)}
+                      whileTap={{ scale: 0.95 }}
+                      className={`w-8 h-8 text-sm font-black rounded-lg transition-all ${currentPage === i
+                          ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20'
+                          : 'text-gray-500 hover:bg-white/5 hover:text-white'
+                        }`}
+                    >
+                      {i}
+                    </motion.button>
+                  );
+                }
+
+                return pages;
+              })()}
+            </div>
+
+            <button
+              disabled={currentPage === totalPages}
+              onClick={() => setCurrentPage(p => p + 1)}
+              className="p-2 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+            >
+              <IoChevronForward size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Delete Modal */}
       <AnimatePresence>
         {taskToDelete && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <motion.div 
-              initial={{ opacity: 0 }} 
-              animate={{ opacity: 1 }} 
-              exit={{ opacity: 0 }} 
-              onClick={() => setTaskToDelete(null)} 
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setTaskToDelete(null)}
               className="absolute inset-0 bg-[#000000]/60 backdrop-blur-sm"
             />
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }} 
-              animate={{ scale: 1, opacity: 1 }} 
-              exit={{ scale: 0.95, opacity: 0 }} 
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
               transition={smoothTransition}
               className="relative w-full max-w-sm ui-modal p-6 shadow-2xl bg-zinc-900 border-white/5"
             >
@@ -201,14 +200,14 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
                   Are you sure you want to delete <span className="text-white font-black">{taskToDelete.task_name}</span>? This action cannot be undone.
                 </p>
                 <div className="flex gap-3">
-                  <button 
-                    onClick={() => setTaskToDelete(null)} 
+                  <button
+                    onClick={() => setTaskToDelete(null)}
                     className="flex-1 py-2.5 text-sm font-black text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all uppercase tracking-wider"
                   >
                     Cancel
                   </button>
-                  <button 
-                    onClick={() => { onDeleteTask(taskToDelete.task_id); setTaskToDelete(null); }} 
+                  <button
+                    onClick={() => { onDeleteTask(taskToDelete.task_id); setTaskToDelete(null); }}
                     className="flex-1 py-2.5 bg-red-600 text-white rounded-xl font-black hover:bg-red-700 shadow-lg shadow-red-500/20 transition-all uppercase tracking-wider"
                   >
                     Delete

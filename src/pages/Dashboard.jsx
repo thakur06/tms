@@ -133,8 +133,8 @@ export default function Dashboard() {
       rd: [],
       bd: [],
       tb: [],
-      meetings:[],
-      holidays:[],
+      meetings: [],
+      holidays: [],
 
 
     };
@@ -595,7 +595,7 @@ export default function Dashboard() {
   return (
     <div className="space-y-8 pb-10 p-3">
 
-      <div className="relative overflow-hidden rounded-3xl p-8 border border-white/5 bg-zinc-900 shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/5 bg-zinc-900 shadow-2xl">
         <div className="absolute inset-0 bg-linear-to-br from-amber-500/10 via-transparent to-orange-500/10" />
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex-1 space-y-1">
@@ -632,7 +632,7 @@ export default function Dashboard() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3 sm:gap-6">
         {cards.map((card, idx) => {
           const colors = colorMap[card.color] || colorMap.indigo;
           return (
@@ -642,7 +642,7 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.04 }}
               whileHover={{ y: -4 }}
-              className="bg-zinc-900 rounded-3xl p-4 cursor-pointer border border-white/5 hover:border-amber-500/20 transition-all group relative"
+              className="bg-zinc-900 rounded-2xl sm:rounded-3xl p-3 sm:p-4 cursor-pointer border border-white/5 hover:border-amber-500/20 transition-all group relative"
               onClick={() => handleCardClick(card)}
             >
               <div className="relative z-10">
@@ -654,7 +654,7 @@ export default function Dashboard() {
                     {card.label}
                   </div>
                 </div>
-                
+
                 <div className="space-y-0.5">
                   <div className="text-2xl font-black text-white tracking-tighter">
                     {card.value}
@@ -674,11 +674,11 @@ export default function Dashboard() {
       {/* --- Charts Grid --- */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Daily Hours Chart */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="ui-card p-6 bg-zinc-900 border-white/5 hover:border-amber-500/20 transition-all shadow-sm"
+          className="ui-card p-4 sm:p-6 bg-zinc-900 border-white/5 hover:border-amber-500/20 transition-all shadow-sm"
         >
           <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
             <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-amber-500">
@@ -686,14 +686,14 @@ export default function Dashboard() {
             </div>
             Daily Activity
           </h3>
-          <div className="h-[300px] w-full flex items-center justify-center">
+          <div className="h-[250px] sm:h-[300px] w-full flex items-center justify-center">
             {analytics.chartData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={analytics.chartData}>
                   <defs>
                     <linearGradient id="colorHours" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0} />
                     </linearGradient>
                   </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" vertical={false} />
@@ -742,12 +742,12 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Location Split Chart */}
-        <div className="ui-card p-6 bg-zinc-900 border-white/5">
+        <div className="ui-card p-4 sm:p-6 bg-zinc-900 border-white/5">
           <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
             <IoLocationOutline className="text-amber-500" />
             Work Location
           </h3>
-          <div className="h-[300px] w-full flex items-center justify-center">
+          <div className="h-[250px] sm:h-[300px] w-full flex items-center justify-center">
             {analytics.locationData.length > 0 ? (
               <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
@@ -765,7 +765,7 @@ export default function Dashboard() {
                         key={`cell-${index}`}
                         fill={
                           ["#6366f1", "#10b981", "#f59e0b", "#ef4444"][
-                            index % 4
+                          index % 4
                           ]
                         }
                       />
@@ -981,12 +981,12 @@ export default function Dashboard() {
                     {modalContent.detail}
                   </p>
                 </div>
-                  <button
-                    onClick={() => setModalOpen(false)}
-                    className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
-                  >
-                    <IoClose size={24} />
-                  </button>
+                <button
+                  onClick={() => setModalOpen(false)}
+                  className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                >
+                  <IoClose size={24} />
+                </button>
               </div>
               <div className="p-6">{renderModalContent()}</div>
             </motion.div>

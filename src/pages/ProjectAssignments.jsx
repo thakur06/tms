@@ -374,9 +374,9 @@ export default function ProjectAssignments() {
                                             });
                                             setIsAssignModalOpen(true);
                                         }}
-                                        className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 hover:border-amber-500/20 transition-all group overflow-hidden cursor-pointer"
+                                        className="bg-zinc-900/50 border border-white/5 rounded-2xl sm:rounded-3xl p-4 sm:p-6 hover:border-amber-500/20 transition-all group overflow-hidden cursor-pointer"
                                     >
-                                        <div className="flex flex-col sm:flex-row gap-6">
+                                        <div className="flex flex-col lg:flex-row gap-6">
                                             {/* Left Column: Stats & Projects */}
                                             <div className="flex-1 space-y-6">
                                                 <div className="flex items-center gap-4">
@@ -540,7 +540,7 @@ export default function ProjectAssignments() {
                             </AnimatePresence>
                         </div>
                     ) : (
-                        <div className="bg-zinc-900/50 border border-white/5 rounded-3xl p-6 h-[500px] flex flex-col relative overflow-hidden">
+                        <div className="bg-zinc-900/50 border border-white/5 rounded-2xl sm:rounded-3xl p-4 sm:p-6 h-[400px] sm:h-[500px] flex flex-col relative overflow-hidden">
                             <h3 className="text-xl font-black text-white mb-6 flex items-center gap-3">
                                 <IoStatsChartOutline className="text-amber-500" />
                                 Workload Analytics

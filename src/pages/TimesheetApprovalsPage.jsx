@@ -10,7 +10,7 @@ import { useAuth } from '../context/AuthContext';
 import { useEffect, useState } from 'react';
 import UserAvatar from '../components/UserAvatar';
 export default function TimesheetApprovalsPage() {
-   const server=import.meta.env.VITE_SERVER_ADDRESS;
+  const server = import.meta.env.VITE_SERVER_ADDRESS;
   const { user } = useAuth();
   const navigate = useNavigate();
   const [timesheets, setTimesheets] = useState([]);
@@ -27,10 +27,10 @@ export default function TimesheetApprovalsPage() {
     setLoading(true);
     try {
       const token = localStorage.getItem('token');
-      const endpoint = filter === 'all' 
+      const endpoint = filter === 'all'
         ? `/api/timesheets/team`
         : `/api/timesheets/team?status=${filter}`;
-      
+
       const response = await axios.get(`${server}${endpoint}`, {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -90,7 +90,7 @@ export default function TimesheetApprovalsPage() {
   };
 
   return (
-    <div className="w-full space-y-6">
+    <div className="p-4 sm:p-6 md:p-8 w-full space-y-6">
       {/* Header */}
       <header className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 mb-8">
         <div className="space-y-1">
@@ -100,7 +100,7 @@ export default function TimesheetApprovalsPage() {
             <span className="text-amber-500">Approvals</span>
           </nav>
           <div className="flex items-center gap-4">
-          <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-amber-500">
+            <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-amber-500">
               <IoCheckmarkCircle size={28} />
             </div>
             <div>
@@ -113,33 +113,32 @@ export default function TimesheetApprovalsPage() {
         </div>
 
         <div className="flex items-center gap-3">
-            <button
-                onClick={() => navigate('/team-compliance')}
-                className="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-bold border border-white/5 transition-all active:scale-95 shadow-lg group"
-            >
-                <IoDocumentTextOutline size={18} className="text-amber-500 group-hover:scale-110 transition-transform" />
-                <span className="text-sm">Team Weekly Status</span>
-            </button>
-            <div className="w-px h-8 bg-white/5 mx-2 hidden lg:block" />
-            
-            {/* Filter Tabs - Scrollable on mobile */}
-            <div className="w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
-              <div className="flex bg-zinc-900 p-1 rounded-xl border border-white/5 min-w-max">
-                {['pending', 'approved', 'rejected', 'all'].map((tab) => (
-                  <button
-                    key={tab}
-                    onClick={() => setFilter(tab)}
-                    className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-300 ${
-                      filter === tab
-                        ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20 scale-105'
-                        : 'text-gray-400 hover:text-white hover:bg-white/5'
+          <button
+            onClick={() => navigate('/team-compliance')}
+            className="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-bold border border-white/5 transition-all active:scale-95 shadow-lg group"
+          >
+            <IoDocumentTextOutline size={18} className="text-amber-500 group-hover:scale-110 transition-transform" />
+            <span className="text-sm">Team Weekly Status</span>
+          </button>
+          <div className="w-px h-8 bg-white/5 mx-2 hidden lg:block" />
+
+          {/* Filter Tabs - Scrollable on mobile */}
+          <div className="w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 no-scrollbar">
+            <div className="flex bg-zinc-900 p-1 rounded-xl border border-white/5 min-w-max">
+              {['pending', 'approved', 'rejected', 'all'].map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setFilter(tab)}
+                  className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-300 ${filter === tab
+                      ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20 scale-105'
+                      : 'text-gray-400 hover:text-white hover:bg-white/5'
                     }`}
-                  >
-                    {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                  </button>
-                ))}
-              </div>
+                >
+                  {tab.charAt(0).toUpperCase() + tab.slice(1)}
+                </button>
+              ))}
             </div>
+          </div>
         </div>
       </header>
 

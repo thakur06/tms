@@ -119,7 +119,7 @@ export default function MyTickets() {
     return (
         <div className="flex flex-col h-full bg-zinc-950 overflow-hidden">
             {/* Header Section */}
-            <div className="px-6 py-4 bg-zinc-900/30 border-b border-white/5 backdrop-blur-xl shrink-0">
+            <div className="px-4 sm:px-6 py-4 bg-zinc-900/30 border-b border-white/5 backdrop-blur-xl shrink-0">
                 <div className="w-full flex flex-col md:flex-row md:items-center justify-between gap-4">
                     <div>
                         <div className="flex items-center gap-3">
@@ -151,7 +151,7 @@ export default function MyTickets() {
                             placeholder="Search your tickets..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-10 pl-11 pr-4 bg-zinc-900/50 border border-white/5 rounded-xl text-xs font-medium text-white placeholder-gray-500 outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10 transition-all shadow-inner"
+                            className="w-full h-10 pl-11 pr-4 bg-zinc-900/50 border border-white/5 rounded-xl text-[11px] font-bold text-white placeholder-gray-500 outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10 transition-all shadow-inner"
                         />
                     </div>
 
@@ -199,7 +199,7 @@ export default function MyTickets() {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
                 <div className="w-full">
                     {loading ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -256,25 +256,13 @@ export default function MyTickets() {
                                         </div>
 
                                         <div className="flex items-center justify-between gap-3 mt-1">
-                                            <div className="flex-1 w-full" onClick={(e) => e.stopPropagation()}>
-                                                <SearchableSelect
-                                                    showLabel={false}
-                                                    placeholder="Edit Status"
-                                                    options={[
-                                                        { label: 'Created', value: 'Open' },
-                                                        { label: 'In Progress', value: 'In Progress' },
-                                                        { label: 'Under Review', value: 'Under Review' },
-                                                        { label: 'Closed', value: 'Done' },
-                                                        { label: 'Cancelled', value: 'Cancelled' }
-                                                    ]}
-                                                    value={ticket.status}
-                                                    onChange={(val) => handleStatusUpdate(ticket.id, val)}
-                                                    className="h-8"
-                                                />
-                                            </div>
-                                            <div className="flex items-center gap-1.5 text-[9px] text-gray-600 font-bold shrink-0">
-                                                <IoCalendarOutline size={10} className="text-gray-700" />
+                                            <div className="flex items-center gap-1.5 text-[9px] text-gray-400 font-bold shrink-0 Group-hover:text-gray-300 transition-colors">
+                                                <IoCalendarOutline size={10} className="text-gray-600" />
                                                 {new Date(ticket.updated_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                                            </div>
+                                            <div className="flex items-center gap-1 text-[9px] text-amber-500/50 group-hover:text-amber-500 font-black uppercase tracking-widest transition-all">
+                                                Details
+                                                <IoChevronForwardOutline size={10} />
                                             </div>
                                         </div>
 

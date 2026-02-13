@@ -5,7 +5,7 @@ import {
     IoArrowBackOutline, IoPersonCircleOutline, IoCalendarOutline,
     IoTimeOutline, IoPencilOutline, IoSendOutline, IoAlertCircleOutline,
     IoCheckmarkCircleOutline, IoTicketOutline, IoChatbubbleOutline, IoLinkOutline,
-    IoTrashOutline, IoBriefcaseOutline, IoShieldCheckmarkOutline
+    IoTrashOutline, IoBriefcaseOutline, IoShieldCheckmarkOutline, IoCheckmarkCircle
 } from 'react-icons/io5';
 import { getTicketById, updateTicket, addComment, deleteTicket } from '../api/tickets';
 import { getAllUsers } from '../api/users';
@@ -27,6 +27,12 @@ export default function TicketViewPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [users, setUsers] = useState([]);
     const [projects, setProjects] = useState([]);
+
+    // Mention state
+    const [mentionSearch, setMentionSearch] = useState('');
+    const [showMentionSuggestions, setShowMentionSuggestions] = useState(false);
+    const [mentionCursorPos, setMentionCursorPos] = useState(null);
+    const [selectedMentionIndex, setSelectedMentionIndex] = useState(0);
 
     useEffect(() => {
         loadData();
@@ -79,12 +85,47 @@ export default function TicketViewPage() {
         try {
             await addComment(id, { content: comment });
             setComment('');
+            setShowMentionSuggestions(false);
             loadData();
             toast.success("Comment added");
         } catch (error) {
             toast.error("Failed to add comment");
         }
     };
+
+    const handleCommentChange = (e) => {
+        const value = e.target.value;
+        const cursorPos = e.target.selectionStart;
+        setComment(value);
+
+        // Detect mention
+        const textBeforeCursor = value.slice(0, cursorPos);
+        const mentionMatch = textBeforeCursor.match(/@(\w*)$/);
+
+        if (mentionMatch) {
+            setMentionSearch(mentionMatch[1].toLowerCase());
+            setMentionCursorPos(cursorPos);
+            setShowMentionSuggestions(true);
+            setSelectedMentionIndex(0);
+        } else {
+            setShowMentionSuggestions(false);
+        }
+    };
+
+    const handleMentionSelect = (userName) => {
+        const textBeforeMention = comment.slice(0, mentionCursorPos - mentionSearch.length - 1);
+        const textAfterMention = comment.slice(mentionCursorPos);
+        const newComment = `${textBeforeMention}@${userName} ${textAfterMention}`;
+
+        setComment(newComment);
+        setShowMentionSuggestions(false);
+
+        // Focus back on textarea after state update (handled by focus logic in the future or just the fact that it's a controlled component)
+    };
+
+    const filteredMentionUsers = users.filter(u =>
+        u.name.toLowerCase().includes(mentionSearch)
+    ).slice(0, 5);
 
     const handleDeleteTicket = async () => {
         try {
@@ -208,8 +249,8 @@ export default function TicketViewPage() {
     return (
         <div className="flex flex-col h-full bg-zinc-950 overflow-hidden">
             {/* Premium Header */}
-            <div className="px-6 py-5 bg-zinc-900/60 border-b border-white/5 backdrop-blur-3xl flex items-center justify-between shrink-0 z-20 shadow-2xl relative overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-amber-500/5 via-transparent to-transparent pointer-events-none" />
+            <div className="px-4 sm:px-6 py-4 sm:py-5 bg-zinc-900/60 border-b border-white/5 backdrop-blur-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0 z-20 shadow-2xl relative">
+                <div className="absolute inset-0 bg-linear-to-r from-amber-500/5 via-transparent to-transparent pointer-events-none" />
 
                 <div className="flex items-center gap-5 relative">
                     <motion.button
@@ -255,33 +296,35 @@ export default function TicketViewPage() {
                         )}
                     </AnimatePresence>
                     {(canEditOrDelete || isAssignee) && (
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
-                            onClick={() => handleStatusUpdate(ticket.status === 'Done' ? 'Open' : 'Done')}
-                            className={`flex items-center gap-2 h-11 px-6 rounded-2xl font-black text-[10px] uppercase tracking-[0.15em] transition-all border shadow-xl ${ticket.status === 'Done'
-                                ? 'bg-amber-500 text-zinc-950 border-amber-500 shadow-amber-500/20'
-                                : 'bg-emerald-500 text-zinc-950 border-emerald-500 shadow-emerald-500/20'
-                                }`}
-                        >
-                            {ticket.status === 'Done' ? <IoArrowBackOutline /> : <IoCheckmarkCircleOutline />}
-                            {ticket.status === 'Done' ? 'Reactivate' : 'Resolve Ticket'}
-                        </motion.button>
+                        <div className="min-w-[200px]">
+                            <SearchableSelect
+                                placeholder="Update Status"
+                                options={[
+                                    { label: 'Open', value: 'Open' },
+                                    { label: 'In Progress', value: 'In Progress' },
+                                    { label: 'Under Review', value: 'Under Review' },
+                                    { label: 'Done', value: 'Done' },
+                                    { label: 'Cancelled', value: 'Cancelled' }
+                                ]}
+                                value={ticket.status}
+                                onChange={handleStatusUpdate}
+                            />
+                        </div>
                     )}
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 md:p-8 bg-zinc-950/20 relative">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 md:p-8 bg-zinc-950/20 relative">
                 {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-amber-500/[0.02] blur-[120px] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-indigo-500/[0.02] blur-[120px] pointer-events-none" />
+                <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-amber-500/2 blur-[120px] pointer-events-none" />
+                <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-indigo-500/2 blur-[120px] pointer-events-none" />
 
                 <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
 
                     {/* Main Content Area */}
-                    <div className="lg:col-span-8 space-y-10 order-2 lg:order-1 relative">
+                    <div className="lg:col-span-8 space-y-6 sm:space-y-10 order-1 relative">
                         {/* Description Section */}
-                        <section className="bg-zinc-900/40 border border-white/5 rounded-[3rem] p-8 md:p-10 shadow-2xl backdrop-blur-md group hover:border-white/10 transition-all duration-500">
+                        <section className="bg-zinc-900/40 border border-white/5 rounded-3xl sm:rounded-[3rem] p-6 sm:p-8 md:p-10 shadow-2xl backdrop-blur-md group hover:border-white/10 transition-all duration-500">
                             <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
                                 <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shadow-inner">
@@ -316,14 +359,78 @@ export default function TicketViewPage() {
 
                             {/* Comment Write Field */}
                             <form onSubmit={handleCommentSubmit} className="relative group">
-                                <div className="absolute -inset-0.5 bg-gradient-to-br from-amber-500/20 via-transparent to-indigo-500/20 rounded-[2.5rem] opacity-0 group-focus-within:opacity-100 transition-opacity blur-sm pointer-events-none" />
+                                <div className="absolute -inset-0.5 bg-linear-to-br from-amber-500/20 via-transparent to-indigo-500/20 rounded-[2.5rem] opacity-0 group-focus-within:opacity-100 transition-opacity blur-sm pointer-events-none" />
                                 <div className="relative bg-zinc-900 shadow-2xl border border-white/5 rounded-[2.5rem] overflow-hidden">
                                     <textarea
                                         className="w-full min-h-[140px] resize-none bg-transparent border-none p-8 text-base font-light text-white placeholder-gray-600 outline-none transition-all"
-                                        placeholder="Add to the discussion or mention someone with @..."
+                                        placeholder="Add to the discussion... Type @username to mention"
                                         value={comment}
-                                        onChange={(e) => setComment(e.target.value)}
+                                        onChange={handleCommentChange}
+                                        onKeyDown={(e) => {
+                                            if (showMentionSuggestions) {
+                                                if (e.key === 'ArrowDown') {
+                                                    e.preventDefault();
+                                                    setSelectedMentionIndex(prev => (prev + 1) % filteredMentionUsers.length);
+                                                } else if (e.key === 'ArrowUp') {
+                                                    e.preventDefault();
+                                                    setSelectedMentionIndex(prev => (prev - 1 + filteredMentionUsers.length) % filteredMentionUsers.length);
+                                                } else if (e.key === 'Enter') {
+                                                    e.preventDefault();
+                                                    if (filteredMentionUsers[selectedMentionIndex]) {
+                                                        handleMentionSelect(filteredMentionUsers[selectedMentionIndex].name);
+                                                    }
+                                                } else if (e.key === 'Escape') {
+                                                    setShowMentionSuggestions(false);
+                                                }
+                                            }
+                                        }}
                                     />
+
+                                    {/* Mention Suggestions */}
+                                    <AnimatePresence>
+                                        {showMentionSuggestions && filteredMentionUsers.length > 0 && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 10 }}
+                                                className="absolute bottom-full left-8 mb-2 w-64 bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-1000 backdrop-blur-xl"
+                                            >
+                                                <div className="p-3 border-b border-white/5 bg-zinc-900/50">
+                                                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Select Operative</p>
+                                                </div>
+                                                <div className="p-1.5 max-h-48 overflow-y-auto custom-scrollbar">
+                                                    {filteredMentionUsers.map((u, idx) => (
+                                                        <button
+                                                            key={u.id}
+                                                            type="button"
+                                                            onClick={() => handleMentionSelect(u.name)}
+                                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left group ${idx === selectedMentionIndex
+                                                                ? 'bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.1)]'
+                                                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                                                }`}
+                                                        >
+                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black transition-all ${idx === selectedMentionIndex
+                                                                ? 'bg-amber-500 text-zinc-950 scale-110'
+                                                                : 'bg-zinc-900 border border-white/5'
+                                                                }`}>
+                                                                {u.name.substring(0, 2).toUpperCase()}
+                                                            </div>
+                                                            <div className="flex-1 min-w-0">
+                                                                <span className="text-xs font-bold block truncate">{u.name}</span>
+                                                                {idx === selectedMentionIndex && (
+                                                                    <span className="text-[8px] font-black uppercase tracking-tighter opacity-70">Press Enter to select</span>
+                                                                )}
+                                                            </div>
+                                                            {idx === selectedMentionIndex && (
+                                                                <IoCheckmarkCircle className="shrink-0 animate-in fade-in zoom-in" size={14} />
+                                                            )}
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </AnimatePresence>
+
                                     <div className="absolute bottom-4 right-4">
                                         <motion.button
                                             whileHover={{ scale: 1.05 }}
@@ -341,21 +448,21 @@ export default function TicketViewPage() {
                             {/* Activity Stream */}
                             <div className="space-y-4 pt-4">
                                 {ticket.comments?.length === 0 ? (
-                                    <div className="py-20 flex flex-col items-center justify-center bg-zinc-900/20 border border-dashed border-white/5 rounded-[3rem] opacity-40">
+                                    <div className="py-12 sm:py-20 flex flex-col items-center justify-center bg-zinc-900/20 border border-dashed border-white/5 rounded-4xl sm:rounded-[3rem] opacity-40">
                                         <IoChatbubbleOutline size={48} className="text-gray-600 mb-4" />
                                         <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Discussion stream empty</p>
                                     </div>
                                 ) : (
                                     <div className="grid gap-4">
-                                        {ticket.comments.map((c, i) => (
+                                        {[...ticket.comments].reverse().map((c, i) => (
                                             <motion.div
                                                 key={c.id}
                                                 initial={{ opacity: 0, x: -20 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 transition={{ delay: i * 0.05 }}
-                                                className="flex gap-6 p-6 bg-zinc-900/60 border border-white/5 rounded-[2.5rem] hover:border-white/10 transition-all group"
+                                                className="flex gap-4 sm:gap-6 p-4 sm:p-6 bg-zinc-900/60 border border-white/5 rounded-3xl sm:rounded-[2.5rem] hover:border-white/10 transition-all group"
                                             >
-                                                <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center text-amber-500 font-black shrink-0 shadow-2xl text-sm group-hover:scale-110 transition-transform">
+                                                <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center text-amber-500 font-black shrink-0 shadow-2xl text-sm group-hover:scale-110 transition-transform">
                                                     {c.user_name?.substring(0, 2).toUpperCase() || '??'}
                                                 </div>
                                                 <div className="flex-1 space-y-2 min-w-0">
@@ -368,7 +475,7 @@ export default function TicketViewPage() {
                                                             {new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
                                                         </span>
                                                     </div>
-                                                    <div className="text-gray-300 text-sm leading-relaxed font-light break-words lg:text-lg">
+                                                    <div className="text-gray-300 text-sm leading-relaxed font-light wrap-break-word">
                                                         {formatCommentContent(c.content)}
                                                     </div>
                                                 </div>
@@ -381,14 +488,35 @@ export default function TicketViewPage() {
                     </div>
 
                     {/* Meta/Sidebar */}
-                    <aside className="lg:col-span-4 space-y-8 order-1 lg:order-2">
+                    <aside className="lg:col-span-4 space-y-6 order-2">
+                        {/* Ticket Owner (Reporter) - Non-editable */}
+                        <section className="bg-zinc-900/40 border border-amber-500/20 rounded-3xl sm:rounded-[2.5rem] p-6 shadow-2xl backdrop-blur-xl relative">
+                            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full" />
+                            <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                <IoPersonCircleOutline size={14} />
+                                Ticket Owner
+                            </h4>
+                            <div className="flex items-center gap-4 bg-zinc-950/50 p-4 rounded-2xl border border-white/5">
+                                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 font-black text-sm">
+                                    {ticket.reporter_name?.substring(0, 2).toUpperCase() || '??'}
+                                </div>
+                                <div className="min-w-0 flex-1">
+                                    <p className="text-sm font-black text-white truncate">{ticket.reporter_name || 'Unknown'}</p>
+                                    <p className="text-[9px] font-black text-gray-600 uppercase tracking-tighter">Report Creator</p>
+                                </div>
+                            </div>
+                            <p className="mt-3 text-[9px] text-gray-600 font-bold uppercase tracking-widest leading-relaxed">
+                                Owner cannot be changed
+                            </p>
+                        </section>
+
                         {/* Assignment Control */}
                         {canReassign && (
-                            <section className="bg-zinc-900/40 border border-indigo-500/20 rounded-[2.5rem] p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden group">
+                            <section className="bg-zinc-900/40 border border-indigo-500/20 rounded-[2.5rem] p-6 shadow-2xl backdrop-blur-xl relative group">
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full" />
-                                <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-6 flex items-center gap-2">
+                                <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                                     <IoShieldCheckmarkOutline size={14} />
-                                    Security Control
+                                    Assignee Control
                                 </h4>
                                 <SearchableSelect
                                     label="Update Assignee"
@@ -400,8 +528,8 @@ export default function TicketViewPage() {
                                     value={ticket.assignee_id || ''}
                                     onChange={handleAssigneeUpdate}
                                 />
-                                <p className="mt-4 text-[9px] text-gray-600 font-bold uppercase tracking-widest leading-relaxed">
-                                    Only authorized personnel can modify task ownership.
+                                <p className="mt-3 text-[9px] text-gray-600 font-bold uppercase tracking-widest leading-relaxed">
+                                    Only owner, assignee, or admin can reassign
                                 </p>
                             </section>
                         )}
@@ -451,16 +579,6 @@ export default function TicketViewPage() {
                                     </div>
                                 </div>
                             </div>
-                        </section>
-
-                        {/* Reporter Unit */}
-                        <section className="bg-zinc-900/20 border border-white/5 rounded-[2.5rem] p-6 text-center shadow-inner">
-                            <span className="text-[9px] font-black text-gray-700 uppercase tracking-[0.2em] block mb-4">Reporter Profile</span>
-                            <div className="w-16 h-16 rounded-[1.5rem] bg-emerald-500/5 border border-emerald-500/10 flex items-center justify-center text-emerald-500 mx-auto mb-3 shadow-2xl">
-                                <IoPersonCircleOutline size={32} />
-                            </div>
-                            <h5 className="text-sm font-black text-white uppercase tracking-widest mb-1">{ticket.reporter_name || 'Unknown'}</h5>
-                            <p className="text-[9px] font-bold text-gray-600 uppercase">Source Personnel</p>
                         </section>
                     </aside>
                 </div>

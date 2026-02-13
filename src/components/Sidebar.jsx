@@ -25,7 +25,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation();
   const { logout, user } = useAuth();
-  const [openFolders, setOpenFolders] = useState(['Workspace', 'Performance', 'Leadership', 'Governance', 'Insights']);
+  const [openFolders, setOpenFolders] = useState(['Tickets', 'Timesheets', 'Administration']);
 
   const toggleFolder = (folder) => {
     setOpenFolders(prev =>
@@ -35,51 +35,41 @@ export default function Sidebar({ isOpen, onClose }) {
     );
   };
 
+  // Top-level links (always visible, no grouping)
+  const topLevelLinks = [
+    { path: '/', label: 'Home', icon: IoHomeOutline, activeIcon: IoHome },
+    { path: '/dashboard', label: 'Dashboard', icon: IoAnalyticsOutline, activeIcon: IoAnalytics },
+    { path: '/time-log', label: 'Time Log', icon: IoTimeOutline, activeIcon: IoTime },
+  ];
+
   const menuGroups = [
     {
-      name: 'Workspace',
-      icon: IoLayersOutline,
+      name: 'Tickets',
+      icon: IoTicketOutline,
       links: [
-        { path: '/', label: 'Home', icon: IoHomeOutline, activeIcon: IoHome },
-        { path: '/dashboard', label: 'Dashboard', icon: IoAnalyticsOutline, activeIcon: IoAnalytics },
-        { path: '/tickets', label: 'Tickets', icon: IoTicketOutline, activeIcon: IoTicket },
+        { path: '/tickets', label: 'All Tickets', icon: IoTicketOutline, activeIcon: IoTicket },
         { path: '/my-tickets', label: 'My Tickets', icon: IoTicketOutline, activeIcon: IoTicket },
-        { path: '/time-log', label: 'Time Log', icon: IoTimeOutline, activeIcon: IoTime },
       ]
     },
     {
-      name: 'Performance',
-      icon: IoShieldCheckmarkOutline,
+      name: 'Timesheets',
+      icon: IoCalendarOutline,
       links: [
         { path: '/my-submissions', label: 'My Submissions', icon: IoCalendarOutline, activeIcon: IoCalendar },
+        { path: '/approvals', label: 'Approvals', icon: IoCheckmarkCircleOutline, activeIcon: IoCheckmarkCircle, hideIfNoReports: true, adminOrManager: true },
+        { path: '/team-compliance', label: 'Team Compliance', icon: IoShieldCheckmarkOutline, activeIcon: IoShieldCheckmark, adminOrManager: true },
+        { path: '/compliance', label: 'Compliance Report', icon: IoDocumentTextOutline, activeIcon: IoDocumentText, adminOrManager: true },
       ]
     },
     {
-      name: 'Leadership',
-      icon: IoPeopleOutline,
-      adminOrManager: true,
-      links: [
-        { path: '/approvals', label: 'Approvals', icon: IoCheckmarkCircleOutline, activeIcon: IoCheckmarkCircle, hideIfNoReports: true },
-        { path: '/project-assignments', label: 'Project Assignments', icon: IoLayersOutline, activeIcon: IoLayers },
-        { path: '/team-compliance', label: 'Team Compliance', icon: IoCalendarOutline, activeIcon: IoCalendar },
-        { path: '/compliance', label: 'Compliance Report', icon: IoDocumentTextOutline, activeIcon: IoDocumentText },
-      ]
-    },
-    {
-      name: 'Governance',
+      name: 'Administration',
       icon: IoKeyOutline,
       adminOnly: true,
       links: [
         { path: '/projects', label: 'Projects', icon: IoBriefcaseOutline, activeIcon: IoBriefcase },
         { path: '/tasks', label: 'Tasks', icon: IoListOutline, activeIcon: IoList },
         { path: '/users', label: 'User Management', icon: IoPersonOutline, activeIcon: IoPerson },
-      ]
-    },
-    {
-      name: 'Insights',
-      icon: IoStatsChartOutline,
-      adminOnly: true,
-      links: [
+        { path: '/project-assignments', label: 'Project Assignments', icon: IoLayersOutline, activeIcon: IoLayers },
         { path: '/reports-analytics', label: 'Reports & Analytics', icon: IoStatsChartOutline, activeIcon: IoStatsChart },
       ]
     }
@@ -102,6 +92,7 @@ export default function Sidebar({ isOpen, onClose }) {
     return links.filter(link => {
       if (user?.role === 'admin') return true;
       if (link.adminOnly && user?.role !== 'admin') return false;
+      if (link.adminOrManager && user?.role !== 'admin' && user?.role !== 'manager') return false;
       if (link.hideIfNoReports && (parseInt(user?.reportsCount) || 0) <= 0) return false;
       return true;
     });
@@ -123,12 +114,44 @@ export default function Sidebar({ isOpen, onClose }) {
       >
         <div className="flex flex-col h-full">
           {/* Logo Area */}
-          <div className="h-24 flex items-center justify-center border-b border-white/5 bg-black/20">
-            <img src="/logo.png" alt="logo" className="h-16 object-contain brightness-0 invert" />
+          <div className="h-20 lg:h-24 flex items-center justify-center border-b border-white/5 bg-black/20 shrink-0">
+            <img src="/logo.png" alt="logo" className="h-12 lg:h-16 object-contain brightness-0 invert" />
           </div>
 
           {/* Navigation */}
-          <nav className="flex-1 px-4 py-6 space-y-4 overflow-y-auto custom-scrollbar">
+          <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto custom-scrollbar">
+            {/* Top-Level Links (No Grouping) */}
+            {topLevelLinks.map((link) => {
+              const active = isActive(link.path);
+              const Icon = active ? link.activeIcon : link.icon;
+
+              return (
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => window.innerWidth < 1024 && onClose()}
+                  className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${active
+                    ? 'text-zinc-950 bg-amber-500 shadow-lg shadow-amber-500/20 font-black'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5 font-bold'
+                    }`}
+                >
+                  <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'text-white scale-110' : 'text-gray-500 group-hover:text-amber-500 group-hover:scale-110'}`} />
+                  <span className="text-[11px] font-bold tracking-tight">{link.label}</span>
+                  {active && (
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="ml-auto w-1 h-1 rounded-full bg-white shadow-sm"
+                    />
+                  )}
+                </Link>
+              );
+            })}
+
+            {/* Divider */}
+            <div className="h-px bg-white/5 my-4" />
+
+            {/* Grouped Links */}
             {menuGroups
               .filter(group => isGroupVisible(group))
               .map((group, groupIdx) => {

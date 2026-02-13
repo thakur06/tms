@@ -116,7 +116,7 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={transition}
-          className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 border-t border-white/5 bg-white/5 rounded-xl"
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-6 border-t border-white/5 bg-white/5 rounded-xl"
         >
           <div className="text-sm text-gray-500 font-medium">
             Page <span className="text-white font-bold">{page}</span> of <span className="text-white font-bold">{totalPages}</span>
@@ -150,8 +150,8 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
                       onClick={() => setPage(i)}
                       whileTap={{ scale: 0.95 }}
                       className={`w-8 h-8 text-sm font-bold rounded-lg transition-all ${page === i
-                          ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20'
-                          : 'text-gray-500 hover:bg-white/10 hover:text-white'
+                        ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20'
+                        : 'text-gray-500 hover:bg-white/10 hover:text-white'
                         }`}
                     >
                       {i}
@@ -232,7 +232,7 @@ function ProjectCard({ project, index, getStatusColor, onDelete, onEdit }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.05 }}
       whileHover={{ y: -4 }}
-      className="group relative ui-card p-5 transition-all cursor-default overflow-visible shadow-sm hover:shadow-xl bg-zinc-900 border-white/5 hover:border-amber-500/20"
+      className="group relative ui-card p-4 sm:p-5 transition-all cursor-default overflow-visible shadow-sm hover:shadow-xl bg-zinc-900 border-white/5 hover:border-amber-500/20"
     >
       <div className="flex flex-col h-full">
         {/* Header with status and menu */}
