@@ -116,15 +116,18 @@ export default function TicketViewPage() {
         }
     };
 
-    const handleMentionSelect = (userName) => {
+    const handleMentionSelect = (user) => {
         const textBeforeMention = comment.slice(0, mentionCursorPos - mentionSearch.length - 1);
         const textAfterMention = comment.slice(mentionCursorPos);
-        const newComment = `${textBeforeMention}@${userName} ${textAfterMention}`;
+
+        // Check for duplicate names
+        const hasDuplicateName = users.filter(u => u.name.trim().toLowerCase() === user.name.trim().toLowerCase()).length > 1;
+        const mentionText = hasDuplicateName ? `${user.name} (${user.email})` : user.name;
+
+        const newComment = `${textBeforeMention}@${mentionText} ${textAfterMention}`;
 
         setComment(newComment);
         setShowMentionSuggestions(false);
-
-        // Focus back on textarea after state update (handled by focus logic in the future or just the fact that it's a controlled component)
     };
 
     const filteredMentionUsers = users.filter(u =>
@@ -397,6 +400,53 @@ export default function TicketViewPage() {
                             {/* Comment Write Field */}
                             <form onSubmit={handleCommentSubmit} className="relative group">
                                 <div className="absolute -inset-0.5 bg-linear-to-br from-amber-500/20 via-transparent to-indigo-500/20 rounded-[2.5rem] opacity-0 group-focus-within:opacity-100 transition-opacity blur-sm pointer-events-none" />
+
+                                {/* Mention Suggestions - Moved outside overflow-hidden */}
+                                <AnimatePresence>
+                                    {showMentionSuggestions && filteredMentionUsers.length > 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute bottom-full left-8 mb-2 w-64 bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-1000 backdrop-blur-xl"
+                                        >
+                                            <div className="p-3 border-b border-white/5 bg-zinc-900/50">
+                                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Select Operative</p>
+                                            </div>
+                                            <div className="p-1.5 max-h-48 overflow-y-auto custom-scrollbar">
+                                                {filteredMentionUsers.map((u, idx) => (
+                                                    <button
+                                                        key={u.id}
+                                                        type="button"
+                                                        onClick={() => handleMentionSelect(u)}
+                                                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left group ${idx === selectedMentionIndex
+                                                            ? 'bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.1)]'
+                                                            : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                                            }`}
+                                                    >
+                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black transition-all ${idx === selectedMentionIndex
+                                                            ? 'bg-amber-500 text-zinc-950 scale-110'
+                                                            : 'bg-zinc-900 border border-white/5'
+                                                            }`}>
+                                                            {u.name.substring(0, 2).toUpperCase()}
+                                                        </div>
+                                                        <div className="flex-1 min-w-0">
+                                                            <span className="text-xs font-bold block truncate">{u.name}</span>
+                                                            <span className="text-[10px] text-zinc-400 block truncate font-medium">{u.email || 'No Email'}</span>
+                                                            {idx === selectedMentionIndex && (
+                                                                <span className="text-[8px] font-black uppercase tracking-tighter opacity-70">Press Enter to select</span>
+                                                            )}
+                                                        </div>
+                                                        {idx === selectedMentionIndex && (
+                                                            <IoCheckmarkCircle className="shrink-0 animate-in fade-in zoom-in" size={14} />
+                                                        )}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
                                 <div className="relative bg-zinc-900 shadow-2xl border border-white/5 rounded-[2.5rem] overflow-hidden">
                                     <textarea
                                         ref={(el) => {
@@ -424,7 +474,7 @@ export default function TicketViewPage() {
                                                 } else if (e.key === 'Enter') {
                                                     e.preventDefault();
                                                     if (filteredMentionUsers[selectedMentionIndex]) {
-                                                        handleMentionSelect(filteredMentionUsers[selectedMentionIndex].name);
+                                                        handleMentionSelect(filteredMentionUsers[selectedMentionIndex]);
                                                     }
                                                 } else if (e.key === 'Escape') {
                                                     setShowMentionSuggestions(false);
@@ -432,51 +482,6 @@ export default function TicketViewPage() {
                                             }
                                         }}
                                     />
-
-                                    {/* Mention Suggestions */}
-                                    <AnimatePresence>
-                                        {showMentionSuggestions && filteredMentionUsers.length > 0 && (
-                                            <motion.div
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                exit={{ opacity: 0, y: 10 }}
-                                                className="absolute bottom-full left-8 mb-2 w-64 bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-1000 backdrop-blur-xl"
-                                            >
-                                                <div className="p-3 border-b border-white/5 bg-zinc-900/50">
-                                                    <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Select Operative</p>
-                                                </div>
-                                                <div className="p-1.5 max-h-48 overflow-y-auto custom-scrollbar">
-                                                    {filteredMentionUsers.map((u, idx) => (
-                                                        <button
-                                                            key={u.id}
-                                                            type="button"
-                                                            onClick={() => handleMentionSelect(u.name)}
-                                                            className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left group ${idx === selectedMentionIndex
-                                                                ? 'bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.1)]'
-                                                                : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                                                                }`}
-                                                        >
-                                                            <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black transition-all ${idx === selectedMentionIndex
-                                                                ? 'bg-amber-500 text-zinc-950 scale-110'
-                                                                : 'bg-zinc-900 border border-white/5'
-                                                                }`}>
-                                                                {u.name.substring(0, 2).toUpperCase()}
-                                                            </div>
-                                                            <div className="flex-1 min-w-0">
-                                                                <span className="text-xs font-bold block truncate">{u.name}</span>
-                                                                {idx === selectedMentionIndex && (
-                                                                    <span className="text-[8px] font-black uppercase tracking-tighter opacity-70">Press Enter to select</span>
-                                                                )}
-                                                            </div>
-                                                            {idx === selectedMentionIndex && (
-                                                                <IoCheckmarkCircle className="shrink-0 animate-in fade-in zoom-in" size={14} />
-                                                            )}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            </motion.div>
-                                        )}
-                                    </AnimatePresence>
 
                                     <div className="absolute bottom-4 right-4">
                                         <motion.button
@@ -667,6 +672,6 @@ export default function TicketViewPage() {
                 title="TERMINATE REPORT"
                 message="This will permanently purge this incident report and all associated intelligence from the system. This operation is irreversible."
             />
-        </div>
+        </div >
     );
 }
