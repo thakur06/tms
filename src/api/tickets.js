@@ -85,3 +85,15 @@ export const addComment = async (id, commentData) => {
         throw error;
     }
 };
+// Update a comment
+export const updateComment = async (ticketId, commentId, commentData) => {
+    try {
+        const response = await axios.put(`${API_URL}/${ticketId}/comments/${commentId}`, commentData, {
+            headers: getAuthHeader()
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error updating comment:", error);
+        throw error;
+    }
+};

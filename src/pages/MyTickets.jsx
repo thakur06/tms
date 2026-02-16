@@ -241,7 +241,7 @@ export default function MyTickets() {
                                         <div className="text-[9px] font-mono font-black text-gray-700 group-hover:text-amber-500/30 transition-colors uppercase tracking-widest">#{ticket.id}</div>
                                     </div>
 
-                                    <h3 className="text-xs font-black text-white leading-tight mb-4 line-clamp-2 group-hover:text-amber-500 transition-colors">
+                                    <h3 className="text-xs font-black text-white leading-tight mb-4 line-clamp-2 group-hover:text-amber-500 transition-colors uppercase">
                                         {ticket.title}
                                     </h3>
 

@@ -118,7 +118,7 @@ export default function TimesheetApprovalsPage() {
             className="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-zinc-800 text-white rounded-xl font-bold border border-white/5 transition-all active:scale-95 shadow-lg group"
           >
             <IoDocumentTextOutline size={18} className="text-amber-500 group-hover:scale-110 transition-transform" />
-            <span className="text-sm">Team Weekly Status</span>
+            <span className="text-sm md:block hidden">Weekly Status</span>
           </button>
           <div className="w-px h-8 bg-white/5 mx-2 hidden lg:block" />
 
@@ -130,8 +130,8 @@ export default function TimesheetApprovalsPage() {
                   key={tab}
                   onClick={() => setFilter(tab)}
                   className={`px-4 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all duration-300 ${filter === tab
-                      ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20 scale-105'
-                      : 'text-gray-400 hover:text-white hover:bg-white/5'
+                    ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20 scale-105'
+                    : 'text-gray-400 hover:text-white hover:bg-white/5'
                     }`}
                 >
                   {tab.charAt(0).toUpperCase() + tab.slice(1)}

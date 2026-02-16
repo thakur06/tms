@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import { IoArrowBack, IoSearch, IoFilter, IoChevronBack, IoChevronForward } from 'react-icons/io5';
+import { IoArrowBack, IoSearch, IoFilter, IoChevronBack, IoChevronForward, IoTime } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import ComplianceTable from '../components/ComplianceTable';
 import MultiSelect from '../components/MultiSelect';
@@ -217,6 +217,14 @@ export default function ComplianceReportPage() {
                         <option value="rejected" className="bg-zinc-900">Rejected</option>
                     </select>
                 </div>
+
+                <button
+                    onClick={fetchComplianceReport}
+                    className="p-2 bg-zinc-900 border border-white/5 rounded-xl text-gray-400 hover:text-white transition-all active:scale-95 flex items-center justify-center shrink-0 w-10 h-10"
+                    title="Refresh Data"
+                >
+                    <IoTime size={18} className={loading ? "animate-spin" : ""} />
+                </button>
             </div>
 
             {/* Content */}

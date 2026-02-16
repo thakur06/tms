@@ -7,7 +7,7 @@ import {
     IoCheckmarkCircleOutline, IoTicketOutline, IoChatbubbleOutline, IoLinkOutline,
     IoTrashOutline, IoBriefcaseOutline, IoShieldCheckmarkOutline, IoCheckmarkCircle
 } from 'react-icons/io5';
-import { getTicketById, updateTicket, addComment, deleteTicket } from '../api/tickets';
+import { getTicketById, updateTicket, addComment, deleteTicket, updateComment } from '../api/tickets';
 import { getAllUsers } from '../api/users';
 import { getAllProjects } from '../api/projects';
 import { useAuth } from '../context/AuthContext';
@@ -27,6 +27,10 @@ export default function TicketViewPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [users, setUsers] = useState([]);
     const [projects, setProjects] = useState([]);
+
+    // Comment Editing State
+    const [editingCommentId, setEditingCommentId] = useState(null);
+    const [editContent, setEditContent] = useState('');
 
     // Mention state
     const [mentionSearch, setMentionSearch] = useState('');
@@ -126,6 +130,39 @@ export default function TicketViewPage() {
     const filteredMentionUsers = users.filter(u =>
         u.name.toLowerCase().includes(mentionSearch)
     ).slice(0, 5);
+
+
+
+    const handleEditClick = (comment) => {
+        setEditingCommentId(comment.id);
+        setEditContent(comment.content);
+    };
+
+    const handleCancelEdit = () => {
+        setEditingCommentId(null);
+        setEditContent('');
+    };
+
+    const handleSaveEdit = async (commentId) => {
+        if (!editContent.trim()) return;
+        try {
+            await updateComment(id, commentId, { content: editContent });
+
+            // Optimistic update or reload
+            setTicket(prev => ({
+                ...prev,
+                comments: prev.comments.map(c =>
+                    c.id === commentId ? { ...c, content: editContent, updated_at: new Date().toISOString() } : c
+                )
+            }));
+
+            setEditingCommentId(null);
+            setEditContent('');
+            toast.success("Comment updated");
+        } catch (error) {
+            toast.error("Failed to update comment");
+        }
+    };
 
     const handleDeleteTicket = async () => {
         try {
@@ -362,10 +399,20 @@ export default function TicketViewPage() {
                                 <div className="absolute -inset-0.5 bg-linear-to-br from-amber-500/20 via-transparent to-indigo-500/20 rounded-[2.5rem] opacity-0 group-focus-within:opacity-100 transition-opacity blur-sm pointer-events-none" />
                                 <div className="relative bg-zinc-900 shadow-2xl border border-white/5 rounded-[2.5rem] overflow-hidden">
                                     <textarea
-                                        className="w-full min-h-[140px] resize-none bg-transparent border-none p-8 text-base font-light text-white placeholder-gray-600 outline-none transition-all"
+                                        ref={(el) => {
+                                            if (el) {
+                                                el.style.height = 'auto';
+                                                el.style.height = el.scrollHeight + 'px';
+                                            }
+                                        }}
+                                        className="w-full min-h-[140px] resize-none bg-transparent border-none p-6 text-base font-light text-white placeholder-gray-600 outline-none transition-all overflow-hidden whitespace-pre-wrap"
                                         placeholder="Add to the discussion... Type @username to mention"
                                         value={comment}
-                                        onChange={handleCommentChange}
+                                        onChange={(e) => {
+                                            handleCommentChange(e);
+                                            e.target.style.height = 'auto';
+                                            e.target.style.height = e.target.scrollHeight + 'px';
+                                        }}
                                         onKeyDown={(e) => {
                                             if (showMentionSuggestions) {
                                                 if (e.key === 'ArrowDown') {
@@ -465,19 +512,56 @@ export default function TicketViewPage() {
                                                 <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center text-amber-500 font-black shrink-0 shadow-2xl text-sm group-hover:scale-110 transition-transform">
                                                     {c.user_name?.substring(0, 2).toUpperCase() || '??'}
                                                 </div>
-                                                <div className="flex-1 space-y-2 min-w-0">
+                                                <div className="flex-1 space-y-2 min-w-0 w-full">
                                                     <div className="flex items-center justify-between">
                                                         <span className="text-sm font-black text-white group-hover:text-amber-500 transition-colors uppercase tracking-widest">{c.user_name}</span>
-                                                        <span className="text-[10px] font-black text-gray-600 flex items-center gap-1.5 uppercase tracking-tighter">
-                                                            <IoTimeOutline size={12} className="text-gray-700" />
-                                                            {new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                            <span className="text-zinc-800 mx-1">•</span>
-                                                            {new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                                                        </span>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[10px] font-black text-gray-600 flex items-center gap-1.5 uppercase tracking-tighter">
+                                                                <IoTimeOutline size={12} className="text-gray-700" />
+                                                                {new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                                                <span className="text-zinc-800 mx-1">•</span>
+                                                                {new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
+                                                            </span>
+                                                            {c.user_id === currentUser?.id && !editingCommentId && (
+                                                                <button
+                                                                    onClick={() => handleEditClick(c)}
+                                                                    className="text-gray-600 hover:text-white transition-colors p-1"
+                                                                    title="Edit Comment"
+                                                                >
+                                                                    <IoPencilOutline size={12} />
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
-                                                    <div className="text-gray-300 text-sm leading-relaxed font-light wrap-break-word">
-                                                        {formatCommentContent(c.content)}
-                                                    </div>
+
+                                                    {editingCommentId === c.id ? (
+                                                        <div className="mt-2 space-y-3">
+                                                            <textarea
+                                                                value={editContent}
+                                                                onChange={(e) => setEditContent(e.target.value)}
+                                                                className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-sm text-gray-300 focus:outline-none focus:border-amber-500/50 min-h-[80px] resize-y whitespace-pre-wrap"
+                                                                autoFocus
+                                                            />
+                                                            <div className="flex items-center gap-2 justify-end">
+                                                                <button
+                                                                    onClick={handleCancelEdit}
+                                                                    className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
+                                                                >
+                                                                    Cancel
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => handleSaveEdit(c.id)}
+                                                                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
+                                                                >
+                                                                    Save Changes
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="text-gray-300 text-sm leading-relaxed font-light [overflow-wrap:anywhere] whitespace-pre-wrap w-full">
+                                                            {formatCommentContent(c.content)}
+                                                        </div>
+                                                    )}
                                                 </div>
                                             </motion.div>
                                         ))}
