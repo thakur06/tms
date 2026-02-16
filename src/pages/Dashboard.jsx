@@ -593,7 +593,7 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="space-y-8 pb-10 p-3">
+    <div className="w-full space-y-8 pb-10 p-3">
 
       <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/5 bg-zinc-900 shadow-2xl">
         <div className="absolute inset-0 bg-linear-to-br from-amber-500/10 via-transparent to-orange-500/10" />

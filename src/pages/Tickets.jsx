@@ -104,7 +104,7 @@ export default function Tickets() {
         <div className="flex flex-col h-full bg-zinc-950 overflow-hidden">
             {/* Header Section */}
             <div className="px-4 sm:px-6 py-4 sm:py-6 bg-zinc-900/30 border-b border-white/5 backdrop-blur-xl shrink-0">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-1">
                             <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-inner">
@@ -129,7 +129,7 @@ export default function Tickets() {
                 </div>
 
                 {/* Search and Filters Bar */}
-                <div className="max-w-7xl mx-auto mt-6 sm:mt-8 flex flex-col lg:flex-row items-center gap-4">
+                <div className="mt-6 sm:mt-8 flex flex-col lg:flex-row items-center gap-4">
                     {/* Search Bar */}
                     <div className="relative w-full lg:max-w-sm group">
                         <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors" size={18} />
@@ -187,7 +187,7 @@ export default function Tickets() {
 
             {/* Main Content Area */}
             <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
-                <div className="max-w-7xl mx-auto">
+                <div className="w-full">
                     {loading ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             {[1, 2, 3, 4, 5, 6].map(i => (

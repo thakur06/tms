@@ -263,10 +263,10 @@ export default function TicketViewPage() {
                     </motion.button>
                     <div>
                         <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-black text-amber-500 tracking-[0.2em] uppercase bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">ISSUE REPORT</span>
+                            <span className="text-[10px] font-black text-amber-500 tracking-[0.2em] uppercase bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">Ticket</span>
                             <span className="text-[10px] font-mono text-gray-500 font-black">#{ticket.id}</span>
                         </div>
-                        <h1 className="text-xl md:text-2xl font-black text-white tracking-tight leading-tight max-w-xl truncate">{ticket.title}</h1>
+                        <h1 className="text-xl md:text-2xl font-black text-white tracking-tight leading-tight w-full truncate uppercase">{ticket.title}</h1>
                     </div>
                 </div>
 
@@ -319,10 +319,10 @@ export default function TicketViewPage() {
                 <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-amber-500/2 blur-[120px] pointer-events-none" />
                 <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-indigo-500/2 blur-[120px] pointer-events-none" />
 
-                <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10">
+                <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10">
 
-                    {/* Main Content Area */}
-                    <div className="lg:col-span-8 space-y-6 sm:space-y-10 order-1 relative">
+                    {/* Left Column: Description & Communication */}
+                    <div className="lg:col-span-8 space-y-12 order-1 relative">
                         {/* Description Section */}
                         <section className="bg-zinc-900/40 border border-white/5 rounded-3xl sm:rounded-[3rem] p-6 sm:p-8 md:p-10 shadow-2xl backdrop-blur-md group hover:border-white/10 transition-all duration-500">
                             <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
@@ -341,8 +341,8 @@ export default function TicketViewPage() {
                                     </div>
                                 </div>
                             </div>
-                            <div className="prose prose-invert prose-lg max-w-none text-gray-300 whitespace-pre-wrap leading-relaxed font-light tracking-wide lg:text-lg">
-                                {formatCommentContent(ticket.description || 'No detailed description specified for this report.')}
+                            <div className="prose prose-invert prose-lg max-w-none text-gray-300 whitespace-pre-wrap leading-relaxed font-light tracking-wide lg:text-md">
+                                {formatCommentContent(ticket.description || '- Description not available')}
                             </div>
                         </section>
 
@@ -437,7 +437,7 @@ export default function TicketViewPage() {
                                             whileTap={{ scale: 0.95 }}
                                             type="submit"
                                             disabled={!comment.trim()}
-                                            className="h-14 w-14 bg-amber-500 text-zinc-950 rounded-[1.5rem] flex items-center justify-center transition-all shadow-xl shadow-amber-500/20 disabled:opacity-30 disabled:scale-100"
+                                            className="h-14 w-14 bg-amber-500 text-zinc-950 rounded-3xl flex items-center justify-center transition-all shadow-xl shadow-amber-500/20 disabled:opacity-30 disabled:scale-100"
                                         >
                                             <IoSendOutline size={20} />
                                         </motion.button>
@@ -488,7 +488,7 @@ export default function TicketViewPage() {
                     </div>
 
                     {/* Meta/Sidebar */}
-                    <aside className="lg:col-span-4 space-y-6 order-2">
+                    <aside className="lg:col-span-4 space-y-6 order-2 lg:sticky lg:top-8 self-start">
                         {/* Ticket Owner (Reporter) - Non-editable */}
                         <section className="bg-zinc-900/40 border border-amber-500/20 rounded-3xl sm:rounded-[2.5rem] p-6 shadow-2xl backdrop-blur-xl relative">
                             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full" />
@@ -505,9 +505,7 @@ export default function TicketViewPage() {
                                     <p className="text-[9px] font-black text-gray-600 uppercase tracking-tighter">Report Creator</p>
                                 </div>
                             </div>
-                            <p className="mt-3 text-[9px] text-gray-600 font-bold uppercase tracking-widest leading-relaxed">
-                                Owner cannot be changed
-                            </p>
+
                         </section>
 
                         {/* Assignment Control */}
@@ -516,7 +514,7 @@ export default function TicketViewPage() {
                                 <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full" />
                                 <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
                                     <IoShieldCheckmarkOutline size={14} />
-                                    Assignee Control
+                                    Assignee
                                 </h4>
                                 <SearchableSelect
                                     label="Update Assignee"
@@ -528,9 +526,6 @@ export default function TicketViewPage() {
                                     value={ticket.assignee_id || ''}
                                     onChange={handleAssigneeUpdate}
                                 />
-                                <p className="mt-3 text-[9px] text-gray-600 font-bold uppercase tracking-widest leading-relaxed">
-                                    Only owner, assignee, or admin can reassign
-                                </p>
                             </section>
                         )}
 
@@ -540,7 +535,7 @@ export default function TicketViewPage() {
 
                             <div className="space-y-6">
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Project Origin</span>
+                                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Project</span>
                                     <div className="flex items-center gap-4 bg-zinc-950/50 p-4 rounded-3xl border border-white/5 hover:border-indigo-500/30 transition-all cursor-default">
                                         <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20 shadow-inner">
                                             <IoBriefcaseOutline size={18} />
@@ -552,18 +547,6 @@ export default function TicketViewPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Current operative</span>
-                                    <div className="flex items-center gap-4 bg-zinc-950/50 p-4 rounded-3xl border border-white/5 hover:border-amber-500/30 transition-all cursor-default">
-                                        <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shadow-inner">
-                                            <IoPersonCircleOutline size={18} />
-                                        </div>
-                                        <div className="min-w-0">
-                                            <p className="text-xs font-black text-white truncate">{ticket.assignee_name || 'Awaiting Intel'}</p>
-                                            <p className="text-[9px] font-black text-gray-600 uppercase tracking-tighter">Assigned Agent</p>
-                                        </div>
-                                    </div>
-                                </div>
 
                                 <div className="flex flex-col gap-2 text-right">
                                     <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest text-left">Timeline</span>
