@@ -147,7 +147,7 @@ export default function ComplianceReportPage() {
     return (
         <div className="p-4 sm:p-6 md:p-8 space-y-8 min-h-screen bg-black text-white font-sans selection:bg-amber-500/30">
             {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate(-1)}
@@ -155,11 +155,11 @@ export default function ComplianceReportPage() {
                     >
                         <IoArrowBack size={20} />
                     </button>
-                    <div>
-                        <h1 className="text-3xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white to-zinc-500">
+                    <div className="min-w-0">
+                        <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-transparent bg-clip-text bg-linear-to-r from-white to-zinc-500 truncate">
                             Compliance Report
                         </h1>
-                        <p className="text-gray-500 font-bold text-sm">
+                        <p className="text-gray-500 font-bold text-[10px] sm:text-sm">
                             {weekDays[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                             {' - '}
                             {weekDays[6].toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
@@ -169,16 +169,16 @@ export default function ComplianceReportPage() {
 
                 <div className="flex flex-wrap items-center gap-3">
                     {/* Week Nav */}
-                    <div className="flex bg-zinc-900 border border-white/5 rounded-xl p-1">
-                        <button onClick={handlePrevWeek} className="px-4 py-2 hover:bg-zinc-800 rounded-lg text-sm text-gray-400 font-bold transition-colors">Prev</button>
-                        <button onClick={() => setCurrentWeekStart(new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)))} className="px-4 py-2 hover:bg-zinc-800 rounded-lg text-sm text-amber-500 font-bold transition-colors">Current</button>
-                        <button onClick={handleNextWeek} className="px-4 py-2 hover:bg-zinc-800 rounded-lg text-sm text-gray-400 font-bold transition-colors">Next</button>
+                    <div className="flex w-full sm:w-auto bg-zinc-900 border border-white/5 rounded-xl p-1">
+                        <button onClick={handlePrevWeek} className="flex-1 sm:flex-none px-3 py-2 hover:bg-zinc-800 rounded-lg text-xs sm:text-sm text-gray-400 font-bold transition-colors">Prev</button>
+                        <button onClick={() => setCurrentWeekStart(new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1)))} className="flex-2 sm:flex-none px-3 py-2 hover:bg-zinc-800 rounded-lg text-xs sm:text-sm text-amber-500 font-bold transition-colors uppercase tracking-widest">Current</button>
+                        <button onClick={handleNextWeek} className="flex-1 sm:flex-none px-3 py-2 hover:bg-zinc-800 rounded-lg text-xs sm:text-sm text-gray-400 font-bold transition-colors">Next</button>
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="flex flex-col md:flex-row md:items-center gap-4 bg-zinc-900/50 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:flex lg:items-center gap-4 bg-zinc-900/50 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
                 <div className="relative flex-1 group">
                     <IoSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors" size={16} />
                     <input
@@ -262,8 +262,8 @@ export default function ComplianceReportPage() {
                                         key={i + 1}
                                         onClick={() => setCurrentPage(i + 1)}
                                         className={`w-8 h-8 rounded-lg text-xs font-black transition-all ${currentPage === i + 1
-                                                ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
-                                                : "text-gray-500 hover:text-white hover:bg-white/5"
+                                            ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
+                                            : "text-gray-500 hover:text-white hover:bg-white/5"
                                             }`}
                                     >
                                         {i + 1}

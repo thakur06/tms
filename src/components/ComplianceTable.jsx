@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
-import { 
-  IoCheckmarkCircle, IoCloseCircle, IoTime, 
-  IoWarning, IoMail, IoBusiness
+import {
+    IoCheckmarkCircle, IoCloseCircle, IoTime,
+    IoWarning, IoMail, IoBusiness
 } from 'react-icons/io5';
 import UserAvatar from './UserAvatar';
 
 const getStatusColor = (status) => {
-    switch(status) {
+    switch (status) {
         case 'approved': return 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20';
         case 'rejected': return 'bg-red-500/10 text-red-500 border-red-500/20';
         case 'pending': return 'bg-amber-500/10 text-amber-500 border-amber-500/20';
@@ -14,9 +14,9 @@ const getStatusColor = (status) => {
     }
 };
 
-export default function ComplianceTable({ 
-    data, 
-    weekDays, 
+export default function ComplianceTable({
+    data,
+    weekDays,
     onAction, // (action, item) => {} action: 'approve' | 'reject' | 'view'
     userRole,
     enableActions = true
@@ -31,8 +31,8 @@ export default function ComplianceTable({
     }
 
     return (
-        <div className="overflow-x-auto rounded-xl border border-white/5 bg-zinc-900/50">
-            <table className="w-full border-collapse min-w-[1000px]">
+        <div className="overflow-x-auto rounded-xl border border-white/5 bg-zinc-900/50 custom-scrollbar">
+            <table className="w-full border-collapse min-w-[700px] sm:min-w-[800px]">
                 <thead>
                     <tr className="bg-black/20 border-b border-white/5">
                         <th className="p-4 text-left text-[10px] font-black uppercase text-gray-500 tracking-widest w-[250px] sticky left-0 bg-zinc-900 z-10">User</th>
@@ -54,9 +54,9 @@ export default function ComplianceTable({
                 <tbody className="divide-y divide-white/5 text-xs font-medium">
                     {data.map((item, index) => {
                         const isPending = item.status === 'pending';
-                        
+
                         return (
-                            <motion.tr 
+                            <motion.tr
                                 key={item.user.id}
                                 initial={{ opacity: 0, y: 5 }}
                                 animate={{ opacity: 1, y: 0 }}
@@ -91,12 +91,12 @@ export default function ComplianceTable({
                                     const dateStr = day.toISOString().split('T')[0];
                                     const hours = item.daily[dateStr] || 0;
                                     const isWeekend = day.getDay() === 0 || day.getDay() === 6;
-                                    
+
                                     // Highlight logic: < 8h on weekday = red/amber
                                     // No highlighting on weekends
                                     const isLow = !isWeekend && hours < 8 && hours > 0;
                                     const isMissing = !isWeekend && hours === 0;
-                                    
+
                                     return (
                                         <td key={dateStr} className={`p-2 text-center border-r border-white/5 last:border-0 bg-zinc-900 group-hover:bg-zinc-800 transition-colors`}>
                                             <div className={`
@@ -104,7 +104,7 @@ export default function ComplianceTable({
                                                 ${hours > 0 ? (isLow ? 'text-amber-500 bg-amber-500/10' : 'text-white bg-white/5') : 'text-gray-700'}
                                                 ${isMissing && dateStr < new Date().toISOString().split('T')[0] ? 'bg-red-500/5 text-red-500/50' : ''}
                                             `}>
-                                                {hours > 0 ? Number(hours).toFixed(1)+"h" : '-'}
+                                                {hours > 0 ? Number(hours).toFixed(1) + "h" : '-'}
                                             </div>
                                         </td>
                                     );
@@ -112,7 +112,7 @@ export default function ComplianceTable({
 
                                 {/* Total */}
                                 <td className="p-4 text-center font-mono font-black text-white bg-zinc-900 group-hover:bg-zinc-800 transition-colors border-l border-white/5">
-                                    {Number(item.totalHours).toFixed(1)+"h"}
+                                    {Number(item.totalHours).toFixed(1) + "h"}
                                 </td>
 
                                 {/* Actions */}
@@ -121,14 +121,14 @@ export default function ComplianceTable({
                                         <div className="flex items-center justify-end gap-2">
                                             {isPending && (
                                                 <>
-                                                    <button 
+                                                    <button
                                                         onClick={() => onAction('approve', item)}
                                                         className="px-3 py-1.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 border border-emerald-500/20 text-[10px] font-black uppercase tracking-wider transition-all active:scale-95"
                                                         title="Quick Approve"
                                                     >
                                                         Approve
                                                     </button>
-                                                    <button 
+                                                    <button
                                                         onClick={() => onAction('reject', item)}
                                                         className="px-3 py-1.5 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 border border-red-500/20 text-[10px] font-black uppercase tracking-wider transition-all active:scale-95"
                                                         title="Quick Reject"
@@ -137,7 +137,7 @@ export default function ComplianceTable({
                                                     </button>
                                                 </>
                                             )}
-                                            <button 
+                                            <button
                                                 onClick={() => onAction('view', item)}
                                                 className="px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-wider text-gray-400 transition-all active:scale-95 border border-white/5"
                                             >

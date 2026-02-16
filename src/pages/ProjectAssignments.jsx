@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -736,147 +737,149 @@ export default function ProjectAssignments() {
                         </div>
                     )}
 
-                    {/* Slide-over Side Panel - Common for both views */}
-                    <AnimatePresence>
-                        {selectedAnalyticsUser && (
-                            <>
-                                {/* Backdrop */}
-                                <motion.div
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    onClick={() => setSelectedAnalyticsUser(null)}
-                                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50"
-                                />
+                    {createPortal(
+                        <AnimatePresence>
+                            {selectedAnalyticsUser && (
+                                <>
+                                    {/* Backdrop */}
+                                    <motion.div
+                                        initial={{ opacity: 0 }}
+                                        animate={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                        onClick={() => setSelectedAnalyticsUser(null)}
+                                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-9999"
+                                    />
 
-                                {/* Drawer */}
-                                <motion.div
-                                    initial={{ x: '100%' }}
-                                    animate={{ x: 0 }}
-                                    exit={{ x: '100%' }}
-                                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                                    className="fixed top-0 right-0 h-full w-full max-w-sm bg-black border-l border-white/10 z-1000 shadow-2xl overflow-hidden flex flex-col"
-                                >
-                                    <div className="p-6 border-b border-white/10 flex items-center justify-between bg-zinc-900/50">
-                                        <div className="flex items-center gap-3">
-                                            <UserAvatar name={selectedAnalyticsUser.user_name} email={selectedAnalyticsUser.user_email} size="md" />
-                                            <div>
-                                                <h4 className="text-lg font-black text-white">{selectedAnalyticsUser.user_name}</h4>
-                                                <p className="text-xs text-gray-400 font-bold">{selectedAnalyticsUser.user_dept}</p>
-                                            </div>
-                                        </div>
-                                        <button
-                                            onClick={() => setSelectedAnalyticsUser(null)}
-                                            className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
-                                        >
-                                            <IoCloseOutline size={20} />
-                                        </button>
-                                    </div>
-
-                                    <div className="p-6 flex-1 overflow-y-auto">
-                                        <div className="flex items-center justify-between mb-6">
-                                            <span className="text-[10px] uppercase font-black text-gray-500 tracking-widest">Utilized Capacity</span>
-                                            <span className={`text-xl font-black ${selectedAnalyticsUser.total_allocation > 100 ? 'text-red-500' : 'text-emerald-500'}`}>
-                                                {selectedAnalyticsUser.total_allocation}%
-                                            </span>
-                                        </div>
-
-                                        {allocationThreshold && (
-                                            <div className="mb-6 p-5 rounded-3xl bg-linear-to-br from-amber-500/10 to-transparent border border-amber-500/10 shadow-xl relative overflow-hidden group">
-                                                <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                                                    <IoCalendarOutline size={32} />
+                                    {/* Drawer */}
+                                    <motion.div
+                                        initial={{ x: '100%' }}
+                                        animate={{ x: 0 }}
+                                        exit={{ x: '100%' }}
+                                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                                        className="fixed top-0 right-0 h-full w-full max-w-sm bg-black border-l border-white/10 z-10000 shadow-2xl overflow-hidden flex flex-col "
+                                    >
+                                        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-zinc-900/50">
+                                            <div className="flex items-center gap-3">
+                                                <UserAvatar name={selectedAnalyticsUser.user_name} email={selectedAnalyticsUser.user_email} size="md" />
+                                                <div>
+                                                    <h4 className="text-lg font-black text-white">{selectedAnalyticsUser.user_name}</h4>
+                                                    <p className="text-xs text-gray-400 font-bold">{selectedAnalyticsUser.user_dept}</p>
                                                 </div>
-                                                <h5 className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                                                    <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-                                                    Availability Forecast
-                                                </h5>
+                                            </div>
+                                            <button
+                                                onClick={() => setSelectedAnalyticsUser(null)}
+                                                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
+                                            >
+                                                <IoCloseOutline size={20} />
+                                            </button>
+                                        </div>
 
-                                                {timelineLoading ? (
-                                                    <div className="flex items-center gap-2 py-2">
-                                                        <div className="w-4 h-4 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
-                                                        <span className="text-[10px] font-bold text-gray-500 uppercase">Calculating Dates...</span>
+                                        <div className="p-6 flex-1 overflow-y-auto">
+                                            <div className="flex items-center justify-between mb-6">
+                                                <span className="text-[10px] uppercase font-black text-gray-500 tracking-widest">Utilized Capacity</span>
+                                                <span className={`text-xl font-black ${selectedAnalyticsUser.total_allocation > 100 ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                    {selectedAnalyticsUser.total_allocation}%
+                                                </span>
+                                            </div>
+
+                                            {allocationThreshold && (
+                                                <div className="mb-6 p-5 rounded-3xl bg-linear-to-br from-amber-500/10 to-transparent border border-amber-500/10 shadow-xl relative overflow-hidden group">
+                                                    <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
+                                                        <IoCalendarOutline size={32} />
                                                     </div>
-                                                ) : availabilityForecast ? (
-                                                    <div className="space-y-4">
-                                                        <div className="flex items-center justify-between">
-                                                            <div className="space-y-0.5">
-                                                                <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Capacity Date (≤{allocationThreshold}%)</p>
-                                                                <p className="text-lg font-black text-white">
-                                                                    {availabilityForecast.date === selectedDate ? 'AVAILABLE TODAY' : new Date(availabilityForecast.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                                                    <h5 className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
+                                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                                        Availability Forecast
+                                                    </h5>
+
+                                                    {timelineLoading ? (
+                                                        <div className="flex items-center gap-2 py-2">
+                                                            <div className="w-4 h-4 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+                                                            <span className="text-[10px] font-bold text-gray-500 uppercase">Calculating Dates...</span>
+                                                        </div>
+                                                    ) : availabilityForecast ? (
+                                                        <div className="space-y-4">
+                                                            <div className="flex items-center justify-between">
+                                                                <div className="space-y-0.5">
+                                                                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Capacity Date (≤{allocationThreshold}%)</p>
+                                                                    <p className="text-lg font-black text-white">
+                                                                        {availabilityForecast.date === selectedDate ? 'AVAILABLE TODAY' : new Date(availabilityForecast.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 bg-black/40 px-3 py-2 rounded-xl border border-white/5">
+                                                                <IoAlertCircleOutline className="text-amber-500" size={14} />
+                                                                <p className="text-[10px] font-bold text-gray-400">
+                                                                    Projected load will drop to <span className="text-amber-500">{availabilityForecast.load}%</span>
                                                                 </p>
                                                             </div>
                                                         </div>
-                                                        <div className="flex items-center gap-2 bg-black/40 px-3 py-2 rounded-xl border border-white/5">
-                                                            <IoAlertCircleOutline className="text-amber-500" size={14} />
-                                                            <p className="text-[10px] font-bold text-gray-400">
-                                                                Projected load will drop to <span className="text-amber-500">{availabilityForecast.load}%</span>
-                                                            </p>
+                                                    ) : (
+                                                        <div className="flex items-center gap-2 bg-red-500/5 px-3 py-2 rounded-xl border border-red-500/10">
+                                                            <IoAlertCircleOutline className="text-red-500" size={14} />
+                                                            <p className="text-[10px] font-bold text-red-400 uppercase">No future capacity detected</p>
                                                         </div>
-                                                    </div>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            <div className="space-y-3">
+                                                <h5 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-4">Assigned Projects</h5>
+                                                {selectedAnalyticsUser.projects.length > 0 ? (
+                                                    selectedAnalyticsUser.projects.map(proj => (
+                                                        <div key={proj.id} className="p-4 rounded-2xl bg-zinc-900/80 border border-white/5 space-y-3">
+                                                            <div className="flex items-start justify-between">
+                                                                <div className="flex items-center gap-3">
+                                                                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/5">
+                                                                        {proj.project_code}
+                                                                    </div>
+                                                                    <div>
+                                                                        <p className="text-sm font-black text-white">{proj.project_name}</p>
+                                                                        <p className="text-[10px] text-gray-400">{proj.project_client}</p>
+                                                                    </div>
+                                                                </div>
+                                                                <span className="text-blue-500 font-black text-lg">{proj.allocation_percentage}%</span>
+                                                            </div>
+                                                            <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 bg-black/40 p-2 rounded-lg">
+                                                                <IoCalendarOutline />
+                                                                {new Date(proj.start_date).toLocaleDateString()}
+                                                                <span>→</span>
+                                                                {proj.end_date.startsWith('9999') ? 'Ongoing' : new Date(proj.end_date).toLocaleDateString()}
+                                                            </div>
+                                                        </div>
+                                                    ))
                                                 ) : (
-                                                    <div className="flex items-center gap-2 bg-red-500/5 px-3 py-2 rounded-xl border border-red-500/10">
-                                                        <IoAlertCircleOutline className="text-red-500" size={14} />
-                                                        <p className="text-[10px] font-bold text-red-400 uppercase">No future capacity detected</p>
+                                                    <div className="p-8 text-center border border-dashed border-white/10 rounded-2xl">
+                                                        <p className="text-gray-500 text-sm font-bold">No projects assigned</p>
                                                     </div>
                                                 )}
                                             </div>
-                                        )}
-
-                                        <div className="space-y-3">
-                                            <h5 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-4">Assigned Projects</h5>
-                                            {selectedAnalyticsUser.projects.length > 0 ? (
-                                                selectedAnalyticsUser.projects.map(proj => (
-                                                    <div key={proj.id} className="p-4 rounded-2xl bg-zinc-900/80 border border-white/5 space-y-3">
-                                                        <div className="flex items-start justify-between">
-                                                            <div className="flex items-center gap-3">
-                                                                <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/5">
-                                                                    {proj.project_code}
-                                                                </div>
-                                                                <div>
-                                                                    <p className="text-sm font-black text-white">{proj.project_name}</p>
-                                                                    <p className="text-[10px] text-gray-400">{proj.project_client}</p>
-                                                                </div>
-                                                            </div>
-                                                            <span className="text-blue-500 font-black text-lg">{proj.allocation_percentage}%</span>
-                                                        </div>
-                                                        <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 bg-black/40 p-2 rounded-lg">
-                                                            <IoCalendarOutline />
-                                                            {new Date(proj.start_date).toLocaleDateString()}
-                                                            <span>→</span>
-                                                            {proj.end_date.startsWith('9999') ? 'Ongoing' : new Date(proj.end_date).toLocaleDateString()}
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <div className="p-8 text-center border border-dashed border-white/10 rounded-2xl">
-                                                    <p className="text-gray-500 text-sm font-bold">No projects assigned</p>
-                                                </div>
-                                            )}
                                         </div>
-                                    </div>
 
-                                    <div className="p-4 border-t border-white/10 bg-zinc-900/30">
-                                        <button
-                                            onClick={() => {
-                                                setFormData({
-                                                    user_id: selectedAnalyticsUser.user_id,
-                                                    project_id: '',
-                                                    allocation_percentage: 100,
-                                                    start_date: selectedDate,
-                                                    end_date: new Date().toISOString().split('T')[0]
-                                                });
-                                                setSelectedAnalyticsUser(null);
-                                                setIsAssignModalOpen(true);
-                                            }}
-                                            className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black uppercase tracking-wider text-xs transition-all shadow-lg shadow-amber-500/10"
-                                        >
-                                            Assign New Project
-                                        </button>
-                                    </div>
-                                </motion.div>
-                            </>
-                        )}
-                    </AnimatePresence>
+                                        <div className="p-4 border-t border-white/10 bg-zinc-900/30">
+                                            <button
+                                                onClick={() => {
+                                                    setFormData({
+                                                        user_id: selectedAnalyticsUser.user_id,
+                                                        project_id: '',
+                                                        allocation_percentage: 100,
+                                                        start_date: selectedDate,
+                                                        end_date: new Date().toISOString().split('T')[0]
+                                                    });
+                                                    setSelectedAnalyticsUser(null);
+                                                    setIsAssignModalOpen(true);
+                                                }}
+                                                className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black uppercase tracking-wider text-xs transition-all shadow-lg shadow-amber-500/10"
+                                            >
+                                                Assign New Project
+                                            </button>
+                                        </div>
+                                    </motion.div>
+                                </>
+                            )}
+                        </AnimatePresence>,
+                        document.body
+                    )}
                 </>
             )}
 
@@ -1004,7 +1007,7 @@ export default function ProjectAssignments() {
             {/* Delete Confirmation Modal */}
             <AnimatePresence>
                 {isDeleteModalOpen && (
-                    <div className="fixed inset-0 z-100 flex items-center justify-center p-4">
+                    <div className="fixed inset-0 z-100 h-screen flex items-center justify-center p-4 ">
                         <motion.div
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
