@@ -21,8 +21,12 @@ export default function PtoSpreadsheetView({ users, selectedDate, onSyncSuccess,
         users.forEach(user => {
             user.projects.forEach(proj => {
                 if (proj.project_category === 'PTO' || proj.project_name === 'Leave') {
-                    const start = new Date(proj.start_date);
-                    const end = new Date(proj.end_date);
+                    // Fix: Parse YYYY-MM-DD directly to avoid timezone shift
+                    const [sYear, sMonth, sDay] = proj.start_date.toString().substring(0, 10).split('-').map(Number);
+                    const [eYear, eMonth, eDay] = proj.end_date.toString().substring(0, 10).split('-').map(Number);
+
+                    const start = new Date(sYear, sMonth - 1, sDay);
+                    const end = new Date(eYear, eMonth - 1, eDay);
 
                     // Simple day-by-day mapping for the selected month
                     for (let d = 1; d <= daysInMonth; d++) {
