@@ -14,7 +14,8 @@ export default function TicketModal({ isOpen, onClose, onSuccess, projects, user
         priority: 'Medium',
         status: 'Open',
         project_id: '',
-        assignee_id: ''
+        assignee_id: '',
+        estimated_date: ''
     });
     const [loading, setLoading] = useState(false);
     const [mounted, setMounted] = useState(false);
@@ -29,7 +30,8 @@ export default function TicketModal({ isOpen, onClose, onSuccess, projects, user
                 priority: ticket.priority,
                 status: ticket.status,
                 project_id: ticket.project_id || '',
-                assignee_id: ticket.assignee_id || ''
+                assignee_id: ticket.assignee_id || '',
+                estimated_date: ticket.estimated_date ? new Date(ticket.estimated_date).toISOString().split('T')[0] : ''
             });
         } else {
             setFormData({
@@ -39,7 +41,8 @@ export default function TicketModal({ isOpen, onClose, onSuccess, projects, user
                 priority: 'Medium',
                 status: 'Open',
                 project_id: '',
-                assignee_id: ''
+                assignee_id: '',
+                estimated_date: ''
             });
         }
         return () => setMounted(false);
@@ -181,6 +184,16 @@ export default function TicketModal({ isOpen, onClose, onSuccess, projects, user
                                 value={formData.assignee_id}
                                 onChange={(value) => setFormData({ ...formData, assignee_id: value })}
                             />
+
+                            <div className="space-y-1">
+                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest px-0.5">Est. Completion Date</label>
+                                <input
+                                    type="date"
+                                    className="ui-input py-2 text-xs bg-zinc-900/50 border-white/5 focus:border-amber-500/50 scheme-dark"
+                                    value={formData.estimated_date}
+                                    onChange={e => setFormData({ ...formData, estimated_date: e.target.value })}
+                                />
+                            </div>
 
                             <div className="space-y-1">
                                 <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest px-0.5">Description</label>

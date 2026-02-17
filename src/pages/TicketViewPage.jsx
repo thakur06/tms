@@ -7,7 +7,7 @@ import {
     IoCheckmarkCircleOutline, IoTicketOutline, IoChatbubbleOutline, IoLinkOutline,
     IoTrashOutline, IoBriefcaseOutline, IoShieldCheckmarkOutline, IoCheckmarkCircle
 } from 'react-icons/io5';
-import { getTicketById, updateTicket, addComment, deleteTicket, updateComment } from '../api/tickets';
+import { getTicketById, updateTicket, addComment, deleteTicket, updateComment, deleteComment } from '../api/tickets';
 import { getAllUsers } from '../api/users';
 import { getAllProjects } from '../api/projects';
 import { useAuth } from '../context/AuthContext';
@@ -134,6 +134,24 @@ export default function TicketViewPage() {
         u.name.toLowerCase().includes(mentionSearch)
     ).slice(0, 5);
 
+    const isNearDeadline = (ticket) => {
+        if (!ticket || !ticket.estimated_date || ticket.status === 'Done' || ticket.status === 'Cancelled') return false;
+
+        // Parse "YYYY-MM-DD" directly to avoid timezone shifts
+        const dateStr = new Date(ticket.estimated_date).toISOString().split('T')[0];
+        const deadline = new Date(dateStr + "T23:59:59"); // End of that day
+        const now = new Date();
+
+        const diffTime = deadline.getTime() - now.getTime();
+        return diffTime < (48 * 60 * 60 * 1000) && diffTime > 0; // Within 48 hours but not past
+    };
+
+    const formatEstimatedDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
+    };
+
 
 
     const handleEditClick = (comment) => {
@@ -164,6 +182,20 @@ export default function TicketViewPage() {
             toast.success("Comment updated");
         } catch (error) {
             toast.error("Failed to update comment");
+        }
+    };
+
+    const handleDeleteComment = async (commentId) => {
+        if (!window.confirm("Are you sure you want to delete this comment?")) return;
+        try {
+            await deleteComment(id, commentId);
+            setTicket((prev) => ({
+                ...prev,
+                comments: prev.comments.filter((c) => c.id !== commentId)
+            }));
+            toast.success("Comment deleted");
+        } catch (err) {
+            toast.error("Failed to delete comment");
         }
     };
 
@@ -287,58 +319,53 @@ export default function TicketViewPage() {
     const canReassign = isOwner || isAssignee || isAdmin;
 
     return (
-        <div className="flex flex-col h-full bg-zinc-950 overflow-hidden">
-            {/* Premium Header */}
-            <div className="px-4 sm:px-6 py-4 sm:py-5 bg-zinc-900/60 border-b border-white/5 backdrop-blur-3xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 shrink-0 z-20 shadow-2xl relative">
-                <div className="absolute inset-0 bg-linear-to-r from-amber-500/5 via-transparent to-transparent pointer-events-none" />
-
-                <div className="flex items-center gap-5 relative">
-                    <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+        <div className="flex flex-col h-full bg-zinc-950 text-zinc-300 font-normal overflow-hidden">
+            {/* Minimal Header */}
+            <div className="px-6 py-4 border-b border-white/5 flex items-center justify-between shrink-0 bg-zinc-950 z-20">
+                <div className="flex items-center gap-4">
+                    <button
                         onClick={() => navigate(-1)}
-                        className="w-12 h-12 rounded-2xl bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all border border-white/5 flex items-center justify-center shadow-lg group"
+                        className="text-zinc-500 hover:text-white transition-colors"
                     >
-                        <IoArrowBackOutline size={20} className="group-hover:-translate-x-1 transition-transform" />
-                    </motion.button>
+                        <IoArrowBackOutline size={20} />
+                    </button>
+                    <div className="h-6 w-px bg-white/10 mx-2" />
                     <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            <span className="text-[10px] font-black text-amber-500 tracking-[0.2em] uppercase bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20">Ticket</span>
-                            <span className="text-[10px] font-mono text-gray-500 font-black">#{ticket.id}</span>
+                        <div className="flex items-center gap-3 text-sm text-zinc-400 mb-1">
+                            <span className="font-mono">#{ticket.id}</span>
+                            <span>•</span>
+                            <span className="uppercase tracking-wider font-bold text-xs">{ticket.project_name || 'No Project'}</span>
                         </div>
-                        <h1 className="text-xl md:text-2xl font-black text-white tracking-tight leading-tight w-full truncate uppercase">{ticket.title}</h1>
+                        <h1 className="text-xl font-bold text-white tracking-tight leading-none">{ticket.title}</h1>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-3 relative">
+                <div className="flex items-center gap-3">
                     <AnimatePresence>
                         {canEditOrDelete && (
-                            <div className="flex items-center gap-2 mr-2 pr-4 border-r border-white/10">
-                                <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                            <div className="flex items-center gap-1 mr-2 pr-4 border-r border-white/10">
+                                <button
                                     onClick={() => setIsEditModalOpen(true)}
-                                    className="h-10 px-4 rounded-xl bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-500/20 transition-all flex items-center gap-2 font-black text-[10px] uppercase tracking-widest"
+                                    className="p-2 text-zinc-500 hover:text-indigo-400 hover:bg-indigo-500/10 rounded-lg transition-all"
+                                    title="Edit Ticket"
                                 >
                                     <IoPencilOutline size={16} />
-                                    <span className="hidden sm:inline">Modify</span>
-                                </motion.button>
-                                <motion.button
-                                    whileHover={{ scale: 1.02 }}
-                                    whileTap={{ scale: 0.98 }}
+                                </button>
+                                <button
                                     onClick={() => setIsDeleteModalOpen(true)}
-                                    className="h-10 px-4 rounded-xl bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500/20 transition-all flex items-center gap-2 font-black text-[10px] uppercase tracking-widest"
+                                    className="p-2 text-zinc-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                    title="Delete Ticket"
                                 >
                                     <IoTrashOutline size={16} />
-                                    <span className="hidden sm:inline">Purge</span>
-                                </motion.button>
+                                </button>
                             </div>
                         )}
                     </AnimatePresence>
+
                     {(canEditOrDelete || isAssignee) && (
-                        <div className="min-w-[200px]">
+                        <div className="min-w-[140px]">
                             <SearchableSelect
-                                placeholder="Update Status"
+                                placeholder="Status"
                                 options={[
                                     { label: 'Open', value: 'Open' },
                                     { label: 'In Progress', value: 'In Progress' },
@@ -348,310 +375,237 @@ export default function TicketViewPage() {
                                 ]}
                                 value={ticket.status}
                                 onChange={handleStatusUpdate}
+                                variant="minimal" // Assuming SearchableSelect can handle or we adapt styling here
                             />
                         </div>
                     )}
                 </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6 md:p-8 bg-zinc-950/20 relative">
-                {/* Background Decor */}
-                <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-amber-500/2 blur-[120px] pointer-events-none" />
-                <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-indigo-500/2 blur-[120px] pointer-events-none" />
+            {/* Scrollable Content */}
+            <div className="flex-1 overflow-y-auto custom-scrollbar">
+                <div className="max-w-5xl mx-auto px-6 py-10 grid grid-cols-1 lg:grid-cols-12 gap-12">
 
-                <div className="w-full grid grid-cols-1 lg:grid-cols-12 gap-10">
+                    {/* Left Column: Content */}
+                    <div className="lg:col-span-8 space-y-10">
 
-                    {/* Left Column: Description & Communication */}
-                    <div className="lg:col-span-8 space-y-12 order-1 relative">
-                        {/* Description Section */}
-                        <section className="bg-zinc-900/40 border border-white/5 rounded-3xl sm:rounded-[3rem] p-6 sm:p-8 md:p-10 shadow-2xl backdrop-blur-md group hover:border-white/10 transition-all duration-500">
-                            <div className="flex items-center justify-between mb-8 border-b border-white/5 pb-6">
-                                <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 shadow-inner">
-                                        <IoTicketOutline size={16} />
-                                    </div>
-                                    TICKET DETAILS
-                                </h3>
-                                <div className="flex items-center gap-3">
-                                    <div className={`px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${getStatusStyles(ticket.status)}`}>
-                                        {ticket.status === 'Open' ? 'Created' : ticket.status === 'Done' ? 'Closed' : ticket.status}
-                                    </div>
-                                    <div className={`px-4 py-1.5 rounded-2xl text-[10px] font-black uppercase tracking-widest border transition-all ${getPriorityColor(ticket.priority)}`}>
-                                        {ticket.priority} Priority
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="prose prose-invert prose-lg max-w-none text-gray-300 whitespace-pre-wrap leading-relaxed font-light tracking-wide lg:text-md">
-                                {formatCommentContent(ticket.description || '- Description not available')}
+                        {/* Description */}
+                        <section className="space-y-4">
+                            <h3 className="text-xs font-bold text-zinc-400 uppercase tracking-widest border-b border-white/10 pb-2">Description</h3>
+                            <div className="prose prose-invert prose-base max-w-none text-zinc-200 leading-relaxed whitespace-pre-wrap">
+                                {formatCommentContent(ticket.description || 'No description provided.')}
                             </div>
                         </section>
 
-                        {/* Communication Hub */}
+                        {/* Comments */}
                         <section className="space-y-6">
-                            <div className="flex items-center justify-between px-4">
-                                <h3 className="text-sm font-black text-gray-400 uppercase tracking-[0.2em] flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
-                                        <IoChatbubbleOutline size={16} />
-                                    </div>
-                                    COMMENTS ({ticket.comments?.length || 0})
-                                </h3>
+                            <div className="flex items-center justify-between border-b border-white/5 pb-2">
+                                <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest">Activity ({ticket.comments?.length || 0})</h3>
                             </div>
 
-                            {/* Comment Write Field */}
-                            <form onSubmit={handleCommentSubmit} className="relative group">
-                                <div className="absolute -inset-0.5 bg-linear-to-br from-amber-500/20 via-transparent to-indigo-500/20 rounded-[2.5rem] opacity-0 group-focus-within:opacity-100 transition-opacity blur-sm pointer-events-none" />
-
-                                {/* Mention Suggestions - Moved outside overflow-hidden */}
-                                <AnimatePresence>
-                                    {showMentionSuggestions && filteredMentionUsers.length > 0 && (
-                                        <motion.div
-                                            initial={{ opacity: 0, y: 10 }}
-                                            animate={{ opacity: 1, y: 0 }}
-                                            exit={{ opacity: 0, y: 10 }}
-                                            className="absolute bottom-full left-8 mb-2 w-64 bg-zinc-950 border border-white/10 rounded-2xl shadow-2xl overflow-hidden z-1000 backdrop-blur-xl"
-                                        >
-                                            <div className="p-3 border-b border-white/5 bg-zinc-900/50">
-                                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Select Operative</p>
-                                            </div>
-                                            <div className="p-1.5 max-h-48 overflow-y-auto custom-scrollbar">
+                            {/* Comment Input */}
+                            <div className="flex gap-4">
+                                <div className="w-8 h-8 rounded-full bg-zinc-800 flex items-center justify-center text-xs font-bold text-zinc-400 border border-white/5 shrink-0">
+                                    {currentUser?.name?.substring(0, 2).toUpperCase()}
+                                </div>
+                                <div className="flex-1 relative group">
+                                    {/* Mention Suggestions */}
+                                    <AnimatePresence>
+                                        {showMentionSuggestions && filteredMentionUsers.length > 0 && (
+                                            <motion.div
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: 10 }}
+                                                className="absolute bottom-full left-0 mb-2 w-64 bg-zinc-900 border border-white/10 rounded-lg shadow-xl overflow-hidden z-50"
+                                            >
                                                 {filteredMentionUsers.map((u, idx) => (
                                                     <button
                                                         key={u.id}
                                                         type="button"
                                                         onClick={() => handleMentionSelect(u)}
-                                                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all text-left group ${idx === selectedMentionIndex
-                                                            ? 'bg-amber-500/10 text-amber-500 ring-1 ring-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.1)]'
-                                                            : 'text-gray-400 hover:bg-white/5 hover:text-white'
-                                                            }`}
+                                                        className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs ${idx === selectedMentionIndex ? 'bg-amber-500/10 text-amber-500' : 'text-zinc-400 hover:bg-white/5'}`}
                                                     >
-                                                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-black transition-all ${idx === selectedMentionIndex
-                                                            ? 'bg-amber-500 text-zinc-950 scale-110'
-                                                            : 'bg-zinc-900 border border-white/5'
-                                                            }`}>
-                                                            {u.name.substring(0, 2).toUpperCase()}
-                                                        </div>
-                                                        <div className="flex-1 min-w-0">
-                                                            <span className="text-xs font-bold block truncate">{u.name}</span>
-                                                            <span className="text-[10px] text-zinc-400 block truncate font-medium">{u.email || 'No Email'}</span>
-                                                            {idx === selectedMentionIndex && (
-                                                                <span className="text-[8px] font-black uppercase tracking-tighter opacity-70">Press Enter to select</span>
-                                                            )}
-                                                        </div>
-                                                        {idx === selectedMentionIndex && (
-                                                            <IoCheckmarkCircle className="shrink-0 animate-in fade-in zoom-in" size={14} />
-                                                        )}
+                                                        <span className="font-bold">@{u.name}</span>
                                                     </button>
                                                 ))}
-                                            </div>
-                                        </motion.div>
-                                    )}
-                                </AnimatePresence>
-
-                                <div className="relative bg-zinc-900 shadow-2xl border border-white/5 rounded-[2.5rem] overflow-hidden">
-                                    <textarea
-                                        ref={(el) => {
-                                            if (el) {
-                                                el.style.height = 'auto';
-                                                el.style.height = el.scrollHeight + 'px';
-                                            }
-                                        }}
-                                        className="w-full min-h-[140px] resize-none bg-transparent border-none p-6 text-base font-light text-white placeholder-gray-600 outline-none transition-all overflow-hidden whitespace-pre-wrap"
-                                        placeholder="Add to the discussion... Type @username to mention"
-                                        value={comment}
-                                        onChange={(e) => {
-                                            handleCommentChange(e);
-                                            e.target.style.height = 'auto';
-                                            e.target.style.height = e.target.scrollHeight + 'px';
-                                        }}
-                                        onKeyDown={(e) => {
-                                            if (showMentionSuggestions) {
-                                                if (e.key === 'ArrowDown') {
-                                                    e.preventDefault();
-                                                    setSelectedMentionIndex(prev => (prev + 1) % filteredMentionUsers.length);
-                                                } else if (e.key === 'ArrowUp') {
-                                                    e.preventDefault();
-                                                    setSelectedMentionIndex(prev => (prev - 1 + filteredMentionUsers.length) % filteredMentionUsers.length);
-                                                } else if (e.key === 'Enter') {
-                                                    e.preventDefault();
-                                                    if (filteredMentionUsers[selectedMentionIndex]) {
-                                                        handleMentionSelect(filteredMentionUsers[selectedMentionIndex]);
-                                                    }
-                                                } else if (e.key === 'Escape') {
-                                                    setShowMentionSuggestions(false);
-                                                }
-                                            }
-                                        }}
-                                    />
-
-                                    <div className="absolute bottom-4 right-4">
-                                        <motion.button
-                                            whileHover={{ scale: 1.05 }}
-                                            whileTap={{ scale: 0.95 }}
-                                            type="submit"
-                                            disabled={!comment.trim()}
-                                            className="h-14 w-14 bg-amber-500 text-zinc-950 rounded-3xl flex items-center justify-center transition-all shadow-xl shadow-amber-500/20 disabled:opacity-30 disabled:scale-100"
-                                        >
-                                            <IoSendOutline size={20} />
-                                        </motion.button>
-                                    </div>
-                                </div>
-                            </form>
-
-                            {/* Activity Stream */}
-                            <div className="space-y-4 pt-4">
-                                {ticket.comments?.length === 0 ? (
-                                    <div className="py-12 sm:py-20 flex flex-col items-center justify-center bg-zinc-900/20 border border-dashed border-white/5 rounded-4xl sm:rounded-[3rem] opacity-40">
-                                        <IoChatbubbleOutline size={48} className="text-gray-600 mb-4" />
-                                        <p className="text-[10px] font-black uppercase tracking-[0.3em] text-gray-500">Discussion stream empty</p>
-                                    </div>
-                                ) : (
-                                    <div className="grid gap-4">
-                                        {[...ticket.comments].reverse().map((c, i) => (
-                                            <motion.div
-                                                key={c.id}
-                                                initial={{ opacity: 0, x: -20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ delay: i * 0.05 }}
-                                                className="flex gap-4 sm:gap-6 p-4 sm:p-6 bg-zinc-900/60 border border-white/5 rounded-3xl sm:rounded-[2.5rem] hover:border-white/10 transition-all group"
-                                            >
-                                                <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-zinc-800 to-zinc-900 border border-white/10 flex items-center justify-center text-amber-500 font-black shrink-0 shadow-2xl text-sm group-hover:scale-110 transition-transform">
-                                                    {c.user_name?.substring(0, 2).toUpperCase() || '??'}
-                                                </div>
-                                                <div className="flex-1 space-y-2 min-w-0 w-full">
-                                                    <div className="flex items-center justify-between">
-                                                        <span className="text-sm font-black text-white group-hover:text-amber-500 transition-colors uppercase tracking-widest">{c.user_name}</span>
-                                                        <div className="flex items-center gap-2">
-                                                            <span className="text-[10px] font-black text-gray-600 flex items-center gap-1.5 uppercase tracking-tighter">
-                                                                <IoTimeOutline size={12} className="text-gray-700" />
-                                                                {new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                                <span className="text-zinc-800 mx-1">•</span>
-                                                                {new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                                                            </span>
-                                                            {c.user_id === currentUser?.id && !editingCommentId && (
-                                                                <button
-                                                                    onClick={() => handleEditClick(c)}
-                                                                    className="text-gray-600 hover:text-white transition-colors p-1"
-                                                                    title="Edit Comment"
-                                                                >
-                                                                    <IoPencilOutline size={12} />
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    {editingCommentId === c.id ? (
-                                                        <div className="mt-2 space-y-3">
-                                                            <textarea
-                                                                value={editContent}
-                                                                onChange={(e) => setEditContent(e.target.value)}
-                                                                className="w-full bg-black/20 border border-white/10 rounded-xl p-3 text-sm text-gray-300 focus:outline-none focus:border-amber-500/50 min-h-[80px] resize-y whitespace-pre-wrap"
-                                                                autoFocus
-                                                            />
-                                                            <div className="flex items-center gap-2 justify-end">
-                                                                <button
-                                                                    onClick={handleCancelEdit}
-                                                                    className="px-3 py-1.5 rounded-lg text-xs font-bold text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
-                                                                >
-                                                                    Cancel
-                                                                </button>
-                                                                <button
-                                                                    onClick={() => handleSaveEdit(c.id)}
-                                                                    className="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500 text-black hover:bg-amber-400 transition-colors shadow-lg shadow-amber-500/20"
-                                                                >
-                                                                    Save Changes
-                                                                </button>
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="text-gray-300 text-sm leading-relaxed font-light [overflow-wrap:anywhere] whitespace-pre-wrap w-full">
-                                                            {formatCommentContent(c.content)}
-                                                        </div>
-                                                    )}
-                                                </div>
                                             </motion.div>
-                                        ))}
+                                        )}
+                                    </AnimatePresence>
+
+                                    <form onSubmit={handleCommentSubmit}>
+                                        <textarea
+                                            value={comment}
+                                            onChange={handleCommentChange}
+                                            onKeyDown={(e) => {
+                                                if (showMentionSuggestions) {
+                                                    if (e.key === 'ArrowDown') { e.preventDefault(); setSelectedMentionIndex(prev => (prev + 1) % filteredMentionUsers.length); }
+                                                    else if (e.key === 'ArrowUp') { e.preventDefault(); setSelectedMentionIndex(prev => (prev - 1 + filteredMentionUsers.length) % filteredMentionUsers.length); }
+                                                    else if (e.key === 'Enter') { e.preventDefault(); if (filteredMentionUsers[selectedMentionIndex]) handleMentionSelect(filteredMentionUsers[selectedMentionIndex]); }
+                                                    else if (e.key === 'Escape') { setShowMentionSuggestions(false); }
+                                                }
+                                            }}
+                                            placeholder="Leave a comment..."
+                                            className="w-full bg-transparent border-0 border-b border-white/10 py-2 px-0 text-sm focus:ring-0 focus:border-amber-500/50 transition-colors resize-none min-h-[40px] leading-relaxed placeholder-zinc-700"
+                                            rows={1}
+                                            style={{ minHeight: '40px' }}
+                                            onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
+                                        />
+                                        <div className="flex justify-end mt-2 opacity-0 group-focus-within:opacity-100 transition-opacity">
+                                            <button
+                                                type="submit"
+                                                disabled={!comment.trim()}
+                                                className="px-3 py-1 bg-zinc-800 hover:bg-zinc-700 text-white text-xs font-bold rounded transition-colors disabled:opacity-50"
+                                            >
+                                                Comment
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            {/* Comment List */}
+                            <div className="space-y-8 pl-4 border-l border-white/5 ml-4">
+                                {[...ticket.comments].reverse().map((c) => (
+                                    <div key={c.id} className="group relative pl-8 pb-2">
+                                        <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-zinc-950 border border-white/10 group-hover:border-amber-500/50 transition-colors" />
+
+                                        <div className="flex items-baseline justify-between mb-2">
+                                            <div className="flex items-center gap-3">
+                                                <span className="text-sm font-bold text-zinc-200">{c.user_name}</span>
+                                                <span className="text-[10px] uppercase tracking-wider text-zinc-600 font-medium">
+                                                    {new Date(c.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                                </span>
+                                            </div>
+                                            {c.user_id === currentUser?.id && !editingCommentId && (
+                                                <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                    <button
+                                                        onClick={() => handleEditClick(c)}
+                                                        className="p-1.5 text-zinc-600 hover:text-zinc-300 hover:bg-white/5 rounded-lg transition-all"
+                                                        title="Edit"
+                                                    >
+                                                        <IoPencilOutline size={14} />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDeleteComment(c.id)}
+                                                        className="p-1.5 text-zinc-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                                        title="Delete"
+                                                    >
+                                                        <IoTrashOutline size={14} />
+                                                    </button>
+                                                </div>
+                                            )}
+                                        </div>
+
+                                        {editingCommentId === c.id ? (
+                                            <div className="mt-2 bg-zinc-900/50 p-4 rounded-xl border border-white/5">
+                                                <textarea
+                                                    value={editContent}
+                                                    onChange={(e) => setEditContent(e.target.value)}
+                                                    className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-sm text-zinc-300 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all min-h-[100px]"
+                                                />
+                                                <div className="flex justify-end gap-2 mt-3">
+                                                    <button
+                                                        onClick={handleCancelEdit}
+                                                        className="px-3 py-1.5 text-xs font-bold text-zinc-500 hover:text-zinc-300 transition-colors"
+                                                    >
+                                                        Cancel
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleSaveEdit(c.id)}
+                                                        className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-xs font-bold rounded-lg transition-colors border border-amber-500/20"
+                                                    >
+                                                        Save Changes
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="text-base text-zinc-300 leading-relaxed whitespace-pre-wrap bg-zinc-900/40 p-5 rounded-xl border border-white/5 hover:border-white/10 transition-colors shadow-sm">
+                                                {formatCommentContent(c.content)}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                                {ticket.comments?.length === 0 && (
+                                    <div className="text-center py-12">
+                                        <p className="text-zinc-600 text-sm italic">No comments yet.</p>
                                     </div>
                                 )}
                             </div>
                         </section>
                     </div>
 
-                    {/* Meta/Sidebar */}
-                    <aside className="lg:col-span-4 space-y-6 order-2 lg:sticky lg:top-8 self-start">
-                        {/* Ticket Owner (Reporter) - Non-editable */}
-                        <section className="bg-zinc-900/40 border border-amber-500/20 rounded-3xl sm:rounded-[2.5rem] p-6 shadow-2xl backdrop-blur-xl relative">
-                            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 blur-3xl rounded-full" />
-                            <h4 className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                                <IoPersonCircleOutline size={14} />
-                                Ticket Owner
-                            </h4>
-                            <div className="flex items-center gap-4 bg-zinc-950/50 p-4 rounded-2xl border border-white/5">
-                                <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/20 font-black text-sm">
-                                    {ticket.reporter_name?.substring(0, 2).toUpperCase() || '??'}
+                    {/* Right Column: Metadata */}
+                    <aside className="lg:col-span-4 space-y-8">
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-white/5 pb-2">Properties</h3>
+
+                            <dl className="space-y-4 text-sm">
+                                <div className="grid grid-cols-3 gap-4">
+                                    <dt className="text-zinc-600 font-medium">Status</dt>
+                                    <dd className="col-span-2">
+                                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded textxs font-bold uppercase tracking-wider ${getStatusStyles(ticket.status).split(' ')[0]}`}>
+                                            <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                                            {ticket.status}
+                                        </span>
+                                    </dd>
                                 </div>
-                                <div className="min-w-0 flex-1">
-                                    <p className="text-sm font-black text-white truncate">{ticket.reporter_name || 'Unknown'}</p>
-                                    <p className="text-[9px] font-black text-gray-600 uppercase tracking-tighter">Report Creator</p>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <dt className="text-zinc-600 font-medium">Priority</dt>
+                                    <dd className="col-span-2">
+                                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${getPriorityColor(ticket.priority).split(' ')[0]}`}>
+                                            <div className="w-1.5 h-1.5 rounded-full bg-current" />
+                                            {ticket.priority}
+                                        </span>
+                                    </dd>
                                 </div>
-                            </div>
-
-                        </section>
-
-                        {/* Assignment Control */}
-                        {canReassign && (
-                            <section className="bg-zinc-900/40 border border-indigo-500/20 rounded-[2.5rem] p-6 shadow-2xl backdrop-blur-xl relative group">
-                                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-3xl rounded-full" />
-                                <h4 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
-                                    <IoShieldCheckmarkOutline size={14} />
-                                    Assignee
-                                </h4>
-                                <SearchableSelect
-                                    label="Update Assignee"
-                                    placeholder="Select operative..."
-                                    options={[
-                                        { label: 'Unassigned', value: '' },
-                                        ...users.map(u => ({ label: u.name, value: u.id }))
-                                    ]}
-                                    value={ticket.assignee_id || ''}
-                                    onChange={handleAssigneeUpdate}
-                                />
-                            </section>
-                        )}
-
-                        {/* Property Matrix */}
-                        <section className="bg-zinc-900/40 border border-white/5 rounded-[2.5rem] p-8 space-y-8 shadow-2xl backdrop-blur-xl">
-                            <h4 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em] border-b border-white/5 pb-4">Issue Matrix</h4>
-
-                            <div className="space-y-6">
-                                <div className="flex flex-col gap-2">
-                                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest">Project</span>
-                                    <div className="flex items-center gap-4 bg-zinc-950/50 p-4 rounded-3xl border border-white/5 hover:border-indigo-500/30 transition-all cursor-default">
-                                        <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-500 border border-indigo-500/20 shadow-inner">
-                                            <IoBriefcaseOutline size={18} />
+                                <div className="grid grid-cols-3 gap-4">
+                                    <dt className="text-zinc-600 font-medium">Reporter</dt>
+                                    <dd className="col-span-2 flex items-center gap-2">
+                                        <div className="w-5 h-5 rounded bg-zinc-800 flex items-center justify-center text-[10px] text-zinc-400">
+                                            {ticket.reporter_name?.substring(0, 2).toUpperCase()}
                                         </div>
-                                        <div className="min-w-0">
-                                            <p className="text-xs font-black text-white truncate">{ticket.project_name || 'Generic'}</p>
-                                            <p className="text-[9px] font-black text-gray-600 uppercase tracking-tighter">System ID: {ticket.project_id || 'N/A'}</p>
-                                        </div>
+                                        <span className="text-zinc-300">{ticket.reporter_name}</span>
+                                    </dd>
+                                </div>
+                                <div className="grid grid-cols-3 gap-4">
+                                    <dt className="text-zinc-600 font-medium">Assignee</dt>
+                                    <dd className="col-span-2">
+                                        {canReassign ? (
+                                            <SearchableSelect
+                                                placeholder="Assignee"
+                                                options={[{ label: 'Unassigned', value: '' }, ...users.map(u => ({ label: u.name, value: u.id }))]}
+                                                value={ticket.assignee_id || ''}
+                                                onChange={handleAssigneeUpdate}
+                                            />
+                                        ) : (
+                                            <span className="text-zinc-300">{ticket.assignee_name || 'Unassigned'}</span>
+                                        )}
+                                    </dd>
+                                </div>
+                            </dl>
+                        </div>
+
+                        <div className="space-y-4">
+                            <h3 className="text-xs font-bold text-zinc-500 uppercase tracking-widest border-b border-white/5 pb-2">Timeline</h3>
+                            <dl className="space-y-3 text-sm">
+                                <div className="flex justify-between">
+                                    <dt className="text-zinc-600">Created</dt>
+                                    <dd className="text-zinc-400 font-mono text-xs">{new Date(ticket.created_at).toLocaleDateString()}</dd>
+                                </div>
+                                <div className="flex justify-between">
+                                    <dt className="text-zinc-600">Updated</dt>
+                                    <dd className="text-zinc-400 font-mono text-xs">{new Date(ticket.updated_at).toLocaleDateString()}</dd>
+                                </div>
+                                {ticket.estimated_date && (
+                                    <div className="flex justify-between">
+                                        <dt className={`${isNearDeadline(ticket) ? 'text-red-500 font-bold' : 'text-zinc-600'}`}>Due Date</dt>
+                                        <dd className={`text-xs font-mono font-bold ${isNearDeadline(ticket) ? 'text-red-500 animate-blink' : 'text-amber-500'}`}>
+                                            {formatEstimatedDate(ticket.estimated_date)}
+                                        </dd>
                                     </div>
-                                </div>
-
-
-                                <div className="flex flex-col gap-2 text-right">
-                                    <span className="text-[10px] font-black text-gray-600 uppercase tracking-widest text-left">Timeline</span>
-                                    <div className="bg-zinc-950/30 p-5 rounded-3xl border border-white/5 space-y-3">
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-[10px] font-black text-gray-600 uppercase">Detection</span>
-                                            <span className="text-xs font-bold text-gray-400">{new Date(ticket.created_at).toLocaleDateString()}</span>
-                                        </div>
-                                        <div className="flex items-center justify-between">
-                                            <span className="text-[10px] font-black text-gray-600 uppercase">Last Sync</span>
-                                            <span className="text-xs font-bold text-gray-400">{new Date(ticket.updated_at).toLocaleDateString()}</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </section>
+                                )}
+                            </dl>
+                        </div>
                     </aside>
                 </div>
             </div>
@@ -669,9 +623,9 @@ export default function TicketViewPage() {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={handleDeleteTicket}
-                title="TERMINATE REPORT"
-                message="This will permanently purge this incident report and all associated intelligence from the system. This operation is irreversible."
+                title="Delete Ticket?"
+                message="This action cannot be undone."
             />
-        </div >
+        </div>
     );
 }

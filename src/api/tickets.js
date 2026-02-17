@@ -110,3 +110,15 @@ export const createBulkTickets = async (tickets) => {
         throw error;
     }
 };
+// Delete a comment
+export const deleteComment = async (ticketId, commentId) => {
+    try {
+        const response = await axios.delete(`${API_URL}/${ticketId}/comments/${commentId}`, {
+            headers: getAuthHeader()
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error deleting comment:", error);
+        throw error;
+    }
+};

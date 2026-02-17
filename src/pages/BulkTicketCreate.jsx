@@ -27,7 +27,7 @@ export default function BulkTicketCreate() {
     console.log("BulkTicketCreate Mounted");
     const navigate = useNavigate();
     const [rows, setRows] = useState([
-        { id: Date.now(), project_id: '', title: '', priority: 'Medium', status: 'Open', estimated_hours: '', assignee_id: '', description: '' }
+        { id: Date.now(), project_id: '', title: '', priority: 'Medium', status: 'Open', estimated_date: '', assignee_id: '', description: '' }
     ]);
     const [projects, setProjects] = useState([]);
     const [users, setUsers] = useState([]);
@@ -61,7 +61,7 @@ export default function BulkTicketCreate() {
     const handleAddRow = () => {
         setRows(prev => [
             ...prev,
-            { id: Date.now() + Math.random(), project_id: '', title: '', priority: 'Medium', status: 'Open', estimated_hours: '', assignee_id: '', description: '' }
+            { id: Date.now() + Math.random(), project_id: '', title: '', priority: 'Medium', status: 'Open', estimated_date: '', assignee_id: '', description: '' }
         ]);
     };
 
@@ -99,7 +99,7 @@ export default function BulkTicketCreate() {
                 status: r.status,
                 project_id: r.project_id,
                 assignee_id: r.assignee_id || null,
-                estimated_hours: parseFloat(r.estimated_hours) || 0
+                estimated_date: r.estimated_date || null
             }));
 
             await createBulkTickets(ticketsToCreate);
@@ -173,7 +173,7 @@ export default function BulkTicketCreate() {
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[220px]">Task Name <span className="text-red-500">*</span></th>
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 w-36">Priority</th>
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 w-36">Status</th>
-                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 w-24">Est. Hrs</th>
+                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 w-40">Est. Date</th>
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[180px]">Reviewer</th>
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[200px]">Remarks (Desc)</th>
                                 <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 w-12 text-center">Action</th>
@@ -229,13 +229,10 @@ export default function BulkTicketCreate() {
                                         </td>
                                         <td className="p-2">
                                             <input
-                                                type="number"
-                                                step="0.5"
-                                                min="0"
-                                                value={row.estimated_hours}
-                                                onChange={(e) => handleChange(row.id, 'estimated_hours', e.target.value)}
-                                                placeholder="0.0"
-                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-2 py-2.5 text-xs font-mono text-center text-emerald-400 focus:outline-none focus:border-emerald-500/50"
+                                                type="date"
+                                                value={row.estimated_date}
+                                                onChange={(e) => handleChange(row.id, 'estimated_date', e.target.value)}
+                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-2 py-2.5 text-[11px] font-black text-amber-500 focus:outline-none focus:border-amber-500/50 scheme-dark"
                                             />
                                         </td>
                                         <td className="p-2">
@@ -279,7 +276,7 @@ export default function BulkTicketCreate() {
                 <p>
                     <strong>Tip:</strong> You can add multiple tasks quickly here.
                     Set "Reviewer" to assign the task to someone immediately.
-                    "Estimated Hours" helps in tracking progress against plans.
+                    "Est. Date" helps in setting target completion dates.
                     Status defaults to "Open".
                 </p>
             </div>

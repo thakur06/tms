@@ -88,7 +88,12 @@ export default function ComplianceTable({
 
                                 {/* Daily Hours */}
                                 {weekDays.map(day => {
-                                    const dateStr = day.toISOString().split('T')[0];
+                                    // Fix: Use local date components matching the backend/page generation
+                                    const year = day.getFullYear();
+                                    const month = String(day.getMonth() + 1).padStart(2, '0');
+                                    const d = String(day.getDate()).padStart(2, '0');
+                                    const dateStr = `${year}-${month}-${d}`;
+
                                     const hours = item.daily[dateStr] || 0;
                                     const isWeekend = day.getDay() === 0 || day.getDay() === 6;
 

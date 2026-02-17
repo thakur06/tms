@@ -152,6 +152,22 @@ body {
   }
 }
 
+@keyframes blink {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.3;
+  }
+}
+
+.animate-blink {
+  animation: blink 1s infinite ease-in-out;
+}
+
 .animate-fade-in {
   animation: fadeIn 0.5s ease-out forwards;
 }

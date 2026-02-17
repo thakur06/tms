@@ -5,7 +5,7 @@ import {
     IoTicketOutline, IoAddOutline,
     IoAlertCircleOutline, IoPersonOutline, IoChevronForwardOutline,
     IoSearchOutline, IoBriefcaseOutline, IoCalendarOutline, IoEllipsisVertical,
-    IoChevronDown, IoCheckmarkCircleOutline
+    IoChevronDown, IoCheckmarkCircleOutline, IoEyeOutline
 } from 'react-icons/io5';
 import { getTickets, updateTicket } from '../api/tickets';
 import { getAllProjects } from '../api/projects';
@@ -96,6 +96,24 @@ export default function MyTickets() {
         if (status === 'Open') return 'Created';
         if (status === 'Done') return 'Closed';
         return status;
+    };
+
+    const isNearDeadline = (ticket) => {
+        if (!ticket.estimated_date || ticket.status === 'Done' || ticket.status === 'Cancelled') return false;
+
+        // Parse "YYYY-MM-DD" directly to avoid timezone shifts
+        const dateStr = new Date(ticket.estimated_date).toISOString().split('T')[0];
+        const deadline = new Date(dateStr + "T23:59:59"); // End of that day
+        const now = new Date();
+
+        const diffTime = deadline.getTime() - now.getTime();
+        return diffTime < (48 * 60 * 60 * 1000) && diffTime > 0; // Within 48 hours but not past
+    };
+
+    const formatEstimatedDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString);
+        return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', timeZone: 'UTC' });
     };
 
     const processedTickets = useMemo(() => {
@@ -199,80 +217,109 @@ export default function MyTickets() {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-4 sm:p-6">
-                <div className="w-full">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-2 sm:p-4">
+                <div className="max-w-[1600px] mx-auto">
                     {loading ? (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {[1, 2, 3, 4].map(i => (
-                                <div key={i} className="h-40 bg-zinc-900/50 border border-white/5 rounded-2xl animate-pulse" />
+                        <div className="space-y-3">
+                            {[1, 2, 3, 4, 5, 6].map(i => (
+                                <div key={i} className="h-16 bg-zinc-900/50 border border-white/5 rounded-xl animate-pulse" />
                             ))}
                         </div>
                     ) : processedTickets.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-32 text-center opacity-50">
-                            <div className="w-16 h-16 bg-zinc-900 rounded-full flex items-center justify-center mb-4 border border-white/5">
-                                <IoTicketOutline size={32} className="text-gray-600" />
+                            <div className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center mb-4 border border-white/5">
+                                <IoTicketOutline size={40} className="text-gray-600" />
                             </div>
                             <h3 className="text-lg font-black text-white">All Clear!</h3>
-                            <p className="text-[10px] text-gray-500 mt-1 uppercase tracking-widest">No tickets currently assigned to you</p>
+                            <p className="text-xs text-gray-500 mt-1 uppercase tracking-widest">No tickets currently assigned to you</p>
                         </div>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-                            {processedTickets.map((ticket, index) => (
-                                <motion.div
-                                    key={ticket.id}
-                                    initial={{ opacity: 0, scale: 0.98 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ delay: index * 0.01 }}
-                                    className="group relative bg-zinc-900/40 border border-white/5 rounded-3xl p-4 hover:border-amber-500/30 cursor-pointer transition-all duration-300 hover:shadow-xl hover:shadow-black/40 flex flex-col h-full"
-                                    onClick={() => navigate(`/tickets/${ticket.id}`)}
-                                >
-                                    <div className="absolute inset-0 bg-gradient-to-br from-amber-500/[0.02] to-transparent opacity-0 group-hover:opacity-100 transition-opacity rounded-3xl pointer-events-none" />
+                        <div className="bg-zinc-900/20 rounded-2xl border border-white/5 overflow-hidden">
+                            {/* Table Header */}
+                            <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-zinc-900/50 border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                                <div className="col-span-1">ID</div>
+                                <div className="col-span-4">Task Name</div>
+                                <div className="col-span-2">Project</div>
+                                <div className="col-span-2">Assignee</div>
+                                <div className="col-span-1">Status</div>
+                                <div className="col-span-1 text-center">Priority</div>
+                                <div className="col-span-1 text-right">Action</div>
+                            </div>
 
-                                    <div className="flex items-start justify-between mb-2.5 relative">
-                                        <div className="flex flex-wrap gap-1.5">
-                                            <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border shadow-sm ${getStatusColor(ticket.status)}`}>
+                            {/* Ticket Rows */}
+                            <div className="divide-y divide-white/5">
+                                {processedTickets.map((ticket, index) => (
+                                    <motion.div
+                                        key={ticket.id}
+                                        initial={{ opacity: 0, x: -10 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.01 }}
+                                        onClick={() => navigate(`/tickets/${ticket.id}`)}
+                                        className={`group grid grid-cols-1 lg:grid-cols-12 gap-4 px-6 py-4 hover:bg-white/2 cursor-pointer transition-all items-center relative border-l-4 ${ticket.priority === 'Critical' ? 'border-red-500 bg-red-500/5' :
+                                            ticket.priority === 'High' ? 'border-orange-500 bg-orange-500/5' :
+                                                ticket.priority === 'Medium' ? 'border-amber-500 bg-amber-500/5' :
+                                                    'border-emerald-500 bg-emerald-500/5'
+                                            }`}
+                                    >
+                                        <div className="col-span-1 text-[11px] font-mono font-black text-gray-600 group-hover:text-amber-500 transition-colors">
+                                            #{ticket.id}
+                                        </div>
+
+                                        <div className="col-span-1 lg:col-span-4 min-w-0">
+                                            <div className="flex flex-col gap-0.5">
+                                                <h3 className="text-xs font-black text-white group-hover:text-amber-500 transition-colors truncate uppercase leading-tight">
+                                                    {ticket.title}
+                                                </h3>
+                                                <div className="flex items-center gap-2 text-[9px] text-gray-500 font-bold uppercase tracking-tighter self-start">
+                                                    <IoCalendarOutline size={10} />
+                                                    {new Date(ticket.updated_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                    {ticket.estimated_date && (
+                                                        <>
+                                                            <span className="text-gray-800">•</span>
+                                                            <span className={`text-amber-500/80 ${isNearDeadline(ticket) ? 'animate-blink text-red-500 font-black' : ''}`}>
+                                                                Est: {formatEstimatedDate(ticket.estimated_date)}
+                                                            </span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="col-span-1 lg:col-span-2 flex items-center gap-2">
+                                            <div className="w-6 h-6 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500 shrink-0">
+                                                <IoBriefcaseOutline size={12} />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-gray-400 truncate">{ticket.project_name || 'Generic'}</span>
+                                        </div>
+
+                                        <div className="col-span-1 lg:col-span-2 flex items-center gap-2">
+                                            <div className="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
+                                                <IoPersonOutline size={12} />
+                                            </div>
+                                            <span className="text-[10px] font-bold text-gray-400 truncate">{ticket.assignee_name || 'You'}</span>
+                                        </div>
+
+                                        <div className="col-span-1 lg:col-span-1">
+                                            <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border shadow-sm inline-block ${getStatusColor(ticket.status)}`}>
                                                 {displayStatus(ticket.status)}
                                             </span>
+                                        </div>
+
+                                        <div className="col-span-1 lg:col-span-1 flex justify-center">
                                             <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm ${getPriorityStyles(ticket.priority)}`}>
                                                 <div className="w-1 h-1 rounded-full bg-current" />
                                                 {ticket.priority}
                                             </span>
                                         </div>
-                                        <div className="text-[9px] font-mono font-black text-gray-700 group-hover:text-amber-500/30 transition-colors uppercase tracking-widest">#{ticket.id}</div>
-                                    </div>
 
-                                    <h3 className="text-xs font-black text-white leading-tight mb-4 line-clamp-2 group-hover:text-amber-500 transition-colors uppercase">
-                                        {ticket.title}
-                                    </h3>
-
-                                    <div className="mt-auto pt-3 border-t border-white/5 relative flex flex-col gap-2">
-                                        <div className="flex items-center gap-2 group/meta">
-                                            <div className="w-6 h-6 rounded-lg bg-indigo-500/5 border border-indigo-500/10 flex items-center justify-center text-indigo-500/70 shadow-inner shrink-0 transition-transform group-hover/meta:scale-110">
-                                                <IoBriefcaseOutline size={10} />
-                                            </div>
-                                            <div className="min-w-0">
-                                                <p className="text-[9px] font-bold text-gray-400 truncate">{ticket.project_name || 'Unassigned'}</p>
+                                        <div className="col-span-1 lg:col-span-1 flex justify-end">
+                                            <div className="p-2 bg-white/5 rounded-lg text-gray-500 group-hover:bg-amber-500 group-hover:text-zinc-950 transition-all shadow-lg">
+                                                <IoEyeOutline size={14} />
                                             </div>
                                         </div>
-
-                                        <div className="flex items-center justify-between gap-3 mt-1">
-                                            <div className="flex items-center gap-1.5 text-[9px] text-gray-400 font-bold shrink-0 Group-hover:text-gray-300 transition-colors">
-                                                <IoCalendarOutline size={10} className="text-gray-600" />
-                                                {new Date(ticket.updated_at).toLocaleDateString([], { month: 'short', day: 'numeric' })}
-                                            </div>
-                                            <div className="flex items-center gap-1 text-[9px] text-amber-500/50 group-hover:text-amber-500 font-black uppercase tracking-widest transition-all">
-                                                Details
-                                                <IoChevronForwardOutline size={10} />
-                                            </div>
-                                        </div>
-
-                                        <div className="flex items-center justify-between mt-1 pt-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <span className="text-[8px] font-black text-gray-600 uppercase tracking-widest">View Details</span>
-                                            <IoEllipsisVertical size={10} className="text-amber-500" />
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
+                                    </motion.div>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>

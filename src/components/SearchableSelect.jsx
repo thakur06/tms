@@ -13,6 +13,7 @@ const SearchableSelect = ({
     className = "",
     showLabel = true,
     error = "",
+    variant = "default", // 'default' | 'minimal'
     disabled = false
 }) => {
     const [isOpen, setIsOpen] = useState(false);
@@ -84,7 +85,7 @@ const SearchableSelect = ({
                         width: coords.width,
                         zIndex: 10000,
                     }}
-                    className="portal-dropdown border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-zinc-900 border-white/10 ring-1 ring-white/10"
+                    className="portal-dropdown border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-zinc-900"
                 >
                     <div className="p-3 border-b border-white/5 space-y-2 bg-zinc-950/50">
                         <div className="relative">
@@ -136,6 +137,18 @@ const SearchableSelect = ({
         </AnimatePresence>
     );
 
+    const getTriggerStyles = () => {
+        if (variant === 'minimal') {
+            return `bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-white/5 ${isOpen ? 'text-white bg-white/5' : ''}`;
+        }
+        return `bg-zinc-900 ${isOpen
+            ? "border-amber-500 ring-4 ring-amber-500/10"
+            : error
+                ? "border-red-500/50 text-white shadow-sm"
+                : "border-white/5 text-white shadow-sm hover:border-white/10"
+            }`;
+    };
+
     return (
         <div
             className={`searchable-select-container flex-1 transition-all ${showLabel ? 'space-y-1.5' : ''} ${className} ${disabled ? 'opacity-50 pointer-events-none' : ''}`}
@@ -154,12 +167,7 @@ const SearchableSelect = ({
                     type="button"
                     disabled={disabled}
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`w-full flex items-center justify-between px-4 py-2.5 border rounded-xl text-xs font-bold transition-all bg-zinc-900 ${isOpen
-                        ? "border-amber-500 ring-4 ring-amber-500/10"
-                        : error
-                            ? "border-red-500/50 text-white shadow-sm"
-                            : "border-white/5 text-white shadow-sm hover:border-white/10"
-                        }`}
+                    className={`w-full flex items-center justify-between px-4 py-2.5 border rounded-xl text-xs font-bold transition-all ${getTriggerStyles()}`}
                 >
                     <span className={`truncate ${selectedOption ? "text-white" : "text-gray-500"}`}>
                         {selectedOption ? selectedOption.label : placeholder}
