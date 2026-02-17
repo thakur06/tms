@@ -7,7 +7,8 @@ import {
     IoPencilOutline, IoTrashOutline, IoBusinessOutline,
     IoChevronDownOutline, IoCheckmarkCircle, IoAlertCircleOutline,
     IoPersonOutline, IoPieChartOutline, IoLayersOutline,
-    IoCalendarOutline, IoArrowUpOutline, IoArrowDownOutline
+    IoCalendarOutline, IoArrowUpOutline, IoArrowDownOutline,
+    IoAnalyticsOutline 
 } from 'react-icons/io5';
 // Add custom styles for recharts
 const rechartsStyles = `
@@ -50,7 +51,7 @@ export default function ProjectAssignments() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [deptFilter, setDeptFilter] = useState('Process');
-    const [allocationThreshold, setAllocationThreshold] = useState('100');
+    const [allocationThreshold, setAllocationThreshold] = useState('160');
     const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
     const [isDeptOpen, setIsDeptOpen] = useState(false);
     const [allDepts, setAllDepts] = useState(['All']);
@@ -66,8 +67,9 @@ export default function ProjectAssignments() {
     const [formData, setFormData] = useState({
         user_id: '',
         project_id: '',
-        allocation_percentage: 100,
-        end_date: new Date().toISOString().split('T')[0]
+        allocation_hours: 40,
+        start_date: selectedDate,
+        end_date: selectedDate
     });
 
     // Analytics State
@@ -97,7 +99,7 @@ export default function ProjectAssignments() {
             const load = assignments.reduce((sum, as) => {
                 const start = new Date(as.start_date);
                 const end = new Date(as.end_date);
-                if (d >= start && d <= end) return sum + as.allocation_percentage;
+                if (d >= start && d <= end) return sum + as.allocation_hours;
                 return sum;
             }, 0);
 
@@ -121,7 +123,7 @@ export default function ProjectAssignments() {
             const res = await axios.get(`${server}/api/user-projects/user/${user.user_id}`, {
                 headers: { Authorization: `Bearer ${token}` }
             });
-            const forecast = calculateAvailability(res.data.assignments, allocationThreshold || '100');
+            const forecast = calculateAvailability(res.data.assignments, allocationThreshold || '160');
             setAvailabilityForecast(forecast);
         } catch (err) {
             console.error("Failed to fetch timeline", err);
@@ -186,6 +188,10 @@ export default function ProjectAssignments() {
 
     const handleAssignSubmit = async (e) => {
         e.preventDefault();
+        if (new Date(formData.start_date) > new Date(formData.end_date)) {
+            toast.error('Start date must be before or equal to end date');
+            return;
+        }
         try {
             const token = localStorage.getItem('token');
             await axios.post(`${server}/api/user-projects`, formData, {
@@ -201,10 +207,14 @@ export default function ProjectAssignments() {
 
     const handleEditSubmit = async (e) => {
         e.preventDefault();
+        if (new Date(formData.start_date) > new Date(formData.end_date)) {
+            toast.error('Start date must be before or equal to end date');
+            return;
+        }
         try {
             const token = localStorage.getItem('token');
             await axios.put(`${server}/api/user-projects/${selectedAssignment.id}`, {
-                allocation_percentage: formData.allocation_percentage,
+                allocation_hours: formData.allocation_hours,
                 start_date: formData.start_date,
                 end_date: formData.end_date
             }, {
@@ -298,9 +308,9 @@ export default function ProjectAssignments() {
                             setFormData({
                                 user_id: '',
                                 project_id: '',
-                                allocation_percentage: 100,
+                                allocation_hours: 40,
                                 start_date: selectedDate,
-                                end_date: new Date().toISOString().split('T')[0]
+                                end_date: selectedDate
                             });
                             setIsAssignModalOpen(true);
                         }}
@@ -314,6 +324,41 @@ export default function ProjectAssignments() {
 
             {/* Filters */}
             <div className="flex flex-col md:flex-row md:items-center gap-4">
+                <div className="flex flex-col gap-2 shrink-0">
+                    {/* <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em] px-2 mb-1">Forecast Period</span> */}
+                    <div className="flex bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-1.5 shadow-2xl relative overflow-hidden">
+                        <div className="absolute inset-0 bg-linear-to-br from-amber-500/5 to-transparent pointer-events-none" />
+                        {[0, 1, 2, 3].map((m) => {
+                            const d = new Date();
+                            d.setDate(1);
+                            d.setMonth(d.getMonth() + m);
+                            const label = d.toLocaleDateString('en-US', { month: 'short' });
+                            const dateStr = d.toISOString().split('T')[0];
+                            const isActive = selectedDate.startsWith(dateStr.substring(0, 7));
+
+                            return (
+                                <button
+                                    key={m}
+                                    onClick={() => setSelectedDate(dateStr)}
+                                    className={`relative px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all min-w-[75px] z-10 ${isActive
+                                        ? 'text-zinc-950 scale-105 active:scale-95'
+                                        : 'text-gray-500 hover:text-white hover:bg-white/5 active:scale-95'
+                                        }`}
+                                >
+                                    {isActive && (
+                                        <motion.div
+                                            layoutId="activeMonth"
+                                            className="absolute inset-0 bg-amber-500 rounded-xl -z-1 shadow-[0_0_20px_rgba(245,158,11,0.4)]"
+                                            transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                                        />
+                                    )}
+                                    <span className="relative z-10">{m === 0 ? 'Now' : label}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+
                 <div className="relative flex-1 group">
                     <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors w-5 h-5" />
                     <input
@@ -329,7 +374,7 @@ export default function ProjectAssignments() {
                     <IoStatsChartOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors w-4 h-4" />
                     <input
                         type="number"
-                        placeholder="Forecast Threshold %"
+                        placeholder="Forecast Threshold Hrs"
                         className="w-full bg-zinc-900 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-[11px] font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all shadow-sm text-white placeholder-gray-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                         value={allocationThreshold}
                         title="Threshold for calculating availability forecast"
@@ -388,7 +433,7 @@ export default function ProjectAssignments() {
                         onClick={() => toggleSort('allocation')}
                         className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${sortConfig.key === 'allocation' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-zinc-900 border-white/5 text-gray-500 hover:text-white'}`}
                     >
-                        Load %
+                        Load Hrs
                         {sortConfig.key === 'allocation' && (
                             sortConfig.direction === 'asc' ? <IoArrowUpOutline size={12} /> : <IoArrowDownOutline size={12} />
                         )}
@@ -442,9 +487,9 @@ export default function ProjectAssignments() {
                                             setFormData({
                                                 user_id: user.user_id,
                                                 project_id: '',
-                                                allocation_percentage: 100,
+                                                allocation_hours: 40,
                                                 start_date: selectedDate,
-                                                end_date: new Date().toISOString().split('T')[0]
+                                                end_date: selectedDate
                                             });
                                             setIsAssignModalOpen(true);
                                         }}
@@ -476,16 +521,16 @@ export default function ProjectAssignments() {
 
                                                 <div className="space-y-3">
                                                     <div className="flex items-center justify-between">
-                                                        <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Total Load</span>
-                                                        <span className={`text-xs font-black ${user.total_allocation > 100 ? 'text-red-500' : 'text-emerald-500'}`}>
-                                                            {user.total_allocation}%
+                                                        <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Total Hours</span>
+                                                        <span className={`text-xs font-black ${user.total_allocation > 160 ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                            {user.total_allocation} / 160
                                                         </span>
                                                     </div>
                                                     <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                                                         <motion.div
                                                             initial={{ width: 0 }}
-                                                            animate={{ width: `${Math.min(user.total_allocation, 100)}%` }}
-                                                            className={`h-full rounded-full ${user.total_allocation > 100 ? 'bg-red-500' : 'bg-emerald-500'}`}
+                                                            animate={{ width: `${Math.min((user.total_allocation / 160) * 100, 100)}%` }}
+                                                            className={`h-full rounded-full ${user.total_allocation > 160 ? 'bg-red-500' : 'bg-emerald-500'}`}
                                                         />
                                                     </div>
                                                 </div>
@@ -502,7 +547,7 @@ export default function ProjectAssignments() {
                                                                         </div>
                                                                     </div>
                                                                     <div className="flex flex-col items-end gap-1 shrink-0">
-                                                                        <span className="text-blue-500 font-black text-xs md:text-sm">{proj.allocation_percentage}%</span>
+                                                                        <span className="text-blue-500 font-black text-xs md:text-sm">{proj.allocation_hours}h</span>
                                                                         <div className="flex items-center gap-1.5 pt-1">
                                                                             <button
                                                                                 onClick={(e) => {
@@ -510,7 +555,7 @@ export default function ProjectAssignments() {
                                                                                     setSelectedAssignment(proj);
                                                                                     setFormData({
                                                                                         ...formData,
-                                                                                        allocation_percentage: proj.allocation_percentage,
+                                                                                        allocation_hours: proj.allocation_hours,
                                                                                         start_date: proj.start_date.split('T')[0],
                                                                                         end_date: proj.end_date.split('T')[0]
                                                                                     });
@@ -539,7 +584,7 @@ export default function ProjectAssignments() {
                                                                     </div>
                                                                     <span className="opacity-30">→</span>
                                                                     <div className="flex items-center gap-1.5">
-                                                                        <span>{proj.end_date.startsWith('9999') ? 'Ongoing' : new Date(proj.end_date).toLocaleDateString()}</span>
+                                                                        <span>{new Date(proj.end_date).toLocaleDateString()}</span>
                                                                     </div>
                                                                 </div>
                                                             </div>
@@ -563,13 +608,13 @@ export default function ProjectAssignments() {
                                                 <ResponsiveContainer width="100%" height="100%">
                                                     <PieChart>
                                                         <Pie
-                                                            data={user.projects.length > 0 ? user.projects : [{ project_name: 'Free', allocation_percentage: 100 }]}
+                                                            data={user.projects.length > 0 ? user.projects : [{ project_name: 'Free', allocation_hours: 160 }]}
                                                             cx="50%"
                                                             cy="50%"
                                                             innerRadius={45}
                                                             outerRadius={65}
                                                             paddingAngle={user.projects.length > 0 ? 5 : 0}
-                                                            dataKey="allocation_percentage"
+                                                            dataKey="allocation_hours"
                                                             nameKey="project_name"
                                                             stroke="none"
                                                             onMouseEnter={(_, index) => {
@@ -594,7 +639,7 @@ export default function ProjectAssignments() {
                                                         </Pie>
                                                         {user.projects.length > 0 && (
                                                             <Tooltip
-                                                                formatter={(value) => `${value}%`}
+                                                                formatter={(value) => `${value} Hrs`}
                                                                 contentStyle={{
                                                                     backgroundColor: '#D3D3D3',
                                                                     border: 'none',
@@ -618,9 +663,9 @@ export default function ProjectAssignments() {
                                                     id={`load-info-${user.user_id}`}
                                                     className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 transition-opacity duration-300"
                                                 >
-                                                    <span className="text-[10px] font-black text-gray-500 uppercase">Load</span>
-                                                    <span className={`text-lg font-black ${user.total_allocation > 100 ? 'text-red-500' : 'text-white'}`}>
-                                                        {user.total_allocation}%
+                                                    <span className="text-[10px] font-black text-gray-500 uppercase">Monthly</span>
+                                                    <span className={`text-lg font-black ${user.total_allocation > 160 ? 'text-red-500' : 'text-white'}`}>
+                                                        {user.total_allocation}h
                                                     </span>
                                                 </div>
                                             </div>
@@ -630,11 +675,34 @@ export default function ProjectAssignments() {
                             </AnimatePresence>
                         </div>
                     ) : (
-                        <div className="bg-zinc-900/50 border border-white/5 rounded-2xl sm:rounded-3xl p-4 sm:p-6 h-[400px] sm:h-[500px] flex flex-col relative overflow-hidden">
-                            <h3 className="text-xl font-black text-white mb-6 flex items-center gap-3">
-                                <IoStatsChartOutline className="text-amber-500" />
-                                Workload Analytics
-                            </h3>
+                        <div className="bg-zinc-900/40 backdrop-blur-3xl border border-white/5 rounded-[40px] p-8 sm:p-10 h-[500px] sm:h-[600px] flex flex-col relative overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] group/analytics">
+                            <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full -mr-48 -mt-48 blur-[100px] pointer-events-none group-hover/analytics:bg-amber-500/10 transition-colors duration-700" />
+
+                            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 relative z-10">
+                                <div className="space-y-1">
+                                    <h3 className="text-2xl font-black text-white flex items-center gap-3 tracking-tighter">
+                                        <div className="p-2.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 shadow-xl shadow-amber-500/5">
+                                            <IoStatsChartOutline />
+                                        </div>
+                                        Workload Distribution
+                                    </h3>
+                                    <p className="text-gray-500 text-[10px] font-bold uppercase tracking-[0.2em] ml-1">Monthly capacity analytics & user forecasting</p>
+                                </div>
+                                <div className="flex items-center gap-4 bg-black/40 px-5 py-2.5 rounded-2xl border border-white/5 backdrop-blur-md">
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]" />
+                                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Optimal</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.5)]" />
+                                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">At Cap</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-2.5 h-2.5 rounded-full bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]" />
+                                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">Over</span>
+                                    </div>
+                                </div>
+                            </div>
 
                             {filteredUsers.length === 0 ? (
                                 <div className="flex-1 flex flex-col items-center justify-center text-gray-500 opacity-50">
@@ -642,90 +710,112 @@ export default function ProjectAssignments() {
                                     <p className="font-bold text-sm">No user data to display</p>
                                 </div>
                             ) : (
-                                <div className="flex-1 w-full min-h-0 focus:outline-none outline-none">
-                                    <ResponsiveContainer width="100%" height="100%">
+                                <div className="flex-1 w-full min-h-[400px] max-h-[600px] overflow-x-hidden overflow-y-auto custom-scrollbar focus:outline-none outline-none">
+                                    <ResponsiveContainer width="100%" height={Math.max(400, filteredUsers.length * 45)}>
                                         <BarChart
+                                            layout="vertical"
                                             data={filteredUsers}
-                                            margin={{ top: 20, right: 30, left: 20, bottom: 100 }}
+                                            margin={{ top: 10, right: 60, left: 20, bottom: 5 }}
                                             className="focus:outline-none outline-none"
                                         >
-                                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" vertical={false} />
+                                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff05" horizontal={false} />
                                             <XAxis
+                                                type="number"
+                                                domain={[0, 160]}
+                                                tick={{ fill: '#6b7280', fontSize: 10, fontWeight: 700 }}
+                                                axisLine={{ stroke: '#ffffff10' }}
+                                                tickLine={{ stroke: '#ffffff10' }}
+                                            />
+                                            <YAxis
                                                 dataKey="user_name"
+                                                type="category"
+                                                axisLine={false}
+                                                tickLine={false}
+                                                width={90}
                                                 tick={({ x, y, payload }) => {
                                                     const user = filteredUsers[payload.index];
-                                                    let fill = '#3B82F6'; // Default Blue
-                                                    if (user && user.total_allocation >= 100) fill = '#EF4444'; // Red
-                                                    if (user && user.total_allocation === 0) fill = '#10B981'; // Green
+                                                    let fill = '#9CA3AF'; // Default Gray
+                                                    if (user && user.total_allocation > 160) fill = '#EF4444'; // Red
+                                                    else if (user && user.total_allocation >= 140) fill = '#F59E0B'; // Amber
                                                     return (
                                                         <g transform={`translate(${x},${y})`}>
                                                             <text
-                                                                x={0}
+                                                                x={-10}
                                                                 y={0}
-                                                                dy={16}
+                                                                dy={4}
                                                                 textAnchor="end"
                                                                 fill={fill}
-                                                                transform="rotate(-45)"
                                                                 fontSize={10}
-                                                                fontWeight={700}
+                                                                fontWeight={900}
+                                                                className="uppercase tracking-tighter"
                                                             >
-                                                                {payload.value}
+                                                                {payload.value.split(' ')[0]}
                                                             </text>
                                                         </g>
                                                     );
                                                 }}
-                                                axisLine={{ stroke: '#ffffff10' }}
-                                                tickLine={{ stroke: '#ffffff10' }}
-                                                interval={0}
-                                                height={60}
-                                            />
-                                            <YAxis
-                                                tick={{ fill: '#6b7280', fontSize: 10, fontWeight: 700 }}
-                                                axisLine={{ stroke: '#ffffff10' }}
-                                                tickLine={{ stroke: '#ffffff10' }}
-                                                domain={[0, 'auto']}
                                             />
                                             <Tooltip
-                                                cursor={{ fill: '#ffffff05' }}
+                                                cursor={{ fill: 'rgba(255,255,255,0.03)', radius: [0, 8, 8, 0] }}
                                                 contentStyle={{
-                                                    backgroundColor: '#09090b',
-                                                    border: '1px solid #ffffff10',
-                                                    borderRadius: '12px',
+                                                    backgroundColor: 'rgba(9, 9, 11, 0.95)',
+                                                    backdropFilter: 'blur(20px)',
+                                                    border: '1px solid rgba(255, 255, 255, 0.1)',
+                                                    borderRadius: '20px',
+                                                    padding: '16px',
                                                     fontSize: '12px',
                                                     fontWeight: 'bold',
-                                                    boxShadow: '0 10px 30px -5px rgba(0, 0, 0, 0.5)'
+                                                    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+                                                    color: '#fff'
                                                 }}
-                                                itemStyle={{ color: '#fff' }}
+                                                itemStyle={{ color: '#fff', fontSize: '12px', fontWeight: '900' }}
+                                                labelStyle={{ color: '#F59E0B', marginBottom: '8px', fontSize: '10px', textTransform: 'uppercase', letterSpacing: '2px', fontWeight: '900' }}
+                                                formatter={(val) => [`${val}h`, 'Total Planned']}
                                             />
                                             <Bar
                                                 dataKey="total_allocation"
-                                                name="Total Load %"
-                                                radius={[4, 4, 0, 0]}
+                                                name="Total Hours/Month"
+                                                radius={[0, 8, 8, 0]}
                                                 cursor="pointer"
-                                                activeBar={false}
-                                                onClick={(data) => {
-                                                    if (data) {
-                                                        handleUserSelect(data);
-                                                    }
-                                                }}
+                                                barSize={24}
+                                                onClick={(data) => handleUserSelect(data)}
+                                                className="transition-all duration-300"
                                             >
-                                                {filteredUsers.map((entry, index) => (
-                                                    <Cell
-                                                        key={`cell-${index}`}
-                                                        fill={COLORS[index % COLORS.length]}
-                                                        fillOpacity={0.9}
-                                                        stroke="none"
-                                                    />
-                                                ))}
+                                                {filteredUsers.map((entry, index) => {
+                                                    let fill = 'url(#blueGradient)';
+                                                    if (entry.total_allocation > 160) fill = 'url(#redGradient)';
+                                                    else if (entry.total_allocation >= 140) fill = 'url(#amberGradient)';
+                                                    else if (entry.total_allocation > 0) fill = 'url(#emeraldGradient)';
+                                                    return <Cell key={`cell-${index}`} fill={fill} fillOpacity={0.9} />;
+                                                })}
                                                 <LabelList
                                                     dataKey="total_allocation"
-                                                    position="top"
+                                                    position="right"
                                                     fill="#9CA3AF"
-                                                    fontSize={10}
-                                                    fontWeight={700}
-                                                    formatter={(val) => `${val}%`}
+                                                    fontSize={11}
+                                                    fontWeight={900}
+                                                    formatter={(val) => `${val}h`}
+                                                    offset={15}
                                                 />
                                             </Bar>
+                                            <defs>
+                                                <linearGradient id="blueGradient" x1="0" y1="0" x2="1" y2="0">
+                                                    <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.8} />
+                                                    <stop offset="100%" stopColor="#2563EB" stopOpacity={0.9} />
+                                                </linearGradient>
+                                                <linearGradient id="emeraldGradient" x1="0" y1="0" x2="1" y2="0">
+                                                    <stop offset="0%" stopColor="#10B981" stopOpacity={0.8} />
+                                                    <stop offset="100%" stopColor="#059669" stopOpacity={0.9} />
+                                                </linearGradient>
+                                                <linearGradient id="amberGradient" x1="0" y1="0" x2="1" y2="0">
+                                                    <stop offset="0%" stopColor="#F59E0B" stopOpacity={0.8} />
+                                                    <stop offset="100%" stopColor="#D97706" stopOpacity={0.9} />
+                                                </linearGradient>
+                                                <linearGradient id="redGradient" x1="0" y1="0" x2="1" y2="0">
+                                                    <stop offset="0%" stopColor="#EF4444" stopOpacity={0.8} />
+                                                    <stop offset="100%" stopColor="#DC2626" stopOpacity={0.9} />
+                                                </linearGradient>
+                                            </defs>
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>
@@ -755,122 +845,154 @@ export default function ProjectAssignments() {
                                         initial={{ x: '100%' }}
                                         animate={{ x: 0 }}
                                         exit={{ x: '100%' }}
-                                        transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                                        className="fixed top-0 right-0 h-full w-full max-w-sm bg-black border-l border-white/10 z-10000 shadow-2xl overflow-hidden flex flex-col "
+                                        transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+                                        className="fixed top-0 right-0 h-full w-full max-w-sm bg-zinc-950/95 backdrop-blur-2xl border-l border-white/10 z-10000 shadow-[-50px_0_100px_-20px_rgba(0,0,0,0.8)] overflow-hidden flex flex-col"
                                     >
-                                        <div className="p-6 border-b border-white/10 flex items-center justify-between bg-zinc-900/50">
-                                            <div className="flex items-center gap-3">
-                                                <UserAvatar name={selectedAnalyticsUser.user_name} email={selectedAnalyticsUser.user_email} size="md" />
+                                        <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/5 rounded-full -mr-32 -mt-32 blur-[80px] pointer-events-none" />
+
+                                        <div className="p-8 border-b border-white/10 flex items-center justify-between relative z-10 bg-black/20">
+                                            <div className="flex items-center gap-4">
+                                                <div className="p-1 rounded-2xl bg-linear-to-br from-amber-500/20 to-transparent border border-amber-500/20 shadow-xl">
+                                                    <UserAvatar name={selectedAnalyticsUser.user_name} email={selectedAnalyticsUser.user_email} size="md" />
+                                                </div>
                                                 <div>
-                                                    <h4 className="text-lg font-black text-white">{selectedAnalyticsUser.user_name}</h4>
-                                                    <p className="text-xs text-gray-400 font-bold">{selectedAnalyticsUser.user_dept}</p>
+                                                    <h4 className="text-xl font-black text-white tracking-tight leading-tight">{selectedAnalyticsUser.user_name}</h4>
+                                                    <div className="flex items-center gap-2 mt-0.5">
+                                                        <span className="w-1.5 h-1.5 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]" />
+                                                        <p className="text-[10px] text-gray-400 font-bold uppercase tracking-widest">{selectedAnalyticsUser.user_dept}</p>
+                                                    </div>
                                                 </div>
                                             </div>
                                             <button
                                                 onClick={() => setSelectedAnalyticsUser(null)}
-                                                className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-full transition-all"
+                                                className="w-10 h-10 flex items-center justify-center text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all border border-transparent hover:border-white/10"
                                             >
-                                                <IoCloseOutline size={20} />
+                                                <IoCloseOutline size={24} />
                                             </button>
                                         </div>
 
-                                        <div className="p-6 flex-1 overflow-y-auto">
-                                            <div className="flex items-center justify-between mb-6">
-                                                <span className="text-[10px] uppercase font-black text-gray-500 tracking-widest">Utilized Capacity</span>
-                                                <span className={`text-xl font-black ${selectedAnalyticsUser.total_allocation > 100 ? 'text-red-500' : 'text-emerald-500'}`}>
-                                                    {selectedAnalyticsUser.total_allocation}%
-                                                </span>
+                                        <div className="p-8 flex-1 overflow-y-auto custom-scrollbar relative z-10 space-y-8">
+                                            <div>
+                                                <div className="flex items-center justify-between mb-4">
+                                                    <span className="text-[10px] uppercase font-black text-gray-500 tracking-[0.2em]">Capacity Usage</span>
+                                                    <span className={`text-sm font-black flex items-center gap-2 ${selectedAnalyticsUser.total_allocation > 160 ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                        {selectedAnalyticsUser.total_allocation} <span className="text-[10px] text-gray-500">/ 160h</span>
+                                                    </span>
+                                                </div>
+                                                <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
+                                                    <motion.div
+                                                        initial={{ width: 0 }}
+                                                        animate={{ width: `${Math.min(100, (selectedAnalyticsUser.total_allocation / 160) * 100)}%` }}
+                                                        className={`h-full shadow-[0_0_15px_-3px_currentColor] ${selectedAnalyticsUser.total_allocation > 160 ? 'bg-red-500' : 'bg-emerald-500'}`}
+                                                    />
+                                                </div>
                                             </div>
 
                                             {allocationThreshold && (
-                                                <div className="mb-6 p-5 rounded-3xl bg-linear-to-br from-amber-500/10 to-transparent border border-amber-500/10 shadow-xl relative overflow-hidden group">
-                                                    <div className="absolute top-0 right-0 p-3 opacity-10 group-hover:opacity-20 transition-opacity">
-                                                        <IoCalendarOutline size={32} />
+                                                <div className="p-6 rounded-[32px] bg-zinc-900/50 border border-white/10 shadow-2xl relative overflow-hidden group">
+                                                    <div className="absolute top-0 right-0 p-4 opacity-5 group-hover:opacity-10 transition-opacity">
+                                                        <IoCalendarOutline size={50} />
                                                     </div>
-                                                    <h5 className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-2">
-                                                        <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                                    <h5 className="text-[10px] font-black text-amber-500 uppercase tracking-[0.2em] mb-4 flex items-center gap-2">
+                                                        <IoAnalyticsOutline size={14} />
                                                         Availability Forecast
                                                     </h5>
 
                                                     {timelineLoading ? (
-                                                        <div className="flex items-center gap-2 py-2">
-                                                            <div className="w-4 h-4 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
-                                                            <span className="text-[10px] font-bold text-gray-500 uppercase">Calculating Dates...</span>
+                                                        <div className="flex items-center gap-3 py-2">
+                                                            <div className="w-5 h-5 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+                                                            <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Processing Data...</span>
                                                         </div>
                                                     ) : availabilityForecast ? (
-                                                        <div className="space-y-4">
-                                                            <div className="flex items-center justify-between">
-                                                                <div className="space-y-0.5">
-                                                                    <p className="text-[10px] font-bold text-gray-500 uppercase tracking-tighter">Capacity Date (≤{allocationThreshold}%)</p>
-                                                                    <p className="text-lg font-black text-white">
-                                                                        {availabilityForecast.date === selectedDate ? 'AVAILABLE TODAY' : new Date(availabilityForecast.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
-                                                                    </p>
-                                                                </div>
+                                                        <div className="space-y-5">
+                                                            <div>
+                                                                <p className="text-[9px] font-black text-gray-500 uppercase tracking-[0.2em] mb-1">Target Date (≤{allocationThreshold}h)</p>
+                                                                <p className="text-xl font-black text-white tracking-tight">
+                                                                    {availabilityForecast.date === selectedDate ? 'Available Now' : new Date(availabilityForecast.date).toLocaleDateString(undefined, { month: 'long', day: 'numeric', year: 'numeric' })}
+                                                                </p>
                                                             </div>
-                                                            <div className="flex items-center gap-2 bg-black/40 px-3 py-2 rounded-xl border border-white/5">
-                                                                <IoAlertCircleOutline className="text-amber-500" size={14} />
-                                                                <p className="text-[10px] font-bold text-gray-400">
-                                                                    Projected load will drop to <span className="text-amber-500">{availabilityForecast.load}%</span>
+                                                            <div className="bg-black/40 px-4 py-3 rounded-2xl border border-white/5 flex items-center gap-3">
+                                                                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 border border-amber-500/10">
+                                                                    <IoAlertCircleOutline size={18} />
+                                                                </div>
+                                                                <p className="text-[11px] font-bold text-gray-400 leading-relaxed">
+                                                                    Projected workload will stabilize at <span className="text-amber-500 font-black">{availabilityForecast.load}h/month</span>
                                                                 </p>
                                                             </div>
                                                         </div>
                                                     ) : (
-                                                        <div className="flex items-center gap-2 bg-red-500/5 px-3 py-2 rounded-xl border border-red-500/10">
-                                                            <IoAlertCircleOutline className="text-red-500" size={14} />
-                                                            <p className="text-[10px] font-bold text-red-400 uppercase">No future capacity detected</p>
+                                                        <div className="flex items-center gap-3 bg-red-500/5 px-4 py-3 rounded-2xl border border-red-500/10">
+                                                            <IoAlertCircleOutline className="text-red-500 shadow-[0_0_10px_rgba(239,68,68,0.3)]" size={18} />
+                                                            <p className="text-[10px] font-black text-red-500 uppercase tracking-widest">Capacity Overloaded</p>
                                                         </div>
                                                     )}
                                                 </div>
                                             )}
 
-                                            <div className="space-y-3">
-                                                <h5 className="text-xs font-black text-gray-400 uppercase tracking-wider mb-4">Assigned Projects</h5>
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between px-1">
+                                                    <h5 className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Current Projects</h5>
+                                                    <span className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-black text-gray-400 border border-white/5">{selectedAnalyticsUser.projects.length}</span>
+                                                </div>
+
                                                 {selectedAnalyticsUser.projects.length > 0 ? (
-                                                    selectedAnalyticsUser.projects.map(proj => (
-                                                        <div key={proj.id} className="p-4 rounded-2xl bg-zinc-900/80 border border-white/5 space-y-3">
-                                                            <div className="flex items-start justify-between">
-                                                                <div className="flex items-center gap-3">
-                                                                    <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/5">
-                                                                        {proj.project_code}
+                                                    <div className="space-y-3">
+                                                        {selectedAnalyticsUser.projects.map(proj => (
+                                                            <div key={proj.id} className="group/item p-5 rounded-3xl bg-zinc-900/40 border border-white/5 hover:border-amber-500/30 transition-all duration-300 relative overflow-hidden">
+                                                                <div className="absolute inset-0 bg-linear-to-br from-amber-500/0 via-transparent to-amber-500/5 opacity-0 group-hover/item:opacity-100 transition-opacity" />
+
+                                                                <div className="flex items-start justify-between relative z-10">
+                                                                    <div className="flex items-center gap-4">
+                                                                        <div className="w-10 h-10 rounded-2xl bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/10 group-hover/item:bg-amber-500 group-hover/item:text-zinc-950 transition-colors duration-500">
+                                                                            {proj.project_code}
+                                                                        </div>
+                                                                        <div>
+                                                                            <p className="text-sm font-black text-white leading-tight">{proj.project_name}</p>
+                                                                            <p className="text-[10px] text-gray-500 font-bold uppercase mt-1 tracking-wider">{proj.project_client}</p>
+                                                                        </div>
                                                                     </div>
-                                                                    <div>
-                                                                        <p className="text-sm font-black text-white">{proj.project_name}</p>
-                                                                        <p className="text-[10px] text-gray-400">{proj.project_client}</p>
+                                                                    <div className="text-right">
+                                                                        <div className="text-lg font-black text-amber-500 tracking-tight">{proj.allocation_hours}h</div>
+                                                                        <div className="text-[9px] text-gray-500 font-bold uppercase">Monthly</div>
                                                                     </div>
                                                                 </div>
-                                                                <span className="text-blue-500 font-black text-lg">{proj.allocation_percentage}%</span>
+
+                                                                <div className="mt-4 flex items-center gap-2 text-[9px] font-black text-gray-500 bg-black/40 px-3 py-2 rounded-xl border border-white/5">
+                                                                    <IoCalendarOutline size={12} className="text-amber-500/50" />
+                                                                    <span>{new Date(proj.start_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                                                    <span className="opacity-30">→</span>
+                                                                    <span className={'text-emerald-500/80 shadow-[0_0_10px_rgba(16,185,129,0.2)]'}>
+                                                                        {new Date(proj.end_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
+                                                                    </span>
+                                                                </div>
                                                             </div>
-                                                            <div className="flex items-center gap-2 text-[10px] font-bold text-gray-500 bg-black/40 p-2 rounded-lg">
-                                                                <IoCalendarOutline />
-                                                                {new Date(proj.start_date).toLocaleDateString()}
-                                                                <span>→</span>
-                                                                {proj.end_date.startsWith('9999') ? 'Ongoing' : new Date(proj.end_date).toLocaleDateString()}
-                                                            </div>
-                                                        </div>
-                                                    ))
+                                                        ))}
+                                                    </div>
                                                 ) : (
-                                                    <div className="p-8 text-center border border-dashed border-white/10 rounded-2xl">
-                                                        <p className="text-gray-500 text-sm font-bold">No projects assigned</p>
+                                                    <div className="p-10 text-center border-2 border-dashed border-white/5 rounded-[32px] bg-zinc-900/20">
+                                                        <IoLayersOutline size={32} className="text-gray-800 mx-auto mb-3" />
+                                                        <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">No Active Assignments</p>
                                                     </div>
                                                 )}
                                             </div>
                                         </div>
 
-                                        <div className="p-4 border-t border-white/10 bg-zinc-900/30">
+                                        <div className="p-6 bg-black/40 border-t border-white/10 backdrop-blur-md relative z-20">
                                             <button
                                                 onClick={() => {
                                                     setFormData({
                                                         user_id: selectedAnalyticsUser.user_id,
                                                         project_id: '',
-                                                        allocation_percentage: 100,
+                                                        allocation_hours: 40,
                                                         start_date: selectedDate,
-                                                        end_date: new Date().toISOString().split('T')[0]
+                                                        end_date: '9999-12-31'
                                                     });
                                                     setSelectedAnalyticsUser(null);
                                                     setIsAssignModalOpen(true);
                                                 }}
-                                                className="w-full py-3 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black uppercase tracking-wider text-xs transition-all shadow-lg shadow-amber-500/10"
+                                                className="w-full py-4 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-[22px] font-black uppercase tracking-[0.2em] text-[11px] transition-all shadow-[0_15px_30px_-10px_rgba(245,158,11,0.5)] active:scale-95 flex items-center justify-center gap-3"
                                             >
+                                                <IoAddOutline size={18} className="stroke-3" />
                                                 Assign New Project
                                             </button>
                                         </div>
@@ -910,7 +1032,7 @@ export default function ProjectAssignments() {
                                             {isAssignModalOpen ? 'Assign Project' : 'Edit Allocation'}
                                         </h2>
                                         <p className="text-xs text-gray-500 font-bold">
-                                            Set project percentage allocation for the user
+                                            Set monthly hours allocation for the user
                                         </p>
                                     </div>
                                 </div>
@@ -966,19 +1088,19 @@ export default function ProjectAssignments() {
 
                                     <div className="space-y-1.5">
                                         <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
-                                            Allocation Percentage (%)
+                                            Monthly Allocation (Hours)
                                         </label>
                                         <div className="relative">
                                             <input
                                                 type="number"
                                                 required
                                                 min="1"
-                                                max="100"
+                                                max="160"
                                                 className="w-full bg-zinc-900 border border-white/5 rounded-xl pl-4 pr-12 py-3 text-lg font-black text-white outline-none focus:border-amber-500 transition-all"
-                                                value={formData.allocation_percentage || ''}
-                                                onChange={(e) => setFormData({ ...formData, allocation_percentage: e.target.value === '' ? '' : parseInt(e.target.value) })}
+                                                value={formData.allocation_hours || ''}
+                                                onChange={(e) => setFormData({ ...formData, allocation_hours: e.target.value === '' ? '' : parseInt(e.target.value) })}
                                             />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">%</span>
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">Hrs</span>
                                         </div>
                                     </div>
 
