@@ -8,7 +8,7 @@ import {
     IoChevronDownOutline, IoCheckmarkCircle, IoAlertCircleOutline,
     IoPersonOutline, IoPieChartOutline, IoLayersOutline,
     IoCalendarOutline, IoArrowUpOutline, IoArrowDownOutline,
-    IoAnalyticsOutline 
+    IoAnalyticsOutline, IoSyncOutline
 } from 'react-icons/io5';
 // Add custom styles for recharts
 const rechartsStyles = `
@@ -30,7 +30,8 @@ import {
 import { toast } from 'react-toastify';
 import UserAvatar from '../components/UserAvatar';
 import SearchableSelect from '../components/SearchableSelect';
-import { IoCloseOutline, IoStatsChartOutline, IoGridOutline } from 'react-icons/io5';
+import { IoCloseOutline, IoStatsChartOutline, IoGridOutline, IoCalendarOutline as IoCalendarSubTab } from 'react-icons/io5';
+import PtoSpreadsheetView from '../components/PtoSpreadsheetView';
 
 const COLORS = [
     '#F59E0B', // Yellow/Amber
@@ -134,7 +135,7 @@ export default function ProjectAssignments() {
 
     useEffect(() => {
         fetchData();
-    }, [selectedDate]);
+    }, [selectedDate, activeTab]);
 
     const fetchData = async () => {
         setLoading(true);
@@ -142,10 +143,15 @@ export default function ProjectAssignments() {
             const token = localStorage.getItem('token');
             const headers = { Authorization: `Bearer ${token}` };
 
+            const dateObj = new Date(selectedDate);
             const [assignmentsRes, usersRes, projectsRes] = await Promise.all([
                 axios.get(`${server}/api/user-projects`, {
                     headers,
-                    params: { date: selectedDate }
+                    params: {
+                        date: selectedDate,
+                        month: dateObj.getMonth() + 1,
+                        year: dateObj.getFullYear()
+                    }
                 }),
                 axios.get(`${server}/api/users?limit=1000`, { headers }),
                 axios.get(`${server}/api/projects`, { headers })
@@ -230,7 +236,7 @@ export default function ProjectAssignments() {
 
     const filteredUsers = allUsers.map(user => {
         const assignmentData = usersWithAssignments.find(u => u.user_id === user.id);
-        return assignmentData || {
+        const data = assignmentData || {
             user_id: user.id,
             user_name: user.name,
             user_email: user.email,
@@ -238,15 +244,27 @@ export default function ProjectAssignments() {
             total_allocation: 0,
             projects: []
         };
+
+        // Filter projects based on active tab for the card view
+        // But keep the 'original' projects for total capacity calculations if needed
+        const ptoProjects = data.projects.filter(p => p.project_category === 'PTO' || p.project_name === 'Leave');
+        const workProjects = data.projects.filter(p => p.project_category !== 'PTO' && p.project_name !== 'Leave');
+
+        return {
+            ...data,
+            pto_hours: ptoProjects.reduce((sum, p) => sum + p.allocation_hours, 0),
+            work_hours: workProjects.reduce((sum, p) => sum + p.allocation_hours, 0),
+            displayProjects: activeTab === 'ptos' ? ptoProjects : workProjects,
+            displayAllocation: data.projects.reduce((sum, p) => sum + p.allocation_hours, 0)
+        };
     }).filter(u => {
         const matchesSearch = (u.user_name || '').toLowerCase().includes(search.toLowerCase()) ||
             (u.user_email || '').toLowerCase().includes(search.toLowerCase());
         const matchesDept = deptFilter === 'All' || u.user_dept === deptFilter;
 
-        // Threshold no longer filters the list - it only affects the forecast
-        const matchesThreshold = true;
-
-        return matchesSearch && matchesDept && matchesThreshold;
+        // If in PTO tab and not searching, maybe only show those with PTO? 
+        // No, user said "add pto hrs for particular emp", so searching everyone is good.
+        return matchesSearch && matchesDept;
     }).sort((a, b) => {
         if (sortConfig.key === 'name') {
             return sortConfig.direction === 'asc'
@@ -254,8 +272,8 @@ export default function ProjectAssignments() {
                 : b.user_name.localeCompare(a.user_name);
         } else if (sortConfig.key === 'allocation') {
             return sortConfig.direction === 'asc'
-                ? a.total_allocation - b.total_allocation
-                : b.total_allocation - a.total_allocation;
+                ? a.displayAllocation - b.displayAllocation
+                : b.displayAllocation - a.displayAllocation;
         }
         return 0;
     });
@@ -300,15 +318,20 @@ export default function ProjectAssignments() {
                             type="date"
                             className="w-full bg-zinc-900 border-none px-2 py-2 text-[11px] font-black uppercase tracking-wider text-white outline-none cursor-pointer scheme-dark"
                             value={selectedDate}
-                            onChange={(e) => setSelectedDate(e.target.value)}
+                            onChange={(e) => {
+                                const newDate = e.target.value;
+                                setSelectedDate(newDate);
+                                setFormData(prev => ({ ...prev, start_date: newDate, end_date: newDate }));
+                            }}
                         />
                     </div>
                     <button
                         onClick={() => {
+                            const leaveProject = allProjects.find(p => p.category === 'PTO' || p.name === 'Leave');
                             setFormData({
                                 user_id: '',
-                                project_id: '',
-                                allocation_hours: 40,
+                                project_id: activeTab === 'ptos' && leaveProject ? leaveProject.id : '',
+                                allocation_hours: activeTab === 'ptos' ? 8 : 40,
                                 start_date: selectedDate,
                                 end_date: selectedDate
                             });
@@ -317,7 +340,7 @@ export default function ProjectAssignments() {
                         className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black shadow-lg shadow-amber-500/20 transition-all active:scale-95 uppercase tracking-wider text-[11px] whitespace-nowrap"
                     >
                         <IoAddOutline size={20} strokeWidth={2.5} />
-                        Assign Project
+                        {activeTab === 'ptos' ? 'Log PTO' : 'Assign Project'}
                     </button>
                 </div>
             </header>
@@ -463,6 +486,27 @@ export default function ProjectAssignments() {
                     <IoStatsChartOutline size={16} />
                     Analytics
                 </button>
+                <button
+                    onClick={() => setActiveTab('ptos')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'ptos'
+                        ? 'bg-amber-500 text-zinc-950 shadow-lg shadow-amber-500/20'
+                        : 'text-gray-500 hover:text-white hover:bg-white/5'
+                        }`}
+                >
+                    <IoAnalyticsOutline size={16} />
+                    PTO Plans
+                </button>
+
+                <div className="w-px h-6 bg-white/5 mx-1" />
+
+                <button
+                    onClick={fetchData}
+                    disabled={loading}
+                    className="p-2 text-gray-500 hover:text-white transition-colors"
+                    title="Refresh Data"
+                >
+                    <IoSyncOutline className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                </button>
             </div>
 
             {loading ? (
@@ -484,10 +528,11 @@ export default function ProjectAssignments() {
                                         onClick={(e) => {
                                             // Revert to assignment modal on card click
                                             if (e.target.closest('button')) return;
+                                            const leaveProject = allProjects.find(p => p.category === 'PTO' || p.name === 'Leave');
                                             setFormData({
                                                 user_id: user.user_id,
-                                                project_id: '',
-                                                allocation_hours: 40,
+                                                project_id: activeTab === 'ptos' && leaveProject ? leaveProject.id : '',
+                                                allocation_hours: activeTab === 'ptos' ? 8 : 40,
                                                 start_date: selectedDate,
                                                 end_date: selectedDate
                                             });
@@ -521,23 +566,23 @@ export default function ProjectAssignments() {
 
                                                 <div className="space-y-3">
                                                     <div className="flex items-center justify-between">
-                                                        <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Total Hours</span>
-                                                        <span className={`text-xs font-black ${user.total_allocation > 160 ? 'text-red-500' : 'text-emerald-500'}`}>
-                                                            {user.total_allocation} / 160
+                                                        <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">{activeTab === 'ptos' ? 'PTO Hours' : 'Total Work Hours'}</span>
+                                                        <span className={`text-xs font-black ${user.displayAllocation > 160 ? 'text-red-500' : (activeTab === 'ptos' ? 'text-blue-500' : 'text-emerald-500')}`}>
+                                                            {user.displayAllocation} / 160
                                                         </span>
                                                     </div>
                                                     <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                                                         <motion.div
                                                             initial={{ width: 0 }}
-                                                            animate={{ width: `${Math.min((user.total_allocation / 160) * 100, 100)}%` }}
-                                                            className={`h-full rounded-full ${user.total_allocation > 160 ? 'bg-red-500' : 'bg-emerald-500'}`}
+                                                            animate={{ width: `${Math.min((user.displayAllocation / 160) * 100, 100)}%` }}
+                                                            className={`h-full rounded-full ${user.displayAllocation > 160 ? 'bg-red-500' : (activeTab === 'ptos' ? 'bg-blue-500' : 'bg-emerald-500')}`}
                                                         />
                                                     </div>
                                                 </div>
 
-                                                <div className="space-y-2 max-h-[105px] overflow-y-auto pr-1 hide-y-scroll">
-                                                    {user.projects.length > 0 ? (
-                                                        user.projects.map(proj => (
+                                                <div className="space-y-2 max-h-[150px] overflow-y-auto pr-1 hide-y-scroll">
+                                                    {user.displayProjects.length > 0 ? (
+                                                        user.displayProjects.map(proj => (
                                                             <div key={proj.id} className="group/item relative p-3 rounded-2xl bg-black/40 border border-white/5 hover:border-amber-500/30 transition-all space-y-3">
                                                                 <div className="flex items-start justify-between gap-3">
                                                                     <div className="flex items-center gap-3 min-w-0">
@@ -547,7 +592,7 @@ export default function ProjectAssignments() {
                                                                         </div>
                                                                     </div>
                                                                     <div className="flex flex-col items-end gap-1 shrink-0">
-                                                                        <span className="text-blue-500 font-black text-xs md:text-sm">{proj.allocation_hours}h</span>
+                                                                        <span className={`${activeTab === 'ptos' ? 'text-blue-500' : 'text-emerald-500'} font-black text-xs md:text-sm`}>{proj.allocation_hours}h</span>
                                                                         <div className="flex items-center gap-1.5 pt-1">
                                                                             <button
                                                                                 onClick={(e) => {
@@ -555,6 +600,8 @@ export default function ProjectAssignments() {
                                                                                     setSelectedAssignment(proj);
                                                                                     setFormData({
                                                                                         ...formData,
+                                                                                        user_id: user.user_id,
+                                                                                        project_id: proj.project_id,
                                                                                         allocation_hours: proj.allocation_hours,
                                                                                         start_date: proj.start_date.split('T')[0],
                                                                                         end_date: proj.end_date.split('T')[0]
@@ -595,8 +642,8 @@ export default function ProjectAssignments() {
                                                                 <IoLayersOutline size={14} />
                                                             </div>
                                                             <div>
-                                                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider">No Projects Assigned</p>
-                                                                <p className="text-[9px] text-gray-600 font-bold italic">Click card to assign first project</p>
+                                                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider">{activeTab === 'ptos' ? 'No PTO Hours' : 'No Projects Assigned'}</p>
+                                                                <p className="text-[9px] text-gray-600 font-bold italic">Click card to log hrs</p>
                                                             </div>
                                                         </div>
                                                     )}
@@ -613,7 +660,7 @@ export default function ProjectAssignments() {
                                                             cy="50%"
                                                             innerRadius={45}
                                                             outerRadius={65}
-                                                            paddingAngle={user.projects.length > 0 ? 5 : 0}
+                                                            paddingAngle={user.displayProjects.length > 0 ? 5 : 0}
                                                             dataKey="allocation_hours"
                                                             nameKey="project_name"
                                                             stroke="none"
@@ -630,9 +677,10 @@ export default function ProjectAssignments() {
                                                             }}
                                                         >
                                                             {user.projects.length > 0 ? (
-                                                                user.projects.map((entry, index) => (
-                                                                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                                                                ))
+                                                                user.projects.map((entry, index) => {
+                                                                    const isLeave = entry.project_category === 'PTO' || entry.project_name === 'Leave';
+                                                                    return <Cell key={`cell-${index}`} fill={isLeave ? '#3B82F6' : COLORS[index % COLORS.length]} />;
+                                                                })
                                                             ) : (
                                                                 <Cell fill="#3B3B3B" /> /* Emerald-500 */
                                                             )}
@@ -663,9 +711,9 @@ export default function ProjectAssignments() {
                                                     id={`load-info-${user.user_id}`}
                                                     className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 transition-opacity duration-300"
                                                 >
-                                                    <span className="text-[10px] font-black text-gray-500 uppercase">Monthly</span>
-                                                    <span className={`text-lg font-black ${user.total_allocation > 160 ? 'text-red-500' : 'text-white'}`}>
-                                                        {user.total_allocation}h
+                                                    <span className="text-[10px] font-black text-gray-500 uppercase">{activeTab === 'ptos' ? 'PTO Load' : 'Monthly'}</span>
+                                                    <span className={`text-lg font-black ${user.displayAllocation > 160 ? 'text-red-500' : (activeTab === 'ptos' ? 'text-blue-500' : 'text-white')}`}>
+                                                        {user.displayAllocation}h
                                                     </span>
                                                 </div>
                                             </div>
@@ -674,7 +722,16 @@ export default function ProjectAssignments() {
                                 ))}
                             </AnimatePresence>
                         </div>
-                    ) : (
+                    ) : activeTab === 'ptos' ? (
+                        <div className="flex-1 min-h-0 h-[600px]">
+                            <PtoSpreadsheetView
+                                users={filteredUsers}
+                                selectedDate={selectedDate}
+                                onSyncSuccess={fetchData}
+                                server={server}
+                            />
+                        </div>
+                    ) : activeTab === 'analytics' ? (
                         <div className="bg-zinc-900/40 backdrop-blur-3xl border border-white/5 rounded-[40px] p-8 sm:p-10 h-[500px] sm:h-[600px] flex flex-col relative overflow-hidden shadow-[0_30px_60px_-15px_rgba(0,0,0,0.7)] group/analytics">
                             <div className="absolute top-0 right-0 w-96 h-96 bg-amber-500/5 rounded-full -mr-48 -mt-48 blur-[100px] pointer-events-none group-hover/analytics:bg-amber-500/10 transition-colors duration-700" />
 
@@ -735,8 +792,8 @@ export default function ProjectAssignments() {
                                                 tick={({ x, y, payload }) => {
                                                     const user = filteredUsers[payload.index];
                                                     let fill = '#9CA3AF'; // Default Gray
-                                                    if (user && user.total_allocation > 160) fill = '#EF4444'; // Red
-                                                    else if (user && user.total_allocation >= 140) fill = '#F59E0B'; // Amber
+                                                    if (user && user.displayAllocation > 160) fill = '#EF4444'; // Red
+                                                    else if (user && user.displayAllocation >= 140) fill = '#F59E0B'; // Amber
                                                     return (
                                                         <g transform={`translate(${x},${y})`}>
                                                             <text
@@ -773,7 +830,7 @@ export default function ProjectAssignments() {
                                                 formatter={(val) => [`${val}h`, 'Total Planned']}
                                             />
                                             <Bar
-                                                dataKey="total_allocation"
+                                                dataKey="displayAllocation"
                                                 name="Total Hours/Month"
                                                 radius={[0, 8, 8, 0]}
                                                 cursor="pointer"
@@ -783,13 +840,13 @@ export default function ProjectAssignments() {
                                             >
                                                 {filteredUsers.map((entry, index) => {
                                                     let fill = 'url(#blueGradient)';
-                                                    if (entry.total_allocation > 160) fill = 'url(#redGradient)';
-                                                    else if (entry.total_allocation >= 140) fill = 'url(#amberGradient)';
-                                                    else if (entry.total_allocation > 0) fill = 'url(#emeraldGradient)';
+                                                    if (entry.displayAllocation > 160) fill = 'url(#redGradient)';
+                                                    else if (entry.displayAllocation >= 140) fill = 'url(#amberGradient)';
+                                                    else if (entry.displayAllocation > 0) fill = 'url(#emeraldGradient)';
                                                     return <Cell key={`cell-${index}`} fill={fill} fillOpacity={0.9} />;
                                                 })}
                                                 <LabelList
-                                                    dataKey="total_allocation"
+                                                    dataKey="displayAllocation"
                                                     position="right"
                                                     fill="#9CA3AF"
                                                     fontSize={11}
@@ -825,7 +882,7 @@ export default function ProjectAssignments() {
                                 Click on any bar to view details
                             </p>
                         </div>
-                    )}
+                    ) : null}
 
                     {createPortal(
                         <AnimatePresence>
@@ -875,15 +932,15 @@ export default function ProjectAssignments() {
                                             <div>
                                                 <div className="flex items-center justify-between mb-4">
                                                     <span className="text-[10px] uppercase font-black text-gray-500 tracking-[0.2em]">Capacity Usage</span>
-                                                    <span className={`text-sm font-black flex items-center gap-2 ${selectedAnalyticsUser.total_allocation > 160 ? 'text-red-500' : 'text-emerald-500'}`}>
-                                                        {selectedAnalyticsUser.total_allocation} <span className="text-[10px] text-gray-500">/ 160h</span>
+                                                    <span className={`text-sm font-black flex items-center gap-2 ${selectedAnalyticsUser.displayAllocation > 160 ? 'text-red-500' : 'text-emerald-500'}`}>
+                                                        {selectedAnalyticsUser.displayAllocation} <span className="text-[10px] text-gray-500">/ 160h</span>
                                                     </span>
                                                 </div>
                                                 <div className="h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/5">
                                                     <motion.div
                                                         initial={{ width: 0 }}
-                                                        animate={{ width: `${Math.min(100, (selectedAnalyticsUser.total_allocation / 160) * 100)}%` }}
-                                                        className={`h-full shadow-[0_0_15px_-3px_currentColor] ${selectedAnalyticsUser.total_allocation > 160 ? 'bg-red-500' : 'bg-emerald-500'}`}
+                                                        animate={{ width: `${Math.min(100, (selectedAnalyticsUser.displayAllocation / 160) * 100)}%` }}
+                                                        className={`h-full shadow-[0_0_15px_-3px_currentColor] ${selectedAnalyticsUser.displayAllocation > 160 ? 'bg-red-500' : 'bg-emerald-500'}`}
                                                     />
                                                 </div>
                                             </div>
@@ -935,45 +992,73 @@ export default function ProjectAssignments() {
                                                     <span className="px-2 py-0.5 rounded-full bg-white/5 text-[9px] font-black text-gray-400 border border-white/5">{selectedAnalyticsUser.projects.length}</span>
                                                 </div>
 
-                                                {selectedAnalyticsUser.projects.length > 0 ? (
-                                                    <div className="space-y-3">
-                                                        {selectedAnalyticsUser.projects.map(proj => (
-                                                            <div key={proj.id} className="group/item p-5 rounded-3xl bg-zinc-900/40 border border-white/5 hover:border-amber-500/30 transition-all duration-300 relative overflow-hidden">
-                                                                <div className="absolute inset-0 bg-linear-to-br from-amber-500/0 via-transparent to-amber-500/5 opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                                                {(() => {
+                                                    const drawerPto = selectedAnalyticsUser.projects.filter(p => p.project_category === 'PTO' || p.project_name === 'Leave');
+                                                    const drawerWork = selectedAnalyticsUser.projects.filter(p => p.project_category !== 'PTO' && p.project_name !== 'Leave');
 
-                                                                <div className="flex items-start justify-between relative z-10">
-                                                                    <div className="flex items-center gap-4">
-                                                                        <div className="w-10 h-10 rounded-2xl bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/10 group-hover/item:bg-amber-500 group-hover/item:text-zinc-950 transition-colors duration-500">
-                                                                            {proj.project_code}
-                                                                        </div>
-                                                                        <div>
-                                                                            <p className="text-sm font-black text-white leading-tight">{proj.project_name}</p>
-                                                                            <p className="text-[10px] text-gray-500 font-bold uppercase mt-1 tracking-wider">{proj.project_client}</p>
-                                                                        </div>
-                                                                    </div>
-                                                                    <div className="text-right">
-                                                                        <div className="text-lg font-black text-amber-500 tracking-tight">{proj.allocation_hours}h</div>
-                                                                        <div className="text-[9px] text-gray-500 font-bold uppercase">Monthly</div>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div className="mt-4 flex items-center gap-2 text-[9px] font-black text-gray-500 bg-black/40 px-3 py-2 rounded-xl border border-white/5">
-                                                                    <IoCalendarOutline size={12} className="text-amber-500/50" />
-                                                                    <span>{new Date(proj.start_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                                                                    <span className="opacity-30">→</span>
-                                                                    <span className={'text-emerald-500/80 shadow-[0_0_10px_rgba(16,185,129,0.2)]'}>
-                                                                        {new Date(proj.end_date).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}
-                                                                    </span>
-                                                                </div>
+                                                    if (drawerPto.length === 0 && drawerWork.length === 0) {
+                                                        return (
+                                                            <div className="p-10 text-center border-2 border-dashed border-white/5 rounded-[32px] bg-zinc-900/20">
+                                                                <IoLayersOutline size={32} className="text-gray-800 mx-auto mb-3" />
+                                                                <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">No Active Assignments</p>
                                                             </div>
-                                                        ))}
-                                                    </div>
-                                                ) : (
-                                                    <div className="p-10 text-center border-2 border-dashed border-white/5 rounded-[32px] bg-zinc-900/20">
-                                                        <IoLayersOutline size={32} className="text-gray-800 mx-auto mb-3" />
-                                                        <p className="text-gray-500 text-[10px] font-black uppercase tracking-widest">No Active Assignments</p>
-                                                    </div>
-                                                )}
+                                                        );
+                                                    }
+
+                                                    return (
+                                                        <div className="space-y-6">
+                                                            {drawerWork.length > 0 && (
+                                                                <div className="space-y-3">
+                                                                    {drawerWork.map(proj => (
+                                                                        <div key={proj.id} className="group/item p-5 rounded-3xl bg-zinc-900/40 border border-white/5 hover:border-amber-500/30 transition-all duration-300 relative overflow-hidden">
+                                                                            <div className="absolute inset-0 bg-linear-to-br from-amber-500/0 via-transparent to-amber-500/5 opacity-0 group-hover/item:opacity-100 transition-opacity" />
+                                                                            <div className="flex items-start justify-between relative z-10">
+                                                                                <div className="flex items-center gap-4">
+                                                                                    <div className="w-10 h-10 rounded-2xl bg-zinc-800 flex items-center justify-center text-[10px] font-black text-amber-500 border border-white/10 group-hover/item:bg-amber-500 group-hover/item:text-zinc-950 transition-colors duration-500">
+                                                                                        {proj.project_code}
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <p className="text-sm font-black text-white leading-tight">{proj.project_name}</p>
+                                                                                        <p className="text-[10px] text-gray-500 font-bold uppercase mt-1 tracking-wider">{proj.project_client}</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="text-right">
+                                                                                    <div className="text-lg font-black text-amber-500 tracking-tight">{proj.allocation_hours}h</div>
+                                                                                    <div className="text-[9px] text-gray-500 font-bold uppercase">Work</div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+
+                                                            {drawerPto.length > 0 && (
+                                                                <div className="space-y-3">
+                                                                    <h6 className="text-[9px] font-black text-blue-400 uppercase tracking-[0.2em] px-1">Leave Assignments</h6>
+                                                                    {drawerPto.map(proj => (
+                                                                        <div key={proj.id} className="group/item p-5 rounded-3xl bg-blue-500/5 border border-blue-500/10 hover:border-blue-500/30 transition-all duration-300 relative overflow-hidden">
+                                                                            <div className="flex items-start justify-between relative z-10">
+                                                                                <div className="flex items-center gap-4">
+                                                                                    <div className="w-10 h-10 rounded-2xl bg-blue-500 flex items-center justify-center text-[10px] font-black text-white border border-blue-400/20">
+                                                                                        PTO
+                                                                                    </div>
+                                                                                    <div>
+                                                                                        <p className="text-sm font-black text-blue-400 leading-tight">Leave/Holiday</p>
+                                                                                        <p className="text-[10px] text-blue-400/50 font-bold uppercase mt-1 tracking-wider">{proj.project_client || 'Personal'}</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                                <div className="text-right">
+                                                                                    <div className="text-lg font-black text-blue-400 tracking-tight">{proj.allocation_hours}h</div>
+                                                                                    <div className="text-[9px] text-blue-400/50 font-bold uppercase">Leave</div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    );
+                                                })()}
                                             </div>
                                         </div>
 
@@ -1048,14 +1133,16 @@ export default function ProjectAssignments() {
                                                 onChange={(val) => setFormData({ ...formData, user_id: val })}
                                                 icon={IoPersonOutline}
                                             />
-                                            <SearchableSelect
-                                                label="Select Project"
-                                                placeholder="Choose a project..."
-                                                options={allProjects.map(p => ({ label: `[${p.code}] ${p.name}`, value: p.id, subLabel: p.client }))}
-                                                value={formData.project_id}
-                                                onChange={(val) => setFormData({ ...formData, project_id: val })}
-                                                icon={IoLayersOutline}
-                                            />
+                                            {activeTab !== 'ptos' && (
+                                                <SearchableSelect
+                                                    label="Select Project"
+                                                    placeholder="Choose a project..."
+                                                    options={allProjects.filter(p => p.category !== 'PTO').map(p => ({ label: `[${p.code}] ${p.name}`, value: p.id, subLabel: p.client }))}
+                                                    value={formData.project_id}
+                                                    onChange={(val) => setFormData({ ...formData, project_id: val })}
+                                                    icon={IoLayersOutline}
+                                                />
+                                            )}
                                         </>
                                     )}
 
