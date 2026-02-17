@@ -33,9 +33,9 @@ const SearchableSelect = ({
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
-    // Update coordinates when opening
-    useEffect(() => {
-        if (isOpen && triggerRef.current) {
+    // Update coordinates when opening or scrolling
+    const updateCoords = () => {
+        if (triggerRef.current) {
             const rect = triggerRef.current.getBoundingClientRect();
             setCoords({
                 top: rect.bottom + window.scrollY,
@@ -43,17 +43,22 @@ const SearchableSelect = ({
                 width: rect.width
             });
         }
-    }, [isOpen]);
+    };
 
-    // Close on window resize or scroll to avoid floating dropdowns
     useEffect(() => {
         if (isOpen) {
-            const handleUpdate = () => setIsOpen(false);
-            window.addEventListener("resize", handleUpdate);
-            window.addEventListener("scroll", handleUpdate, true);
+            updateCoords();
+        }
+    }, [isOpen]);
+
+    // Update position on scroll/resize instead of closing
+    useEffect(() => {
+        if (isOpen) {
+            window.addEventListener("resize", updateCoords);
+            window.addEventListener("scroll", updateCoords, true);
             return () => {
-                window.removeEventListener("resize", handleUpdate);
-                window.removeEventListener("scroll", handleUpdate, true);
+                window.removeEventListener("resize", updateCoords);
+                window.removeEventListener("scroll", updateCoords, true);
             };
         }
     }, [isOpen]);
@@ -68,10 +73,10 @@ const SearchableSelect = ({
         <AnimatePresence>
             {isOpen && (
                 <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ type: "spring", damping: 30, stiffness: 400 }}
                     style={{
                         position: "absolute",
                         top: coords.top + 8,
@@ -79,9 +84,9 @@ const SearchableSelect = ({
                         width: coords.width,
                         zIndex: 10000,
                     }}
-                    className="portal-dropdown border border-white/10 rounded-2xl overflow-hidden shadow-2xl bg-zinc-950 backdrop-blur-xl ring-1 ring-white/10"
+                    className="portal-dropdown border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-zinc-900 border-white/10 ring-1 ring-white/10"
                 >
-                    <div className="p-3 border-b border-white/5 space-y-2 bg-zinc-900/50">
+                    <div className="p-3 border-b border-white/5 space-y-2 bg-zinc-950/50">
                         <div className="relative">
                             <IoSearchOutline
                                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
@@ -96,7 +101,7 @@ const SearchableSelect = ({
                             />
                         </div>
                     </div>
-                    <div className="max-h-60 overflow-y-auto custom-scrollbar p-1.5">
+                    <div className="max-h-60 overflow-y-auto custom-scrollbar p-1.5 bg-zinc-900">
                         {filtered.map((opt) => (
                             <button
                                 key={opt.value}
@@ -107,8 +112,8 @@ const SearchableSelect = ({
                                     setSearch("");
                                 }}
                                 className={`w-full px-4 py-3 text-left text-[11px] rounded-xl transition-all flex items-center justify-between group ${String(value) === String(opt.value)
-                                    ? "bg-amber-500/10 text-amber-500 font-black shadow-inner"
-                                    : "text-gray-400 hover:bg-white/5 hover:text-white"
+                                    ? "bg-amber-500/10 text-amber-500 font-black"
+                                    : "text-gray-400 hover:bg-white/10 hover:text-white"
                                     }`}
                             >
                                 <div className="flex flex-col">

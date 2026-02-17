@@ -97,3 +97,16 @@ export const updateComment = async (ticketId, commentId, commentData) => {
         throw error;
     }
 };
+
+// Bulk Create Tickets
+export const createBulkTickets = async (tickets) => {
+    try {
+        const response = await axios.post(`${API_URL}/bulk`, { tickets }, {
+            headers: getAuthHeader()
+        });
+        return response.data;
+    } catch (error) {
+        console.error("Error creating bulk tickets:", error);
+        throw error;
+    }
+};

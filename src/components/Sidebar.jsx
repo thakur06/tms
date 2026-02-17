@@ -22,7 +22,7 @@ import {
 import { useAuth } from '../context/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Sidebar({ isOpen, onClose }) {
+export default function Sidebar({ isOpen, onClose, isCollapsed }) {
   const location = useLocation();
   const { logout, user } = useAuth();
   const [openFolders, setOpenFolders] = useState(['Tickets', 'Timesheets', 'Administration']);
@@ -49,6 +49,7 @@ export default function Sidebar({ isOpen, onClose }) {
       links: [
         { path: '/tickets', label: 'All Tickets', icon: IoTicketOutline, activeIcon: IoTicket },
         { path: '/my-tickets', label: 'My Tickets', icon: IoTicketOutline, activeIcon: IoTicket },
+        { path: '/bulk-tickets', label: 'Bulk Entry', icon: IoTicketOutline, activeIcon: IoTicketSharp },
       ]
     },
     {
@@ -109,13 +110,18 @@ export default function Sidebar({ isOpen, onClose }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full w-64 bg-zinc-950 border-r border-white/5 z-50 transition-transform duration-300 transform lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
-          }`}
+        className={`fixed top-0 left-0 h-full bg-zinc-950 border-r border-white/5 z-50 transition-all duration-300 transform lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+          } ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}`}
       >
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full overflow-hidden">
           {/* Logo Area */}
           <div className="h-20 lg:h-24 flex items-center justify-center border-b border-white/5 bg-black/20 shrink-0">
-            <img src="/logo.png" alt="logo" className="h-12 lg:h-16 object-contain brightness-0 invert" />
+            <motion.img
+              animate={{ scale: isCollapsed ? 0.7 : 1 }}
+              src="/logo.png"
+              alt="logo"
+              className={`h-12 lg:h-16 object-contain brightness-0 invert transition-all ${isCollapsed ? 'lg:h-10' : ''}`}
+            />
           </div>
 
           {/* Navigation */}
@@ -133,11 +139,12 @@ export default function Sidebar({ isOpen, onClose }) {
                   className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${active
                     ? 'text-zinc-950 bg-amber-500 shadow-lg shadow-amber-500/20 font-black'
                     : 'text-gray-400 hover:text-white hover:bg-white/5 font-bold'
-                    }`}
+                    } ${isCollapsed ? 'lg:justify-center lg:px-0' : ''}`}
+                  title={isCollapsed ? link.label : ''}
                 >
                   <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'text-white scale-110' : 'text-gray-500 group-hover:text-amber-500 group-hover:scale-110'}`} />
-                  <span className="text-[11px] font-bold tracking-tight">{link.label}</span>
-                  {active && (
+                  {!isCollapsed && <span className="text-[11px] font-bold tracking-tight">{link.label}</span>}
+                  {active && !isCollapsed && (
                     <motion.div
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
@@ -166,20 +173,25 @@ export default function Sidebar({ isOpen, onClose }) {
                     {/* Folder Header */}
                     <button
                       onClick={() => toggleFolder(group.name)}
-                      className="w-full flex items-center justify-between px-4 py-2 text-gray-500 hover:text-white transition-colors group"
+                      className={`w-full flex items-center justify-between px-4 py-2 text-gray-500 hover:text-white transition-colors group ${isCollapsed ? 'lg:justify-center lg:px-0' : ''}`}
+                      title={isCollapsed ? group.name : ''}
                     >
                       <div className="flex items-center gap-3">
                         <GroupIcon className={`w-4 h-4 transition-colors ${isOpen ? 'text-amber-500' : 'text-gray-600'}`} />
-                        <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isOpen ? 'text-gray-300' : 'text-gray-500'}`}>
-                          {group.name}
-                        </span>
+                        {!isCollapsed && (
+                          <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isOpen ? 'text-gray-300' : 'text-gray-500'}`}>
+                            {group.name}
+                          </span>
+                        )}
                       </div>
-                      <motion.div
-                        animate={{ rotate: isOpen ? 180 : 0 }}
-                        className="text-gray-600 group-hover:text-amber-500"
-                      >
-                        <IoChevronDown size={12} />
-                      </motion.div>
+                      {!isCollapsed && (
+                        <motion.div
+                          animate={{ rotate: isOpen ? 180 : 0 }}
+                          className="text-gray-600 group-hover:text-amber-500"
+                        >
+                          <IoChevronDown size={12} />
+                        </motion.div>
+                      )}
                     </button>
 
                     {/* Links in Folder */}
@@ -208,11 +220,12 @@ export default function Sidebar({ isOpen, onClose }) {
                                   className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${active
                                     ? 'text-zinc-950 bg-amber-500 shadow-lg shadow-amber-500/20 font-black'
                                     : 'text-gray-400 hover:text-white hover:bg-white/5 font-bold'
-                                    }`}
+                                    } ${isCollapsed ? 'lg:justify-center lg:px-0' : ''}`}
+                                  title={isCollapsed ? link.label : ''}
                                 >
                                   <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'text-white scale-110' : 'text-gray-500 group-hover:text-amber-500 group-hover:scale-110'}`} />
-                                  <span className="text-[11px] font-bold tracking-tight">{link.label}</span>
-                                  {active && (
+                                  {!isCollapsed && <span className="text-[11px] font-bold tracking-tight">{link.label}</span>}
+                                  {active && !isCollapsed && (
                                     <motion.div
                                       initial={{ scale: 0 }}
                                       animate={{ scale: 1 }}

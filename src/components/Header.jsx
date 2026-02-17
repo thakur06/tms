@@ -13,7 +13,7 @@ import { toast } from 'react-toastify';
 import LogoutConfirmationModal from './LogoutConfirmationModal';
 import UserAvatar from './UserAvatar';
 
-export default function Header({ onMenuClick }) {
+export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
   const server = import.meta.env.VITE_SERVER_ADDRESS;
   const { user, logout } = useAuth();
   const { theme, setTheme } = useTheme();
@@ -146,6 +146,20 @@ export default function Header({ onMenuClick }) {
               text-gray-400 hover:bg-white/5 hover:text-white"
           >
             <IoMenu className="w-6 h-6" />
+          </button>
+
+          {/* Desktop Collapse Toggle */}
+          <button
+            onClick={onCollapseToggle}
+            className="hidden lg:flex p-2 -ml-2 rounded-lg transition-colors 
+              text-gray-400 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/10"
+          >
+            <motion.div
+              animate={{ rotate: isCollapsed ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+            >
+              <IoMenu className="w-5 h-5" />
+            </motion.div>
           </button>
 
           <div>

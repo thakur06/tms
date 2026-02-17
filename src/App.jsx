@@ -16,6 +16,7 @@ import ProjectAssignments from './pages/ProjectAssignments';
 import Tickets from './pages/Tickets';
 import MyTickets from './pages/MyTickets';
 import TicketViewPage from './pages/TicketViewPage';
+import BulkTicketCreate from './pages/BulkTicketCreate';
 import NotFound from './pages/NotFound';
 import ProtectedRoutes from "./security/ProtectedRoutes";
 import PublicRoute from "./security/PublicRoute";
@@ -67,6 +68,7 @@ function AppContent() {
         } />
         <Route path="/tickets" element={<Tickets />} />
         <Route path="/tickets/:id" element={<TicketViewPage />} />
+        <Route path="/bulk-tickets" element={<BulkTicketCreate />} />
         <Route path="/my-tickets" element={<MyTickets />} />
         {/* <Route path="/reports" element={<TimeReports />} /> */}
         <Route path="/approvals" element={<TimesheetApprovalsPage />} />
