@@ -35,7 +35,8 @@ const ProjectListTab = ({
 
     // Props for Drawer (if passed through)
     selectedAnalyticsUser,
-    setSelectedAnalyticsUser
+    setSelectedAnalyticsUser,
+    allocationThreshold = 160
 }) => {
 
     // Internal handler for forecast click
@@ -97,15 +98,15 @@ const ProjectListTab = ({
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
                                         <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Total Work Hours</span>
-                                        <span className={`text-xs font-black ${user.displayAllocation > 160 ? 'text-red-500' : 'text-emerald-500'}`}>
-                                            {user.displayAllocation} / 160
+                                        <span className={`text-xs font-black ${user.displayAllocation > parseInt(allocationThreshold) ? 'text-red-500' : 'text-emerald-500'}`}>
+                                            {user.displayAllocation} / {allocationThreshold}
                                         </span>
                                     </div>
                                     <div className="h-2 bg-white/5 rounded-full overflow-hidden">
                                         <motion.div
                                             initial={{ width: 0 }}
-                                            animate={{ width: `${Math.min((user.displayAllocation / 160) * 100, 100)}%` }}
-                                            className={`h-full rounded-full ${user.displayAllocation > 160 ? 'bg-red-500' : 'bg-emerald-500'}`}
+                                            animate={{ width: `${Math.min((user.displayAllocation / parseInt(allocationThreshold)) * 100, 100)}%` }}
+                                            className={`h-full rounded-full ${user.displayAllocation > parseInt(allocationThreshold) ? 'bg-red-500' : 'bg-emerald-500'}`}
                                         />
                                     </div>
                                 </div>
@@ -119,6 +120,11 @@ const ProjectListTab = ({
                                                         <div className="min-w-0">
                                                             <p className="text-xs font-black text-white truncate">{proj.project_name}</p>
                                                             <p className="text-[10px] text-gray-400 font-bold truncate">{proj.project_client}</p>
+                                                            {proj.remarks && (
+                                                                <p className="text-[9px] text-amber-500 font-extrabold italic mt-1 bg-amber-500/10 px-1.5 py-0.5 rounded-md w-fit">
+                                                                    {proj.remarks}
+                                                                </p>
+                                                            )}
                                                         </div>
                                                     </div>
                                                     <div className="flex flex-col items-end gap-1 shrink-0">
@@ -131,7 +137,7 @@ const ProjectListTab = ({
                                                                     setFormData({
                                                                         user_id: user.user_id,
                                                                         project_id: proj.project_id,
-                                                                        allocation_hours: proj.allocation_hours,
+                                                                        allocation_hours: proj.base_hours || proj.allocation_hours,
                                                                         start_date: proj.start_date.split('T')[0],
                                                                         end_date: proj.end_date.split('T')[0]
                                                                     });
@@ -184,12 +190,19 @@ const ProjectListTab = ({
                                 <ResponsiveContainer width="100%" height="100%">
                                     <PieChart>
                                         <Pie
-                                            data={user.activeProjects.length > 0 ? user.activeProjects : [{ project_name: 'Free', allocation_hours: 160 }]}
+                                            data={[
+                                                ...user.activeProjects,
+                                                ...(user.displayAllocation < parseInt(allocationThreshold) ? [{
+                                                    project_name: 'Free',
+                                                    allocation_hours: Math.max(0, parseInt(allocationThreshold) - user.displayAllocation),
+                                                    project_category: 'FREE'
+                                                }] : [])
+                                            ]}
                                             cx="50%"
                                             cy="50%"
                                             innerRadius={45}
                                             outerRadius={65}
-                                            paddingAngle={user.displayProjects.length > 0 ? 5 : 0}
+                                            paddingAngle={(user.displayProjects.length > 0 && user.displayAllocation < parseInt(allocationThreshold)) ? 5 : 0}
                                             dataKey="allocation_hours"
                                             nameKey="project_name"
                                             stroke="none"
@@ -205,18 +218,21 @@ const ProjectListTab = ({
                                                 if (el) el.style.opacity = '1';
                                             }}
                                         >
-                                            {user.activeProjects.length > 0 ? (
-                                                user.activeProjects.map((entry, index) => {
-                                                    const isLeave = entry.project_category === 'PTO' || entry.project_name === 'Leave';
-                                                    return <Cell key={`cell-${index}`} fill={isLeave ? '#3B82F6' : COLORS[index % COLORS.length]} />;
-                                                })
-                                            ) : (
-                                                <Cell fill="#3B3B3B" />
-                                            )}
+                                            {[
+                                                ...user.activeProjects,
+                                                ...(user.displayAllocation < parseInt(allocationThreshold) ? [{ project_category: 'FREE' }] : [])
+                                            ].map((entry, index) => {
+                                                if (entry.project_category === 'FREE') return <Cell key="cell-free" fill="#3B3B3B" opacity={0.3} />;
+                                                const isLeave = entry.project_category === 'PTO' || entry.project_name === 'Leave';
+                                                return <Cell key={`cell-${index}`} fill={isLeave ? '#3B82F6' : COLORS[index % COLORS.length]} />;
+                                            })}
                                         </Pie>
-                                        {user.activeProjects.length > 0 && (
+                                        {user.displayAllocation > 0 && (
                                             <Tooltip
-                                                formatter={(value) => `${value} Hrs`}
+                                                formatter={(value) => {
+                                                    const percentage = ((value / parseInt(allocationThreshold)) * 100).toFixed(1);
+                                                    return [`${percentage}%`, 'Allocation'];
+                                                }}
                                                 contentStyle={{
                                                     backgroundColor: '#D3D3D3',
                                                     border: 'none',
@@ -240,9 +256,9 @@ const ProjectListTab = ({
                                     id={`load-info-${user.user_id}`}
                                     className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 transition-opacity duration-300"
                                 >
-                                    <span className="text-[10px] font-black text-gray-500 uppercase">Monthly</span>
-                                    <span className={`text-lg font-black ${user.displayAllocation > 160 ? 'text-red-500' : 'text-white'}`}>
-                                        {user.displayAllocation}h
+                                    <span className="text-[10px] font-black text-gray-500 uppercase">Load %</span>
+                                    <span className={`text-lg font-black ${user.displayAllocation > parseInt(allocationThreshold) ? 'text-red-500' : 'text-white'}`}>
+                                        {Math.round((user.displayAllocation / parseInt(allocationThreshold)) * 100)}%
                                     </span>
                                 </div>
                             </div>

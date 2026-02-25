@@ -14,7 +14,8 @@ const SearchableSelect = ({
     showLabel = true,
     error = "",
     variant = "default", // 'default' | 'minimal'
-    disabled = false
+    disabled = false,
+    compact = false
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const [search, setSearch] = useState("");
@@ -83,6 +84,7 @@ const SearchableSelect = ({
                         top: coords.top + 8,
                         left: coords.left,
                         width: coords.width,
+                        minWidth: compact ? "160px" : "200px",
                         zIndex: 10000,
                     }}
                     className="portal-dropdown border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-zinc-900"
@@ -112,22 +114,22 @@ const SearchableSelect = ({
                                     setIsOpen(false);
                                     setSearch("");
                                 }}
-                                className={`w-full px-4 py-3 text-left text-[11px] rounded-xl transition-all flex items-center justify-between group ${String(value) === String(opt.value)
+                                className={`w-full px-4 text-left rounded-xl transition-all flex items-center justify-between group ${compact ? 'py-1.5 text-[9px]' : 'py-3 text-[11px]'} ${String(value) === String(opt.value)
                                     ? "bg-amber-500/10 text-amber-500 font-black"
                                     : "text-gray-400 hover:bg-white/10 hover:text-white"
                                     }`}
                             >
                                 <div className="flex flex-col">
                                     <span className="truncate">{opt.label}</span>
-                                    {opt.subLabel && <span className="text-[10px] opacity-50 font-medium">{opt.subLabel}</span>}
+                                    {opt.subLabel && <span className={`${compact ? 'text-[8px]' : 'text-[10px]'} opacity-50 font-medium`}>{opt.subLabel}</span>}
                                 </div>
                                 {String(value) === String(opt.value) && (
-                                    <IoCheckmarkCircle className="shrink-0 text-amber-500" size={16} />
+                                    <IoCheckmarkCircle className="shrink-0 text-amber-500" size={compact ? 11 : 16} />
                                 )}
                             </button>
                         ))}
                         {filtered.length === 0 && (
-                            <div className="py-6 text-center text-gray-500 text-[10px] font-bold italic uppercase tracking-widest">
+                            <div className={`py-6 text-center text-gray-500 font-bold italic uppercase tracking-widest ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
                                 No matching results
                             </div>
                         )}
@@ -151,7 +153,7 @@ const SearchableSelect = ({
 
     return (
         <div
-            className={`searchable-select-container flex-1 transition-all ${showLabel ? 'space-y-1.5' : ''} ${className} ${disabled ? 'opacity-50 pointer-events-none' : ''}`}
+            className={`searchable-select-container transition-all ${showLabel ? 'space-y-1.5' : ''} ${className} ${disabled ? 'opacity-50 pointer-events-none' : ''}`}
             ref={containerRef}
         >
             {showLabel && (
@@ -167,14 +169,14 @@ const SearchableSelect = ({
                     type="button"
                     disabled={disabled}
                     onClick={() => setIsOpen(!isOpen)}
-                    className={`w-full flex items-center justify-between px-4 py-2.5 border rounded-xl text-xs font-bold transition-all ${getTriggerStyles()}`}
+                    className={`w-full flex items-center justify-between border rounded-xl font-bold transition-all ${compact ? 'px-3 py-2 text-[9.5px]' : 'px-4 py-2.5 text-xs'} ${getTriggerStyles()}`}
                 >
                     <span className={`truncate ${selectedOption ? "text-white" : "text-gray-500"}`}>
                         {selectedOption ? selectedOption.label : placeholder}
                     </span>
                     <IoChevronDown
                         className={`text-amber-500 shrink-0 transition-transform duration-300 ${isOpen ? "rotate-180" : ""}`}
-                        size={14}
+                        size={compact ? 11 : 14}
                     />
                 </button>
 

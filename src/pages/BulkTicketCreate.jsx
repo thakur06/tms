@@ -168,15 +168,15 @@ export default function BulkTicketCreate() {
                     <table className="w-full text-left border-collapse">
                         <thead>
                             <tr className="bg-zinc-950/50 border-b border-white/5">
-                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 w-12 text-center">#</th>
-                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[200px]">Project <span className="text-red-500">*</span></th>
-                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[220px]">Task Name <span className="text-red-500">*</span></th>
-                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 w-36">Priority</th>
-                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 w-36">Status</th>
-                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 w-40">Est. Date</th>
-                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[180px]">Reviewer</th>
-                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[200px]">Remarks (Desc)</th>
-                                <th className="p-4 text-[10px] font-black uppercase tracking-widest text-gray-500 w-12 text-center">Action</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-12 text-center">#</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[180px]">Project <span className="text-red-500">*</span></th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[200px]">Task Name <span className="text-red-500">*</span></th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-52">Priority</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-52">Status</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-44">Est. Date</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[200px]">Reviewer</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[220px]">Remarks (Desc)</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-12 text-center">Action</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/5">
@@ -199,7 +199,8 @@ export default function BulkTicketCreate() {
                                                 onChange={(val) => handleChange(row.id, 'project_id', val)}
                                                 placeholder="Select Project"
                                                 showLabel={false}
-                                                className="min-w-0"
+                                                compact={true}
+                                                className="w-full"
                                             />
                                         </td>
                                         <td className="p-2">
@@ -208,7 +209,7 @@ export default function BulkTicketCreate() {
                                                 value={row.title}
                                                 onChange={(e) => handleChange(row.id, 'title', e.target.value)}
                                                 placeholder="Enter task name..."
-                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-amber-500/50 placeholder-gray-700 font-medium transition-all"
+                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-amber-500/50 placeholder-gray-700 font-medium transition-all uppercase"
                                             />
                                         </td>
                                         <td className="p-2">
@@ -217,6 +218,8 @@ export default function BulkTicketCreate() {
                                                 value={row.priority}
                                                 onChange={(val) => handleChange(row.id, 'priority', val)}
                                                 showLabel={false}
+                                                compact={true}
+                                                className="w-full"
                                             />
                                         </td>
                                         <td className="p-2">
@@ -225,6 +228,8 @@ export default function BulkTicketCreate() {
                                                 value={row.status}
                                                 onChange={(val) => handleChange(row.id, 'status', val)}
                                                 showLabel={false}
+                                                compact={true}
+                                                className="w-full"
                                             />
                                         </td>
                                         <td className="p-2">
@@ -232,7 +237,7 @@ export default function BulkTicketCreate() {
                                                 type="date"
                                                 value={row.estimated_date}
                                                 onChange={(e) => handleChange(row.id, 'estimated_date', e.target.value)}
-                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-2 py-2.5 text-[11px] font-black text-amber-500 focus:outline-none focus:border-amber-500/50 scheme-dark"
+                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-2 py-1 text-[10px] font-black text-amber-500 focus:outline-none focus:border-amber-500/50 scheme-dark"
                                             />
                                         </td>
                                         <td className="p-2">
@@ -242,6 +247,8 @@ export default function BulkTicketCreate() {
                                                 onChange={(val) => handleChange(row.id, 'assignee_id', val)}
                                                 placeholder="Select Reviewer"
                                                 showLabel={false}
+                                                compact={true}
+                                                className="w-full"
                                             />
                                         </td>
                                         <td className="p-2">
@@ -250,7 +257,7 @@ export default function BulkTicketCreate() {
                                                 value={row.description}
                                                 onChange={(e) => handleChange(row.id, 'description', e.target.value)}
                                                 placeholder="Add remarks..."
-                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-4 py-2.5 text-xs text-gray-400 focus:text-white focus:outline-none transition-all placeholder:italic"
+                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-3 py-1.5 text-[10px] text-gray-400 focus:text-white focus:outline-none transition-all placeholder:italic"
                                             />
                                         </td>
                                         <td className="p-2 text-center">

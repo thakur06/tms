@@ -67,14 +67,12 @@ export default function PtoSpreadsheetView({ users, selectedDate, onSyncSuccess,
         try {
             const assignments = [];
             Object.entries(gridData).forEach(([key, hours]) => {
-                if (hours > 0) {
-                    const [userId, day] = key.split('_');
-                    assignments.push({
-                        user_id: parseInt(userId),
-                        day: parseInt(day),
-                        hours: hours
-                    });
-                }
+                const [userId, day] = key.split('_');
+                assignments.push({
+                    user_id: parseInt(userId),
+                    day: parseInt(day),
+                    hours: hours
+                });
             });
 
             const token = localStorage.getItem('token');

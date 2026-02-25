@@ -1,7 +1,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
-import { IoCloseOutline, IoLayersOutline, IoAddOutline } from 'react-icons/io5';
+import { IoCloseOutline, IoLayersOutline, IoAddOutline,IoStatsChartOutline } from 'react-icons/io5';
 import UserAvatar from '../UserAvatar';
 
 const UserAvailabilityDrawer = ({
@@ -75,10 +75,28 @@ const UserAvailabilityDrawer = ({
                                 </div>
                             </div>
 
-                            {/* Note: I'm commenting out the Availability Forecast section as it relied on external state (timelineLoading, availabilityForecast) logic 
-                                inside the drawer previously. If needed, we can pass those as props. For now, simplifying to just project list.
-                                If the user wants the forecast card back in the drawer, we can uncomment and pass props.
-                            */}
+                            <div className="p-6 rounded-[32px] bg-linear-to-br from-amber-500/10 to-transparent border border-amber-500/20 shadow-xl relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-3 opacity-20 group-hover:opacity-40 transition-opacity">
+                                    <IoStatsChartOutline size={40} className="text-amber-500" />
+                                </div>
+                                <div className="relative z-10">
+                                    <span className="text-[10px] font-black text-amber-500/60 uppercase tracking-widest">Availability Forecast</span>
+                                    <h5 className="text-2xl font-black text-white mt-1">
+                                        {selectedUser.nextFreeDate === 'Currently Free' ? (
+                                            <span className="text-emerald-500">Available Now</span>
+                                        ) : selectedUser.nextFreeDate === 'No Free Date Found' ? (
+                                            <span className="text-red-500 italic">Fully Booked</span>
+                                        ) : (
+                                            <>
+                                                Free on <span className="text-amber-500">{new Date(selectedUser.nextFreeDate).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
+                                            </>
+                                        )}
+                                    </h5>
+                                    <p className="text-[10px] text-gray-500 font-bold mt-2 uppercase tracking-tight">
+                                        Based on {selectedUser.displayAllocation}h current load
+                                    </p>
+                                </div>
+                            </div>
 
                             <div className="space-y-4">
                                 <div className="flex items-center justify-between px-1">

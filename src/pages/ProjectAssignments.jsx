@@ -27,7 +27,8 @@ export default function ProjectAssignments() {
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
     const [deptFilter, setDeptFilter] = useState('Process');
-    const [allocationThreshold, setAllocationThreshold] = useState('160');
+    const [allocationThreshold, setAllocationThreshold] = useState(160); // Now managed dynamically
+    const [currentPeriodRange, setCurrentPeriodRange] = useState({ start: '', end: '' });
     const [sortConfig, setSortConfig] = useState({ key: 'name', direction: 'asc' });
     const [isDeptOpen, setIsDeptOpen] = useState(false);
     const [allDepts, setAllDepts] = useState(['All']);
@@ -47,6 +48,25 @@ export default function ProjectAssignments() {
         end_date: selectedDate
     });
 
+    // Helper to count workdays (Mon-Fri)
+    const countWorkdays = (startStr, endStr) => {
+        if (!startStr || !endStr) return 0;
+        const start = new Date(startStr);
+        const end = new Date(endStr);
+        let count = 0;
+        let cur = new Date(start);
+        while (cur <= end) {
+            const day = cur.getDay();
+            if (day !== 0 && day !== 6) count++;
+            cur.setDate(cur.getDate() + 1);
+        }
+        return count;
+    };
+
+    const workdays = countWorkdays(formData.start_date, formData.end_date);
+    const avgHoursPerDay = workdays > 0 ? (formData.allocation_hours / workdays).toFixed(1) : 0;
+    const isOverloaded = parseFloat(avgHoursPerDay) > 8;
+
     // Analytics State
     const [activeTab, setActiveTab] = useState('list'); // 'list' or 'analytics' or 'ptos'
 
@@ -64,14 +84,25 @@ export default function ProjectAssignments() {
             const token = localStorage.getItem('token');
             const headers = { Authorization: `Bearer ${token}` };
 
+            const today = new Date().toISOString().split('T')[0];
             const dateObj = new Date(selectedDate);
+            const monthStart = new Date(dateObj.getFullYear(), dateObj.getMonth(), 1).toISOString().split('T')[0];
+            const monthEnd = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0).toISOString().split('T')[0];
+
+            // Goal: Today to month's last day (if current month), else whole month
+            const rStart = (today > monthStart && today <= monthEnd) ? today : monthStart;
+            const rEnd = monthEnd;
+
+            setCurrentPeriodRange({ start: rStart, end: rEnd });
+            const workdaysCount = countWorkdays(rStart, rEnd);
+            setAllocationThreshold(workdaysCount * 8);
+
             const [assignmentsRes, usersRes, projectsRes] = await Promise.all([
                 axios.get(`${server}/api/user-projects`, {
                     headers,
                     params: {
-                        date: selectedDate,
-                        month: dateObj.getMonth() + 1,
-                        year: dateObj.getFullYear()
+                        startDate: rStart,
+                        endDate: rEnd
                     }
                 }),
                 axios.get(`${server}/api/users?limit=1000`, { headers }),
@@ -121,10 +152,15 @@ export default function ProjectAssignments() {
         }
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`${server}/api/user-projects`, formData, {
+            const response = await axios.post(`${server}/api/user-projects`, formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success('Project assigned successfully');
+            if (response.data?.pto_hours_added > 0) {
+                toast.info(`there are pto ${response.data.pto_hours_added} hrs in between the assignment`, {
+                    duration: 6000
+                });
+            }
             setIsAssignModalOpen(false);
             fetchData();
         } catch (err) {
@@ -140,7 +176,7 @@ export default function ProjectAssignments() {
         }
         try {
             const token = localStorage.getItem('token');
-            await axios.put(`${server}/api/user-projects/${selectedAssignment.id}`, {
+            const response = await axios.put(`${server}/api/user-projects/${selectedAssignment.id}`, {
                 allocation_hours: formData.allocation_hours,
                 start_date: formData.start_date,
                 end_date: formData.end_date
@@ -148,6 +184,11 @@ export default function ProjectAssignments() {
                 headers: { Authorization: `Bearer ${token}` }
             });
             toast.success('Assignment updated successfully');
+            if (response.data?.pto_hours_added > 0) {
+                toast.info(`there are pto ${response.data.pto_hours_added} hrs in between the assignment`, {
+                    duration: 6000
+                });
+            }
             setIsEditModalOpen(false);
             fetchData();
         } catch (err) {
@@ -175,19 +216,43 @@ export default function ProjectAssignments() {
             ...data,
             pto_hours: ptoProjects.reduce((sum, p) => sum + p.allocation_hours, 0),
             work_hours: workProjects.reduce((sum, p) => sum + p.allocation_hours, 0),
-            displayProjects: activeTab === 'ptos' ? ptoProjects : workProjects,
-            // Filter projects active on the selected date for the Pie Chart
-            activeProjects: data.projects.filter(p => {
-                const s = p.start_date.split('T')[0];
-                const e = p.end_date.split('T')[0];
-                return selectedDate >= s && selectedDate <= e;
-            }),
-            // Recalculate allocation based on ACTIVE projects only
-            displayAllocation: data.projects.filter(p => {
-                const s = p.start_date.split('T')[0];
-                const e = p.end_date.split('T')[0];
-                return selectedDate >= s && selectedDate <= e;
-            }).reduce((sum, p) => sum + p.allocation_hours, 0)
+            displayProjects: (activeTab === 'ptos' ? ptoProjects : workProjects),
+            // For monthly view, all projects returned are relevant since we queried the exact range
+            activeProjects: data.projects,
+            displayAllocation: data.projects.reduce((sum, p) => sum + p.allocation_hours, 0),
+            // Prediction: Next Free Date
+            nextFreeDate: (() => {
+                const threshold = parseInt(allocationThreshold);
+                const currentLoad = data.projects.filter(p => {
+                    const s = p.start_date.split('T')[0];
+                    const e = p.end_date.split('T')[0];
+                    return selectedDate >= s && selectedDate <= e;
+                }).reduce((sum, p) => sum + p.allocation_hours, 0);
+
+                if (currentLoad < threshold) return 'Currently Free';
+
+                // Find the first date where load drops below threshold
+                const candidates = data.projects
+                    .filter(p => new Date(p.end_date) >= new Date(selectedDate))
+                    .map(p => {
+                        const d = new Date(p.end_date);
+                        d.setDate(d.getDate() + 1);
+                        return d.toISOString().split('T')[0];
+                    });
+
+                candidates.sort();
+
+                for (const date of candidates) {
+                    const loadOnDate = data.projects.filter(p => {
+                        const s = p.start_date.split('T')[0];
+                        const e = p.end_date.split('T')[0];
+                        return date >= s && date <= e;
+                    }).reduce((sum, p) => sum + p.allocation_hours, 0);
+
+                    if (loadOnDate < threshold) return date;
+                }
+                return 'No Free Date Found';
+            })()
         };
     }).filter(u => {
         const matchesSearch = (u.user_name || '').toLowerCase().includes(search.toLowerCase()) ||
@@ -297,16 +362,14 @@ export default function ProjectAssignments() {
                     />
                 </div>
 
-                <div className="relative min-w-[140px] group">
-                    <IoStatsChartOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors w-4 h-4" />
-                    <input
-                        type="number"
-                        placeholder="Forecast Threshold Hrs"
-                        className="w-full bg-zinc-900 border border-white/10 rounded-xl pl-10 pr-4 py-2 text-[11px] font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all shadow-sm text-white placeholder-gray-500 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
-                        value={allocationThreshold}
-                        title="Threshold for calculating availability forecast"
-                        onChange={(e) => setAllocationThreshold(e.target.value)}
-                    />
+                <div className="relative min-w-[120px] group">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 antialiased">
+                        <IoStatsChartOutline size={16} />
+                    </div>
+                    <div className="w-full bg-zinc-900 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-[11px] font-black text-white shadow-sm flex items-center gap-2">
+                        <span className="text-gray-500 uppercase tracking-tighter">Cap:</span>
+                        <span className="text-amber-500">{allocationThreshold}h</span>
+                    </div>
                 </div>
 
                 <div className="relative min-w-[200px] group">
@@ -433,6 +496,7 @@ export default function ProjectAssignments() {
                             handleDeleteClick={handleDeleteClick}
                             selectedAnalyticsUser={selectedAnalyticsUser}
                             setSelectedAnalyticsUser={setSelectedAnalyticsUser}
+                            allocationThreshold={allocationThreshold}
                         />
                     )}
 
@@ -548,13 +612,32 @@ export default function ProjectAssignments() {
                                                 type="number"
                                                 required
                                                 min="1"
-                                                max="160"
-                                                className="w-full bg-zinc-900 border border-white/5 rounded-xl pl-4 pr-12 py-3 text-lg font-black text-white outline-none focus:border-amber-500 transition-all"
+                                                max="744"
+                                                className={`w-full bg-zinc-900 border ${isOverloaded ? 'border-amber-500/50 focus:border-amber-500' : 'border-white/5 focus:border-amber-500'} rounded-xl pl-4 pr-12 py-3 text-lg font-black text-white outline-none transition-all`}
                                                 value={formData.allocation_hours || ''}
                                                 onChange={(e) => setFormData({ ...formData, allocation_hours: e.target.value === '' ? '' : parseInt(e.target.value) })}
                                             />
                                             <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">Hrs</span>
                                         </div>
+
+                                        <AnimatePresence>
+                                            {isOverloaded && (
+                                                <motion.div
+                                                    initial={{ opacity: 0, height: 0, y: -10 }}
+                                                    animate={{ opacity: 1, height: 'auto', y: 0 }}
+                                                    exit={{ opacity: 0, height: 0, y: -10 }}
+                                                    className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-3 mt-2 overflow-hidden"
+                                                >
+                                                    <IoAlertCircleOutline className="text-amber-500 shrink-0 mt-0.5" size={16} />
+                                                    <div className="space-y-0.5">
+                                                        <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Workload Overload Alert</p>
+                                                        <p className="text-[11px] text-amber-500/80 font-bold leading-tight">
+                                                            Currently allocating {avgHoursPerDay}h a day over {workdays} working days. Standard is 8h.
+                                                        </p>
+                                                    </div>
+                                                </motion.div>
+                                            )}
+                                        </AnimatePresence>
                                     </div>
 
                                     <div className="pt-4 flex gap-3">

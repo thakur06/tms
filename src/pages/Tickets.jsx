@@ -9,10 +9,12 @@ import {
 import { getTickets } from '../api/tickets';
 import { getAllProjects } from '../api/projects';
 import { getAllUsers } from '../api/users';
-import TicketModal from '../components/tickets/TicketModal';
-import SearchableSelect from '../components/SearchableSelect';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
+import TicketDetail from '../components/tickets/TicketDetail';
+import SearchableSelect from '../components/SearchableSelect';
+import { updateTicket, getTicketById } from '../api/tickets';
+import { IoChatbubbleEllipsesOutline } from 'react-icons/io5';
 
 export default function Tickets() {
     const [tickets, setTickets] = useState([]);
@@ -29,6 +31,9 @@ export default function Tickets() {
     });
     const [sortBy, setSortBy] = useState('newest'); // 'newest', 'oldest', 'priority'
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedTicket, setSelectedTicket] = useState(null);
+    const [isSidePanelOpen, setIsSidePanelOpen] = useState(false);
+    const [createdByMeOnly, setCreatedByMeOnly] = useState(false);
     const navigate = useNavigate();
     const { user: currentUser } = useAuth();
 
@@ -52,6 +57,50 @@ export default function Tickets() {
             toast.error("Failed to load data");
         } finally {
             setLoading(false);
+        }
+    };
+
+    const handleStatusUpdate = async (id, newStatus) => {
+        try {
+            const ticket = tickets.find(t => t.id === id);
+            await updateTicket(id, { ...ticket, status: newStatus });
+            setTickets(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
+            toast.success("Status updated");
+        } catch (error) {
+            toast.error("Failed to update status");
+        }
+    };
+
+    const handlePriorityUpdate = async (id, newPriority) => {
+        try {
+            const ticket = tickets.find(t => t.id === id);
+            await updateTicket(id, { ...ticket, priority: newPriority });
+            setTickets(prev => prev.map(t => t.id === id ? { ...t, priority: newPriority } : t));
+            toast.success("Priority updated");
+        } catch (error) {
+            toast.error("Failed to update priority");
+        }
+    };
+
+    const handleAssigneeUpdate = async (id, newAssigneeId) => {
+        try {
+            const ticket = tickets.find(t => t.id === id);
+            const assigneeName = users.find(u => u.id === parseInt(newAssigneeId))?.name || 'Unassigned';
+            await updateTicket(id, { ...ticket, assignee_id: newAssigneeId });
+            setTickets(prev => prev.map(t => t.id === id ? { ...t, assignee_id: newAssigneeId, assignee_name: assigneeName } : t));
+            toast.success(`Assigned to ${assigneeName}`);
+        } catch (error) {
+            toast.error("Failed to update assignee");
+        }
+    };
+
+    const handleOpenSidePanel = async (ticket) => {
+        try {
+            const fullTicket = await getTicketById(ticket.id);
+            setSelectedTicket(fullTicket);
+            setIsSidePanelOpen(true);
+        } catch (error) {
+            toast.error("Failed to load ticket details");
         }
     };
 
@@ -104,11 +153,15 @@ export default function Tickets() {
     };
 
     const processedTickets = useMemo(() => {
-        let filtered = tickets.filter(t =>
-            t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            t.id.toString().includes(searchTerm) ||
-            (t.project_name || '').toLowerCase().includes(searchTerm.toLowerCase())
-        );
+        let filtered = tickets.filter(t => {
+            const matchesSearch = t.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                t.id.toString().includes(searchTerm) ||
+                (t.project_name || '').toLowerCase().includes(searchTerm.toLowerCase());
+
+            const matchesCreatedByMe = createdByMeOnly ? t.reporter_id === currentUser?.id : true;
+
+            return matchesSearch && matchesCreatedByMe;
+        });
 
         if (sortBy === 'priority') {
             const priorityMap = { 'Critical': 4, 'High': 3, 'Medium': 2, 'Low': 1 };
@@ -119,7 +172,7 @@ export default function Tickets() {
             return filtered.sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
         }
         return filtered;
-    }, [tickets, searchTerm, sortBy]);
+    }, [tickets, searchTerm, sortBy, createdByMeOnly, currentUser]);
 
     return (
         <div className="flex flex-col h-full bg-zinc-950 overflow-hidden">
@@ -139,6 +192,12 @@ export default function Tickets() {
                     </div>
 
                     <div className="flex items-center gap-3">
+                        <button
+                            onClick={() => setCreatedByMeOnly(!createdByMeOnly)}
+                            className={`h-11 px-6 rounded-xl font-black transition-all flex items-center gap-2 active:scale-95 border ${createdByMeOnly ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'}`}
+                        >
+                            {createdByMeOnly ? 'All Tickets' : 'Created by Me'}
+                        </button>
                         <button
                             onClick={() => setIsModalOpen(true)}
                             className="h-11 px-6 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 active:scale-95 group"
@@ -244,18 +303,23 @@ export default function Tickets() {
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.01 }}
-                                        onClick={() => navigate(`/tickets/${ticket.id}`)}
                                         className={`group grid grid-cols-1 lg:grid-cols-12 gap-4 px-6 py-4 hover:bg-white/2 cursor-pointer transition-all items-center relative border-l-4 ${ticket.priority === 'Critical' ? 'border-red-500 bg-red-500/5' :
                                             ticket.priority === 'High' ? 'border-orange-500 bg-orange-500/5' :
                                                 ticket.priority === 'Medium' ? 'border-amber-500 bg-amber-500/5' :
                                                     'border-emerald-500 bg-emerald-500/5'
                                             }`}
                                     >
-                                        <div className="col-span-1 text-[11px] font-mono font-black text-gray-600 group-hover:text-amber-500 transition-colors">
+                                        <div
+                                            onClick={() => navigate(`/tickets/${ticket.id}`)}
+                                            className="col-span-1 text-[11px] font-mono font-black text-gray-600 group-hover:text-amber-500 transition-colors"
+                                        >
                                             #{ticket.id}
                                         </div>
 
-                                        <div className="col-span-1 lg:col-span-4 min-w-0">
+                                        <div
+                                            onClick={() => navigate(`/tickets/${ticket.id}`)}
+                                            className="col-span-1 lg:col-span-2 min-w-0"
+                                        >
                                             <div className="flex flex-col gap-0.5">
                                                 <h3 className="text-xs font-black text-white group-hover:text-amber-500 transition-colors truncate uppercase leading-tight">
                                                     {ticket.title}
@@ -275,37 +339,73 @@ export default function Tickets() {
                                             </div>
                                         </div>
 
-                                        <div className="col-span-1 lg:col-span-2 flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500 shrink-0">
-                                                <IoBriefcaseOutline size={12} />
+                                        <div className="col-span-1 lg:col-span-1 flex items-center gap-1.5 min-w-0">
+                                            <div className="w-5 h-5 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center text-indigo-500 shrink-0">
+                                                <IoBriefcaseOutline size={10} />
                                             </div>
-                                            <span className="text-[10px] font-bold text-gray-400 truncate">{ticket.project_name || 'Generic'}</span>
+                                            <span className="text-[9px] font-bold text-gray-400 truncate uppercase tracking-tighter">{ticket.project_name || 'Generic'}</span>
                                         </div>
 
-                                        <div className="col-span-1 lg:col-span-2 flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-500 shrink-0">
-                                                <IoPersonOutline size={12} />
-                                            </div>
-                                            <span className="text-[10px] font-bold text-gray-400 truncate">{ticket.assignee_name || 'Unassigned'}</span>
+                                        <div className="col-span-1 lg:col-span-2 flex items-center">
+                                            <SearchableSelect
+                                                variant="minimal"
+                                                compact={true}
+                                                showLabel={false}
+                                                className="flex-1"
+                                                options={[
+                                                    { label: 'Unassigned', value: '' },
+                                                    ...users.map(u => ({ label: u.name, value: u.id }))
+                                                ]}
+                                                value={ticket.assignee_id || ''}
+                                                onChange={(val) => handleAssigneeUpdate(ticket.id, val)}
+                                                icon={IoPersonOutline}
+                                            />
                                         </div>
 
-                                        <div className="col-span-1 lg:col-span-1">
-                                            <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest border shadow-sm inline-block ${getStatusColor(ticket.status)}`}>
-                                                {displayStatus(ticket.status)}
-                                            </span>
+                                        <div className="col-span-1 lg:col-span-3">
+                                            <SearchableSelect
+                                                variant="minimal"
+                                                compact={true}
+                                                showLabel={false}
+                                                options={[
+                                                    { label: 'Created', value: 'Open' },
+                                                    { label: 'In Progress', value: 'In Progress' },
+                                                    { label: 'Under Review', value: 'Under Review' },
+                                                    { label: 'Closed', value: 'Done' },
+                                                    { label: 'Cancelled', value: 'Cancelled' }
+                                                ]}
+                                                value={ticket.status}
+                                                onChange={(val) => handleStatusUpdate(ticket.id, val)}
+                                                className={`w-full rounded-lg font-black uppercase tracking-widest ${getStatusColor(ticket.status)}`}
+                                            />
                                         </div>
 
-                                        <div className="col-span-1 lg:col-span-1 flex justify-center">
-                                            <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest flex items-center gap-1 shadow-sm ${getPriorityStyles(ticket.priority)}`}>
-                                                <div className="w-1 h-1 rounded-full bg-current" />
-                                                {ticket.priority}
-                                            </span>
+                                        <div className="col-span-1 lg:col-span-2">
+                                            <SearchableSelect
+                                                variant="minimal"
+                                                compact={true}
+                                                showLabel={false}
+                                                options={[
+                                                    { label: 'Critical', value: 'Critical' },
+                                                    { label: 'High', value: 'High' },
+                                                    { label: 'Medium', value: 'Medium' },
+                                                    { label: 'Low', value: 'Low' }
+                                                ]}
+                                                value={ticket.priority}
+                                                onChange={(val) => handlePriorityUpdate(ticket.id, val)}
+                                                className={`w-full rounded-lg font-black uppercase tracking-widest ${getPriorityStyles(ticket.priority)}`}
+                                            />
                                         </div>
 
-                                        <div className="col-span-1 lg:col-span-1 flex justify-end">
-                                            <div className="p-2 bg-white/5 rounded-lg text-gray-500 group-hover:bg-amber-500 group-hover:text-zinc-950 transition-all shadow-lg">
-                                                <IoEyeOutline size={14} />
-                                            </div>
+                                        <div className="col-span-1 lg:col-span-1 flex justify-end gap-2">
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleOpenSidePanel(ticket); }}
+                                                className="p-2 bg-white/5 rounded-lg text-gray-400 hover:bg-white/10 hover:text-white transition-all shadow-lg w-full flex items-center justify-center gap-2 border border-white/5 group-hover:border-amber-500/30"
+                                                title="View Comments"
+                                            >
+                                                <IoChatbubbleEllipsesOutline size={14} />
+                                                <span className="lg:hidden text-[10px] font-black uppercase">Comments</span>
+                                            </button>
                                         </div>
                                     </motion.div>
                                 ))}
@@ -322,6 +422,20 @@ export default function Tickets() {
                 projects={projects}
                 users={users}
             />
+
+            <AnimatePresence>
+                {isSidePanelOpen && selectedTicket && (
+                    <TicketDetail
+                        ticket={selectedTicket}
+                        onClose={() => setIsSidePanelOpen(false)}
+                        onUpdate={fetchData}
+                        onEdit={(ticket) => {
+                            setIsSidePanelOpen(false);
+                            // Optionally open full edit modal
+                        }}
+                    />
+                )}
+            </AnimatePresence>
         </div>
     );
 }

@@ -224,9 +224,9 @@ const AnalyticsTab = ({ server, selectedDate, allUsers }) => {
                             <ReferenceLine x={160} stroke="#10B981" strokeDasharray="3 3" strokeOpacity={0.5}>
                                 <Label value="Monthly Cap (160h)" position="insideTopRight" fill="#10B981" fontSize={10} fontWeight={900} offset={10} />
                             </ReferenceLine>
-                            <Bar dataKey="m0" name={getMonthName(0)} fill="url(#colorCurrent)" radius={[0, 4, 4, 0]} barSize={10} animationDuration={1200} />
-                            <Bar dataKey="m1" name={getMonthName(1)} fill="url(#colorNext)" radius={[0, 4, 4, 0]} barSize={10} animationDuration={1200} animationBegin={150} />
-                            <Bar dataKey="m2" name={getMonthName(2)} fill="url(#colorFuture)" radius={[0, 4, 4, 0]} barSize={10} animationDuration={1200} animationBegin={300} />
+                            <Bar dataKey="m0" name={getMonthName(0)} fill="url(#colorCurrent)" radius={[0, 4, 4, 0]} barSize={5} animationDuration={1200} />
+                            <Bar dataKey="m1" name={getMonthName(1)} fill="url(#colorNext)" radius={[0, 4, 4, 0]} barSize={5} animationDuration={1200} animationBegin={150} />
+                            <Bar dataKey="m2" name={getMonthName(2)} fill="url(#colorFuture)" radius={[0, 4, 4, 0]} barSize={5} animationDuration={1200} animationBegin={300} />
                         </BarChart>
                     </ResponsiveContainer>
                 </div>
