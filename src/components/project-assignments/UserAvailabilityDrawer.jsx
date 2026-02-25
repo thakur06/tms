@@ -1,7 +1,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
-import { IoCloseOutline, IoLayersOutline, IoAddOutline,IoStatsChartOutline } from 'react-icons/io5';
+import { IoCloseOutline, IoLayersOutline, IoAddOutline, IoStatsChartOutline } from 'react-icons/io5';
 import UserAvatar from '../UserAvatar';
 
 const UserAvailabilityDrawer = ({
@@ -24,7 +24,7 @@ const UserAvailabilityDrawer = ({
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         onClick={onClose}
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-9999"
+                        className="fixed inset-0 bg-black/60 backdrop-blur-md z-9999"
                     />
 
                     {/* Drawer */}

@@ -12,6 +12,7 @@ import { getAllUsers } from '../api/users';
 import { useAuth } from '../context/AuthContext';
 import { toast } from 'react-toastify';
 import TicketDetail from '../components/tickets/TicketDetail';
+import TicketModal from '../components/tickets/TicketModal';
 import SearchableSelect from '../components/SearchableSelect';
 import { updateTicket, getTicketById } from '../api/tickets';
 import { IoChatbubbleEllipsesOutline } from 'react-icons/io5';
@@ -287,11 +288,11 @@ export default function Tickets() {
                             {/* Table Header */}
                             <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-zinc-900/50 border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-gray-500">
                                 <div className="col-span-1">ID</div>
-                                <div className="col-span-4">Task Name</div>
-                                <div className="col-span-2">Project</div>
+                                <div className="col-span-2">Task Name</div>
+                                <div className="col-span-1">Project</div>
                                 <div className="col-span-2">Assignee</div>
-                                <div className="col-span-1">Status</div>
-                                <div className="col-span-1 text-center">Priority</div>
+                                <div className="col-span-3">Status</div>
+                                <div className="col-span-2 text-center">Priority</div>
                                 <div className="col-span-1 text-right">Action</div>
                             </div>
 
@@ -346,7 +347,7 @@ export default function Tickets() {
                                             <span className="text-[9px] font-bold text-gray-400 truncate uppercase tracking-tighter">{ticket.project_name || 'Generic'}</span>
                                         </div>
 
-                                        <div className="col-span-1 lg:col-span-2 flex items-center">
+                                        <div className="col-span-1 lg:col-span-2 flex items-center min-w-0">
                                             <SearchableSelect
                                                 variant="minimal"
                                                 compact={true}
@@ -362,7 +363,7 @@ export default function Tickets() {
                                             />
                                         </div>
 
-                                        <div className="col-span-1 lg:col-span-3">
+                                        <div className="col-span-1 lg:col-span-3 min-w-0">
                                             <SearchableSelect
                                                 variant="minimal"
                                                 compact={true}
@@ -380,7 +381,7 @@ export default function Tickets() {
                                             />
                                         </div>
 
-                                        <div className="col-span-1 lg:col-span-2">
+                                        <div className="col-span-1 lg:col-span-2 min-w-0">
                                             <SearchableSelect
                                                 variant="minimal"
                                                 compact={true}

@@ -169,11 +169,11 @@ export default function BulkTicketCreate() {
                         <thead>
                             <tr className="bg-zinc-950/50 border-b border-white/5">
                                 <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-12 text-center">#</th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[180px]">Project <span className="text-red-500">*</span></th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[200px]">Task Name <span className="text-red-500">*</span></th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-52">Priority</th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-52">Status</th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-44">Est. Date</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[200px]">Project <span className="text-red-500">*</span></th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[220px]">Task Name <span className="text-red-500">*</span></th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-64">Priority</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-64">Status</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-48">Est. Date</th>
                                 <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[200px]">Reviewer</th>
                                 <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[220px]">Remarks (Desc)</th>
                                 <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-12 text-center">Action</th>
