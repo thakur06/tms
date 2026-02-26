@@ -241,7 +241,7 @@ export default function TicketViewPage() {
                     href={url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-amber-400 hover:text-amber-300 hover:underline break-all inline-flex items-center gap-1 font-bold"
+                    className="text-(--primary) hover:text-(--secondary) hover:underline break-all inline-flex items-center gap-1 font-bold"
                     onClick={(e) => e.stopPropagation()}
                 >
                     <IoLinkOutline size={12} />
@@ -270,7 +270,7 @@ export default function TicketViewPage() {
                 result.push(text.slice(cursor, index));
             }
             result.push(
-                <span key={index} className="text-emerald-400 font-black bg-emerald-400/10 rounded-lg px-2 py-0.5 border border-emerald-400/20 mx-1 inline-block text-[11px] uppercase tracking-wider backdrop-blur-sm">
+                <span key={index} className="text-(--accent) font-black bg-(--accent-glow) rounded-lg px-2 py-0.5 border border-(--accent-glow) mx-1 inline-block text-[11px] uppercase tracking-wider backdrop-blur-sm">
                     @{name}
                 </span>
             );
@@ -284,7 +284,7 @@ export default function TicketViewPage() {
 
     if (loading) return (
         <div className="flex flex-col items-center justify-center h-full bg-zinc-950 gap-4">
-            <div className="w-12 h-12 border-4 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+            <div className="w-12 h-12 border-4 border-(--primary-glow) border-t-(--primary) rounded-full animate-spin" />
             <span className="text-gray-500 font-black uppercase tracking-[0.3em] text-[10px]">Synchronizing Intel...</span>
         </div>
     );
@@ -293,21 +293,21 @@ export default function TicketViewPage() {
 
     const getStatusStyles = (status) => {
         switch (status) {
-            case 'Open': return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
-            case 'In Progress': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
-            case 'Under Review': return 'text-purple-500 bg-purple-500/10 border-purple-500/20';
-            case 'Done': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
-            case 'Cancelled': return 'text-red-500 bg-red-500/10 border-red-500/20';
+            case 'Open': return 'text-(--primary) bg-(--primary-glow) border-(--primary-glow)';
+            case 'In Progress': return 'text-(--secondary) bg-(--secondary-glow) border-(--secondary-glow)';
+            case 'Under Review': return 'text-(--indigo) bg-(--indigo-glow) border-(--indigo-glow)';
+            case 'Done': return 'text-(--accent) bg-(--accent-glow) border-(--accent-glow)';
+            case 'Cancelled': return 'text-(--rose) bg-(--rose-glow) border-(--rose-glow)';
             default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
         }
     };
 
     const getPriorityColor = (priority) => {
         switch (priority) {
-            case 'Critical': return 'text-red-500 bg-red-500/10 border-red-500/20';
-            case 'High': return 'text-orange-500 bg-orange-500/10 border-orange-500/20';
-            case 'Medium': return 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20';
-            case 'Low': return 'text-green-500 bg-green-500/10 border-green-500/20';
+            case 'Critical': return 'text-(--rose) bg-(--rose-glow) border-(--rose-glow)';
+            case 'High': return 'text-(--orange) bg-(--orange-glow) border-(--orange-glow)';
+            case 'Medium': return 'text-(--amber) bg-(--amber-glow) border-(--amber-glow)';
+            case 'Low': return 'text-(--accent) bg-(--accent-glow) border-(--accent-glow)';
             default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
         }
     };
@@ -423,7 +423,7 @@ export default function TicketViewPage() {
                                                         key={u.id}
                                                         type="button"
                                                         onClick={() => handleMentionSelect(u)}
-                                                        className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs ${idx === selectedMentionIndex ? 'bg-amber-500/10 text-amber-500' : 'text-zinc-400 hover:bg-white/5'}`}
+                                                        className={`w-full flex items-center gap-2 px-3 py-2 text-left text-xs ${idx === selectedMentionIndex ? 'bg-(--primary-glow) text-(--primary)' : 'text-zinc-400 hover:bg-white/5'}`}
                                                     >
                                                         <span className="font-bold">@{u.name}</span>
                                                     </button>
@@ -445,7 +445,7 @@ export default function TicketViewPage() {
                                                 }
                                             }}
                                             placeholder="Leave a comment..."
-                                            className="w-full bg-transparent border-0 border-b border-white/10 py-2 px-0 text-sm focus:ring-0 focus:border-amber-500/50 transition-colors resize-none min-h-[40px] leading-relaxed placeholder-zinc-700"
+                                            className="w-full bg-transparent border-0 border-b border-white/10 py-2 px-0 text-sm focus:ring-0 focus:border-(--primary) transition-colors resize-none min-h-[40px] leading-relaxed placeholder-zinc-700"
                                             rows={1}
                                             style={{ minHeight: '40px' }}
                                             onInput={(e) => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px'; }}
@@ -467,7 +467,7 @@ export default function TicketViewPage() {
                             <div className="space-y-8 pl-4 border-l border-white/5 ml-4">
                                 {[...ticket.comments].reverse().map((c) => (
                                     <div key={c.id} className="group relative pl-8 pb-2">
-                                        <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-zinc-950 border border-white/10 group-hover:border-amber-500/50 transition-colors" />
+                                        <div className="absolute -left-[5px] top-2 w-2.5 h-2.5 rounded-full bg-zinc-950 border border-white/10 group-hover:border-(--primary) transition-colors" />
 
                                         <div className="flex items-baseline justify-between mb-2">
                                             <div className="flex items-center gap-3">
@@ -501,7 +501,7 @@ export default function TicketViewPage() {
                                                 <textarea
                                                     value={editContent}
                                                     onChange={(e) => setEditContent(e.target.value)}
-                                                    className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-sm text-zinc-300 focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all min-h-[100px]"
+                                                    className="w-full bg-black/20 border border-white/10 rounded-lg p-3 text-sm text-zinc-300 focus:outline-none focus:border-(--primary) focus:ring-1 focus:ring-(--primary-glow) transition-all min-h-[100px]"
                                                 />
                                                 <div className="flex justify-end gap-2 mt-3">
                                                     <button
@@ -512,7 +512,7 @@ export default function TicketViewPage() {
                                                     </button>
                                                     <button
                                                         onClick={() => handleSaveEdit(c.id)}
-                                                        className="px-3 py-1.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-xs font-bold rounded-lg transition-colors border border-amber-500/20"
+                                                        className="px-3 py-1.5 bg-(--primary-glow) hover:bg-(--primary-glow) text-(--primary) text-xs font-bold rounded-lg transition-colors border border-(--primary-glow)"
                                                     >
                                                         Save Changes
                                                     </button>
@@ -598,8 +598,8 @@ export default function TicketViewPage() {
                                 </div>
                                 {ticket.estimated_date && (
                                     <div className="flex justify-between">
-                                        <dt className={`${isNearDeadline(ticket) ? 'text-red-500 font-bold' : 'text-zinc-600'}`}>Due Date</dt>
-                                        <dd className={`text-xs font-mono font-bold ${isNearDeadline(ticket) ? 'text-red-500 animate-blink' : 'text-amber-500'}`}>
+                                        <dt className={`${isNearDeadline(ticket) ? 'text-(--rose) font-bold' : 'text-zinc-600'}`}>Due Date</dt>
+                                        <dd className={`text-xs font-mono font-bold ${isNearDeadline(ticket) ? 'text-(--rose) animate-blink' : 'text-(--amber)'}`}>
                                             {formatEstimatedDate(ticket.estimated_date)}
                                         </dd>
                                     </div>

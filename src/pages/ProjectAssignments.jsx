@@ -284,20 +284,20 @@ export default function ProjectAssignments() {
             {/* Header */}
             <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-1">
-                    <nav className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">
+                    <nav className="flex items-center gap-2 text-[10px] font-black text-(--text-muted) uppercase tracking-widest mb-2">
                         <span>Administration</span>
                         <span className="opacity-30">/</span>
-                        <span className="text-amber-500">Project Assignments</span>
+                        <span className="text-(--primary)">Project Assignments</span>
                     </nav>
                     <div className="flex items-center gap-4">
-                        <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 shadow-lg shadow-amber-500/10">
+                        <div className="p-3 rounded-2xl bg-(--primary-glow) border border-(--primary-glow) text-(--primary) shadow-(--primary-glow)">
                             <IoLayersOutline size={28} />
                         </div>
                         <div>
-                            <h1 className="text-2xl font-black text-white tracking-tight leading-none">
+                            <h1 className="text-2xl font-black text-(--text-main) tracking-tight leading-none">
                                 Project Assignments
                             </h1>
-                            <p className="text-gray-500 mt-1.5 text-xs font-bold italic">Manage user project allocation and workload</p>
+                            <p className="text-(--text-muted) mt-1.5 text-xs font-bold italic">Manage user project allocation and workload</p>
                         </div>
                     </div>
                 </div>
@@ -312,13 +312,13 @@ export default function ProjectAssignments() {
                         The previous code hid nothing.
                     */}
                     {activeTab !== 'ptos' && (
-                        <div className="flex items-center gap-2 bg-zinc-900 border border-white/5 p-1 rounded-xl shadow-inner group transition-all focus-within:border-amber-500/50 w-full sm:w-auto">
-                            <div className="p-2 text-gray-400 group-focus-within:text-amber-500">
+                        <div className="flex items-center gap-2 bg-(--input-bg) border border-(--input-border) p-1 rounded-xl shadow-inner group transition-all focus-within:border-(--primary-glow) w-full sm:w-auto">
+                            <div className="p-2 text-(--text-muted) group-focus-within:text-(--primary)">
                                 <IoGridOutline size={18} /> {/* Using Grid icon as placeholder for calendar if IoCalendarOutline conflict */}
                             </div>
                             <input
                                 type="date"
-                                className="w-full bg-zinc-900 border-none px-2 py-2 text-[11px] font-black uppercase tracking-wider text-white outline-none cursor-pointer scheme-dark"
+                                className="w-full bg-transparent border-none px-2 py-2 text-[11px] font-black uppercase tracking-wider text-(--text-main) outline-none cursor-pointer scheme-dark"
                                 value={selectedDate}
                                 onChange={(e) => {
                                     const newDate = e.target.value;
@@ -341,7 +341,7 @@ export default function ProjectAssignments() {
                             });
                             setIsAssignModalOpen(true);
                         }}
-                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black shadow-lg shadow-amber-500/20 transition-all active:scale-95 uppercase tracking-wider text-[11px] whitespace-nowrap"
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-(--primary) hover:bg-(--primary-light) text-(--text-inverse) rounded-xl font-black shadow-(--primary-glow) transition-all active:scale-95 uppercase tracking-wider text-[11px] whitespace-nowrap"
                     >
                         <IoAddOutline size={20} strokeWidth={2.5} />
                         {activeTab === 'ptos' ? 'Log PTO' : 'Assign Project'}
@@ -352,30 +352,30 @@ export default function ProjectAssignments() {
             {/* Filters */}
             <div className="flex flex-col md:flex-row md:items-center gap-4">
                 <div className="relative flex-1 group">
-                    <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors w-5 h-5" />
+                    <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-(--text-muted) group-focus-within:text-(--primary) transition-colors w-5 h-5" />
                     <input
                         type="text"
                         placeholder="Search by user or email..."
-                        className="w-full bg-zinc-900 border border-white/10 rounded-xl pl-11 pr-4 py-2 text-[11px] font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all shadow-sm text-white placeholder-gray-500"
+                        className="w-full bg-(--input-bg) border border-(--input-border) rounded-xl pl-11 pr-4 py-2 text-[11px] font-bold focus:outline-none focus:ring-2 focus:ring-(--primary-glow) focus:border-(--primary) transition-all shadow-sm text-(--text-main) placeholder-(--text-muted)"
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                     />
                 </div>
 
                 <div className="relative min-w-[120px] group">
-                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-amber-500 antialiased">
+                    <div className="absolute left-4 top-1/2 -translate-y-1/2 text-(--primary) antialiased">
                         <IoStatsChartOutline size={16} />
                     </div>
-                    <div className="w-full bg-zinc-900 border border-white/10 rounded-xl pl-10 pr-4 py-2.5 text-[11px] font-black text-white shadow-sm flex items-center gap-2">
-                        <span className="text-gray-500 uppercase tracking-tighter">Cap:</span>
-                        <span className="text-amber-500">{allocationThreshold}h</span>
+                    <div className="w-full bg-(--hover-bg) border border-(--glass-border) rounded-xl pl-10 pr-4 py-2.5 text-[11px] font-black text-(--text-main) shadow-sm flex items-center gap-2">
+                        <span className="text-(--text-muted) uppercase tracking-tighter">Cap:</span>
+                        <span className="text-(--primary)">{allocationThreshold}h</span>
                     </div>
                 </div>
 
                 <div className="relative min-w-[200px] group">
                     <button
                         onClick={() => setIsDeptOpen(!isDeptOpen)}
-                        className={`w-full flex items-center justify-between px-4 py-2 bg-zinc-900 border rounded-xl text-[11px] font-bold transition-all shadow-sm ${isDeptOpen || deptFilter !== 'All' ? 'border-amber-500 text-amber-500' : 'border-white/10 text-gray-400'
+                        className={`w-full flex items-center justify-between px-4 py-2 bg-(--input-bg) border rounded-xl text-[11px] font-bold transition-all shadow-sm ${isDeptOpen || deptFilter !== 'All' ? 'border-(--primary) text-(--primary)' : 'border-(--input-border) text-(--text-muted)'
                             }`}
                     >
                         <div className="flex items-center gap-2">
@@ -391,13 +391,13 @@ export default function ProjectAssignments() {
                                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                                 animate={{ opacity: 1, y: 0, scale: 1 }}
                                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                                className="absolute top-full left-0 right-0 mt-2 bg-(--app-bg) border border-(--glass-border) rounded-2xl shadow-2xl z-50 overflow-hidden"
                             >
                                 {allDepts.map(dept => (
                                     <button
                                         key={dept}
                                         onClick={() => { setDeptFilter(dept); setIsDeptOpen(false); }}
-                                        className={`w-full px-4 py-3 text-left text-xs rounded-xl transition-all flex items-center justify-between group ${deptFilter === dept ? 'bg-amber-500/10 text-amber-500 font-black' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                                        className={`w-full px-4 py-3 text-left text-xs rounded-xl transition-all flex items-center justify-between group ${deptFilter === dept ? 'bg-(--primary-glow) text-(--primary) font-black' : 'text-(--text-muted) hover:bg-(--hover-bg) hover:text-(--text-main)'
                                             }`}
                                     >
                                         {dept}
@@ -412,7 +412,7 @@ export default function ProjectAssignments() {
                 <div className="flex items-center gap-2 ml-auto">
                     <button
                         onClick={() => toggleSort('name')}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${sortConfig.key === 'name' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-zinc-900 border-white/5 text-gray-500 hover:text-white'}`}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${sortConfig.key === 'name' ? 'bg-(--primary-glow) border-(--primary) text-(--primary)' : 'bg-(--hover-bg) border-(--glass-border) text-(--text-muted) hover:text-(--text-main)'}`}
                     >
                         Name
                         {sortConfig.key === 'name' && (
@@ -421,7 +421,7 @@ export default function ProjectAssignments() {
                     </button>
                     <button
                         onClick={() => toggleSort('allocation')}
-                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${sortConfig.key === 'allocation' ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-zinc-900 border-white/5 text-gray-500 hover:text-white'}`}
+                        className={`flex items-center gap-2 px-3 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all border ${sortConfig.key === 'allocation' ? 'bg-(--primary-glow) border-(--primary) text-(--primary)' : 'bg-(--hover-bg) border-(--glass-border) text-(--text-muted) hover:text-(--text-main)'}`}
                     >
                         Load Hrs
                         {sortConfig.key === 'allocation' && (
@@ -432,12 +432,12 @@ export default function ProjectAssignments() {
             </div>
 
             {/* Tab Navigation */}
-            <div className="flex items-center gap-1 bg-zinc-900/50 p-1 rounded-xl w-fit border border-white/5 mb-6">
+            <div className="flex items-center gap-1 bg-(--hover-bg) p-1 rounded-xl w-fit border border-(--glass-border) mb-6">
                 <button
                     onClick={() => setActiveTab('list')}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'list'
-                        ? 'bg-amber-500 text-zinc-950 shadow-lg shadow-amber-500/20'
-                        : 'text-gray-500 hover:text-white hover:bg-white/5'
+                        ? 'bg-(--primary) text-(--text-inverse) shadow-(--primary-glow)'
+                        : 'text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg)'
                         }`}
                 >
                     <IoGridOutline size={16} />
@@ -446,8 +446,8 @@ export default function ProjectAssignments() {
                 <button
                     onClick={() => setActiveTab('analytics')}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'analytics'
-                        ? 'bg-amber-500 text-zinc-950 shadow-lg shadow-amber-500/20'
-                        : 'text-gray-500 hover:text-white hover:bg-white/5'
+                        ? 'bg-(--primary) text-(--text-inverse) shadow-(--primary-glow)'
+                        : 'text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg)'
                         }`}
                 >
                     <IoStatsChartOutline size={16} />
@@ -456,20 +456,20 @@ export default function ProjectAssignments() {
                 <button
                     onClick={() => setActiveTab('ptos')}
                     className={`flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-black uppercase tracking-wider transition-all ${activeTab === 'ptos'
-                        ? 'bg-amber-500 text-zinc-950 shadow-lg shadow-amber-500/20'
-                        : 'text-gray-500 hover:text-white hover:bg-white/5'
+                        ? 'bg-(--primary) text-(--text-inverse) shadow-(--primary-glow)'
+                        : 'text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg)'
                         }`}
                 >
                     <IoAnalyticsOutline size={16} />
                     PTO Plans
                 </button>
 
-                <div className="w-px h-6 bg-white/5 mx-1" />
+                <div className="w-px h-6 bg-(--glass-border) mx-1" />
 
                 <button
                     onClick={fetchData}
                     disabled={loading}
-                    className="p-2 text-gray-500 hover:text-white transition-colors"
+                    className="p-2 text-(--text-muted) hover:text-(--text-main) transition-colors"
                     title="Refresh Data"
                 >
                     <IoSyncOutline className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
@@ -478,8 +478,8 @@ export default function ProjectAssignments() {
 
             {loading ? (
                 <div className="p-20 text-center">
-                    <div className="w-10 h-10 border-3 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto" />
-                    <p className="text-gray-500 mt-4 font-medium italic">Loading assignments...</p>
+                    <div className="w-10 h-10 border-3 border-(--primary-glow) border-t-(--primary) rounded-full animate-spin mx-auto" />
+                    <p className="text-(--text-muted) mt-4 font-medium italic">Loading assignments...</p>
                 </div>
             ) : (
                 <>
@@ -535,18 +535,18 @@ export default function ProjectAssignments() {
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
-                            className="w-full max-w-md bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative"
+                            className="w-full max-w-md bg-(--app-bg) border border-(--glass-border) rounded-3xl overflow-hidden shadow-2xl relative"
                         >
                             <div className="p-8 space-y-6">
                                 <div className="flex items-center gap-4">
-                                    <div className="p-3 rounded-2xl bg-amber-500/10 text-amber-500">
+                                    <div className="p-3 rounded-2xl bg-(--primary-glow) text-(--primary)">
                                         {isAssignModalOpen ? <IoAddOutline size={24} /> : <IoPencilOutline size={24} />}
                                     </div>
                                     <div>
-                                        <h2 className="text-xl font-black text-white">
+                                        <h2 className="text-xl font-black text-(--text-main)">
                                             {isAssignModalOpen ? 'Assign Project' : 'Edit Allocation'}
                                         </h2>
-                                        <p className="text-xs text-gray-500 font-bold">
+                                        <p className="text-xs text-(--text-muted) font-bold">
                                             Set monthly hours allocation for the user
                                         </p>
                                     </div>
@@ -578,25 +578,25 @@ export default function ProjectAssignments() {
 
                                     <div className="grid grid-cols-2 gap-4">
                                         <div className="space-y-1.5">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-(--text-muted) ml-1">
                                                 Start Date
                                             </label>
                                             <input
                                                 type="date"
                                                 required
-                                                className="w-full bg-zinc-900 border border-white/5 rounded-xl px-4 py-3 text-xs font-black text-white outline-none focus:border-amber-500 transition-all scheme-dark"
+                                                className="w-full bg-(--input-bg) border border-(--input-border) rounded-xl px-4 py-3 text-xs font-black text-(--text-main) outline-none focus:border-(--primary) transition-all scheme-dark"
                                                 value={formData.start_date}
                                                 onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
                                             />
                                         </div>
                                         <div className="space-y-1.5">
-                                            <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
+                                            <label className="text-[10px] font-black uppercase tracking-widest text-(--text-muted) ml-1">
                                                 End Date
                                             </label>
                                             <input
                                                 type="date"
                                                 required
-                                                className="w-full bg-zinc-900 border border-white/5 rounded-xl px-4 py-3 text-xs font-black text-white outline-none focus:border-amber-500 transition-all scheme-dark"
+                                                className="w-full bg-(--input-bg) border border-(--input-border) rounded-xl px-4 py-3 text-xs font-black text-(--text-main) outline-none focus:border-(--primary) transition-all scheme-dark"
                                                 value={formData.end_date}
                                                 onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
                                             />
@@ -604,7 +604,7 @@ export default function ProjectAssignments() {
                                     </div>
 
                                     <div className="space-y-1.5">
-                                        <label className="text-[10px] font-black uppercase tracking-widest text-gray-500 ml-1">
+                                        <label className="text-[10px] font-black uppercase tracking-widest text-(--text-muted) ml-1">
                                             Monthly Allocation (Hours)
                                         </label>
                                         <div className="relative">
@@ -613,11 +613,11 @@ export default function ProjectAssignments() {
                                                 required
                                                 min="1"
                                                 max="744"
-                                                className={`w-full bg-zinc-900 border ${isOverloaded ? 'border-amber-500/50 focus:border-amber-500' : 'border-white/5 focus:border-amber-500'} rounded-xl pl-4 pr-12 py-3 text-lg font-black text-white outline-none transition-all`}
+                                                className={`w-full bg-(--input-bg) border ${isOverloaded ? 'border-(--rose)/50 focus:border-(--rose)' : 'border-(--input-border) focus:border-(--primary)'} rounded-xl pl-4 pr-12 py-3 text-lg font-black text-(--text-main) outline-none transition-all`}
                                                 value={formData.allocation_hours || ''}
                                                 onChange={(e) => setFormData({ ...formData, allocation_hours: e.target.value === '' ? '' : parseInt(e.target.value) })}
                                             />
-                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-bold">Hrs</span>
+                                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-(--text-muted) font-bold">Hrs</span>
                                         </div>
 
                                         <AnimatePresence>
@@ -626,12 +626,12 @@ export default function ProjectAssignments() {
                                                     initial={{ opacity: 0, height: 0, y: -10 }}
                                                     animate={{ opacity: 1, height: 'auto', y: 0 }}
                                                     exit={{ opacity: 0, height: 0, y: -10 }}
-                                                    className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3 flex items-start gap-3 mt-2 overflow-hidden"
+                                                    className="bg-(--rose)/10 border border-(--rose)/20 rounded-xl p-3 flex items-start gap-3 mt-2 overflow-hidden"
                                                 >
-                                                    <IoAlertCircleOutline className="text-amber-500 shrink-0 mt-0.5" size={16} />
+                                                    <IoAlertCircleOutline className="text-(--rose) shrink-0 mt-0.5" size={16} />
                                                     <div className="space-y-0.5">
-                                                        <p className="text-[10px] font-black text-amber-500 uppercase tracking-widest">Workload Overload Alert</p>
-                                                        <p className="text-[11px] text-amber-500/80 font-bold leading-tight">
+                                                        <p className="text-[10px] font-black text-(--rose) uppercase tracking-widest">Workload Overload Alert</p>
+                                                        <p className="text-[11px] text-(--rose)/80 font-bold leading-tight">
                                                             Currently allocating {avgHoursPerDay}h a day over {workdays} working days. Standard is 8h.
                                                         </p>
                                                     </div>
@@ -644,13 +644,13 @@ export default function ProjectAssignments() {
                                         <button
                                             type="button"
                                             onClick={() => { setIsAssignModalOpen(false); setIsEditModalOpen(false); }}
-                                            className="flex-1 px-6 py-3 bg-zinc-900 text-gray-400 hover:text-white rounded-xl font-black text-[11px] uppercase tracking-wider transition-all"
+                                            className="flex-1 px-6 py-3 bg-(--hover-bg) text-(--text-muted) hover:text-(--text-main) rounded-xl font-black text-[11px] uppercase tracking-wider transition-all"
                                         >
                                             Cancel
                                         </button>
                                         <button
                                             type="submit"
-                                            className="flex-1 px-6 py-3 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black text-[11px] uppercase tracking-wider shadow-lg shadow-amber-500/20 transition-all"
+                                            className="flex-1 px-6 py-3 bg-(--primary) hover:bg-(--primary-light) text-(--text-inverse) rounded-xl font-black text-[11px] uppercase tracking-wider shadow-(--primary-glow) transition-all"
                                         >
                                             {isAssignModalOpen ? 'Assign' : 'Save Changes'}
                                         </button>
@@ -677,21 +677,21 @@ export default function ProjectAssignments() {
                             initial={{ scale: 0.95, opacity: 0 }}
                             animate={{ scale: 1, opacity: 1 }}
                             exit={{ scale: 0.95, opacity: 0 }}
-                            className="w-full max-w-sm bg-zinc-950 border border-white/10 rounded-3xl overflow-hidden shadow-2xl relative z-10 p-6 space-y-6"
+                            className="w-full max-w-sm bg-(--app-bg) border border-(--glass-border) rounded-3xl overflow-hidden shadow-2xl relative z-10 p-6 space-y-6"
                         >
                             <div className="flex items-center gap-4 text-red-500">
                                 <div className="p-3 rounded-2xl bg-red-500/10">
                                     <IoAlertCircleOutline size={24} />
                                 </div>
-                                <h3 className="text-xl font-black text-white">Delete Assignment?</h3>
+                                <h3 className="text-xl font-black text-(--text-main)">Delete Assignment?</h3>
                             </div>
-                            <p className="text-gray-400 text-sm">
+                            <p className="text-(--text-muted) text-sm">
                                 Are you sure you want to remove this project assignment? This action cannot be undone.
                             </p>
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setIsDeleteModalOpen(false)}
-                                    className="flex-1 px-6 py-3 bg-zinc-900 text-gray-400 hover:text-white rounded-xl font-black text-[11px] uppercase tracking-wider transition-all"
+                                    className="flex-1 px-6 py-3 bg-(--hover-bg) text-(--text-muted) hover:text-(--text-main) rounded-xl font-black text-[11px] uppercase tracking-wider transition-all"
                                 >
                                     Cancel
                                 </button>

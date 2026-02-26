@@ -87,16 +87,16 @@ const SearchableSelect = ({
                         minWidth: compact ? "160px" : "200px",
                         zIndex: 10000,
                     }}
-                    className="portal-dropdown border border-white/10 rounded-2xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-zinc-900"
+                    className="portal-dropdown border border-(--glass-border) rounded-2xl overflow-hidden shadow-2xl bg-(--app-bg)"
                 >
-                    <div className="p-3 border-b border-white/5 space-y-2 bg-zinc-950/50">
+                    <div className="p-3 border-b border-(--glass-border) space-y-2 bg-(--glass-surface)">
                         <div className="relative">
                             <IoSearchOutline
                                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"
                                 size={14}
                             />
                             <input
-                                className="w-full pl-9 pr-3 py-2 bg-black/40 rounded-xl text-xs outline-none focus:ring-2 focus:ring-amber-500/20 transition-all font-medium text-white placeholder-gray-600 border border-white/5 focus:border-amber-500/50"
+                                className="w-full pl-9 pr-3 py-2 bg-(--input-bg) rounded-xl text-xs outline-none focus:ring-2 focus:ring-amber-500/20 transition-all font-medium text-(--text-main) placeholder-(--text-muted) border border-(--glass-border) focus:border-amber-500/50"
                                 placeholder={`Search...`}
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
@@ -104,7 +104,7 @@ const SearchableSelect = ({
                             />
                         </div>
                     </div>
-                    <div className="max-h-60 overflow-y-auto custom-scrollbar p-1.5 bg-zinc-900">
+                    <div className="max-h-60 overflow-y-auto custom-scrollbar p-1.5 bg-(--app-bg)">
                         {filtered.map((opt) => (
                             <button
                                 key={opt.value}
@@ -116,7 +116,7 @@ const SearchableSelect = ({
                                 }}
                                 className={`w-full px-4 text-left rounded-xl transition-all flex items-center justify-between group ${compact ? 'py-1.5 text-[9px]' : 'py-3 text-[11px]'} ${String(value) === String(opt.value)
                                     ? "bg-amber-500/10 text-amber-500 font-black"
-                                    : "text-gray-400 hover:bg-white/10 hover:text-white"
+                                    : "text-(--text-muted) hover:bg-(--hover-bg) hover:text-(--text-main)"
                                     }`}
                             >
                                 <div className="flex flex-col">
@@ -129,7 +129,7 @@ const SearchableSelect = ({
                             </button>
                         ))}
                         {filtered.length === 0 && (
-                            <div className={`py-6 text-center text-gray-500 font-bold italic uppercase tracking-widest ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
+                            <div className={`py-6 text-center text-(--text-muted) font-bold italic uppercase tracking-widest ${compact ? 'text-[8px]' : 'text-[10px]'}`}>
                                 No matching results
                             </div>
                         )}
@@ -141,13 +141,13 @@ const SearchableSelect = ({
 
     const getTriggerStyles = () => {
         if (variant === 'minimal') {
-            return `bg-transparent border-transparent text-zinc-400 hover:text-white hover:bg-white/5 ${isOpen ? 'text-white bg-white/5' : ''}`;
+            return `bg-transparent border-transparent text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) ${isOpen ? 'text-(--text-main) bg-(--hover-bg)' : ''}`;
         }
-        return `bg-zinc-900 ${isOpen
+        return `bg-(--glass-surface) ${isOpen
             ? "border-amber-500 ring-4 ring-amber-500/10"
             : error
-                ? "border-red-500/50 text-white shadow-sm"
-                : "border-white/5 text-white shadow-sm hover:border-white/10"
+                ? "border-red-500/50 text-(--text-main) shadow-sm"
+                : "border-(--glass-border) text-(--text-main) shadow-sm hover:border-(--primary-glow) hover:bg-(--hover-bg)"
             }`;
     };
 
@@ -157,7 +157,7 @@ const SearchableSelect = ({
             ref={containerRef}
         >
             {showLabel && (
-                <label className="text-[9px] font-black text-gray-500 flex items-center gap-1.5 uppercase tracking-widest px-1">
+                <label className="text-[9px] font-black text-(--text-muted) flex items-center gap-1.5 uppercase tracking-widest px-1">
                     {Icon && <Icon className="text-amber-500" size={12} />}
                     {label}
                 </label>
@@ -171,7 +171,7 @@ const SearchableSelect = ({
                     onClick={() => setIsOpen(!isOpen)}
                     className={`w-full flex items-center justify-between border rounded-xl font-bold transition-all ${compact ? 'px-3 py-2 text-[9.5px]' : 'px-4 py-2.5 text-xs'} ${getTriggerStyles()}`}
                 >
-                    <span className={`truncate ${selectedOption ? "text-white" : "text-gray-500"}`}>
+                    <span className={`truncate ${selectedOption ? "text-(--text-main)" : "text-(--text-muted)"}`}>
                         {selectedOption ? selectedOption.label : placeholder}
                     </span>
                     <IoChevronDown

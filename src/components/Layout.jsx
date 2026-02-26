@@ -7,7 +7,7 @@ export default function Layout({ children }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   return (
-    <div className="ui-page selection:bg-amber-500/20 selection:text-amber-500 bg-zinc-950 text-gray-200">
+    <div className="ui-page selection:bg-amber-500/20 selection:text-amber-500 bg-(--app-bg) text-(--text-main) transition-colors duration-300">
       {/* Sidebar Navigation */}
       <Sidebar
         isOpen={sidebarOpen}

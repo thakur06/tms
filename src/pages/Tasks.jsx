@@ -5,7 +5,7 @@ import CreateTaskModal from "../components/CreateTaskModal"
 import { IoListOutline } from "react-icons/io5"
 
 export default function Tasks() {
-   const server=import.meta.env.VITE_SERVER_ADDRESS;
+  const server = import.meta.env.VITE_SERVER_ADDRESS;
   const [tasks, setTasks] = useState([])
   const [projects, setProjects] = useState([])
   const [dept, setDept] = useState([])
@@ -54,7 +54,7 @@ export default function Tasks() {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       };
-      
+
       try {
         const [tasksRes, projectsRes, deptRes] = await Promise.all([
           fetch(`${server}/api/tasks`, { headers }),
@@ -139,9 +139,9 @@ export default function Tasks() {
     try {
       const response = await fetch(`${server}/api/tasks/${taskId}`, {
         method: "PATCH",
-        headers: { 
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`
         },
         body: JSON.stringify({ logged: loggedHours }),
       })
@@ -154,7 +154,8 @@ export default function Tasks() {
   const handleDeleteTask = async (taskId) => {
     try {
       const response = await fetch(`${server}/api/tasks/${taskId}`, {
-        headers: { "Content-Type": "application/json",
+        headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
         method: "DELETE",
@@ -181,7 +182,8 @@ export default function Tasks() {
     try {
       const response = await fetch(`${server}/api/tasks`, {
         method: "POST",
-        headers: { "Content-Type": "application/json",
+        headers: {
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`
         },
         body: JSON.stringify(taskData),
@@ -231,33 +233,33 @@ export default function Tasks() {
     <div>
       {isLoading ? (
         <div className="flex justify-center items-center h-64">
-           <div className="animate-spin rounded-full h-8 w-8 border-2 border-indigo-500 border-t-transparent"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-(--primary) border-t-transparent"></div>
         </div>
       ) : (
         <>
           <div className="mb-8">
-            <nav className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+            <nav className="flex items-center gap-2 text-xs font-black text-(--text-muted) uppercase tracking-widest mb-2">
               <span>Planning</span>
               <span className="opacity-30">/</span>
-              <span className="text-amber-500">Tasks</span>
+              <span className="text-(--primary)">Tasks</span>
             </nav>
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-amber-500/10 rounded-2xl border border-amber-500/20 text-amber-500 shadow-sm">
+              <div className="p-3 bg-(--primary-glow) rounded-2xl border border-(--primary-glow) text-(--primary) shadow-sm">
                 <IoListOutline size={28} />
               </div>
               <div>
-                <h1 className="text-2xl font-black text-white tracking-tight leading-none">
+                <h1 className="text-2xl font-black text-(--text-main) tracking-tight leading-none">
                   Workspace Tasks
                 </h1>
-                <p className="text-gray-400 mt-1.5 text-xs font-bold italic">Manage and track unit objectives</p>
+                <p className="text-(--text-muted) mt-1.5 text-xs font-bold italic">Manage and track unit objectives</p>
               </div>
             </div>
           </div>
-          <TasksList 
-            tasks={tasks} 
+          <TasksList
+            tasks={tasks}
             onDeleteTask={handleDeleteTask}
             headerAction={
-              <button 
+              <button
                 onClick={() => setShowTaskModal(true)}
                 className="ui-btn ui-btn-primary w-full sm:w-auto text-xs uppercase font-black tracking-widest h-11 px-6 shadow-blue-500/20"
               >

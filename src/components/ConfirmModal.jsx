@@ -34,7 +34,7 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
                         className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-9999 w-full max-w-md px-4"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="bg-zinc-900 rounded-3xl p-8 border border-white/10 shadow-2xl relative overflow-hidden">
+                        <div className="bg-(--app-bg) rounded-3xl p-8 border border-(--glass-border) shadow-2xl relative overflow-hidden">
                             {/* Decorative background element */}
                             <div className={`absolute top-0 right-0 w-32 h-32 ${isDanger ? 'bg-red-500/5' : 'bg-amber-500/5'} rounded-full -mr-16 -mt-16 opacity-50`} />
 
@@ -43,15 +43,15 @@ export default function ConfirmModal({ isOpen, onClose, onConfirm, title, messag
                                     {isDanger ? <IoTrashOutline size={32} /> : <IoAlertCircleOutline size={32} />}
                                 </div>
 
-                                <h3 className="text-xl font-black text-white mb-3 tracking-tight">{title}</h3>
-                                <p className="text-sm text-gray-400 mb-8 leading-relaxed font-medium">
+                                <h3 className="text-xl font-black text-(--text-main) mb-3 tracking-tight">{title}</h3>
+                                <p className="text-sm text-(--text-muted) mb-8 leading-relaxed font-medium">
                                     {message}
                                 </p>
 
                                 <div className="flex gap-3">
                                     <button
                                         onClick={onClose}
-                                        className="flex-1 py-3.5 text-[11px] font-black text-gray-500 hover:text-white hover:bg-white/5 rounded-2xl transition-all uppercase tracking-widest border border-transparent hover:border-white/10"
+                                        className="flex-1 py-3.5 text-[11px] font-black text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) rounded-2xl transition-all uppercase tracking-widest border border-transparent hover:border-(--glass-border)"
                                     >
                                         Cancel
                                     </button>

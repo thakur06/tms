@@ -40,11 +40,11 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
 
   const getStatusColor = (status) => {
     const colors = {
-      active: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
+      active: 'bg-(--primary-glow) text-(--primary) border-(--primary-glow)',
       inactive: 'bg-white/5 text-gray-500 border-white/5',
-      completed: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-      archived: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-      planning: 'bg-purple-500/10 text-purple-500 border-purple-500/20'
+      completed: 'bg-(--accent-glow) text-(--accent) border-(--accent-glow)',
+      archived: 'bg-(--rose-glow) text-(--rose) border-(--rose-glow)',
+      planning: 'bg-(--secondary-glow) text-(--secondary) border-(--secondary-glow)'
     }
     return colors[status?.toLowerCase()] || colors.inactive
   }
@@ -54,8 +54,8 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
       {/* Controls Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-xl font-black text-white">All Projects</h2>
-          <p className="text-sm text-gray-400 mt-1 font-medium">
+          <h2 className="text-xl font-black text-(--text-main)">All Projects</h2>
+          <p className="text-sm text-(--text-muted) mt-1 font-medium">
             {filteredProjects.length} {filteredProjects.length === 1 ? 'project' : 'projects'} found
           </p>
         </div>
@@ -69,7 +69,7 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
               placeholder="Search projects..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="ui-input pl-10 py-2 h-10 w-full bg-zinc-900 border-white/10 text-white placeholder-gray-500 focus:border-amber-500"
+              className="ui-input pl-10 py-2 h-10 w-full bg-(--input-bg) border-(--glass-border) text-(--text-main) placeholder-(--text-muted) focus:border-(--primary)"
             />
           </div>
         </div>
@@ -81,16 +81,16 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={transition}
-          className="text-center py-16 ui-card bg-zinc-900 border-white/5"
+          className="text-center py-16 ui-card bg-(--hover-bg) border-(--glass-border)"
         >
           <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/5">
             <IoBusinessOutline className="text-gray-500" size={32} />
           </div>
-          <h3 className="text-lg font-bold text-white mb-2">No projects found</h3>
-          <p className="text-gray-500 text-sm mb-6">Try adjusting your search criteria</p>
+          <h3 className="text-lg font-bold text-(--text-main) mb-2">No projects found</h3>
+          <p className="text-(--text-muted) text-sm mb-6">Try adjusting your search criteria</p>
           <button
             onClick={() => setSearchQuery('')}
-            className="text-sm font-semibold text-amber-500 hover:text-amber-400 underline"
+            className="text-sm font-semibold text-(--primary) hover:text-(--secondary) underline"
           >
             Clear search
           </button>
@@ -116,17 +116,17 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={transition}
-          className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-6 border-t border-white/5 bg-white/5 rounded-xl"
+          className="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 sm:p-6 border-t border-(--glass-border) bg-(--hover-bg) rounded-xl"
         >
-          <div className="text-sm text-gray-500 font-medium">
-            Page <span className="text-white font-bold">{page}</span> of <span className="text-white font-bold">{totalPages}</span>
+          <div className="text-sm text-(--text-muted) font-medium">
+            Page <span className="text-(--text-main) font-bold">{page}</span> of <span className="text-(--text-main) font-bold">{totalPages}</span>
           </div>
 
           <div className="flex items-center gap-2">
             <button
               disabled={page === 1}
               onClick={() => setPage(p => p - 1)}
-              className="p-2 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg border border-(--glass-border) text-(--text-muted) hover:bg-(--hover-bg) hover:text-(--text-main) disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               <IoChevronBackOutline size={16} />
             </button>
@@ -150,8 +150,8 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
                       onClick={() => setPage(i)}
                       whileTap={{ scale: 0.95 }}
                       className={`w-8 h-8 text-sm font-bold rounded-lg transition-all ${page === i
-                        ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20'
-                        : 'text-gray-500 hover:bg-white/10 hover:text-white'
+                        ? 'bg-(--gradient-primary) text-(--text-inverse) shadow-lg shadow-(--primary-glow)'
+                        : 'text-(--text-muted) hover:bg-(--hover-bg) hover:text-(--text-main)'
                         }`}
                     >
                       {i}
@@ -166,7 +166,7 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
             <button
               disabled={page === totalPages}
               onClick={() => setPage(p => p + 1)}
-              className="p-2 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg border border-(--glass-border) text-(--text-muted) hover:bg-(--hover-bg) hover:text-(--text-main) disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               <IoChevronForwardOutline size={16} />
             </button>
@@ -190,20 +190,20 @@ export default function ProjectsList({ projects, onDeleteProject, onEditProject,
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={transition}
-              className="relative w-full max-w-sm ui-modal p-6 shadow-2xl bg-zinc-900 border-white/5"
+              className="relative w-full max-w-sm ui-modal p-6 shadow-2xl bg-(--app-bg) border-(--glass-border)"
             >
               <div className="text-center">
                 <div className="w-14 h-14 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
                   <IoTrashOutline size={24} />
                 </div>
-                <h3 className="text-xl font-black text-white mb-2">Delete Project</h3>
-                <p className="text-sm text-gray-400 mb-6 leading-relaxed font-medium">
-                  Are you sure you want to delete <span className="text-white font-black">{projectToDelete?.name}</span>?
+                <h3 className="text-xl font-black text-(--text-main) mb-2">Delete Project</h3>
+                <p className="text-sm text-(--text-muted) mb-6 leading-relaxed font-medium">
+                  Are you sure you want to delete <span className="text-(--text-main) font-black">{projectToDelete?.name}</span>?
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowDeleteModal(false)}
-                    className="flex-1 py-2.5 text-sm font-black text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all uppercase tracking-wider"
+                    className="flex-1 py-2.5 text-sm font-black text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) rounded-xl transition-all uppercase tracking-wider"
                   >
                     Cancel
                   </button>
@@ -232,7 +232,7 @@ function ProjectCard({ project, index, getStatusColor, onDelete, onEdit }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.2, delay: index * 0.05 }}
       whileHover={{ y: -4 }}
-      className="group relative ui-card p-4 sm:p-5 transition-all cursor-default overflow-visible shadow-sm hover:shadow-xl bg-zinc-900 border-white/5 hover:border-amber-500/20"
+      className="group relative ui-card p-4 sm:p-5 transition-all cursor-default overflow-visible shadow-sm hover:shadow-xl bg-(--hover-bg) border-(--glass-border) hover:border-(--primary-glow)"
     >
       <div className="flex flex-col h-full">
         {/* Header with status and menu */}
@@ -246,7 +246,7 @@ function ProjectCard({ project, index, getStatusColor, onDelete, onEdit }) {
           <div className="relative">
             <button
               onClick={() => setShowMenu(!showMenu)}
-              className="p-1.5 text-gray-500 hover:text-white hover:bg-white/5 rounded-lg transition-colors"
+              className="p-1.5 text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) rounded-lg transition-colors"
             >
               <IoEllipsisHorizontal size={16} />
             </button>
@@ -265,18 +265,18 @@ function ProjectCard({ project, index, getStatusColor, onDelete, onEdit }) {
                     initial={{ opacity: 0, scale: 0.95, y: -10 }}
                     animate={{ opacity: 1, scale: 1, y: 0 }}
                     exit={{ opacity: 0, scale: 0.95, y: -10 }}
-                    className="absolute right-0 top-8 bg-zinc-900 rounded-lg shadow-xl border border-white/10 py-1 z-20 w-40"
+                    className="absolute right-0 top-8 bg-(--app-bg) rounded-lg shadow-xl border border-(--glass-border) py-1 z-20 w-40"
                   >
                     <button
                       onClick={(e) => { e.stopPropagation(); onEdit(); setShowMenu(false); }}
-                      className="w-full px-3 py-2 text-left text-sm text-gray-400 hover:text-white hover:bg-white/5 transition-colors flex items-center gap-2"
+                      className="w-full px-3 py-2 text-left text-sm text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) transition-colors flex items-center gap-2"
                     >
                       <IoPencilOutline size={14} />
                       Edit Project
                     </button>
                     <button
                       onClick={(e) => { e.stopPropagation(); onDelete(); setShowMenu(false); }}
-                      className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-white/5 transition-colors flex items-center gap-2"
+                      className="w-full px-3 py-2 text-left text-sm text-red-500 hover:bg-(--hover-bg) transition-colors flex items-center gap-2"
                     >
                       <IoTrashOutline size={14} />
                       Delete Project
@@ -290,28 +290,28 @@ function ProjectCard({ project, index, getStatusColor, onDelete, onEdit }) {
 
         {/* Project Info */}
         <div className="flex-grow">
-          <h3 className="text-base font-black text-white mb-3 line-clamp-2 leading-tight group-hover:text-amber-500 transition-colors">
+          <h3 className="text-base font-black text-(--text-main) mb-3 line-clamp-2 leading-tight group-hover:text-(--primary) transition-colors">
             {project.name}
           </h3>
 
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-blue-500/10 rounded-lg flex items-center justify-center border border-blue-500/20">
-                <IoBusinessOutline className="text-blue-500" size={14} />
+              <div className="w-8 h-8 bg-(--primary-glow) rounded-lg flex items-center justify-center border border-(--primary-glow)">
+                <IoBusinessOutline className="text-(--primary)" size={14} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase tracking-widest font-black text-gray-500">Code</p>
-                <p className="text-sm font-bold text-gray-300 truncate font-mono">{project.code || 'N/A'}</p>
+                <p className="text-[10px] uppercase tracking-widest font-black text-(--text-muted)">Code</p>
+                <p className="text-sm font-bold text-(--text-main) truncate font-mono">{project.code || 'N/A'}</p>
               </div>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 bg-emerald-500/10 rounded-lg flex items-center justify-center border border-emerald-500/20">
-                <IoLocationOutline className="text-emerald-500" size={14} />
+              <div className="w-8 h-8 bg-(--accent-glow) rounded-lg flex items-center justify-center border border-(--accent-glow)">
+                <IoLocationOutline className="text-(--accent)" size={14} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-[10px] uppercase tracking-widest font-black text-gray-500">Location</p>
-                <p className="text-sm font-bold text-gray-300 truncate">{project.location || 'Not specified'}</p>
+                <p className="text-[10px] uppercase tracking-widest font-black text-(--text-muted)">Location</p>
+                <p className="text-sm font-bold text-(--text-main) truncate">{project.location || 'Not specified'}</p>
               </div>
             </div>
           </div>

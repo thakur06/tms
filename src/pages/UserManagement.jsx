@@ -123,20 +123,20 @@ export default function UserManagement() {
       {/* Header */}
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <nav className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-widest mb-2">
+          <nav className="flex items-center gap-2 text-[10px] font-black text-(--text-muted) uppercase tracking-widest mb-2">
             <span>Administration</span>
             <span className="opacity-30">/</span>
-            <span className="text-amber-500">Users</span>
+            <span className="text-(--primary)">Users</span>
           </nav>
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 shadow-lg shadow-amber-500/10">
+            <div className="p-3 rounded-2xl bg-(--primary-glow) border border-(--primary-glow) text-(--primary) shadow-lg shadow-(--primary-glow)">
               <IoShieldCheckmarkOutline size={28} />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-white tracking-tight leading-none">
+              <h1 className="text-2xl font-black text-(--text-main) tracking-tight leading-none">
                 User Management
               </h1>
-              <p className="text-gray-500 mt-1.5 text-xs font-bold italic">Manage system users, roles, and reporting managers</p>
+              <p className="text-(--text-muted) mt-1.5 text-xs font-bold italic">Manage system users, roles, and reporting managers</p>
             </div>
           </div>
         </div>
@@ -146,14 +146,14 @@ export default function UserManagement() {
             onClick={handleSendAlerts}
             disabled={isSendingAlerts}
             className={`w-full xl:w-auto flex items-center justify-center gap-2 px-4 py-2 rounded-xl font-black transition-all active:scale-95 border uppercase tracking-wider text-[10px] ${isSendingAlerts
-                ? 'bg-white/5 text-gray-500 border-white/5 cursor-not-allowed'
-                : 'bg-zinc-900 hover:bg-white/5 text-gray-300 border-white/10 shadow-sm hover:text-white'
+              ? 'bg-white/5 text-(--text-muted) border-white/5 cursor-not-allowed'
+              : 'bg-(--input-bg) hover:bg-white/5 text-(--text-muted) border-(--glass-border) shadow-sm hover:text-(--text-main)'
               }`}
           >
             {isSendingAlerts ? (
-              <div className="w-5 h-5 border-2 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-(--rose-glow) border-t-(--rose) rounded-full animate-spin" />
             ) : (
-              <IoNotificationsOutline size={20} className="text-amber-500" />
+              <IoNotificationsOutline size={20} className="text-(--rose)" />
             )}
             Send Alerts
           </button>
@@ -168,7 +168,7 @@ export default function UserManagement() {
 
           <button
             onClick={() => setIsAddModalOpen(true)}
-            className="w-full xl:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black shadow-lg shadow-amber-500/20 transition-all active:scale-95 uppercase tracking-wider text-[10px]"
+            className="w-full xl:w-auto flex items-center justify-center gap-2 px-4 py-2 bg-(--gradient-primary) text-(--text-inverse) rounded-xl font-black shadow-lg shadow-(--primary-glow) transition-all active:scale-95 uppercase tracking-wider text-[10px]"
           >
             <IoPersonAddOutline size={18} />
             Add User
@@ -179,11 +179,11 @@ export default function UserManagement() {
       {/* Controls */}
       <div className="flex flex-col md:flex-row md:items-center gap-4">
         <div className="relative flex-1 group">
-          <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors w-5 h-5" />
+          <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-(--primary) transition-colors w-5 h-5" />
           <input
             type="text"
             placeholder="Search by name or email..."
-            className="w-full bg-zinc-900 border border-white/10 rounded-xl pl-11 pr-4 py-2 text-[11px] font-bold focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500 transition-all shadow-sm text-white placeholder-gray-500"
+            className="w-full bg-(--input-bg) border border-(--glass-border) rounded-xl pl-11 pr-4 py-2 text-[11px] font-bold focus:outline-none focus:ring-4 focus:ring-(--primary-glow) focus:border-(--primary) transition-all shadow-sm text-(--text-main) placeholder-(--text-muted)"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -193,7 +193,7 @@ export default function UserManagement() {
         <div className="relative min-w-[200px] group">
           <button
             onClick={() => setIsDeptOpen(!isDeptOpen)}
-            className={`w-full flex items-center justify-between px-4 py-2 bg-zinc-900 border rounded-xl text-[11px] font-bold transition-all shadow-sm ${isDeptOpen || deptFilter !== 'All' ? 'border-amber-500 text-amber-500' : 'border-white/10 text-gray-400'
+            className={`w-full flex items-center justify-between px-4 py-2 bg-(--input-bg) border rounded-xl text-[11px] font-bold transition-all shadow-sm ${isDeptOpen || deptFilter !== 'All' ? 'border-(--primary) text-(--primary)' : 'border-(--glass-border) text-(--text-muted)'
               }`}
           >
             <div className="flex items-center gap-2">
@@ -209,13 +209,13 @@ export default function UserManagement() {
                 initial={{ opacity: 0, y: 10, scale: 0.95 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                className="absolute top-full left-0 right-0 mt-2 bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl z-50 overflow-hidden"
+                className="absolute top-full left-0 right-0 mt-2 bg-(--app-bg) border border-(--glass-border) rounded-2xl shadow-2xl z-50 overflow-hidden"
               >
                 <div className="p-2 border-b border-white/5">
                   <div className="relative">
                     <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
                     <input
-                      className="w-full pl-9 pr-3 py-2 bg-black/20 rounded-lg text-xs outline-none focus:bg-black/40 focus:ring-2 focus:ring-amber-500/20 transition-all font-medium text-white placeholder-gray-500"
+                      className="w-full pl-9 pr-3 py-2 bg-black/20 rounded-lg text-xs outline-none focus:bg-black/40 focus:ring-2 focus:ring-(--primary-glow) transition-all font-medium text-white placeholder-gray-500"
                       placeholder="Search depts..."
                       value={deptSearch}
                       onChange={(e) => setDeptSearch(e.target.value)}
@@ -227,7 +227,7 @@ export default function UserManagement() {
                     <button
                       key={dept}
                       onClick={() => { setDeptFilter(dept); setIsDeptOpen(false); }}
-                      className={`w-full px-4 py-2.5 text-left text-xs rounded-xl transition-all flex items-center justify-between group ${deptFilter === dept ? 'bg-amber-500/10 text-amber-500 font-black' : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                      className={`w-full px-4 py-2.5 text-left text-xs rounded-xl transition-all flex items-center justify-between group ${deptFilter === dept ? 'bg-(--primary-glow) text-(--primary) font-black' : 'text-(--text-muted) hover:bg-white/5 hover:text-(--text-main)'
                         }`}
                     >
                       {dept}
@@ -242,10 +242,10 @@ export default function UserManagement() {
       </div>
 
       {/* Users Table */}
-      <div className="ui-card overflow-hidden flex flex-col bg-zinc-900 border-white/5">
+      <div className="ui-card overflow-hidden flex flex-col bg-(--hover-bg) border-(--glass-border)">
         {loading ? (
           <div className="p-20 text-center">
-            <div className="w-10 h-10 border-3 border-amber-500/20 border-t-amber-500 rounded-full animate-spin mx-auto" />
+            <div className="w-10 h-10 border-3 border-(--primary-glow) border-t-(--primary) rounded-full animate-spin mx-auto" />
             <p className="text-gray-500 mt-4 font-medium italic">Loading users...</p>
           </div>
         ) : (
@@ -253,15 +253,15 @@ export default function UserManagement() {
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-white/5 bg-white/5">
-                    <th className="text-left py-4 px-4 sm:px-6 text-xs font-black text-gray-400 uppercase tracking-widest">User</th>
-                    <th className="text-left py-4 px-6 text-xs font-black text-gray-400 uppercase tracking-widest hidden sm:table-cell">Dept</th>
-                    <th className="text-left py-4 px-6 text-xs font-black text-gray-400 uppercase tracking-widest hidden md:table-cell">Role</th>
-                    <th className="text-left py-4 px-6 text-xs font-black text-gray-400 uppercase tracking-widest hidden lg:table-cell">Manager</th>
-                    <th className="text-right py-4 px-6 text-xs font-black text-gray-400 uppercase tracking-widest">Actions</th>
+                  <tr className="border-b border-(--glass-border) bg-(--hover-bg)">
+                    <th className="text-left py-4 px-4 sm:px-6 text-xs font-black text-(--text-muted) uppercase tracking-widest">User</th>
+                    <th className="text-left py-4 px-6 text-xs font-black text-(--text-muted) uppercase tracking-widest hidden sm:table-cell">Dept</th>
+                    <th className="text-left py-4 px-6 text-xs font-black text-(--text-muted) uppercase tracking-widest hidden md:table-cell">Role</th>
+                    <th className="text-left py-4 px-6 text-xs font-black text-(--text-muted) uppercase tracking-widest hidden lg:table-cell">Manager</th>
+                    <th className="text-right py-4 px-6 text-xs font-black text-(--text-muted) uppercase tracking-widest">Actions</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-white/5">
+                <tbody className="divide-y divide-(--glass-border)">
                   <AnimatePresence mode='popLayout'>
                     {users.map((user, index) => (
                       <motion.tr
@@ -270,20 +270,20 @@ export default function UserManagement() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         transition={{ duration: 0.2, delay: index * 0.03 }}
-                        className="hover:bg-white/5 transition-colors group"
+                        className="hover:bg-(--hover-bg) transition-colors group"
                       >
                         <td className="py-4 px-4 sm:px-6">
                           <div className="flex items-center gap-3">
                             <UserAvatar name={user.name} email={user.email} size="md" className="border border-white/10" />
                             <div className="min-w-0">
-                              <p className="text-sm font-black truncate max-w-[140px] sm:max-w-none text-white">{user.name}</p>
-                              <div className="flex items-center gap-1.5 text-xs text-gray-500">
+                              <p className="text-sm font-black truncate max-w-[140px] sm:max-w-none text-(--text-main)">{user.name}</p>
+                              <div className="flex items-center gap-1.5 text-xs text-(--text-muted)">
                                 <IoMailOutline size={12} className="shrink-0" />
                                 <span className="truncate">{user.email}</span>
                               </div>
                               {/* Mobile indicators */}
                               <div className="mt-1 flex flex-wrap gap-1 sm:hidden">
-                                <span className="text-[10px] text-amber-500 bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/20">{user.role}</span>
+                                <span className="text-[10px] text-(--secondary) bg-(--secondary-glow) px-1.5 py-0.5 rounded border border-(--secondary-glow)">{user.role}</span>
                                 {parseInt(user.reports_count) > 0 && (
                                   <span className="text-[10px] text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">Manager</span>
                                 )}
@@ -292,16 +292,16 @@ export default function UserManagement() {
                           </div>
                         </td>
                         <td className="py-4 px-6 hidden sm:table-cell">
-                          <div className="flex items-center gap-2 text-gray-400">
-                            <IoBusinessOutline className="text-gray-500 shrink-0" size={14} />
+                          <div className="flex items-center gap-2 text-(--text-muted)">
+                            <IoBusinessOutline className="text-(--text-muted) shrink-0" size={14} />
                             <span className="text-sm truncate max-w-[120px]">{user.dept}</span>
                           </div>
                         </td>
                         <td className="py-4 px-6 hidden md:table-cell">
                           <div className="flex flex-col gap-1">
                             <span className={`w-fit px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-sm ${user.role === 'admin'
-                                ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
-                                : 'bg-white/5 text-gray-400 border-white/10'
+                              ? 'bg-purple-500/10 text-purple-500 border-purple-500/20'
+                              : 'bg-white/5 text-gray-400 border-white/10'
                               }`}>
                               {user.role}
                             </span>
@@ -313,7 +313,7 @@ export default function UserManagement() {
                           </div>
                         </td>
                         <td className="py-4 px-6 hidden lg:table-cell">
-                          <span className="text-sm text-gray-500 truncate max-w-[150px] block">
+                          <span className="text-sm text-(--text-muted) truncate max-w-[150px] block">
                             {user.manager_name || '—'}
                           </span>
                         </td>
@@ -324,12 +324,12 @@ export default function UserManagement() {
                                 setSelectedUser(user);
                                 setIsHierarchyModalOpen(true);
                               }}
-                              className="p-2.5 text-gray-500 hover:text-amber-500 hover:bg-white/10 rounded-xl transition-all active:scale-90"
+                              className="p-2.5 text-(--text-muted) hover:text-(--primary) hover:bg-white/10 rounded-xl transition-all active:scale-90"
                               title="View Hierarchy"
                             >
                               <div className="relative">
                                 <IoGitNetworkOutline size={18} />
-                                <div className="absolute -top-1 -right-1 w-2 h-2 bg-amber-500 rounded-full scale-0 group-hover:scale-100 transition-transform" />
+                                <div className="absolute -top-1 -right-1 w-2 h-2 bg-(--primary) rounded-full scale-0 group-hover:scale-100 transition-transform" />
                               </div>
                             </button>
                             <button
@@ -337,7 +337,7 @@ export default function UserManagement() {
                                 setSelectedUser(user);
                                 setIsEditModalOpen(true);
                               }}
-                              className="p-2.5 text-gray-500 hover:text-white hover:bg-white/10 rounded-xl transition-all active:scale-90"
+                              className="p-2.5 text-(--text-muted) hover:text-(--text-main) hover:bg-white/10 rounded-xl transition-all active:scale-90"
                               title="Edit User"
                             >
                               <IoPencilOutline size={18} />
@@ -347,7 +347,7 @@ export default function UserManagement() {
                                 setUserToDelete(user);
                                 setIsDeleteModalOpen(true);
                               }}
-                              className="p-2.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all active:scale-90"
+                              className="p-2.5 text-(--text-muted) hover:text-red-500 hover:bg-red-500/10 rounded-xl transition-all active:scale-90"
                               title="Delete User"
                             >
                               <IoTrashOutline size={18} />
@@ -376,15 +376,15 @@ export default function UserManagement() {
 
             {/* Pagination Controls */}
             {pagination.pages > 1 && (
-              <div className="mt-auto px-6 py-4 border-t border-white/5 bg-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
-                <p className="text-sm text-gray-500 order-2 sm:order-1 font-medium">
-                  Showing <span className="text-white font-bold">{(pagination.page - 1) * pagination.limit + 1}</span> to <span className="text-white font-bold">{Math.min(pagination.page * pagination.limit, pagination.total)}</span> of <span className="text-white font-bold">{pagination.total}</span> users
+              <div className="mt-auto px-6 py-4 border-t border-(--glass-border) bg-(--hover-bg) flex flex-col sm:flex-row items-center justify-between gap-4">
+                <p className="text-sm text-(--text-muted) order-2 sm:order-1 font-medium">
+                  Showing <span className="text-(--text-main) font-bold">{(pagination.page - 1) * pagination.limit + 1}</span> to <span className="text-(--text-main) font-bold">{Math.min(pagination.page * pagination.limit, pagination.total)}</span> of <span className="text-(--text-main) font-bold">{pagination.total}</span> users
                 </p>
                 <div className="flex items-center gap-2 order-1 sm:order-2">
                   <button
                     onClick={() => handlePageChange(pagination.page - 1)}
                     disabled={pagination.page === 1}
-                    className="p-2 rounded-lg bg-zinc-900 border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                    className="p-2 rounded-lg bg-(--input-bg) border border-(--glass-border) text-(--text-muted) hover:text-(--text-main) hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
                   >
                     <IoChevronBackOutline size={20} />
                   </button>
@@ -395,8 +395,8 @@ export default function UserManagement() {
                         key={i + 1}
                         onClick={() => handlePageChange(i + 1)}
                         className={`w-8 h-8 rounded-lg text-xs font-bold transition-all ${pagination.page === i + 1
-                            ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20'
-                            : 'text-gray-500 hover:text-white hover:bg-white/5'
+                          ? 'bg-(--gradient-primary) text-(--text-inverse) shadow-lg shadow-(--primary-glow)'
+                          : 'text-(--text-muted) hover:text-(--text-main) hover:bg-white/5'
                           }`}
                       >
                         {i + 1}
@@ -407,7 +407,7 @@ export default function UserManagement() {
                   <button
                     onClick={() => handlePageChange(pagination.page + 1)}
                     disabled={pagination.page === pagination.pages}
-                    className="p-2 rounded-lg bg-zinc-900 border border-white/10 text-gray-400 hover:text-white hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+                    className="p-2 rounded-lg bg-(--input-bg) border border-(--glass-border) text-(--text-muted) hover:text-(--text-main) hover:bg-white/5 disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
                   >
                     <IoChevronForwardOutline size={20} />
                   </button>

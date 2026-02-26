@@ -107,22 +107,22 @@ export default function Tickets() {
 
     const getStatusColor = (status) => {
         switch (status) {
-            case 'Open': return 'text-blue-500 bg-blue-500/10 border-blue-500/20';
-            case 'In Progress': return 'text-amber-500 bg-amber-500/10 border-amber-500/20';
-            case 'Under Review': return 'text-purple-500 bg-purple-500/10 border-purple-500/20';
-            case 'Done': return 'text-emerald-500 bg-emerald-500/10 border-emerald-500/20';
-            case 'Cancelled': return 'text-red-500 bg-red-500/10 border-red-500/20';
-            default: return 'text-gray-500 bg-gray-500/10 border-gray-500/20';
+            case 'Open': return 'text-(--primary) bg-(--primary-glow) border-(--primary-glow)';
+            case 'In Progress': return 'text-(--secondary) bg-(--secondary-glow) border-(--secondary-glow)';
+            case 'Under Review': return 'text-(--primary) bg-(--primary-glow) border-(--primary-glow)'; // Updated from invalid indigo
+            case 'Done': return 'text-(--success) bg-(--success-glow) border-(--success-glow)';
+            case 'Cancelled': return 'text-(--rose) bg-(--rose-glow) border-(--rose-glow)';
+            default: return 'text-(--text-muted) bg-(--hover-bg) border-(--glass-border)';
         }
     };
 
     const getPriorityStyles = (priority) => {
         switch (priority) {
-            case 'Critical': return 'text-red-500 bg-red-500/10';
-            case 'High': return 'text-orange-500 bg-orange-500/10';
-            case 'Medium': return 'text-yellow-500 bg-yellow-500/10';
-            case 'Low': return 'text-green-500 bg-green-500/10';
-            default: return 'text-gray-500 bg-gray-500/10';
+            case 'Critical': return 'text-(--rose) bg-(--rose-glow)';
+            case 'High': return 'text-(--orange) bg-(--orange-glow)';
+            case 'Medium': return 'text-(--primary) bg-(--primary-glow)'; // Updated from invalid amber
+            case 'Low': return 'text-(--success) bg-(--success-glow)';
+            default: return 'text-(--text-muted) bg-(--hover-bg)';
         }
     };
 
@@ -176,18 +176,18 @@ export default function Tickets() {
     }, [tickets, searchTerm, sortBy, createdByMeOnly, currentUser]);
 
     return (
-        <div className="flex flex-col h-full bg-zinc-950 overflow-hidden">
+        <div className="flex flex-col h-full bg-(--app-bg) overflow-hidden">
             {/* Header Section */}
-            <div className="px-4 sm:px-6 py-4 sm:py-6 bg-zinc-900/30 border-b border-white/5 backdrop-blur-xl shrink-0">
+            <div className="px-4 sm:px-6 py-4 sm:py-6 bg-(--glass-surface) border-b border-(--glass-border) backdrop-blur-xl shrink-0">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div>
                         <div className="flex items-center gap-3 mb-1">
-                            <div className="w-10 h-10 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-inner">
+                            <div className="w-10 h-10 rounded-xl bg-(--primary-glow) border border-(--primary-glow) flex items-center justify-center text-(--primary) shadow-inner">
                                 <IoTicketOutline size={22} />
                             </div>
                             <div>
-                                <h1 className="text-2xl font-black text-white tracking-tight">Ticket Center</h1>
-                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-[0.2em]">Manage & track project issues</p>
+                                <h1 className="text-2xl font-black text-(--text-main) tracking-tight">Ticket Center</h1>
+                                <p className="text-[10px] font-black text-(--text-muted) uppercase tracking-[0.2em]">Manage & track project issues</p>
                             </div>
                         </div>
                     </div>
@@ -195,13 +195,13 @@ export default function Tickets() {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={() => setCreatedByMeOnly(!createdByMeOnly)}
-                            className={`h-11 px-6 rounded-xl font-black transition-all flex items-center gap-2 active:scale-95 border ${createdByMeOnly ? 'bg-amber-500/10 border-amber-500 text-amber-500' : 'bg-white/5 border-white/10 text-gray-400 hover:text-white'}`}
+                            className={`h-11 px-6 rounded-xl font-black transition-all flex items-center gap-2 active:scale-95 border ${createdByMeOnly ? 'bg-(--primary-glow) border-(--primary) text-(--primary)' : 'bg-(--hover-bg) border-(--glass-border) text-(--text-muted) hover:text-(--text-main)'}`}
                         >
                             {createdByMeOnly ? 'All Tickets' : 'Created by Me'}
                         </button>
                         <button
                             onClick={() => setIsModalOpen(true)}
-                            className="h-11 px-6 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black shadow-lg shadow-amber-500/20 transition-all flex items-center gap-2 active:scale-95 group"
+                            className="h-11 px-6 bg-(--primary) hover:bg-(--primary) text-(--text-inverse) rounded-xl font-black shadow-lg shadow-(--primary-glow) transition-all flex items-center gap-2 active:scale-95 group"
                         >
                             <IoAddOutline size={20} className="group-hover:rotate-90 transition-transform duration-300" />
                             New Ticket
@@ -213,13 +213,13 @@ export default function Tickets() {
                 <div className="mt-6 sm:mt-8 flex flex-col lg:flex-row items-center gap-4">
                     {/* Search Bar */}
                     <div className="relative w-full lg:max-w-sm group">
-                        <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors" size={18} />
+                        <IoSearchOutline className="absolute left-4 top-1/2 -translate-y-1/2 text-(--text-muted) group-focus-within:text-(--primary) transition-colors" size={18} />
                         <input
                             type="text"
                             placeholder="Search tickets..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full h-11 pl-12 pr-4 bg-zinc-900/50 border border-white/5 rounded-xl text-sm font-medium text-white placeholder-gray-500 outline-none focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10 transition-all shadow-inner"
+                            className="w-full h-11 pl-12 pr-4 bg-(--input-bg) border border-(--input-border) rounded-xl text-sm font-medium text-(--text-main) placeholder-(--text-muted) outline-none focus:border-(--primary) focus:ring-4 focus:ring-(--primary-glow) transition-all shadow-inner"
                         />
                     </div>
 
@@ -253,13 +253,13 @@ export default function Tickets() {
                                 <select
                                     value={sortBy}
                                     onChange={(e) => setSortBy(e.target.value)}
-                                    className="w-full h-full px-4 bg-zinc-900/50 border border-white/5 rounded-xl text-xs font-black text-white hover:border-amber-500/30 transition-all outline-none appearance-none uppercase tracking-widest"
+                                    className="w-full h-full px-4 bg-(--input-bg) border border-(--input-border) rounded-xl text-xs font-black text-(--text-main) hover:border-(--primary-glow) transition-all outline-none appearance-none uppercase tracking-widest"
                                 >
                                     <option value="newest">Newest First</option>
                                     <option value="oldest">Oldest First</option>
                                     <option value="priority">Sort by Priority</option>
                                 </select>
-                                <IoChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-amber-500 pointer-events-none" size={12} />
+                                <IoChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-(--primary) pointer-events-none" size={12} />
                             </div>
                         </div>
                     </div>
@@ -267,26 +267,26 @@ export default function Tickets() {
             </div>
 
             {/* Main Content Area */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-2 sm:p-4">
+            <div className="flex-1 overflow-y-auto custom-scrollbar bg-(--app-bg)">
                 <div className="max-w-[1600px] mx-auto">
                     {loading ? (
                         <div className="space-y-3">
                             {[1, 2, 3, 4, 5, 6].map(i => (
-                                <div key={i} className="h-16 bg-zinc-900/50 border border-white/5 rounded-xl animate-pulse" />
+                                <div key={i} className="h-16 bg-(--hover-bg) border border-(--glass-border) rounded-xl animate-pulse" />
                             ))}
                         </div>
                     ) : processedTickets.length === 0 ? (
                         <div className="flex flex-col items-center justify-center py-32 text-center opacity-50">
-                            <div className="w-20 h-20 bg-zinc-900 rounded-full flex items-center justify-center mb-4 border border-white/5">
-                                <IoTicketOutline size={40} className="text-gray-600" />
+                            <div className="w-20 h-20 bg-(--hover-bg) rounded-full flex items-center justify-center mb-4 border border-(--glass-border)">
+                                <IoTicketOutline size={40} className="text-(--text-muted)" />
                             </div>
-                            <h3 className="text-lg font-black text-white">No Tickets Found</h3>
-                            <p className="text-xs text-gray-500 mt-1 uppercase tracking-widest">Adjust filters or search criteria</p>
+                            <h3 className="text-lg font-black text-(--text-main)">No Tickets Found</h3>
+                            <p className="text-xs text-(--text-muted) mt-1 uppercase tracking-widest">Adjust filters or search criteria</p>
                         </div>
                     ) : (
-                        <div className="bg-zinc-900/20 rounded-2xl border border-white/5 overflow-hidden">
+                        <div className="bg-(--app-bg) rounded-2xl border border-(--glass-border) overflow-hidden">
                             {/* Table Header */}
-                            <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-zinc-900/50 border-b border-white/5 text-[10px] font-black uppercase tracking-widest text-gray-500">
+                            <div className="hidden lg:grid grid-cols-12 gap-4 px-6 py-4 bg-(--glass-surface) border-b border-(--glass-border) text-[10px] font-black uppercase tracking-widest text-(--text-muted)">
                                 <div className="col-span-1">ID</div>
                                 <div className="col-span-2">Task Name</div>
                                 <div className="col-span-1">Project</div>
@@ -297,22 +297,22 @@ export default function Tickets() {
                             </div>
 
                             {/* Ticket Rows */}
-                            <div className="divide-y divide-white/5">
+                            <div className="divide-y divide-(--glass-border)">
                                 {processedTickets.map((ticket, index) => (
                                     <motion.div
                                         key={ticket.id}
                                         initial={{ opacity: 0, x: -10 }}
                                         animate={{ opacity: 1, x: 0 }}
                                         transition={{ delay: index * 0.01 }}
-                                        className={`group grid grid-cols-1 lg:grid-cols-12 gap-4 px-6 py-4 hover:bg-white/2 cursor-pointer transition-all items-center relative border-l-4 ${ticket.priority === 'Critical' ? 'border-red-500 bg-red-500/5' :
-                                            ticket.priority === 'High' ? 'border-orange-500 bg-orange-500/5' :
-                                                ticket.priority === 'Medium' ? 'border-amber-500 bg-amber-500/5' :
-                                                    'border-emerald-500 bg-emerald-500/5'
+                                        className={`group grid grid-cols-1 lg:grid-cols-12 gap-4 px-4 sm:px-6 py-4 border-b border-(--glass-border) hover:bg-(--hover-bg) transition-all items-center relative border-l-4 ${ticket.priority === 'Critical' ? 'border-(--rose) bg-(--rose)/5' :
+                                            ticket.priority === 'High' ? 'border-(--secondary) bg-(--secondary)/5' :
+                                                ticket.priority === 'Medium' ? 'border-(--primary) bg-(--primary)/5' :
+                                                    'border-(--success) bg-(--success)/5'
                                             }`}
                                     >
                                         <div
                                             onClick={() => navigate(`/tickets/${ticket.id}`)}
-                                            className="col-span-1 text-[11px] font-mono font-black text-gray-600 group-hover:text-amber-500 transition-colors"
+                                            className="col-span-1 text-[11px] font-mono font-black text-gray-600 group-hover:text-(--primary) transition-colors"
                                         >
                                             #{ticket.id}
                                         </div>
@@ -322,7 +322,7 @@ export default function Tickets() {
                                             className="col-span-1 lg:col-span-2 min-w-0"
                                         >
                                             <div className="flex flex-col gap-0.5">
-                                                <h3 className="text-xs font-black text-white group-hover:text-amber-500 transition-colors truncate uppercase leading-tight">
+                                                <h3 className="text-xs font-black text-(--text-main) group-hover:text-(--primary) transition-colors truncate uppercase leading-tight">
                                                     {ticket.title}
                                                 </h3>
                                                 <div className="flex items-center gap-2 text-[9px] text-gray-500 font-bold uppercase tracking-tighter self-start">
@@ -331,7 +331,7 @@ export default function Tickets() {
                                                     {ticket.estimated_date && (
                                                         <>
                                                             <span className="text-gray-800">•</span>
-                                                            <span className={`text-amber-500/80 ${isNearDeadline(ticket) ? 'animate-blink text-red-500 font-black' : ''}`}>
+                                                            <span className={`text-(--primary) opacity-80 ${isNearDeadline(ticket) ? 'animate-blink text-(--rose) font-black' : ''}`}>
                                                                 Est: {formatEstimatedDate(ticket.estimated_date)}
                                                             </span>
                                                         </>
@@ -401,7 +401,7 @@ export default function Tickets() {
                                         <div className="col-span-1 lg:col-span-1 flex justify-end gap-2">
                                             <button
                                                 onClick={(e) => { e.stopPropagation(); handleOpenSidePanel(ticket); }}
-                                                className="p-2 bg-white/5 rounded-lg text-gray-400 hover:bg-white/10 hover:text-white transition-all shadow-lg w-full flex items-center justify-center gap-2 border border-white/5 group-hover:border-amber-500/30"
+                                                className="p-2 bg-white/5 rounded-lg text-gray-400 hover:bg-white/10 hover:text-white transition-all shadow-lg w-full flex items-center justify-center gap-2 border border-white/5 group-hover:border-(--primary-glow)"
                                                 title="View Comments"
                                             >
                                                 <IoChatbubbleEllipsesOutline size={14} />

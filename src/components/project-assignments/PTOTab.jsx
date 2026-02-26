@@ -6,8 +6,8 @@ const PTOTab = ({ selectedDate, onDateChange, users, onSyncSuccess, server }) =>
     return (
         <div className="flex-1 min-h-0 h-[600px] flex flex-col gap-4">
             {/* Month Selector for PTO Plans */}
-            <div className="flex bg-zinc-900/80 backdrop-blur-xl border border-white/10 rounded-2xl p-1.5 shadow-2xl relative overflow-hidden w-fit">
-                <div className="absolute inset-0 bg-linear-to-br from-amber-500/5 to-transparent pointer-events-none" />
+            <div className="flex bg-(--hover-bg) backdrop-blur-xl border border-(--glass-border) rounded-2xl p-1.5 shadow-2xl relative overflow-hidden w-fit">
+                <div className="absolute inset-0 bg-linear-to-br from-(--primary-glow) to-transparent pointer-events-none" />
                 {[0, 1, 2, 3].map((m) => {
                     const d = new Date();
                     d.setDate(1);
@@ -22,7 +22,7 @@ const PTOTab = ({ selectedDate, onDateChange, users, onSyncSuccess, server }) =>
                             onClick={() => onDateChange(dateStr)}
                             className={`relative px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider transition-all min-w-[75px] z-10 ${isActive
                                 ? 'text-zinc-950 scale-105 active:scale-95'
-                                : 'text-gray-500 hover:text-white hover:bg-white/5 active:scale-95'
+                                : 'text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) active:scale-95'
                                 }`}
                         >
                             {isActive && (

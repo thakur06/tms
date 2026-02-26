@@ -277,52 +277,44 @@ export default function Dashboard() {
 
   const colorMap = {
     indigo: {
-      bg: "bg-amber-500/10",
-      text: "text-amber-500",
-      border: "border-amber-500/20",
-      accent: "from-amber-400 to-amber-600",
-      light: "bg-amber-500/5",
-      glow: "shadow-amber-500/10"
+      bg: "bg-(--primary-glow)",
+      text: "text-(--primary)",
+      border: "border-(--primary-glow)",
+      accent: "from-(--primary) to-(--secondary)",
+      light: "bg-(--primary-glow)",
+      glow: "shadow-(--primary-glow)"
     },
     blue: {
-      bg: "bg-yellow-500/10",
-      text: "text-yellow-500",
-      border: "border-yellow-500/20",
-      accent: "from-yellow-400 to-yellow-600",
-      light: "bg-yellow-500/5",
-      glow: "shadow-yellow-500/10"
-    },
-    emerald: {
-      bg: "bg-orange-500/10",
-      text: "text-orange-500",
-      border: "border-orange-500/20",
-      accent: "from-orange-400 to-orange-600",
-      light: "bg-orange-500/5",
-      glow: "shadow-orange-500/10"
+      bg: "bg-(--accent-glow)",
+      text: "text-(--accent)",
+      border: "border-(--accent-glow)",
+      accent: "from-(--accent) to-(--primary)",
+      light: "bg-(--accent-glow)",
+      glow: "shadow-(--accent-glow)"
     },
     rose: {
-      bg: "bg-red-500/10",
-      text: "text-red-500",
-      border: "border-red-500/20",
-      accent: "from-red-400 to-red-600",
-      light: "bg-red-500/5",
-      glow: "shadow-red-500/10"
-    },
-    amber: {
-      bg: "bg-amber-500/10",
-      text: "text-amber-500",
-      border: "border-amber-500/20",
-      accent: "from-amber-400 to-amber-600",
-      light: "bg-amber-500/5",
-      glow: "shadow-amber-500/10"
+      bg: "bg-(--rose-glow)",
+      text: "text-(--rose)",
+      border: "border-(--rose-glow)",
+      accent: "from-(--rose) to-(--amber)",
+      light: "bg-(--rose-glow)",
+      glow: "shadow-(--rose-glow)"
     },
     violet: {
-      bg: "bg-orange-500/10",
-      text: "text-orange-500",
-      border: "border-orange-500/20",
-      accent: "from-orange-400 to-orange-600",
-      light: "bg-orange-500/5",
-      glow: "shadow-orange-500/10"
+      bg: "bg-(--secondary-glow)",
+      text: "text-(--secondary)",
+      border: "border-(--secondary-glow)",
+      accent: "from-(--secondary) to-(--primary)",
+      light: "bg-(--secondary-glow)",
+      glow: "shadow-(--secondary-glow)"
+    },
+    amber: {
+      bg: "bg-(--amber-glow)",
+      text: "text-(--amber)",
+      border: "border-(--amber-glow)",
+      accent: "from-(--amber) to-(--rose)",
+      light: "bg-(--amber-glow)",
+      glow: "shadow-(--amber-glow)"
     }
   };
 
@@ -355,7 +347,7 @@ export default function Dashboard() {
       label: "Total Time",
       value: analytics.totalTimeStr,
       icon: IoTimeOutline,
-      color: "emerald",
+      color: "violet",
       trend: "5.2h",
       trendType: "up",
       unit: "Logged",
@@ -545,15 +537,15 @@ export default function Dashboard() {
           {modalContent.data.map((item, idx) => (
             <div
               key={idx}
-              className="flex justify-between items-center p-4 bg-zinc-900 border border-white/5 rounded-xl hover:bg-white/5 hover:border-amber-500/20 transition-all group"
+              className="flex justify-between items-center p-4 bg-(--app-bg) border border-(--glass-border) rounded-xl hover:bg-(--hover-bg) hover:border-amber-500/20 transition-all group"
             >
               <div>
-                <div className="font-bold text-white group-hover:text-amber-500 transition-colors">{item.name}</div>
+                <div className="font-bold text-(--text-main) group-hover:text-amber-500 transition-colors">{item.name}</div>
                 {item.code && (
-                  <div className="text-xs text-gray-500 font-medium">{item.code}</div>
+                  <div className="text-xs text-(--text-muted) font-medium">{item.code}</div>
                 )}
                 {item.count && (
-                  <div className="text-xs text-gray-500 font-medium">
+                  <div className="text-xs text-(--text-muted) font-medium">
                     {item.count} entries
                   </div>
                 )}
@@ -570,19 +562,19 @@ export default function Dashboard() {
     return (
       <div className="space-y-3 max-h-[60vh] overflow-y-auto custom-scrollbar">
         {modalContent.data.map((item, idx) => (
-          <div key={idx} className="p-4 bg-zinc-900 border border-white/5 rounded-xl hover:bg-white/5 transition-all">
+          <div key={idx} className="p-4 bg-(--app-bg) border border-(--glass-border) rounded-xl hover:bg-(--hover-bg) transition-all">
             <div className="flex justify-between">
-              <div className="font-bold text-gray-200">
+              <div className="font-bold text-(--text-main)">
                 {item.project_name || item.project}
               </div>
-              <div className="text-xs text-gray-500 font-medium">
+              <div className="text-xs text-(--text-muted) font-medium">
                 {new Date(item.entry_date).toLocaleDateString()}
               </div>
             </div>
-            <div className="text-sm text-amber-500 font-semibold mt-1">{item.task_id}</div>
-            <div className="flex justify-between mt-3 text-xs text-gray-500 font-medium">
+            <div className="text-sm text-(--primary) font-semibold mt-1">{item.task_id}</div>
+            <div className="flex justify-between mt-3 text-xs text-(--text-muted) font-medium">
               <div>{item.entry_date}</div>
-              <div className="font-mono text-white font-bold">
+              <div className="font-mono text-(--text-main) font-bold">
                 {item.hours}h {item.minutes}m
               </div>
             </div>
@@ -595,30 +587,30 @@ export default function Dashboard() {
   return (
     <div className="w-full space-y-8 pb-10 p-3">
 
-      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-white/5 bg-zinc-900 shadow-2xl">
+      <div className="relative overflow-hidden rounded-2xl sm:rounded-3xl p-5 sm:p-8 border border-(--glass-border) bg-(--glass-surface) shadow-2xl">
         <div className="absolute inset-0 bg-linear-to-br from-amber-500/10 via-transparent to-orange-500/10" />
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="flex-1 space-y-1">
-            <nav className="flex items-center gap-2 text-xs font-black text-amber-500/60 uppercase tracking-widest mb-2">
+            <nav className="flex items-center gap-2 text-xs font-black text-(--primary) uppercase tracking-widest mb-2">
               <span>Overview</span>
               <span className="opacity-30">/</span>
-              <span className="text-white">Dashboard</span>
+              <span className="text-(--text-main)">Dashboard</span>
             </nav>
             <div className="flex items-center gap-4">
-              <div className="p-3 bg-amber-500/20 rounded-2xl border border-amber-500/30 text-amber-500 shadow-lg shadow-amber-500/10">
+              <div className="p-3 bg-(--primary-glow) rounded-2xl border border-(--primary-glow) text-(--primary) shadow-lg shadow-(--primary-glow)">
                 <IoAnalyticsOutline size={28} />
               </div>
               <div>
-                <h1 className="text-2xl font-black text-white tracking-tight leading-none">
+                <h1 className="text-2xl font-black text-(--text-main) tracking-tight leading-none">
                   Activity Hub
                 </h1>
-                <p className="text-gray-400 mt-1.5 text-xs font-bold italic">Real-time workspace insights and productivity metrics.</p>
+                <p className="text-(--text-muted) mt-1.5 text-xs font-bold italic">Real-time workspace insights and productivity metrics.</p>
               </div>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Link to="/time-log" className="px-6 py-2.5 bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-xl font-black transition-all flex items-center gap-2 shadow-lg shadow-amber-500/20 active:scale-95 text-xs uppercase tracking-widest">
+            <Link to="/time-log" className="px-6 py-2.5 bg-(--gradient-primary) text-(--text-inverse) rounded-xl font-black transition-all flex items-center gap-2 shadow-lg shadow-(--primary-glow) active:scale-95 text-xs uppercase tracking-widest">
               <IoCalendarOutline size={18} />
               Time Log
             </Link>
@@ -642,12 +634,12 @@ export default function Dashboard() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.04 }}
               whileHover={{ y: -4 }}
-              className="bg-zinc-900 rounded-2xl sm:rounded-3xl p-3 sm:p-4 cursor-pointer border border-white/5 hover:border-amber-500/20 transition-all group relative"
+              className="ui-card rounded-2xl sm:rounded-3xl p-3 sm:p-4 cursor-pointer border border-(--glass-border) hover:border-(--primary-glow) transition-all group relative bg-(--glass-surface)"
               onClick={() => handleCardClick(card)}
             >
               <div className="relative z-10">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className={`${colors.text} p-1.5 rounded-lg bg-zinc-800 transition-colors`}>
+                  <div className={`${colors.text} p-1.5 rounded-lg bg-(--app-bg) transition-colors`}>
                     <card.icon size={18} />
                   </div>
                   <div className="text-gray-400 text-[9px] font-black uppercase tracking-widest">
@@ -656,10 +648,10 @@ export default function Dashboard() {
                 </div>
 
                 <div className="space-y-0.5">
-                  <div className="text-2xl font-black text-white tracking-tighter">
+                  <div className="text-2xl font-black text-(--text-main) tracking-tighter">
                     {card.value}
                   </div>
-                  <p className="text-[9px] text-gray-500 font-bold italic truncate">
+                  <p className="text-[9px] text-(--text-muted) font-bold italic truncate">
                     {card.detail}
                   </p>
                 </div>
@@ -678,10 +670,10 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="ui-card p-4 sm:p-6 bg-zinc-900 border-white/5 hover:border-amber-500/20 transition-all shadow-sm"
+          className="ui-card p-4 sm:p-6 bg-(--glass-surface) border-(--glass-border) hover:border-amber-500/20 transition-all shadow-sm"
         >
-          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
-            <div className="p-2 bg-amber-500/10 rounded-lg border border-amber-500/20 text-amber-500">
+          <h3 className="text-lg font-bold text-(--text-main) mb-6 flex items-center gap-2">
+            <div className="p-2 bg-(--primary-glow) rounded-lg border border-(--primary-glow) text-(--primary)">
               <IoStatsChartOutline />
             </div>
             Daily Activity
@@ -724,10 +716,10 @@ export default function Dashboard() {
                   <Line
                     type="monotone"
                     dataKey="hours"
-                    stroke="#f59e0b"
+                    stroke="var(--primary)"
                     strokeWidth={3}
-                    dot={{ r: 5, fill: "#f59e0b", strokeWidth: 2, stroke: "#18181b" }}
-                    activeDot={{ r: 7, fill: "#fbbf24", stroke: "#18181b", strokeWidth: 2 }}
+                    dot={{ r: 5, fill: "var(--primary)", strokeWidth: 2, stroke: "#18181b" }}
+                    activeDot={{ r: 7, fill: "var(--accent)", stroke: "#18181b", strokeWidth: 2 }}
                     fill="url(#colorHours)"
                   />
                 </LineChart>
@@ -742,8 +734,8 @@ export default function Dashboard() {
         </motion.div>
 
         {/* Location Split Chart */}
-        <div className="ui-card p-4 sm:p-6 bg-zinc-900 border-white/5">
-          <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+        <div className="ui-card p-4 sm:p-6 bg-(--glass-surface) border-(--glass-border)">
+          <h3 className="text-lg font-bold text-(--text-main) mb-6 flex items-center gap-2">
             <IoLocationOutline className="text-amber-500" />
             Work Location
           </h3>
@@ -795,29 +787,29 @@ export default function Dashboard() {
       {/* --- Projects & Clients Grid --- */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Top Projects List */}
-        <div className="ui-card p-0 overflow-hidden bg-zinc-900 border-white/5">
-          <div className="p-6 border-b border-white/5">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+        <div className="ui-card p-0 overflow-hidden bg-(--app-bg) border border-(--glass-border)">
+          <div className="p-6 border-b border-(--glass-border)">
+            <h3 className="text-lg font-bold text-(--text-main) flex items-center gap-2">
               <IoFolderOutline className="text-amber-500" />
               Top Projects
             </h3>
           </div>
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-(--glass-border)">
             {analytics.topProjects.length > 0 ? (
               analytics.topProjects.map((project, i) => (
                 <div
                   key={i}
-                  className="p-4 hover:bg-white/5 transition-colors flex items-center justify-between"
+                  className="p-4 hover:bg-(--hover-bg) transition-colors flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 font-bold text-xs ring-1 ring-amber-500/20">
                       {i + 1}
                     </div>
                     <div>
-                      <div className="font-medium text-gray-200">
+                      <div className="font-medium text-(--text-main)">
                         {project.name}
                       </div>
-                      <div className="text-xs text-gray-500">
+                      <div className="text-xs text-(--text-muted)">
                         {project.code}
                       </div>
                     </div>
@@ -826,14 +818,14 @@ export default function Dashboard() {
                     <div className="font-mono text-amber-500 font-bold">
                       {project.totalTime}
                     </div>
-                    <div className="text-xs text-gray-600">
+                    <div className="text-xs text-(--text-muted)">
                       {project.progress.toFixed(0)}%
                     </div>
                   </div>
                 </div>
               ))
             ) : (
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-(--text-muted)">
                 No project activity this week
               </div>
             )}
@@ -841,31 +833,31 @@ export default function Dashboard() {
         </div>
 
         {/* Top Clients List */}
-        <div className="ui-card p-0 overflow-hidden bg-zinc-900 border-white/5">
-          <div className="p-6 border-b border-white/5">
-            <h3 className="text-lg font-bold text-white flex items-center gap-2">
+        <div className="ui-card p-0 overflow-hidden bg-(--app-bg) border border-(--glass-border)">
+          <div className="p-6 border-b border-(--glass-border)">
+            <h3 className="text-lg font-bold text-(--text-main) flex items-center gap-2">
               <IoPeopleOutline className="text-rose-500" />
               Top Clients
             </h3>
           </div>
-          <div className="divide-y divide-white/5">
+          <div className="divide-y divide-(--glass-border)">
             {analytics.topClients.length > 0 ? (
               analytics.topClients.map((client, i) => (
                 <div
                   key={i}
-                  className="p-4 hover:bg-white/5 transition-colors flex items-center justify-between"
+                  className="p-4 hover:bg-(--hover-bg) transition-colors flex items-center justify-between"
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-8 h-8 rounded-lg bg-rose-500/10 flex items-center justify-center text-rose-500 font-bold text-xs ring-1 ring-rose-500/20">
                       {client.name.charAt(0)}
                     </div>
-                    <div className="font-medium text-gray-200">{client.name}</div>
+                    <div className="font-medium text-(--text-main)">{client.name}</div>
                   </div>
                   <div className="text-right">
                     <div className="font-mono text-rose-500 font-bold">
                       {client.totalTime}
                     </div>
-                    <div className="w-24 h-1.5 bg-zinc-800 rounded-full mt-2 overflow-hidden">
+                    <div className="w-24 h-1.5 bg-(--hover-bg) rounded-full mt-2 overflow-hidden">
                       <div
                         className="h-full bg-rose-500 rounded-full"
                         style={{ width: `${client.percentage}%` }}
@@ -875,7 +867,7 @@ export default function Dashboard() {
                 </div>
               ))
             ) : (
-              <div className="p-8 text-center text-gray-500">
+              <div className="p-8 text-center text-(--text-muted)">
                 No client details available
               </div>
             )}
@@ -884,9 +876,9 @@ export default function Dashboard() {
       </div>
 
       {/* --- Recent Activity Table --- */}
-      <div className="ui-card p-0 overflow-hidden bg-zinc-900 border-white/5">
-        <div className="p-6 border-b border-white/5 flex justify-between items-center">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
+      <div className="ui-card p-0 overflow-hidden bg-(--app-bg) border border-(--glass-border)">
+        <div className="p-6 border-b border-(--glass-border) flex justify-between items-center">
+          <h3 className="text-lg font-bold text-(--text-main) flex items-center gap-2">
             <IoConstructOutline className="text-cyan-500" />
             Recent Activity
           </h3>
@@ -898,8 +890,8 @@ export default function Dashboard() {
           </Link>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-sm text-gray-400">
-            <thead className="bg-white/5 text-xs uppercase font-bold text-gray-500">
+          <table className="w-full text-left text-sm text-(--text-muted)">
+            <thead className="bg-(--hover-bg) text-xs uppercase font-bold text-(--text-muted)">
               <tr>
                 <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4">Project</th>
@@ -908,7 +900,7 @@ export default function Dashboard() {
                 <th className="px-6 py-4 text-right">Status</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-white/5">
+            <tbody className="divide-y divide-(--glass-border)">
               {analytics.recentEntries.length > 0 ? (
                 analytics.recentEntries.map((entry, idx) => (
                   <motion.tr
@@ -916,19 +908,19 @@ export default function Dashboard() {
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: idx * 0.05 }}
-                    className="hover:bg-white/5 transition-all group"
+                    className="hover:bg-(--hover-bg) transition-all group"
                   >
-                    <td className="px-6 py-4 text-gray-200 font-semibold">
+                    <td className="px-6 py-4 text-(--text-main) font-semibold">
                       {new Date(entry.entry_date).toLocaleDateString()}
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-gray-200 group-hover:text-amber-500 transition-colors font-medium">
+                      <div className="text-(--text-main) group-hover:text-amber-500 transition-colors font-medium">
                         {entry.project_name || entry.project}
                       </div>
-                      <div className="text-xs text-gray-500">{entry.client}</div>
+                      <div className="text-xs text-(--text-muted)">{entry.client}</div>
                     </td>
                     <td className="px-6 py-4">
-                      <span className="inline-flex items-center px-3 py-1 rounded-lg bg-zinc-800 text-gray-400 text-xs border border-white/10 group-hover:border-amber-500/30 group-hover:bg-amber-500/10 transition-all font-bold">
+                      <span className="inline-flex items-center px-3 py-1 rounded-lg bg-(--hover-bg) text-(--text-muted) text-xs border border-(--glass-border) group-hover:border-amber-500/30 group-hover:bg-amber-500/10 transition-all font-bold">
                         {entry.task_id}
                       </span>
                     </td>
@@ -944,7 +936,7 @@ export default function Dashboard() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan="5" className="p-8 text-center text-gray-500">
+                  <td colSpan="5" className="p-8 text-center text-(--text-muted)">
                     No recent activity
                   </td>
                 </tr>
@@ -969,21 +961,21 @@ export default function Dashboard() {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-2xl bg-zinc-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl"
+              className="w-full max-w-2xl ui-modal"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="p-6 border-b border-white/5 flex justify-between items-center bg-white/5">
+              <div className="ui-modal-header">
                 <div>
-                  <h3 className="text-xl font-black text-white">
+                  <h3 className="text-xl font-black text-(--text-main)">
                     {modalContent.title}
                   </h3>
-                  <p className="text-sm text-gray-400 font-medium">
+                  <p className="text-sm text-(--text-muted) font-medium">
                     {modalContent.detail}
                   </p>
                 </div>
                 <button
                   onClick={() => setModalOpen(false)}
-                  className="p-2 hover:bg-white/10 rounded-lg text-gray-400 hover:text-white transition-colors"
+                  className="p-2 hover:bg-(--hover-bg) rounded-lg text-(--text-muted) hover:text-(--text-main) transition-colors"
                 >
                   <IoClose size={24} />
                 </button>

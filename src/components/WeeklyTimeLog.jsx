@@ -44,7 +44,7 @@ function SearchableSelect({ options, value, onChange, placeholder, className }) 
   return (
     <div className={`relative ${className}`} ref={wrapperRef}>
       <div
-        className="w-full flex items-center justify-between p-2 pl-3 bg-zinc-900 border border-transparent rounded hover:bg-white/5 cursor-pointer text-sm text-gray-200"
+        className="w-full flex items-center justify-between p-2 pl-3 bg-(--input-bg) border border-(--glass-border) rounded hover:bg-(--hover-bg) cursor-pointer text-sm text-(--text-main)"
         onClick={() => {
           setIsOpen(!isOpen);
           if (!isOpen) setSearch("");
@@ -53,16 +53,16 @@ function SearchableSelect({ options, value, onChange, placeholder, className }) 
         <span className="truncate select-none">
           {selectedOption ? selectedOption.label : (value || <span className="text-gray-500">{placeholder}</span>)}
         </span>
-        <IoSearch className="text-gray-600 ml-2 shrink-0" size={14} />
+        <IoSearch className="text-(--text-muted) ml-2 shrink-0" size={14} />
       </div>
 
       {isOpen && (
-        <div className="absolute z-9999 top-full left-0 w-[240px] mt-2 bg-zinc-950/90 backdrop-blur-xl border border-white/10 rounded-2xl shadow-2xl max-h-[250px] overflow-hidden flex flex-col hide-y-scroll ring-1 ring-white/5">
-          <div className="p-3 border-b border-white/5 sticky top-0 bg-zinc-900/50">
+        <div className="absolute z-9999 top-full left-0 w-[240px] mt-2 bg-(--app-bg) backdrop-blur-xl border border-(--glass-border) rounded-2xl shadow-2xl max-h-[250px] overflow-hidden flex flex-col hide-y-scroll ring-1 ring-(--glass-border)">
+          <div className="p-3 border-b border-(--glass-border) sticky top-0 bg-(--hover-bg)">
             <input
               autoFocus
               type="text"
-              className="w-full bg-black/20 text-xs text-white p-2 rounded border border-white/10 focus:border-amber-500/50 focus:outline-none"
+              className="w-full bg-(--input-bg) text-xs text-(--text-main) p-2 rounded border border-(--glass-border) focus:border-(--primary) focus:outline-none focus:ring-4 focus:ring-(--primary-glow)"
               placeholder="Search..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -71,12 +71,12 @@ function SearchableSelect({ options, value, onChange, placeholder, className }) 
           </div>
           <div className="overflow-y-auto max-h-[55px] p-1 hide-y-scroll">
             {filteredOptions.length === 0 ? (
-              <div className="p-3 text-xs text-gray-500 text-center">No results</div>
+              <div className="p-3 text-xs text-(--text-muted) text-center">No results</div>
             ) : (
               filteredOptions.map((opt) => (
                 <div
                   key={opt.value}
-                  className={`p-2 text-xs rounded cursor-pointer transition-colors ${value === opt.value ? "bg-amber-500/20 text-amber-500" : "text-gray-300 hover:bg-white/5 hover:text-white"
+                  className={`p-2 text-xs rounded cursor-pointer transition-colors ${value === opt.value ? "bg-(--primary-glow) text-(--primary) font-black" : "text-(--text-muted) hover:bg-(--hover-bg) hover:text-(--text-main)"
                     }`}
                   onClick={() => {
                     onChange(opt.value);
@@ -102,31 +102,31 @@ function RemarksModal({ isOpen, onClose, initialValue, onSave, title }) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-(--app-bg)/80 backdrop-blur-sm p-4">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
-        className="w-full max-w-md bg-zinc-900 border border-white/10 rounded-2xl shadow-2xl overflow-hidden"
+        className="w-full max-w-md bg-(--app-bg) border border-(--glass-border) rounded-2xl shadow-2xl overflow-hidden"
       >
-        <div className="p-4 border-b border-white/5 flex justify-between items-center bg-zinc-900">
-          <h3 className="text-sm font-bold text-white uppercase tracking-wider">{title || "Add Remarks"}</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-white"><IoClose size={20} /></button>
+        <div className="p-4 border-b border-(--glass-border) flex justify-between items-center bg-(--hover-bg)">
+          <h3 className="text-sm font-bold text-(--text-main) uppercase tracking-wider">{title || "Add Remarks"}</h3>
+          <button onClick={onClose} className="text-(--text-muted) hover:text-(--text-main)"><IoClose size={20} /></button>
         </div>
         <div className="p-4">
           <textarea
-            className="w-full bg-black/20 text-sm text-gray-200 p-3 rounded-xl border border-white/10 focus:border-amber-500/50 focus:outline-none min-h-[100px] resize-none"
+            className="w-full bg-(--input-bg) text-sm text-(--text-main) p-3 rounded-xl border border-(--glass-border) focus:border-(--primary) focus:outline-none min-h-[100px] resize-none focus:ring-4 focus:ring-(--primary-glow)"
             placeholder="Enter details about this activity..."
             value={val}
             onChange={(e) => setVal(e.target.value)}
             autoFocus
           />
         </div>
-        <div className="p-4 border-t border-white/5 bg-zinc-900/50 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-xs font-bold text-gray-400 hover:text-white transition-colors">Cancel</button>
+        <div className="p-4 border-t border-(--glass-border) bg-(--hover-bg) flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 text-xs font-bold text-(--text-muted) hover:text-(--text-main) transition-colors">Cancel</button>
           <button
             onClick={() => { onSave(val); onClose(); }}
-            className="px-6 py-2 bg-amber-500 hover:bg-amber-400 text-zinc-900 rounded-lg text-xs font-black uppercase tracking-wider transition-colors"
+            className="px-6 py-2 bg-(--primary) hover:opacity-90 text-(--text-inverse) rounded-lg text-xs font-black uppercase tracking-wider transition-colors shadow-lg shadow-(--primary-glow)"
           >
             Save Note
           </button>
@@ -233,6 +233,10 @@ export default function WeeklyTimeLog({
   const weekDays = useMemo(() => getWeekDays(), [currentWeek]);
 
   const normalizeDateStr = (date) => {
+    if (!date) return "";
+    if (typeof date === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(date)) {
+      return date;
+    }
     const d = new Date(date);
     const year = d.getFullYear();
     const month = String(d.getMonth() + 1).padStart(2, "0");
@@ -563,20 +567,20 @@ export default function WeeklyTimeLog({
       {/* HEADER */}
       <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
         <div className="w-full lg:w-auto">
-          <nav className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+          <nav className="flex items-center gap-2 text-xs font-black text-(--text-muted) uppercase tracking-widest mb-2">
             <span>Workspace</span>
             <span className="opacity-30">/</span>
-            <span className="text-amber-500">Weekly Log</span>
+            <span className="text-(--primary)">Weekly Log</span>
           </nav>
           <div className="flex items-center gap-4">
-            <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-500 shrink-0">
+            <div className="p-3 bg-(--primary-glow) rounded-xl border border-(--primary-glow) text-(--primary) shrink-0">
               <IoCalendar size={24} />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight uppercase leading-tight">
+              <h1 className="text-2xl md:text-3xl font-black text-(--text-main) tracking-tight uppercase leading-tight">
                 Weekly Timesheet
               </h1>
-              <p className="text-gray-500 font-bold text-xs md:text-sm mt-1">
+              <p className="text-(--text-muted) font-bold text-xs md:text-sm mt-1">
                 {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
               </p>
             </div>
@@ -584,8 +588,8 @@ export default function WeeklyTimeLog({
         </div>
 
         <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-          <div className="flex items-center bg-zinc-900 p-1 rounded-xl border border-white/5 shadow-inner">
-            <button onClick={() => navigateWeek(-1)} className="p-2 hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-white transition-colors">
+          <div className="flex items-center bg-(--hover-bg) p-1 rounded-xl border border-(--glass-border) shadow-inner">
+            <button onClick={() => navigateWeek(-1)} className="p-2 hover:bg-(--app-bg) rounded-lg text-(--text-muted) hover:text-(--text-main) transition-colors">
               <IoChevronBack size={18} />
             </button>
             <button onClick={() => {
@@ -596,31 +600,31 @@ export default function WeeklyTimeLog({
               monday.setDate(diff);
               monday.setHours(0, 0, 0, 0);
               setCurrentWeek(monday);
-            }} className="px-3 md:px-4 text-[9px] md:text-[10px] font-black uppercase text-gray-400 hover:text-white transition-colors tracking-widest whitespace-nowrap">
+            }} className="px-3 md:px-4 text-[9px] md:text-[10px] font-black uppercase text-(--text-muted) hover:text-(--text-main) transition-colors tracking-widest whitespace-nowrap">
               Current
             </button>
-            <button onClick={() => navigateWeek(1)} className="p-2 hover:bg-zinc-800 rounded-lg text-gray-400 hover:text-white transition-colors">
+            <button onClick={() => navigateWeek(1)} className="p-2 hover:bg-(--app-bg) rounded-lg text-(--text-muted) hover:text-(--text-main) transition-colors">
               <IoChevronForward size={18} />
             </button>
           </div>
 
           <div className="flex flex-col gap-2 flex-1 md:flex-none md:min-w-[200px]">
-            <div className={`flex items-center justify-between px-4 md:px-5 py-2 rounded-xl border transition-all duration-500 bg-zinc-900/50 backdrop-blur-md shadow-inner ${weeklyTotalHours >= 40 ? 'border-emerald-500/30 text-emerald-500' : 'border-amber-500/30 text-amber-500'}`}>
+            <div className={`flex items-center justify-between px-4 md:px-5 py-2 rounded-xl border transition-all duration-500 bg-(--hover-bg) backdrop-blur-md shadow-inner ${weeklyTotalHours >= 40 ? 'border-emerald-500/30 text-emerald-500' : 'border-(--primary-glow) text-(--primary)'}`}>
               <div className="flex flex-col">
                 <span className="text-[8px] uppercase font-black tracking-widest opacity-60">Weekly Progress</span>
                 <span className="text-lg md:text-xl font-mono font-black leading-none">{weeklyTotalHours.toFixed(1)}<span className="text-[10px] md:text-xs opacity-40 ml-1">/ 40h</span></span>
               </div>
-              <div className={`p-1.5 md:p-2 rounded-lg ${weeklyTotalHours >= 40 ? 'bg-emerald-500/20' : 'bg-amber-500/20'} shrink-0`}>
+              <div className={`p-1.5 md:p-2 rounded-lg ${weeklyTotalHours >= 40 ? 'bg-emerald-500/20' : 'bg-(--primary-glow)'} shrink-0`}>
                 <IoCheckmarkCircle size={18} />
               </div>
             </div>
-            <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden border border-white/5 shadow-inner">
+            <div className="h-1.5 w-full bg-(--glass-border) rounded-full overflow-hidden border border-(--glass-border) shadow-inner">
               <motion.div
                 initial={{ width: 0 }}
                 animate={{ width: `${Math.min((weeklyTotalHours / 40) * 100, 100)}%` }}
                 className={`h-full transition-all duration-1000 ${weeklyTotalHours >= 40
-                  ? 'bg-linear-to-r from-emerald-600 to-emerald-400'
-                  : 'bg-linear-to-r from-amber-600 to-amber-400'
+                  ? 'bg-gradient-to-r from-(--accent) to-emerald-400'
+                  : 'bg-(--gradient-vibrant)'
                   }`}
               />
             </div>
@@ -630,9 +634,9 @@ export default function WeeklyTimeLog({
             <button
               onClick={handleSave}
               disabled={isLocked}
-              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] md:text-[11px] transition-all active:scale-95 border shadow-2xl relative overflow-hidden group ${isLocked
-                ? 'bg-zinc-800/10 border-white/5 text-gray-700 cursor-not-allowed shadow-none'
-                : 'bg-white text-zinc-950 border-white hover:bg-zinc-200'
+              className={`flex-1 md:flex-none flex items-center justify-center gap-2 px-4 md:px-4 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] md:text-[11px] transition-all active:scale-95 border shadow-2xl relative overflow-hidden group ${isLocked
+                ? 'bg-(--hover-bg) border-(--glass-border) text-(--text-muted) cursor-not-allowed shadow-none'
+                : 'bg-(--text-main) text-(--text-inverse) border-(--text-main) hover:opacity-90'
                 }`}
             >
               <IoSave size={16} />
@@ -643,9 +647,9 @@ export default function WeeklyTimeLog({
             <button
               onClick={() => setShowSubmitModal(true)}
               disabled={isLocked}
-              className={`flex-2 md:flex-none flex items-center justify-center gap-2 px-4 md:px-6 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] md:text-[11px] transition-all active:scale-95 border shadow-2xl relative overflow-hidden group ${isLocked
-                ? 'bg-zinc-800/10 border-white/5 text-gray-700 cursor-not-allowed shadow-none'
-                : 'bg-emerald-600 text-white border-emerald-500 hover:bg-emerald-500 hover:shadow-emerald-500/30'
+              className={`flex-2 md:flex-none flex items-center justify-center gap-2 px-4 md:px-4 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] md:text-[11px] transition-all active:scale-95 border shadow-2xl relative overflow-hidden group ${isLocked
+                ? 'bg-(--hover-bg) border-(--glass-border) text-(--text-muted) cursor-not-allowed shadow-none'
+                : 'bg-(--accent) text-(--text-inverse) border-(--accent) hover:opacity-90 hover:shadow-(--accent-glow)'
                 }`}
             >
               <IoCheckmarkCircle size={16} />
@@ -656,7 +660,7 @@ export default function WeeklyTimeLog({
       </div>
 
       {isLocked && (
-        <div className="bg-amber-500/10 border border-amber-500/20 text-amber-500 p-4 rounded-xl text-sm font-bold flex items-center gap-3">
+        <div className="bg-(--primary-glow) border border-(--primary-glow) text-(--primary) p-4 rounded-xl text-sm font-bold flex items-center gap-3">
           <IoCheckmarkCircle size={20} />
           <span>This timesheet has been submitted ({timesheetStatus}). You cannot make changes unless it is rejected.</span>
         </div>
@@ -669,12 +673,12 @@ export default function WeeklyTimeLog({
             key={row.id}
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            className={`bg-zinc-900/60 border border-white/10 rounded-2xl p-4 space-y-4 ${isLocked ? 'opacity-70' : ''}`}
+            className={`bg-(--hover-bg) border border-(--glass-border) rounded-2xl p-4 space-y-4 ${isLocked ? 'opacity-70' : ''}`}
           >
             {/* Row Header: Project & Task */}
             <div className="grid grid-cols-1 gap-3">
               <div className={isLocked ? "pointer-events-none" : ""}>
-                <label className="text-[9px] font-black uppercase text-gray-500 tracking-widest ml-1 mb-1 block">Project</label>
+                <label className="text-[9px] font-black uppercase text-(--text-muted) tracking-widest ml-1 mb-1 block">Project</label>
                 <SearchableSelect
                   options={projectOptions}
                   value={row.projectId}
@@ -687,7 +691,7 @@ export default function WeeklyTimeLog({
                 />
               </div>
               <div className={isLocked ? "pointer-events-none" : ""}>
-                <label className="text-[9px] font-black uppercase text-gray-500 tracking-widest ml-1 mb-1 block">Task</label>
+                <label className="text-[9px] font-black uppercase text-(--text-muted) tracking-widest ml-1 mb-1 block">Task</label>
                 <SearchableSelect
                   options={taskOptions}
                   value={row.taskId}
@@ -709,15 +713,15 @@ export default function WeeklyTimeLog({
                 const hasRemarks = cell?.remarks && cell.remarks.trim().length > 0;
 
                 return (
-                  <div key={dateStr} className={`relative p-2 rounded-xl bg-black/20 border transition-all ${isToday ? 'border-amber-500/30' : 'border-white/5'} ${isLocked ? 'pointer-events-none' : ''}`}>
+                  <div key={dateStr} className={`relative p-2 rounded-xl bg-(--hover-bg) border transition-all ${isToday ? 'border-(--primary-glow)' : 'border-(--glass-border)'} ${isLocked ? 'pointer-events-none' : ''}`}>
                     <div className="flex items-center justify-between mb-2">
-                      <span className={`text-[8px] font-black uppercase ${isToday ? 'text-amber-500' : isWeekend ? 'text-red-500/70' : 'text-gray-500'}`}>
+                      <span className={`text-[8px] font-black uppercase ${isToday ? 'text-(--primary)' : isWeekend ? 'text-(--rose)/70' : 'text-(--text-muted)'}`}>
                         {day.toLocaleDateString("en-US", { weekday: "short" })} {day.getDate()}
                       </span>
                       {(cell?.hours > 0 || hasRemarks) && (
                         <button
                           onClick={() => setRemarksModalState({ open: true, rowId: row.id, dateStr, content: cell?.remarks || "" })}
-                          className={`p-1 rounded-lg transition-colors ${hasRemarks ? 'text-amber-500 bg-amber-500/10' : 'text-gray-600 hover:text-white hover:bg-white/5'}`}
+                          className={`p-1 rounded-lg transition-colors ${hasRemarks ? 'text-(--primary) bg-(--primary-glow)' : 'text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg)'}`}
                         >
                           <IoChatbubbleEllipsesOutline size={12} />
                         </button>
@@ -725,11 +729,11 @@ export default function WeeklyTimeLog({
                     </div>
                     <div className="flex items-center gap-1.5">
                       <div className="flex flex-col flex-1 gap-1">
-                        <span className="text-[7px] uppercase font-black text-gray-600 block text-center">Hrs</span>
+                        <span className="text-[7px] uppercase font-black text-(--text-muted) block text-center">Hrs</span>
                         <input
                           type="number"
                           placeholder="0"
-                          className="w-full bg-zinc-800/50 text-center font-mono text-xs p-1.5 rounded border border-white/10 text-white focus:border-amber-500/50 outline-none"
+                          className="w-full bg-(--input-bg) text-center font-mono text-xs p-1.5 rounded border border-(--glass-border) text-(--text-main) focus:border-(--primary) outline-none transition-all focus:ring-4 focus:ring-(--primary-glow)"
                           value={Math.floor(cell?.hours || 0) || ""}
                           onChange={(e) => {
                             const h = parseInt(e.target.value) || 0;
@@ -738,13 +742,13 @@ export default function WeeklyTimeLog({
                           }}
                         />
                       </div>
-                      <span className="text-gray-700 font-black mt-3">:</span>
+                      <span className="text-(--glass-border) font-black mt-3">:</span>
                       <div className="flex flex-col flex-1 gap-1">
-                        <span className="text-[7px] uppercase font-black text-gray-600 block text-center">Min</span>
+                        <span className="text-[7px] uppercase font-black text-(--text-muted) block text-center">Min</span>
                         <input
                           type="number"
                           placeholder="0"
-                          className="w-full bg-zinc-800/50 text-center font-mono text-xs p-1.5 rounded border border-white/10 text-white focus:border-amber-500/50 outline-none"
+                          className="w-full bg-(--input-bg) text-center font-mono text-xs p-1.5 rounded border border-(--glass-border) text-(--text-main) focus:border-(--primary) outline-none transition-all focus:ring-4 focus:ring-(--primary-glow)"
                           value={Math.round(((cell?.hours || 0) % 1) * 60) || ""}
                           onChange={(e) => {
                             const h = Math.floor(cell?.hours || 0);
@@ -762,10 +766,10 @@ export default function WeeklyTimeLog({
 
             {/* Card Footer: Delete */}
             {!isLocked && (
-              <div className="flex justify-end pt-2 border-t border-white/5">
+              <div className="flex justify-end pt-2 border-t border-(--glass-border)">
                 <button
                   onClick={() => handleDeleteRow(row.id)}
-                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-gray-500 hover:text-red-500 transition-colors"
+                  className="flex items-center gap-2 px-3 py-1.5 text-xs font-bold text-(--text-muted) hover:text-red-500 transition-colors"
                 >
                   <IoTrash size={14} />
                   Delete Entry
@@ -779,8 +783,8 @@ export default function WeeklyTimeLog({
           onClick={handleAddRow}
           disabled={isLocked}
           className={`w-full py-4 flex items-center justify-center gap-2 text-xs font-black uppercase tracking-widest border border-dashed rounded-2xl transition-all ${isLocked
-            ? 'bg-zinc-800/10 border-white/5 text-gray-700 cursor-not-allowed'
-            : 'text-gray-400 hover:text-amber-500 hover:bg-amber-500/5 border-white/10 hover:border-amber-500/50'
+            ? 'bg-(--hover-bg) border-(--glass-border) text-(--text-muted) cursor-not-allowed'
+            : 'text-(--text-muted) hover:text-(--secondary) hover:bg-(--secondary-glow) border-(--glass-border) hover:border-(--secondary)'
             }`}
         >
           <IoAdd size={18} />
@@ -788,17 +792,17 @@ export default function WeeklyTimeLog({
         </button>
 
         {/* Mobile Daily Totals Summary */}
-        <div className="bg-zinc-900 border border-white/5 rounded-2xl p-4 space-y-3">
-          <h4 className="text-[10px] font-black uppercase text-gray-500 tracking-[0.2em] mb-2">Daily Totals</h4>
+        <div className="bg-(--app-bg) border border-(--glass-border) rounded-2xl p-4 space-y-3">
+          <h4 className="text-[10px] font-black uppercase text-(--text-muted) tracking-[0.2em] mb-2">Daily Totals</h4>
           <div className="grid grid-cols-4 gap-2">
             {weekDays.map(day => {
               const total = getDayTotal(normalizeDateStr(day));
               const dateObj = new Date(day);
               const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6;
               return (
-                <div key={day.toISOString()} className="flex flex-col items-center p-2 rounded-xl bg-black/20 border border-white/5">
-                  <span className={`text-[7px] font-black uppercase mb-1 ${isWeekend ? 'text-red-500/50' : 'text-gray-600'}`}>{day.toLocaleDateString("en-US", { weekday: "short" })}</span>
-                  <span className={`text-xs font-mono font-black ${total > 0 ? (total < 8 ? 'text-red-500' : 'text-emerald-500') : 'text-gray-800'}`}>
+                <div key={day.toISOString()} className="flex flex-col items-center p-2 rounded-xl bg-(--hover-bg) border border-(--glass-border)">
+                  <span className={`text-[7px] font-black uppercase mb-1 ${isWeekend ? 'text-red-500/50' : 'text-(--text-muted)'}`}>{day.toLocaleDateString("en-US", { weekday: "short" })}</span>
+                  <span className={`text-xs font-mono font-black ${total > 0 ? (total < 8 ? 'text-red-500' : 'text-emerald-500') : 'text-(--glass-border)'}`}>
                     {total > 0 ? total.toFixed(1) + "h" : "-"}
                   </span>
                 </div>
@@ -809,30 +813,30 @@ export default function WeeklyTimeLog({
       </div>
 
       {/* DESKTOP GRID VIEW (Hidden on mobile) */}
-      <div className="hidden lg:block overflow-x-auto rounded-2xl border border-white/5 bg-zinc-900/50 backdrop-blur-xl shadow-xl">
+      <div className="hidden lg:block overflow-x-auto rounded-2xl border border-(--glass-border) bg-(--app-bg) backdrop-blur-xl shadow-xl">
         <table className="w-full border-collapse min-w-[1000px] table-fixed">
           <thead>
-            <tr className="border-b border-white/5 bg-zinc-900">
-              <th className="p-4 text-xs font-black uppercase text-gray-500 w-[150px]">Project</th>
-              <th className="p-4 text-xs font-black uppercase text-gray-500 w-[150px] border-r border-white/5">Task</th>
+            <tr className="border-b border-(--glass-border) bg-(--hover-bg)">
+              <th className="p-4 text-xs font-black uppercase text-(--text-muted) w-[150px]">Project</th>
+              <th className="p-4 text-xs font-black uppercase text-(--text-muted) w-[150px] border-r border-(--glass-border)">Task</th>
               {weekDays.map(day => {
                 const isToday = normalizeDateStr(day) === normalizeDateStr(new Date());
                 const dateObj = new Date(day);
                 const isWeekend = dateObj.getDay() === 0 || dateObj.getDay() === 6; // 0=Sun, 6=Sat
 
                 return (
-                  <th key={day.toISOString()} className="px-2 py-4 text-center border-b border-white/5 min-w-[80px]">
+                  <th key={day.toISOString()} className="px-2 py-4 text-center border-b border-(--glass-border) min-w-[80px]">
                     <div className="flex flex-col items-center gap-1">
-                      <span className={`text-[10px] font-bold uppercase tracking-widest ${isToday ? 'text-amber-500' :
-                        isWeekend ? 'text-red-500' : 'text-gray-500'
+                      <span className={`text-[10px] font-bold uppercase tracking-widest ${isToday ? 'text-(--primary)' :
+                        isWeekend ? 'text-(--rose)' : 'text-(--text-muted)'
                         }`}>
                         {day.toLocaleDateString("en-US", { weekday: "short" })}
                       </span>
                       <div className={`flex flex-col items-center justify-center w-8 h-8 rounded-full border ${isToday
-                        ? 'bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-500/30'
+                        ? 'bg-(--primary) text-(--text-inverse) border-(--primary) shadow-lg shadow-(--primary-glow)'
                         : isWeekend
-                          ? 'bg-red-500/10 text-red-500 border-red-500/20'
-                          : 'bg-transparent text-gray-300 border-transparent'
+                          ? 'bg-(--rose-glow) text-(--rose) border-(--rose-glow)'
+                          : 'bg-transparent text-(--text-main) border-transparent'
                         }`}>
                         <span className="text-sm font-bold leading-none">
                           {day.getDate()}
@@ -842,10 +846,10 @@ export default function WeeklyTimeLog({
                   </th>
                 );
               })}
-              <th className="p-4 text-xs font-black uppercase text-gray-500 w-[50px] text-center"></th>
+              <th className="p-4 text-xs font-black uppercase text-(--text-muted) w-[50px] text-center"></th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-white/5">
+          <tbody className="divide-y divide-(--glass-border)">
             <AnimatePresence>
               {rows.map((row) => (
                 <motion.tr
@@ -853,7 +857,7 @@ export default function WeeklyTimeLog({
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="group hover:bg-white/5 transition-colors"
+                  className="group hover:bg-(--hover-bg) transition-colors"
                 >
                   <td className="p-2 align-top">
                     <div className={isLocked ? "pointer-events-none opacity-50" : ""}>
@@ -868,7 +872,7 @@ export default function WeeklyTimeLog({
                       />
                     </div>
                   </td>
-                  <td className="p-2 border-r border-white/5 align-top">
+                  <td className="p-2 border-r border-(--glass-border) align-top">
                     <div className={isLocked ? "pointer-events-none opacity-50" : ""}>
                       <SearchableSelect
                         options={taskOptions}
@@ -891,7 +895,7 @@ export default function WeeklyTimeLog({
                             min="0"
                             disabled={isLocked}
                             placeholder="H"
-                            className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-white/10 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10 hover:bg-white/5 transition-all ${Math.floor(cell?.hours || 0) > 0 ? 'text-white font-bold' : 'text-gray-600'
+                            className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-(--glass-border) focus:border-(--primary) focus:ring-4 focus:ring-(--primary-glow) hover:bg-(--hover-bg) transition-all ${Math.floor(cell?.hours || 0) > 0 ? 'text-(--text-main) font-bold' : 'text-(--text-muted)'
                               }`}
                             value={Math.floor(cell?.hours || 0) || ""}
                             onChange={(e) => {
@@ -901,7 +905,7 @@ export default function WeeklyTimeLog({
                               handleDayChange(row.id, dateStr, newTotal.toString());
                             }}
                           />
-                          <span className="text-gray-600 text-[10px] border-b border-white/10">:</span>
+                          <span className="text-(--text-muted) text-[10px] border-b border-(--glass-border)">:</span>
                           {/* Minutes Input */}
                           <input
                             type="number"
@@ -909,7 +913,7 @@ export default function WeeklyTimeLog({
                             max="59"
                             disabled={isLocked}
                             placeholder="M"
-                            className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-white/10 focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10 hover:bg-white/5 transition-all ${Math.round(((cell?.hours || 0) % 1) * 60) > 0 ? 'text-white font-bold' : 'text-gray-600'
+                            className={`[appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none w-[35px] text-center bg-transparent font-mono text-sm focus:outline-none p-1 rounded border border-(--glass-border) focus:border-amber-500/50 focus:ring-4 focus:ring-amber-500/10 hover:bg-(--hover-bg) transition-all ${Math.round(((cell?.hours || 0) % 1) * 60) > 0 ? 'text-(--text-main) font-bold' : 'text-(--text-muted)'
                               }`}
                             value={Math.round(((cell?.hours || 0) % 1) * 60) || ""}
                             onChange={(e) => {
@@ -928,7 +932,7 @@ export default function WeeklyTimeLog({
                               tabIndex={-1}
                               disabled={isLocked}
                               onClick={() => setRemarksModalState({ open: true, rowId: row.id, dateStr, content: cell?.remarks || "" })}
-                              className={`absolute -top-2 -right-1 p-0.5 rounded-full bg-zinc-900 border border-white/10 hover:bg-white/10 transition-colors z-10 ${hasRemarks ? 'text-amber-500 opacity-100' : 'text-gray-600 opacity-0 group-hover/cell:opacity-100'}`}
+                              className={`absolute -top-2 -right-1 p-0.5 rounded-full bg-(--app-bg) border border-(--glass-border) hover:bg-(--hover-bg) transition-colors z-10 ${hasRemarks ? 'text-(--primary) opacity-100' : 'text-(--text-muted) opacity-0 group-hover/cell:opacity-100'}`}
                               title={cell?.remarks || "Add Remarks"}
                             >
                               <IoChatbubbleEllipsesOutline size={12} />
@@ -943,7 +947,7 @@ export default function WeeklyTimeLog({
                     <button
                       onClick={() => handleDeleteRow(row.id)}
                       disabled={isLocked}
-                      className={`p-2 transition-all opacity-0 group-hover:opacity-100 rounded-lg ${isLocked ? 'text-gray-800 cursor-not-allowed' : 'text-gray-600 hover:text-red-500 hover:bg-red-500/10'
+                      className={`p-2 transition-all opacity-0 group-hover:opacity-100 rounded-lg ${isLocked ? 'text-(--glass-border) cursor-not-allowed' : 'text-(--text-muted) hover:text-red-500 hover:bg-red-500/10'
                         }`}
                       title="Delete Row"
                     >
@@ -961,8 +965,8 @@ export default function WeeklyTimeLog({
                   onClick={handleAddRow}
                   disabled={isLocked}
                   className={`w-full py-3 flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest border border-dashed rounded-lg transition-all ${isLocked
-                    ? 'bg-zinc-800/10 border-white/5 text-gray-700 cursor-not-allowed opacity-50'
-                    : 'text-gray-500 hover:text-amber-500 hover:bg-amber-500/5 border-white/10 hover:border-amber-500/50'
+                    ? 'bg-(--hover-bg) border-(--glass-border) text-(--text-muted) cursor-not-allowed opacity-50'
+                    : 'text-(--text-muted) hover:text-(--secondary) hover:bg-(--secondary-glow) border-(--glass-border) hover:border-(--secondary)'
                     }`}
                 >
                   <IoAdd size={16} />
@@ -971,16 +975,16 @@ export default function WeeklyTimeLog({
               </td>
             </tr>
           </tbody>
-          <tfoot className="bg-zinc-900 border-t border-white/5">
+          <tfoot className="bg-(--hover-bg) border-t border-(--glass-border)">
             <tr>
-              <td className="p-4 text-xs font-black uppercase text-gray-500 text-right" colSpan={2}>Daily Total</td>
+              <td className="p-4 text-xs font-black uppercase text-(--text-muted) text-right" colSpan={2}>Daily Total</td>
               {weekDays.map(day => {
                 const total = getDayTotal(normalizeDateStr(day));
-                let colorClass = 'text-gray-600';
+                let colorClass = 'text-(--text-muted)';
                 if (total > 0) {
-                  if (total < 8) colorClass = 'text-red-500';
+                  if (total < 8) colorClass = 'text-(--rose)';
                   else if (total === 8) colorClass = 'text-emerald-500';
-                  else colorClass = 'text-orange-500';
+                  else colorClass = 'text-(--amber)';
                 }
                 return (
                   <td key={day} className="p-4 text-center">
@@ -1061,12 +1065,12 @@ export default function WeeklyTimeLog({
               throw new Error(errorData.error || "Submit failed");
             }
 
-            toast.success("Submitted successfully!", { theme: 'colored' });
+            toast.success("Submitted successfully!", { theme: document.documentElement.classList.contains('dark') ? 'dark' : 'light' });
             confetti({
               particleCount: 150,
               spread: 70,
               origin: { y: 0.6 },
-              colors: ['#f59e0b', '#10b981', '#ffffff']
+              colors: ['#4f46e5', '#9333ea', '#22d3ee', '#f43f5e']
             });
             fetchTimesheetStatus(); // Refresh status to lock UI
           } catch (e) {

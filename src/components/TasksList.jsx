@@ -42,10 +42,10 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
       {/* Controls Header */}
       <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
         <div>
-          <h2 className="text-lg font-black text-white uppercase tracking-tight flex items-center gap-2">
+          <h2 className="text-lg font-black text-(--text-main) uppercase tracking-tight flex items-center gap-2">
             Tasks Repository
           </h2>
-          <p className="text-[10px] text-gray-500 mt-1 font-black uppercase tracking-widest italic leading-none">
+          <p className="text-[10px] text-(--text-muted) mt-1 font-black uppercase tracking-widest italic leading-none">
             Manage and track all unit objectives
           </p>
         </div>
@@ -59,7 +59,7 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
               placeholder="Search tasks..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="ui-input pl-10 py-2 h-10 w-full bg-zinc-900 border-white/10 text-white placeholder-gray-500 focus:border-amber-500"
+              className="ui-input pl-10 py-2 h-10 w-full bg-(--input-bg) border-(--glass-border) text-(--text-main) placeholder-(--text-muted) focus:border-(--primary)"
             />
           </div>
         </div>
@@ -71,11 +71,11 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="col-span-full text-center py-20 bg-zinc-900/50 rounded-3xl border border-dashed border-white/10"
+            className="col-span-full text-center py-20 bg-(--hover-bg) rounded-3xl border border-dashed border-(--glass-border)"
           >
-            <IoLayersOutline size={40} className="text-gray-600 mx-auto mb-4" />
-            <h3 className="text-lg font-bold text-white">No tasks found</h3>
-            <p className="text-gray-500 text-sm">Try adjusting your search query</p>
+            <IoLayersOutline size={40} className="text-(--text-muted) mx-auto mb-4" />
+            <h3 className="text-lg font-bold text-(--text-main)">No tasks found</h3>
+            <p className="text-(--text-muted) text-sm">Try adjusting your search query</p>
           </motion.div>
         ) : (
           currentTasks.map((task, index) => (
@@ -84,10 +84,10 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.05 }}
-              className="group bg-zinc-900 p-4 rounded-xl border border-white/5 hover:border-amber-500/20 hover:shadow-lg hover:shadow-amber-500/5 transition-all flex flex-col gap-3 relative"
+              className="group bg-(--hover-bg) p-4 rounded-xl border border-(--glass-border) hover:border-(--primary-glow) hover:shadow-lg hover:shadow-(--primary-glow) transition-all flex flex-col gap-3 relative"
             >
               <div className="flex items-start justify-between">
-                <div className="w-8 h-8 rounded-lg bg-amber-500/10 flex items-center justify-center text-amber-500 group-hover:bg-amber-500 group-hover:text-zinc-900 transition-all shrink-0">
+                <div className="w-8 h-8 rounded-lg bg-(--primary-glow) flex items-center justify-center text-(--primary) group-hover:bg-(--primary) group-hover:text-(--text-inverse) transition-all shrink-0">
                   <IoDocumentText size={16} />
                 </div>
                 <button
@@ -100,11 +100,11 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
               </div>
 
               <div className="space-y-1">
-                <h4 className="font-bold text-gray-200 text-sm line-clamp-2 group-hover:text-amber-500 transition-colors leading-tight">
+                <h4 className="font-bold text-(--text-main) text-sm line-clamp-2 group-hover:text-(--primary) transition-colors leading-tight">
                   {task.task_name}
                 </h4>
                 <div className="mt-2">
-                  <span className="text-[9px] font-black text-gray-500 uppercase tracking-widest bg-white/5 px-1.5 py-0.5 rounded border border-white/10 italic">
+                  <span className="text-[9px] font-black text-(--text-muted) uppercase tracking-widest bg-(--hover-bg) px-1.5 py-0.5 rounded border border-(--glass-border) italic">
                     #{task.task_id}
                   </span>
                 </div>
@@ -117,15 +117,15 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 p-6 border-t border-white/5 bg-white/5 rounded-xl">
-          <div className="text-sm text-gray-400 font-medium italic">
-            Showing <span className="text-white font-black">{(currentPage - 1) * tasksPerPage + 1}</span> to <span className="text-white font-black">{Math.min(currentPage * tasksPerPage, filteredTasks.length)}</span> of <span className="text-white font-black">{filteredTasks.length}</span> tasks
+          <div className="text-sm text-(--text-muted) font-medium italic">
+            Showing <span className="text-(--text-main) font-black">{(currentPage - 1) * tasksPerPage + 1}</span> to <span className="text-(--text-main) font-black">{Math.min(currentPage * tasksPerPage, filteredTasks.length)}</span> of <span className="text-(--text-main) font-black">{filteredTasks.length}</span> tasks
           </div>
 
           <div className="flex items-center gap-2">
             <button
               disabled={currentPage === 1}
               onClick={() => setCurrentPage(p => p - 1)}
-              className="p-2 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg border border-(--glass-border) text-(--text-muted) hover:bg-(--hover-bg) hover:text-(--text-main) disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               <IoChevronBack size={16} />
             </button>
@@ -149,8 +149,8 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
                       onClick={() => setCurrentPage(i)}
                       whileTap={{ scale: 0.95 }}
                       className={`w-8 h-8 text-sm font-black rounded-lg transition-all ${currentPage === i
-                          ? 'bg-amber-500 text-zinc-900 shadow-lg shadow-amber-500/20'
-                          : 'text-gray-500 hover:bg-white/5 hover:text-white'
+                        ? 'bg-(--gradient-primary) text-(--text-inverse) shadow-lg shadow-(--primary-glow)'
+                        : 'text-(--text-muted) hover:bg-(--hover-bg) hover:text-(--text-main)'
                         }`}
                     >
                       {i}
@@ -165,7 +165,7 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
             <button
               disabled={currentPage === totalPages}
               onClick={() => setCurrentPage(p => p + 1)}
-              className="p-2 rounded-lg border border-white/10 text-gray-400 hover:bg-white/5 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              className="p-2 rounded-lg border border-(--glass-border) text-(--text-muted) hover:bg-(--hover-bg) hover:text-(--text-main) disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
             >
               <IoChevronForward size={16} />
             </button>
@@ -189,20 +189,20 @@ export default function TasksList({ tasks = [], onDeleteTask, headerAction }) {
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
               transition={smoothTransition}
-              className="relative w-full max-w-sm ui-modal p-6 shadow-2xl bg-zinc-900 border-white/5"
+              className="relative w-full max-w-sm ui-modal p-6 shadow-2xl bg-(--app-bg) border-(--glass-border)"
             >
               <div className="text-center">
                 <div className="w-14 h-14 bg-red-500/10 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4 border border-red-500/20">
                   <IoTrash size={24} />
                 </div>
-                <h3 className="text-xl font-black text-white mb-2">Delete Task</h3>
-                <p className="text-sm text-gray-400 mb-6 leading-relaxed font-medium">
-                  Are you sure you want to delete <span className="text-white font-black">{taskToDelete.task_name}</span>? This action cannot be undone.
+                <h3 className="text-xl font-black text-(--text-main) mb-2">Delete Task</h3>
+                <p className="text-sm text-(--text-muted) mb-6 leading-relaxed font-medium">
+                  Are you sure you want to delete <span className="text-(--text-main) font-black">{taskToDelete.task_name}</span>? This action cannot be undone.
                 </p>
                 <div className="flex gap-3">
                   <button
                     onClick={() => setTaskToDelete(null)}
-                    className="flex-1 py-2.5 text-sm font-black text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all uppercase tracking-wider"
+                    className="flex-1 py-2.5 text-sm font-black text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) rounded-xl transition-all uppercase tracking-wider"
                   >
                     Cancel
                   </button>

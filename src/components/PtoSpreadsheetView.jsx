@@ -100,12 +100,12 @@ export default function PtoSpreadsheetView({ users, selectedDate, onSyncSuccess,
     const days = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
     return (
-        <div className="flex flex-col h-full bg-zinc-950/50 rounded-3xl border border-white/5 overflow-hidden">
+        <div className="flex flex-col h-full bg-(--app-bg) rounded-3xl border border-(--glass-border) overflow-hidden">
             {/* Header / Controls */}
-            <div className="p-6 border-b border-white/5 flex items-center justify-between bg-black/20">
+            <div className="p-6 border-b border-(--glass-border) flex items-center justify-between bg-(--hover-bg)">
                 <div>
-                    <h3 className="text-xl font-black text-white tracking-tight">PTO Spreadsheet</h3>
-                    <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-0.5">
+                    <h3 className="text-xl font-black text-(--text-main) tracking-tight">PTO Spreadsheet</h3>
+                    <p className="text-[10px] text-(--text-muted) font-bold uppercase tracking-widest mt-0.5">
                         High-density leave management for {date.toLocaleString('default', { month: 'long', year: 'numeric' })}
                     </p>
                 </div>
@@ -136,10 +136,10 @@ export default function PtoSpreadsheetView({ users, selectedDate, onSyncSuccess,
             {/* Scrollable Grid Container */}
             <div className="flex-1 overflow-auto custom-scrollbar">
                 <table className="w-full border-collapse">
-                    <thead className="sticky top-0 z-20 bg-zinc-900 shadow-xl">
+                    <thead className="sticky top-0 z-20 bg-(--app-bg) shadow-xl">
                         <tr>
-                            <th className="sticky left-0 z-30 bg-zinc-900 p-4 text-left border-b border-r border-white/5 min-w-[200px]">
-                                <span className="text-[10px] font-black text-gray-500 uppercase tracking-widest">Employee</span>
+                            <th className="sticky left-0 z-30 bg-(--app-bg) p-4 text-left border-b border-r border-(--glass-border) min-w-[200px]">
+                                <span className="text-[10px] font-black text-(--text-muted) uppercase tracking-widest">Employee</span>
                             </th>
                             {days.map(d => {
                                 const dayDate = new Date(year, month - 1, d);
@@ -148,25 +148,25 @@ export default function PtoSpreadsheetView({ users, selectedDate, onSyncSuccess,
                                 const isToday = new Date().toDateString() === dayDate.toDateString();
 
                                 return (
-                                    <th key={d} className={`p-2 border-b border-white/5 min-w-[40px] text-center transition-colors ${isToday ? 'bg-blue-500/10' : isWeekend ? 'bg-red-500/5' : ''}`}>
+                                    <th key={d} className={`p-2 border-b border-(--glass-border) min-w-[40px] text-center transition-colors ${isToday ? 'bg-blue-500/10' : isWeekend ? 'bg-red-500/5' : ''}`}>
                                         <div className="flex flex-col items-center">
-                                            <span className={`text-[10px] font-black ${isToday ? 'text-blue-400' : isWeekend ? 'text-red-500/40' : 'text-gray-400'}`}>{dName}</span>
-                                            <span className={`text-xs font-black ${isToday ? 'text-blue-400' : isWeekend ? 'text-red-500/60' : 'text-white'}`}>{d}</span>
+                                            <span className={`text-[10px] font-black ${isToday ? 'text-blue-400' : isWeekend ? 'text-red-500/40' : 'text-(--text-muted)'}`}>{dName}</span>
+                                            <span className={`text-xs font-black ${isToday ? 'text-blue-400' : isWeekend ? 'text-red-500/60' : 'text-(--text-main)'}`}>{d}</span>
                                         </div>
                                     </th>
                                 );
                             })}
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-white/5">
+                    <tbody className="divide-y divide-(--glass-border)">
                         {users.map(user => (
-                            <tr key={user.user_id} className="group hover:bg-white/2 transition-colors">
-                                <td className="sticky left-0 z-10 bg-zinc-900 border-r border-white/5 p-4 group-hover:bg-zinc-800 transition-colors">
+                            <tr key={user.user_id} className="group hover:bg-(--hover-bg) transition-colors">
+                                <td className="sticky left-0 z-10 bg-(--app-bg) border-r border-(--glass-border) p-4 group-hover:bg-(--hover-bg) transition-colors">
                                     <div className="flex items-center gap-3">
                                         <UserAvatar name={user.user_name} size="xs" />
                                         <div className="min-w-0">
-                                            <p className="text-xs font-black text-white truncate">{user.user_name}</p>
-                                            <p className="text-[9px] text-gray-500 font-bold truncate uppercase">{user.user_dept}</p>
+                                            <p className="text-xs font-black text-(--text-main) truncate">{user.user_name}</p>
+                                            <p className="text-[9px] text-(--text-muted) font-bold truncate uppercase">{user.user_dept}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -180,13 +180,13 @@ export default function PtoSpreadsheetView({ users, selectedDate, onSyncSuccess,
                                         <td
                                             key={d}
                                             onClick={() => handleCellClick(user.user_id, d)}
-                                            className={`p-1 border-r border-white/5 text-center transition-all ${isWeekend ? 'cursor-not-allowed bg-red-500/5' : 'cursor-pointer hover:bg-blue-500/10'} ${isToday ? 'bg-blue-500/5' : ''}`}
+                                            className={`p-1 border-r border-(--glass-border) text-center transition-all ${isWeekend ? 'cursor-not-allowed bg-red-500/5' : 'cursor-pointer hover:bg-blue-500/10'} ${isToday ? 'bg-blue-500/5' : ''}`}
                                         >
                                             <div className={`w-full h-8 rounded-lg flex items-center justify-center transition-all ${hours > 0
                                                 ? 'bg-blue-500 text-white font-black text-xs shadow-lg shadow-blue-500/20 scale-95'
-                                                : isWeekend ? 'text-red-500/20' : 'text-gray-700 hover:text-blue-400'
+                                                : isWeekend ? 'text-red-500/20' : 'text-(--text-muted) hover:text-blue-400'
                                                 }`}>
-                                                {hours > 0 ? `${hours}h` : (<div className={`w-1 h-1 rounded-full ${isWeekend ? 'bg-red-500/10' : 'bg-white/5'} group-hover:bg-white/10`} />)}
+                                                {hours > 0 ? `${hours}h` : (<div className={`w-1 h-1 rounded-full ${isWeekend ? 'bg-red-500/10' : 'bg-(--hover-bg)'} group-hover:bg-(--hover-bg)`} />)}
                                             </div>
                                         </td>
                                     );
@@ -200,11 +200,11 @@ export default function PtoSpreadsheetView({ users, selectedDate, onSyncSuccess,
             {/* Empty State */}
             {users.length === 0 && (
                 <div className="flex-1 flex flex-col items-center justify-center p-12 text-center">
-                    <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center text-gray-500 mb-4">
+                    <div className="w-16 h-16 rounded-2xl bg-(--hover-bg) border border-(--glass-border) flex items-center justify-center text-(--text-muted) mb-4">
                         <IoGridOutline size={32} />
                     </div>
-                    <h4 className="text-white font-black tracking-tight">No staff found</h4>
-                    <p className="text-xs text-gray-500 mt-1">Try adjusting your filters to see more results.</p>
+                    <h4 className="text-(--text-main) font-black tracking-tight">No staff found</h4>
+                    <p className="text-xs text-(--text-muted) mt-1">Try adjusting your filters to see more results.</p>
                 </div>
             )}
         </div>

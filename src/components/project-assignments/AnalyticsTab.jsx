@@ -87,7 +87,7 @@ const AnalyticsTab = ({ server, selectedDate, allUsers }) => {
 
     if (loading) return (
         <div className="flex items-center justify-center h-[500px]">
-            <div className="w-10 h-10 border-3 border-amber-500/20 border-t-amber-500 rounded-full animate-spin" />
+            <div className="w-10 h-10 border-3 border-(--primary-glow) border-t-(--primary) rounded-full animate-spin" />
         </div>
     );
 
@@ -99,8 +99,8 @@ const AnalyticsTab = ({ server, selectedDate, allUsers }) => {
             <g transform={`translate(${x},${y})`}>
                 <foreignObject x={-150} y={-16} width={140} height={32}>
                     <div className="flex items-center justify-end gap-2.5 w-full h-full pr-2">
-                        <span className="text-[11px] font-bold text-gray-400 truncate max-w-[100px] tracking-wide" title={payload.value}>{payload.value}</span>
-                        <div className="w-6 h-6 rounded-lg bg-zinc-800/80 border border-white/10 flex items-center justify-center text-[9px] font-black text-white shrink-0 shadow-lg group-hover/analytics:border-amber-500/30 transition-colors">
+                        <span className="text-[11px] font-bold text-(--text-muted) truncate max-w-[100px] tracking-wide" title={payload.value}>{payload.value}</span>
+                        <div className="w-6 h-6 rounded-lg bg-(--app-bg) border border-(--glass-border) flex items-center justify-center text-[9px] font-black text-(--text-main) shrink-0 shadow-lg group-hover/analytics:border-(--primary-glow) transition-colors">
                             {payload.value.substring(0, 2).toUpperCase()}
                         </div>
                     </div>
@@ -113,37 +113,37 @@ const AnalyticsTab = ({ server, selectedDate, allUsers }) => {
         if (active && payload && payload.length) {
             const totalLoad = payload.reduce((sum, e) => sum + e.value, 0);
             return (
-                <div className="bg-zinc-950/95 backdrop-blur-xl border border-white/10 rounded-2xl p-4 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] space-y-3 min-w-[220px]">
-                    <div className="flex items-center gap-3 border-b border-white/5 pb-3">
-                        <div className="w-9 h-9 rounded-xl bg-zinc-900 flex items-center justify-center text-xs font-black text-white border border-white/10 shadow-inner">
+                <div className="bg-(--app-bg) backdrop-blur-xl border border-(--glass-border) rounded-2xl p-4 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)] space-y-3 min-w-[220px]">
+                    <div className="flex items-center gap-3 border-b border-(--glass-border) pb-3">
+                        <div className="w-9 h-9 rounded-xl bg-(--hover-bg) flex items-center justify-center text-xs font-black text-(--text-main) border border-(--glass-border) shadow-inner">
                             {label.substring(0, 2).toUpperCase()}
                         </div>
                         <div>
-                            <p className="text-white font-black text-sm tracking-tight">{label}</p>
-                            <p className="text-[10px] text-gray-500 uppercase tracking-widest font-bold">Forecast Details</p>
+                            <p className="text-(--text-main) font-black text-sm tracking-tight">{label}</p>
+                            <p className="text-[10px] text-(--text-muted) uppercase tracking-widest font-bold">Forecast Details</p>
                         </div>
                     </div>
                     <div className="space-y-2.5 py-1">
                         {payload.map((entry, index) => (
                             <div key={index} className="flex justify-between items-center text-xs group/line">
-                                <span className="text-gray-400 font-bold flex items-center gap-2 group-hover/line:text-gray-300 transition-colors">
+                                <span className="text-(--text-muted) font-bold flex items-center gap-2 group-hover/line:text-(--text-main) transition-colors">
                                     <div className="w-1.5 h-1.5 rounded-full ring-2 ring-white/10" style={{ backgroundColor: entry.color }} />
                                     {entry.name}
                                 </span>
                                 <div className="text-right">
-                                    <span className="text-white font-mono font-black block">
+                                    <span className="text-(--text-main) font-mono font-black block">
                                         {entry.value}h
                                     </span>
                                 </div>
                             </div>
                         ))}
                     </div>
-                    <div className="pt-3 border-t border-white/5 flex justify-between items-center bg-white/2 -mx-4 -mb-4 px-4 py-3 rounded-b-2xl">
+                    <div className="pt-3 border-t border-(--glass-border) flex justify-between items-center bg-(--hover-bg) -mx-4 -mb-4 px-4 py-3 rounded-b-2xl">
                         <div className="flex flex-col">
-                            <span className="text-[9px] text-gray-500 font-bold uppercase tracking-wider">Total Load</span>
-                            <span className="text-[9px] text-gray-600 font-mono">{(totalLoad / 160 * 100).toFixed(0)}% Capacity</span>
+                            <span className="text-[9px] text-(--text-muted) font-bold uppercase tracking-wider">Total Load</span>
+                            <span className="text-[9px] text-(--text-muted) font-mono">{(totalLoad / 160 * 100).toFixed(0)}% Capacity</span>
                         </div>
-                        <span className={`text-base font-black ${totalLoad > 160 ? 'text-red-500' : 'text-emerald-500'}`}>
+                        <span className={`text-base font-black ${totalLoad > 160 ? 'text-(--rose)' : 'text-(--success)'}`}>
                             {totalLoad}h
                         </span>
                     </div>
@@ -154,23 +154,23 @@ const AnalyticsTab = ({ server, selectedDate, allUsers }) => {
     };
 
     return (
-        <div className="bg-zinc-900/60 backdrop-blur-3xl border border-white/5 rounded-[40px] p-6 sm:p-8 h-[650px] flex flex-col relative overflow-hidden shadow-2xl group/analytics">
+        <div className="bg-(--app-bg) backdrop-blur-3xl border border-(--glass-border) rounded-[40px] p-6 sm:p-8 h-[650px] flex flex-col relative overflow-hidden shadow-2xl group/analytics">
             {/* Background Effects */}
             <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 brightness-100 contrast-150 mix-blend-soft-light pointer-events-none" />
-            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-500/5 rounded-full -mr-64 -mt-64 blur-[120px] pointer-events-none group-hover/analytics:bg-amber-500/10 transition-colors duration-1000" />
-            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-blue-500/5 rounded-full -ml-48 -mb-48 blur-[100px] pointer-events-none" />
+            <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-(--primary-glow) rounded-full -mr-64 -mt-64 blur-[120px] pointer-events-none group-hover/analytics:bg-(--primary-glow) transition-colors duration-1000" />
+            <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-(--secondary-glow) rounded-full -ml-48 -mb-48 blur-[100px] pointer-events-none" />
 
             <div className="flex items-center justify-between mb-6 relative z-10 shrink-0">
-                <h3 className="text-2xl font-black text-white flex items-center gap-3 tracking-tighter">
-                    <div className="p-3 rounded-2xl bg-zinc-900 border border-amber-500/20 text-amber-500 shadow-lg shadow-amber-500/5">
+                <h3 className="text-2xl font-black text-(--text-main) flex items-center gap-3 tracking-tighter">
+                    <div className="p-3 rounded-2xl bg-(--hover-bg) border border-(--primary-glow) text-(--primary) shadow-(--primary-glow)">
                         <IoStatsChartOutline />
                     </div>
                     3-Month Resource Forecast
                 </h3>
-                <div className="hidden sm:flex gap-6 text-[10px] font-bold uppercase tracking-widest text-gray-500 bg-black/20 px-4 py-2 rounded-xl border border-white/5">
-                    <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.5)]"></div> {getMonthName(0)}</div>
-                    <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]"></div> {getMonthName(1)}</div>
-                    <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(139,92,246,0.5)]"></div> {getMonthName(2)}</div>
+                <div className="hidden sm:flex gap-6 text-[10px] font-bold uppercase tracking-widest text-(--text-muted) bg-(--hover-bg) px-4 py-2 rounded-xl border border-(--glass-border)">
+                    <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-(--primary) shadow-(--primary-glow)"></div> {getMonthName(0)}</div>
+                    <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-(--secondary) shadow-(--secondary-glow)"></div> {getMonthName(1)}</div>
+                    <div className="flex items-center gap-2"><div className="w-2 h-2 rounded-full bg-(--accent) shadow-(--accent-glow)"></div> {getMonthName(2)}</div>
                 </div>
             </div>
 
@@ -186,16 +186,16 @@ const AnalyticsTab = ({ server, selectedDate, allUsers }) => {
                         >
                             <defs>
                                 <linearGradient id="colorCurrent" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor="#F59E0B" stopOpacity={1} />
-                                    <stop offset="100%" stopColor="#D97706" stopOpacity={0.8} />
+                                    <stop offset="0%" stopColor="var(--primary)" stopOpacity={1} />
+                                    <stop offset="100%" stopColor="var(--primary)" stopOpacity={0.8} />
                                 </linearGradient>
                                 <linearGradient id="colorNext" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor="#3B82F6" stopOpacity={1} />
-                                    <stop offset="100%" stopColor="#2563EB" stopOpacity={0.8} />
+                                    <stop offset="0%" stopColor="var(--secondary)" stopOpacity={1} />
+                                    <stop offset="100%" stopColor="var(--secondary)" stopOpacity={0.8} />
                                 </linearGradient>
                                 <linearGradient id="colorFuture" x1="0" y1="0" x2="1" y2="0">
-                                    <stop offset="0%" stopColor="#A855F7" stopOpacity={1} />
-                                    <stop offset="100%" stopColor="#9333EA" stopOpacity={0.8} />
+                                    <stop offset="0%" stopColor="var(--accent)" stopOpacity={1} />
+                                    <stop offset="100%" stopColor="var(--accent)" stopOpacity={0.8} />
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#ffffff" strokeOpacity={0.05} />
@@ -221,8 +221,8 @@ const AnalyticsTab = ({ server, selectedDate, allUsers }) => {
                                 tick={<CustomYAxisTick />}
                             />
                             <Tooltip content={<CustomTooltip />} cursor={{ fill: '#ffffff05', radius: 8 }} />
-                            <ReferenceLine x={160} stroke="#10B981" strokeDasharray="3 3" strokeOpacity={0.5}>
-                                <Label value="Monthly Cap (160h)" position="insideTopRight" fill="#10B981" fontSize={10} fontWeight={900} offset={10} />
+                            <ReferenceLine x={160} stroke="var(--primary)" strokeDasharray="3 3" strokeOpacity={0.5}>
+                                <Label value="Monthly Cap (160h)" position="insideTopRight" fill="var(--primary)" fontSize={10} fontWeight={900} offset={10} />
                             </ReferenceLine>
                             <Bar dataKey="m0" name={getMonthName(0)} fill="url(#colorCurrent)" radius={[0, 4, 4, 0]} barSize={5} animationDuration={1200} />
                             <Bar dataKey="m1" name={getMonthName(1)} fill="url(#colorNext)" radius={[0, 4, 4, 0]} barSize={5} animationDuration={1200} animationBegin={150} />
@@ -232,7 +232,7 @@ const AnalyticsTab = ({ server, selectedDate, allUsers }) => {
                 </div>
 
                 {forecastData.length === 0 && (
-                    <div className="flex flex-col items-center justify-center h-full text-gray-500 opacity-50 absolute inset-0">
+                    <div className="flex flex-col items-center justify-center h-full text-(--text-muted) opacity-50 absolute inset-0">
                         <IoStatsChartOutline size={48} className="mb-4" />
                         <p className="font-bold text-sm">No forecast data available</p>
                     </div>

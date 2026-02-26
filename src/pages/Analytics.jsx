@@ -49,11 +49,11 @@ const formatDuration = (hours, minutes) => {
 
 const CustomInput = ({ value, onClick, placeholder, icon: Icon }) => (
   <button
-    className="w-full border rounded-xl px-3 py-2 text-left text-white placeholder-gray-500 focus:outline-none focus:ring-4 focus:ring-amber-500/20 focus:border-amber-500 flex items-center gap-2 transition-all shadow-sm bg-zinc-900 border-zinc-700/50"
+    className="w-full border rounded-xl px-3 py-2 text-left text-(--text-main) placeholder-(--text-muted) focus:outline-none focus:ring-2 focus:ring-(--primary-glow) focus:border-(--primary) flex items-center gap-2 transition-all shadow-sm bg-(--input-bg) border-(--glass-border)"
     onClick={onClick}
   >
-    {Icon && <Icon className="text-amber-500" size={16} />}
-    <span className={`text-[11px] truncate ${value ? "text-white font-bold" : "text-gray-500"}`}>
+    {Icon && <Icon className="text-(--primary)" size={16} />}
+    <span className={`text-[11px] truncate ${value ? "text-(--text-main) font-bold" : "text-(--text-muted)"}`}>
       {value || placeholder}
     </span>
   </button>
@@ -436,7 +436,7 @@ export const Analytics = () => {
       label: "Active Projects",
       value: analytics.activeProjectsCount,
       icon: IoFolderOutline,
-      color: "from-gray-700 to-gray-900",
+      color: "from-indigo-600 to-blue-500",
       type: "projects",
       data: analytics.entriesByCat.project,
       detail: "Unique projects worked on",
@@ -445,7 +445,7 @@ export const Analytics = () => {
       label: "Tasks Worked",
       value: analytics.tasksCount,
       icon: IoStatsChartOutline,
-      color: "from-gray-800 to-gray-900",
+      color: "from-violet-600 to-fuchsia-500",
       type: "tasks",
       data: Object.values(analytics.entriesByCat).flat(),
       detail: "Unique tasks logged",
@@ -454,7 +454,7 @@ export const Analytics = () => {
       label: "Total Time",
       value: analytics.totalTimeStr,
       icon: IoTimeOutline,
-      color: "from-amber-600 to-yellow-500",
+      color: "from-emerald-600 to-teal-500",
       type: "time",
       data: Object.values(analytics.entriesByCat).flat(),
       detail: "Total hours logged",
@@ -469,7 +469,7 @@ export const Analytics = () => {
         ),
       ),
       icon: MdBusiness,
-      color: "from-yellow-600 to-amber-500",
+      color: "from-rose-600 to-pink-500",
       type: "bd",
       data: analytics.entriesByCat.bd,
       detail: "Business Development",
@@ -484,7 +484,7 @@ export const Analytics = () => {
         ),
       ),
       icon: MdMeetingRoom,
-      color: "from-amber-700 to-amber-900",
+      color: "from-orange-600 to-rose-500",
       type: "meetings",
       data: analytics.entriesByCat.meetings,
       detail: "Daily Meetings",
@@ -499,7 +499,7 @@ export const Analytics = () => {
         ),
       ),
       icon: IoGameController,
-      color: "from-yellow-700 to-yellow-900",
+      color: "from-sky-600 to-blue-500",
       type: "holidays",
       data: analytics.entriesByCat.holidays,
       detail: "Holidays",
@@ -514,7 +514,7 @@ export const Analytics = () => {
         ),
       ),
       icon: IoPeopleSharp,
-      color: "from-amber-800 to-yellow-700",
+      color: "from-indigo-700 to-violet-500",
       type: "teambuilding",
       data: analytics.entriesByCat.tb,
       detail: "Team Building",
@@ -529,7 +529,7 @@ export const Analytics = () => {
         ),
       ),
       icon: RiBeerFill,
-      color: "from-yellow-800 to-amber-700",
+      color: "from-fuchsia-600 to-pink-500",
       type: "pto",
       data: analytics.entriesByCat.pto,
       detail: "Time off logged",
@@ -544,7 +544,7 @@ export const Analytics = () => {
         ),
       ),
       icon: MdModelTraining,
-      color: "from-gray-700 to-amber-800",
+      color: "from-cyan-600 to-blue-500",
       type: "training",
       data: analytics.entriesByCat.training,
       detail: "Training sessions",
@@ -559,7 +559,7 @@ export const Analytics = () => {
         ),
       ),
       icon: GiBrain,
-      color: "from-gray-800 to-yellow-800",
+      color: "from-rose-700 to-orange-500",
       type: "rd",
       data: analytics.entriesByCat.rd,
       detail: "Research & Development",
@@ -641,22 +641,22 @@ export const Analytics = () => {
           {modalContent.data.map((item, idx) => (
             <div
               key={idx}
-              className="flex justify-between items-center p-3 rounded-lg border border-white/5 bg-zinc-900 hover:bg-white/5 hover:border-amber-500/20 transition-all group"
+              className="flex justify-between items-center p-3 rounded-lg border border-(--glass-border) bg-(--hover-bg) hover:bg-white/5 hover:border-(--primary-glow) transition-all group"
             >
               <div>
-                <div className="font-bold text-gray-200 group-hover:text-amber-500 transition-colors">
+                <div className="font-bold text-(--text-main) group-hover:text-(--primary) transition-colors">
                   {item.name}
                 </div>
                 {item.code && (
-                  <div className="text-xs text-gray-500">{item.code}</div>
+                  <div className="text-xs text-(--text-muted)">{item.code}</div>
                 )}
                 {item.count && (
-                  <div className="text-xs text-gray-500">
+                  <div className="text-xs text-(--text-muted)">
                     {item.count} entries
                   </div>
                 )}
               </div>
-              <div className="text-amber-500 font-mono font-bold">
+              <div className="text-(--primary) font-mono font-bold">
                 {item.totalDisplay}
               </div>
             </div>
@@ -671,20 +671,20 @@ export const Analytics = () => {
         {modalContent.data.map((item, idx) => (
           <div
             key={idx}
-            className="p-3 border border-white/5 bg-zinc-900 rounded-lg hover:border-amber-500/20 transition-all"
+            className="p-3 border border-(--glass-border) bg-(--hover-bg) rounded-lg hover:border-(--primary-glow) transition-all"
           >
             <div className="flex justify-between">
-              <div className="font-bold text-gray-200">
+              <div className="font-bold text-(--text-main)">
                 {item.project}
               </div>
-              <div className="text-sm text-gray-500">
+              <div className="text-sm text-(--text-muted)">
                 {new Date(item.date).toLocaleDateString()}
               </div>
             </div>
-            <div className="text-sm text-amber-500 font-semibold">{item.task_id}</div>
-            <div className="flex justify-between mt-2 text-xs text-gray-400">
+            <div className="text-sm text-(--primary) font-semibold">{item.task_id}</div>
+            <div className="flex justify-between mt-2 text-xs text-(--text-muted)">
               <div>{item.user_name}</div>
-              <div className="font-mono text-white font-bold">
+              <div className="font-mono text-(--text-main) font-bold">
                 {item.hours}h {item.minutes}m
               </div>
             </div>
@@ -698,31 +698,31 @@ export const Analytics = () => {
     <div className="space-y-8 pb-10 p-3 min-h-screen transition-colors duration-300">
       <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div className="space-y-1">
-          <nav className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+          <nav className="flex items-center gap-2 text-xs font-black text-(--text-muted) uppercase tracking-widest mb-2">
             <span>Intelligence</span>
             <span className="opacity-30">/</span>
-            <span className="text-amber-500 uppercase">Reports & Analytics</span>
+            <span className="text-(--primary) uppercase">Reports & Analytics</span>
           </nav>
           <div className="flex items-center gap-4">
-            <div className="p-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-amber-500 shadow-sm">
+            <div className="p-3 rounded-2xl bg-(--primary-glow) border border-(--primary-glow) text-(--primary) shadow-sm">
               <IoAnalytics size={28} />
             </div>
             <div>
-              <h1 className="text-2xl font-black text-white tracking-tight leading-none">
+              <h1 className="text-2xl font-black text-(--text-main) tracking-tight leading-none">
                 Intelligence Hub
               </h1>
-              <p className="text-gray-400 mt-1.5 text-xs font-bold italic">Centralized project intelligence and detailed reporting</p>
+              <p className="text-(--text-muted) mt-1.5 text-xs font-bold italic">Centralized project intelligence and detailed reporting</p>
             </div>
           </div>
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex p-1 bg-zinc-900 border border-white/5 rounded-2xl shadow-inner">
+        <div className="flex p-1 bg-(--hover-bg) border border-(--glass-border) rounded-2xl shadow-inner">
           <button
             onClick={() => setActiveTab("overview")}
             className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "overview"
-                ? "bg-amber-500 text-white shadow-lg"
-                : "text-gray-500 hover:text-white"
+              ? "bg-(--primary) text-(--text-inverse) shadow-(--primary-glow)"
+              : "text-(--text-muted) hover:text-(--text-main)"
               }`}
           >
             Overview
@@ -730,8 +730,8 @@ export const Analytics = () => {
           <button
             onClick={() => setActiveTab("reports")}
             className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "reports"
-                ? "bg-amber-500 text-white shadow-lg"
-                : "text-gray-500 hover:text-white"
+              ? "bg-(--primary) text-(--text-inverse) shadow-(--primary-glow)"
+              : "text-(--text-muted) hover:text-(--text-main)"
               }`}
           >
             Detailed Reports
@@ -740,13 +740,13 @@ export const Analytics = () => {
       </header>
 
       {/* Filters Section */}
-      <div className="relative z-10 p-4 border border-white/5 shadow-2xl rounded-2xl bg-zinc-900/50 backdrop-blur-md">
+      <div className="relative z-10 p-4 border border-(--glass-border) shadow-2xl rounded-2xl bg-(--hover-bg) backdrop-blur-md">
         <div className="flex flex-wrap items-end gap-4 sm:gap-6">
 
           {/* 1. Date Range */}
           <div className="flex flex-col gap-1.5 min-w-[240px]">
-            <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest flex items-center gap-2 px-1">
-              <FiCalendar className="text-amber-500" /> Date Range
+            <label className="text-[9px] font-black text-(--text-muted) uppercase tracking-widest flex items-center gap-2 px-1">
+              <FiCalendar className="text-(--primary)" /> Date Range
             </label>
             <div className="flex gap-2">
               <div className="relative z-30 flex-1">
@@ -813,14 +813,14 @@ export const Analytics = () => {
           <div className="flex items-center gap-2 shrink-0">
             <button
               onClick={handleApplyFilters}
-              className="h-10 px-6 bg-amber-500 text-white rounded-xl flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:bg-amber-400 hover:scale-105 active:scale-95 transition-all shadow-lg shadow-amber-500/20"
+              className="h-10 px-6 bg-(--primary) text-(--text-inverse) rounded-xl flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:bg-(--primary-light) hover:scale-105 active:scale-95 transition-all shadow-(--primary-glow)"
             >
               <IoFilter size={14} />
               Apply Results
             </button>
             <button
               onClick={handleClearFilters}
-              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-white/5 text-gray-400 hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/5 transition-all"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-(--glass-border) text-(--text-muted) hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/5 transition-all"
               title="Reset All"
             >
               <IoClose size={18} />
@@ -850,8 +850,8 @@ export const Analytics = () => {
             className="space-y-8"
           >
             {/* Dynamic Title */}
-            <div className="flex items-center gap-3 px-2 border-l-4 border-amber-500">
-              <h2 className="text-2xl font-bold text-white uppercase tracking-tight">Intelligence Dashboard</h2>
+            <div className="flex items-center gap-3 px-2 border-l-4 border-(--primary)">
+              <h2 className="text-2xl font-bold text-(--text-main) uppercase tracking-tight">Intelligence Dashboard</h2>
             </div>
 
             {/* STATS CARDS */}
@@ -867,18 +867,18 @@ export const Analytics = () => {
                   onClick={() => handleCardClick(card)}
                 >
                   <div className="absolute inset-0 bg-linear-to-br from-amber-500/5 via-transparent to-amber-500/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  <div className="bg-zinc-900 rounded-3xl p-4 border border-white/5 hover:border-amber-500/20 transition-all group relative">
+                  <div className="bg-(--hover-bg) rounded-3xl p-4 border border-(--glass-border) hover:border-amber-500/20 transition-all group relative">
                     <div className="flex justify-between items-start mb-3">
                       <div className={`p-2 rounded-xl bg-linear-to-br ${card.color} shadow-lg group-hover:scale-110 transition-transform duration-300`}>
                         <card.icon size={18} className="text-white" />
                       </div>
                       {card.data && card.data.length > 0 && (
-                        <IoArrowUp className="text-gray-500 -rotate-45 group-hover:text-amber-500 transition-all font-bold" size={12} />
+                        <IoArrowUp className="text-(--text-muted) -rotate-45 group-hover:text-amber-500 transition-all font-bold" size={12} />
                       )}
                     </div>
-                    <div className="text-gray-400 text-[9px] font-bold uppercase tracking-tight mb-0.5">{card.label}</div>
-                    <div className="text-xl font-black text-white tracking-tight group-hover:text-amber-500 transition-all">{card.value}</div>
-                    <div className="text-[9px] font-bold text-gray-500 mt-1 uppercase">{card.detail}</div>
+                    <div className="text-(--text-muted) text-[9px] font-bold uppercase tracking-tight mb-0.5">{card.label}</div>
+                    <div className="text-xl font-black text-(--text-main) tracking-tight group-hover:text-amber-500 transition-all">{card.value}</div>
+                    <div className="text-[9px] font-bold text-(--text-muted) mt-1 uppercase">{card.detail}</div>
                   </div>
                 </motion.div>
               ))}
@@ -886,8 +886,8 @@ export const Analytics = () => {
 
             {/* Charts */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <motion.div className="p-6 border border-white/5 rounded-3xl bg-zinc-900 shadow-sm">
-                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+              <motion.div className="p-6 border border-(--glass-border) rounded-3xl bg-(--hover-bg) shadow-sm">
+                <h3 className="text-lg font-bold text-(--text-main) mb-6 flex items-center gap-2">
                   <div className="p-2 bg-amber-500/10 rounded-lg"><IoStatsChartOutline className="text-amber-500" size={18} /></div>
                   Activity Trend
                 </h3>
@@ -898,16 +898,16 @@ export const Analytics = () => {
                         <CartesianGrid strokeDasharray="3 3" stroke="#374151" />
                         <XAxis dataKey="date" stroke="#9ca3af" fontSize={10} tickFormatter={(str) => new Date(str).toLocaleDateString(undefined, { month: "short", day: "numeric" })} />
                         <YAxis stroke="#9ca3af" fontSize={10} />
-                        <Tooltip contentStyle={{ backgroundColor: "#1f2937", borderColor: "#fbbf24", borderRadius: "12px", color: "#fbbf24" }} />
-                        <Line type="monotone" dataKey="hours" stroke="#fbbf24" strokeWidth={3} dot={{ r: 4 }} />
+                        <Tooltip contentStyle={{ backgroundColor: "var(--app-bg)", borderColor: "var(--primary-glow)", borderRadius: "12px", color: "var(--text-main)" }} />
+                        <Line type="monotone" dataKey="hours" stroke="var(--primary)" strokeWidth={3} dot={{ r: 4 }} />
                       </LineChart>
                     </ResponsiveContainer>
                   ) : <div className="h-full flex items-center justify-center text-gray-500 italic uppercase tracking-widest text-xs font-black opacity-20">No data</div>}
                 </div>
               </motion.div>
 
-              <motion.div className="p-6 border border-white/5 rounded-3xl bg-zinc-900 shadow-sm">
-                <h3 className="text-lg font-bold text-white mb-6 flex items-center gap-2">
+              <motion.div className="p-6 border border-(--glass-border) rounded-3xl bg-(--hover-bg) shadow-sm">
+                <h3 className="text-lg font-bold text-(--text-main) mb-6 flex items-center gap-2">
                   <div className="p-2 bg-amber-500/10 rounded-lg"><IoLocationOutline className="text-amber-500" size={18} /></div>
                   Location Split
                 </h3>
@@ -936,28 +936,28 @@ export const Analytics = () => {
             className="space-y-6"
           >
             <div className="flex items-center justify-between gap-3 px-2">
-              <div className="flex items-center gap-3 border-l-4 border-amber-500 px-3">
-                <h2 className="text-2xl font-bold text-white uppercase tracking-tight">Detailed Time Reports</h2>
+              <div className="flex items-center gap-3 border-l-4 border-(--primary) px-3">
+                <h2 className="text-2xl font-bold text-(--text-main) uppercase tracking-tight">Detailed Time Reports</h2>
               </div>
               <div className="flex gap-2">
-                <div className="px-3 py-1.5 bg-amber-500/10 text-amber-500 border border-amber-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                <div className="px-3 py-1.5 bg-(--primary-glow) text-(--primary) border border-(--primary-glow) rounded-xl text-[10px] font-black uppercase tracking-widest">
                   Total Users: {reportData.length}
                 </div>
-                <div className="px-3 py-1.5 bg-zinc-900 text-gray-500 border border-white/5 rounded-xl text-[10px] font-black uppercase tracking-widest">
+                <div className="px-3 py-1.5 bg-(--hover-bg) text-(--text-muted) border border-(--glass-border) rounded-xl text-[10px] font-black uppercase tracking-widest">
                   {startDate.toLocaleDateString()} - {endDate.toLocaleDateString()}
                 </div>
               </div>
             </div>
 
             {reportData.length === 0 ? (
-              <div className="p-20 flex flex-col items-center justify-center bg-zinc-900 border border-white/5 rounded-3xl">
-                <IoTimeOutline size={64} className="text-gray-800 mb-4" />
-                <p className="text-gray-500 font-black uppercase tracking-widest text-xs">No time entries found for the selected filters</p>
+              <div className="p-20 flex flex-col items-center justify-center bg-(--hover-bg) border border-(--glass-border) rounded-3xl">
+                <IoTimeOutline size={64} className="text-(--text-muted) mb-4" />
+                <p className="text-(--text-muted) font-black uppercase tracking-widest text-xs">No time entries found for the selected filters</p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6 font-poppins">
                 {reportData.map((user) => (
-                  <div key={user.user_email} className="group bg-zinc-900 border border-white/5 rounded-3xl p-6 hover:border-amber-500/30 transition-all duration-300 shadow-sm relative overflow-hidden">
+                  <div key={user.user_email} className="group bg-(--hover-bg) border border-(--glass-border) rounded-3xl p-6 hover:border-amber-500/30 transition-all duration-300 shadow-sm relative overflow-hidden">
                     <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full -mr-16 -mt-16 blur-3xl pointer-events-none" />
 
                     <div className="flex items-center gap-4 mb-6 relative">
@@ -965,42 +965,42 @@ export const Analytics = () => {
                         {user.user_name.charAt(0)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-lg font-black text-white truncate leading-tight tracking-tight">{user.user_name}</h4>
-                        <p className="text-[10px] text-gray-500 font-black uppercase tracking-widest mt-0.5">{user.user_dept || 'General'}</p>
+                        <h4 className="text-lg font-black text-(--text-main) truncate leading-tight tracking-tight">{user.user_name}</h4>
+                        <p className="text-[10px] text-(--text-muted) font-black uppercase tracking-widest mt-0.5">{user.user_dept || 'General'}</p>
                       </div>
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 mb-6">
-                      <div className="bg-black/20 rounded-2xl p-4 border border-white/5 group-hover:bg-amber-500/5 transition-colors">
-                        <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Weekly Hours</div>
-                        <div className="text-xl font-black text-white">{user.total_hours}h {user.total_minutes}m</div>
+                      <div className="bg-black/20 rounded-2xl p-4 border border-white/5 group-hover:bg-(--primary-glow) transition-colors">
+                        <div className="text-[9px] uppercase font-black text-(--text-muted) tracking-widest mb-1">Weekly Hours</div>
+                        <div className="text-xl font-black text-(--text-main)">{user.total_hours}h {user.total_minutes}m</div>
                       </div>
-                      <div className="bg-black/20 rounded-2xl p-4 border border-white/5 group-hover:bg-amber-500/5 transition-colors">
-                        <div className="text-[9px] uppercase font-black text-gray-500 tracking-widest mb-1">Total Entries</div>
-                        <div className="text-xl font-black text-white">{user.entries.length}</div>
+                      <div className="bg-black/20 rounded-2xl p-4 border border-white/5 group-hover:bg-(--primary-glow) transition-colors">
+                        <div className="text-[9px] uppercase font-black text-(--text-muted) tracking-widest mb-1">Total Entries</div>
+                        <div className="text-xl font-black text-(--text-main)">{user.entries.length}</div>
                       </div>
                     </div>
 
                     <div className="space-y-3">
-                      <div className="text-[10px] font-black text-gray-600 uppercase tracking-[0.2em] mb-2 px-1">Recent Activities</div>
+                      <div className="text-[10px] font-black text-(--text-muted) uppercase tracking-[0.2em] mb-2 px-1">Recent Activities</div>
                       {user.entries.slice(0, 3).map((entry, eidx) => (
                         <div key={eidx} className="bg-black/10 rounded-xl p-3 border border-white/5 flex items-start gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-amber-500 shrink-0 border border-white/5">
+                          <div className="w-8 h-8 rounded-lg bg-zinc-800 flex items-center justify-center text-(--primary) shrink-0 border border-white/5">
                             <IoFolderOutline size={14} />
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-start gap-2">
-                              <div className="text-[11px] font-bold text-gray-300 truncate">{entry.project}</div>
-                              <div className="text-[10px] font-black text-amber-500 whitespace-nowrap">{entry.hours}h {entry.minutes}m</div>
+                              <div className="text-[11px] font-bold text-(--text-main) truncate">{entry.project}</div>
+                              <div className="text-[10px] font-black text-(--primary) whitespace-nowrap">{entry.hours}h {entry.minutes}m</div>
                             </div>
-                            <div className="text-[9px] text-gray-500 truncate mt-0.5">{new Date(entry.date).toLocaleDateString()} • {entry.task_id}</div>
+                            <div className="text-[9px] text-(--text-muted) truncate mt-0.5">{new Date(entry.date).toLocaleDateString()} • {entry.task_id}</div>
                           </div>
                         </div>
                       ))}
                       {user.entries.length > 3 && (
                         <button
                           onClick={() => handleCardClick({ label: user.user_name, data: user.entries, type: 'user_detail', detail: `Activities for ${user.user_name}` })}
-                          className="w-full py-2 text-[10px] font-black uppercase tracking-widest text-gray-500 hover:text-white hover:bg-white/5 rounded-xl transition-all border border-dashed border-white/10 mt-2"
+                          className="w-full py-2 text-[10px] font-black uppercase tracking-widest text-(--text-muted) hover:text-(--text-main) hover:bg-white/5 rounded-xl transition-all border border-dashed border-(--glass-border) mt-2"
                         >
                           View {user.entries.length - 3} More Activities
                         </button>
@@ -1028,15 +1028,15 @@ export const Analytics = () => {
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-2xl border border-white/10 rounded-2xl overflow-hidden shadow-2xl bg-zinc-900"
+              className="w-full max-w-2xl border border-(--glass-border) rounded-2xl overflow-hidden shadow-2xl bg-(--app-bg)"
               onClick={(e) => e.stopPropagation()}
             >
               <div className="p-6 border-b border-white/5 flex justify-between items-center">
                 <div>
-                  <h3 className="text-xl font-bold text-white">
+                  <h3 className="text-xl font-bold text-(--text-main)">
                     {modalContent.title}
                   </h3>
-                  <p className="text-sm text-gray-400">
+                  <p className="text-sm text-(--text-muted)">
                     {modalContent.detail}
                   </p>
                 </div>

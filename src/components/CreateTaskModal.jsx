@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion' // Added LayoutGroup
-import { 
-  IoAddCircle, IoClose, IoFlagOutline, 
+import {
+  IoAddCircle, IoClose, IoFlagOutline,
   IoLayersOutline, IoChevronDown, IoSearchOutline,
   IoCheckmarkCircle
 } from 'react-icons/io5'
@@ -17,7 +17,7 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
   const [deptSearch, setDeptSearch] = useState('')
   const [isLoading, setIsLoading] = useState(false)
 
-  const filteredDepts = depts.filter(d => 
+  const filteredDepts = depts.filter(d =>
     d.toLowerCase().includes(deptSearch.toLowerCase())
   )
 
@@ -49,26 +49,26 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
   return (
     <div className="fixed inset-0 z-[70] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
       {/* 1. Added 'layout' to the container so it animates its size */}
-      <motion.div 
-        layout 
+      <motion.div
+        layout
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         exit={{ opacity: 0, scale: 0.95 }}
         transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-        className="ui-card w-full max-w-md p-0 overflow-hidden shadow-2xl border-white/10 bg-zinc-900"
+        className="ui-card w-full max-w-md p-0 overflow-hidden shadow-2xl border-(--glass-border) bg-(--app-bg)"
       >
         {/* Header */}
-        <div className="relative px-8 pt-8 pb-4 border-b border-white/5 bg-white/5">
+        <div className="relative px-8 pt-8 pb-4 border-b border-(--glass-border) bg-(--hover-bg)">
           <div className="flex items-start justify-between">
             <motion.div layout="position">
-              <h2 className="text-lg font-black text-white tracking-tight flex items-center gap-2 uppercase">
+              <h2 className="text-lg font-black text-(--text-main) tracking-tight flex items-center gap-2 uppercase">
                 Initialize New Task
               </h2>
-              <p className="text-[10px] text-gray-400 mt-1 font-black uppercase tracking-widest italic">Define new workspace objectives</p>
+              <p className="text-[10px] text-(--text-muted) mt-1 font-black uppercase tracking-widest italic">Define new workspace objectives</p>
             </motion.div>
             <button
               onClick={handleClose}
-              className="p-2 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-300"
+              className="p-2 text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) rounded-xl transition-all duration-300"
             >
               <IoClose size={24} />
             </button>
@@ -78,7 +78,7 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
           {/* Input: Task Name */}
           <motion.div layout className="space-y-2">
-            <label className="text-[10px] uppercase font-black tracking-widest text-gray-400 group-focus-within:text-amber-500 transition-colors flex items-center gap-2">
+            <label className="text-[10px] uppercase font-black tracking-widest text-(--text-muted) group-focus-within:text-amber-500 transition-colors flex items-center gap-2">
               <IoFlagOutline className="text-amber-500" />
               Identification
             </label>
@@ -86,7 +86,7 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
               type="text"
               value={formData.task_name}
               onChange={(e) => setFormData({ ...formData, task_name: e.target.value })}
-              className="ui-input w-full text-xs py-2.5 bg-zinc-950 border-white/10 text-white focus:border-amber-500 focus:ring-amber-500/20"
+              className="ui-input w-full text-xs py-2.5 bg-(--input-bg) border-(--glass-border) text-(--text-main) focus:border-amber-500 focus:ring-amber-500/20"
               placeholder="e.g. System Architecture Audit"
               disabled={isLoading}
             />
@@ -94,22 +94,21 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
 
           {/* Custom Select: Department */}
           <motion.div layout className="space-y-2">
-            <label className="ui-label flex items-center gap-2 text-gray-400">
+            <label className="ui-label flex items-center gap-2 text-(--text-muted)">
               <IoLayersOutline className="text-amber-500" />
               Ownership
             </label>
-            
+
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setIsDeptOpen(!isDeptOpen)}
-                className={`w-full flex items-center justify-between px-4 py-3 bg-zinc-950 border rounded-xl text-sm font-black transition-all duration-300 ${
-                  isDeptOpen 
-                    ? 'border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.1)] text-white' 
-                    : 'border-white/10 text-white'
-                }`}
+                className={`w-full flex items-center justify-between px-4 py-3 bg-(--input-bg) border rounded-xl text-sm font-black transition-all duration-300 ${isDeptOpen
+                    ? 'border-amber-500 shadow-[0_0_15px_rgba(245,158,11,0.1)] text-(--text-main)'
+                    : 'border-(--glass-border) text-(--text-main)'
+                  }`}
               >
-                <span className={formData.task_dept ? 'text-white' : 'text-gray-500'}>
+                <span className={formData.task_dept ? 'text-(--text-main)' : 'text-(--text-muted)'}>
                   {formData.task_dept || 'Select department...'}
                 </span>
                 <IoChevronDown className={`text-amber-500 transition-transform duration-500 ${isDeptOpen ? 'rotate-180' : ''}`} />
@@ -121,15 +120,15 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
                     initial={{ opacity: 0, height: 0 }}
                     animate={{ opacity: 1, height: 'auto' }}
                     exit={{ opacity: 0, height: 0 }}
-                    className="overflow-hidden mt-2 bg-zinc-900 border border-white/10 rounded-xl shadow-xl z-10 relative"
+                    className="overflow-hidden mt-2 bg-(--app-bg) border border-(--glass-border) rounded-xl shadow-xl z-10 relative"
                   >
                     {/* Inline Search */}
                     <div className="p-3 border-b border-white/5">
                       <div className="relative">
                         <IoSearchOutline className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={14} />
-                        <input 
+                        <input
                           autoFocus
-                          className="w-full pl-9 pr-4 py-2 bg-black/20 rounded-lg text-xs font-medium text-white outline-none border border-transparent focus:border-amber-500/50 transition-all placeholder:text-gray-600"
+                          className="w-full pl-9 pr-4 py-2 bg-black/20 rounded-lg text-xs font-medium text-(--text-main) outline-none border border-transparent focus:border-amber-500/50 transition-all placeholder:text-(--text-muted)"
                           placeholder="Search..."
                           value={deptSearch}
                           onChange={(e) => setDeptSearch(e.target.value)}
@@ -144,11 +143,11 @@ export default function CreateTaskModal({ isOpen, onClose, onCreateTask, depts =
                           key={dept}
                           type="button"
                           onClick={() => {
-                            setFormData({...formData, task_dept: dept})
+                            setFormData({ ...formData, task_dept: dept })
                             setIsDeptOpen(false)
                             setDeptSearch('')
                           }}
-                          className="w-full px-4 py-2.5 text-left text-xs font-medium text-gray-400 hover:bg-amber-500/10 hover:text-amber-500 transition-all flex items-center justify-between group"
+                          className="w-full px-4 py-2.5 text-left text-xs font-medium text-(--text-muted) hover:bg-amber-500/10 hover:text-amber-500 transition-all flex items-center justify-between group"
                         >
                           {dept}
                           {formData.task_dept === dept && (

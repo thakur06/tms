@@ -4,11 +4,8 @@ const ThemeContext = createContext();
 
 export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState(() => {
-    // Check local storage or default to system
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('theme') || 'system';
-    }
-    return 'system';
+    // Default to dark mode
+    return 'dark';
   });
 
   useEffect(() => {
@@ -38,7 +35,7 @@ export function ThemeProvider({ children }) {
         applyTheme('system');
       }
     };
-    
+
     mediaQuery.addEventListener('change', handleSystemChange);
     return () => mediaQuery.removeEventListener('change', handleSystemChange);
   }, [theme]);

@@ -20,11 +20,13 @@ import {
   IoTicketOutline, IoTicket, IoTicketSharp
 } from 'react-icons/io5';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Sidebar({ isOpen, onClose, isCollapsed }) {
   const location = useLocation();
   const { logout, user } = useAuth();
+  const { theme } = useTheme();
   const [openFolders, setOpenFolders] = useState(['Tickets', 'Timesheets', 'Administration']);
 
   const toggleFolder = (folder) => {
@@ -110,17 +112,17 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
 
       {/* Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-full bg-zinc-950 border-r border-white/5 z-50 transition-all duration-300 transform lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed top-0 left-0 h-full bg-(--app-bg) border-r border-(--glass-border) z-50 transition-all duration-300 transform lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
           } ${isCollapsed ? 'lg:w-20' : 'lg:w-64'}`}
       >
         <div className="flex flex-col h-full overflow-hidden">
           {/* Logo Area */}
-          <div className="h-20 lg:h-24 flex items-center justify-center border-b border-white/5 bg-black/20 shrink-0">
+          <div className="h-20 lg:h-24 flex items-center justify-center border-b border-(--glass-border) bg-(--hover-bg) shrink-0">
             <motion.img
               animate={{ scale: isCollapsed ? 0.7 : 1 }}
               src="/logo.png"
               alt="logo"
-              className={`h-12 lg:h-16 object-contain brightness-0 invert transition-all ${isCollapsed ? 'lg:h-10' : ''}`}
+              className={`h-12 lg:h-16 object-contain transition-all ${theme === 'dark' ? 'brightness-0 invert' : ''} ${isCollapsed ? 'lg:h-10' : ''}`}
             />
           </div>
 
@@ -137,12 +139,12 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
                   to={link.path}
                   onClick={() => window.innerWidth < 1024 && onClose()}
                   className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${active
-                    ? 'text-zinc-950 bg-amber-500 shadow-lg shadow-amber-500/20 font-black'
-                    : 'text-gray-400 hover:text-white hover:bg-white/5 font-bold'
+                    ? 'text-white bg-(--gradient-primary) shadow-lg shadow-(--primary-glow) font-black'
+                    : 'text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) font-bold'
                     } ${isCollapsed ? 'lg:justify-center lg:px-0' : ''}`}
                   title={isCollapsed ? link.label : ''}
                 >
-                  <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'text-white scale-110' : 'text-gray-500 group-hover:text-amber-500 group-hover:scale-110'}`} />
+                  <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'text-white scale-110' : 'text-(--text-muted) group-hover:text-(--primary) group-hover:scale-110'}`} />
                   {!isCollapsed && <span className="text-[11px] font-bold tracking-tight">{link.label}</span>}
                   {active && !isCollapsed && (
                     <motion.div
@@ -156,7 +158,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
             })}
 
             {/* Divider */}
-            <div className="h-px bg-white/5 my-4" />
+            <div className="h-px bg-(--glass-border) my-4" />
 
             {/* Grouped Links */}
             {menuGroups
@@ -173,13 +175,13 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
                     {/* Folder Header */}
                     <button
                       onClick={() => toggleFolder(group.name)}
-                      className={`w-full flex items-center justify-between px-4 py-2 text-gray-500 hover:text-white transition-colors group ${isCollapsed ? 'lg:justify-center lg:px-0' : ''}`}
+                      className={`w-full flex items-center justify-between px-4 py-2 text-(--text-muted) hover:text-(--text-main) transition-colors group ${isCollapsed ? 'lg:justify-center lg:px-0' : ''}`}
                       title={isCollapsed ? group.name : ''}
                     >
                       <div className="flex items-center gap-3">
-                        <GroupIcon className={`w-4 h-4 transition-colors ${isOpen ? 'text-amber-500' : 'text-gray-600'}`} />
+                        <GroupIcon className={`w-4 h-4 transition-colors ${isOpen ? 'text-(--primary)' : 'text-(--text-muted)'}`} />
                         {!isCollapsed && (
-                          <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isOpen ? 'text-gray-300' : 'text-gray-500'}`}>
+                          <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isOpen ? 'text-(--text-main)' : 'text-(--text-muted)'}`}>
                             {group.name}
                           </span>
                         )}
@@ -187,7 +189,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
                       {!isCollapsed && (
                         <motion.div
                           animate={{ rotate: isOpen ? 180 : 0 }}
-                          className="text-gray-600 group-hover:text-amber-500"
+                          className="text-(--text-muted) group-hover:text-(--primary)"
                         >
                           <IoChevronDown size={12} />
                         </motion.div>
@@ -201,7 +203,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
                           initial={{ height: 0, opacity: 0 }}
                           animate={{ height: 'auto', opacity: 1 }}
                           exit={{ height: 0, opacity: 0 }}
-                          className="overflow-hidden space-y-1 ml-2 border-l border-white/5 pl-2"
+                          className="overflow-hidden space-y-1 ml-2 border-l border-(--glass-border) pl-2"
                         >
                           {visibleGroupLinks.map((link, linkIdx) => {
                             const active = isActive(link.path);
@@ -218,12 +220,12 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
                                   to={link.path}
                                   onClick={() => window.innerWidth < 1024 && onClose()}
                                   className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${active
-                                    ? 'text-zinc-950 bg-amber-500 shadow-lg shadow-amber-500/20 font-black'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/5 font-bold'
+                                    ? 'text-white bg-(--gradient-primary) shadow-lg shadow-(--primary-glow) font-black'
+                                    : 'text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) font-bold'
                                     } ${isCollapsed ? 'lg:justify-center lg:px-0' : ''}`}
                                   title={isCollapsed ? link.label : ''}
                                 >
-                                  <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'text-white scale-110' : 'text-gray-500 group-hover:text-amber-500 group-hover:scale-110'}`} />
+                                  <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'text-white scale-110' : 'text-(--text-muted) group-hover:text-(--primary) group-hover:scale-110'}`} />
                                   {!isCollapsed && <span className="text-[11px] font-bold tracking-tight">{link.label}</span>}
                                   {active && !isCollapsed && (
                                     <motion.div

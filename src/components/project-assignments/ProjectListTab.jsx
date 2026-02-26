@@ -10,14 +10,14 @@ import UserAvatar from '../UserAvatar';
 import UserAvailabilityDrawer from './UserAvailabilityDrawer';
 
 const COLORS = [
-    '#F59E0B', // Yellow/Amber
-    '#3B82F6', // Blue
-    '#8B5CF6', // Purple
-    '#38BDF8', // Light Blue
-    '#EC4899', // Pink
-    '#14B8A6', // Teal
-    '#EF4444', // Red
-    '#10B981', // Green
+    'var(--rose)',
+    'var(--indigo)',
+    'var(--violet)',
+    'var(--emerald)',
+    'var(--orange)',
+    'var(--sky)',
+    'var(--cyan)',
+    'var(--fuchsia)',
 ];
 
 const ProjectListTab = ({
@@ -70,7 +70,7 @@ const ProjectListTab = ({
                             });
                             setIsAssignModalOpen(true);
                         }}
-                        className="bg-zinc-900/50 border border-white/5 rounded-2xl sm:rounded-3xl p-4 sm:p-6 hover:border-amber-500/20 transition-all group overflow-hidden cursor-pointer"
+                        className="bg-(--app-bg) border border-(--glass-border) rounded-2xl sm:rounded-3xl p-4 sm:p-6 hover:border-(--primary-glow) transition-all group overflow-hidden cursor-pointer"
                     >
                         <div className="flex flex-col lg:flex-row lg:flex-nowrap gap-4">
                             {/* Left Column: Stats & Projects */}
@@ -79,34 +79,34 @@ const ProjectListTab = ({
                                     <UserAvatar name={user.user_name} email={user.user_email} size="md" />
                                     <div className="flex-1 min-w-0">
                                         <div className="flex items-center justify-between">
-                                            <h3 className="text-lg font-black text-white truncate">{user.user_name}</h3>
+                                            <h3 className="text-lg font-black text-(--text-main) truncate">{user.user_name}</h3>
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
                                                     handleForecastClick(user);
                                                 }}
-                                                className="p-2 bg-amber-500/10 text-amber-500 hover:bg-amber-500 hover:text-black rounded-xl transition-all shadow-sm flex items-center gap-2 group/btn"
+                                                className="p-2 bg-(--primary-glow) text-(--primary) hover:bg-(--primary) hover:text-(--text-inverse) rounded-xl transition-all shadow-sm flex items-center gap-2 group/btn"
                                                 title="View Availability Forecast"
                                             >
                                                 <IoCalendarOutline size={14} className="group-hover/btn:scale-110 transition-transform" />
                                             </button>
                                         </div>
-                                        <p className="text-xs text-gray-500 font-bold">{user.user_dept}</p>
+                                        <p className="text-xs text-(--text-muted) font-bold">{user.user_dept}</p>
                                     </div>
                                 </div>
 
                                 <div className="space-y-3">
                                     <div className="flex items-center justify-between">
-                                        <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Total Work Hours</span>
-                                        <span className={`text-xs font-black ${user.displayAllocation > parseInt(allocationThreshold) ? 'text-red-500' : 'text-emerald-500'}`}>
+                                        <span className="text-[10px] font-black uppercase text-(--text-muted) tracking-widest">Total Work Hours</span>
+                                        <span className={`text-xs font-black ${user.displayAllocation > parseInt(allocationThreshold) ? 'text-(--rose)' : 'text-(--success)'}`}>
                                             {user.displayAllocation} / {allocationThreshold}
                                         </span>
                                     </div>
-                                    <div className="h-2 bg-white/5 rounded-full overflow-hidden">
+                                    <div className="h-2 bg-(--hover-bg) rounded-full overflow-hidden">
                                         <motion.div
                                             initial={{ width: 0 }}
                                             animate={{ width: `${Math.min((user.displayAllocation / parseInt(allocationThreshold)) * 100, 100)}%` }}
-                                            className={`h-full rounded-full ${user.displayAllocation > parseInt(allocationThreshold) ? 'bg-red-500' : 'bg-emerald-500'}`}
+                                            className={`h-full rounded-full ${user.displayAllocation > parseInt(allocationThreshold) ? 'bg-(--rose)' : 'bg-(--success)'}`}
                                         />
                                     </div>
                                 </div>
@@ -114,21 +114,21 @@ const ProjectListTab = ({
                                 <div className="space-y-2 max-h-[150px] overflow-y-auto pr-1 hide-y-scroll">
                                     {user.displayProjects.length > 0 ? (
                                         user.displayProjects.map(proj => (
-                                            <div key={proj.id} className="group/item relative p-3 rounded-2xl bg-black/40 border border-white/5 hover:border-amber-500/30 transition-all space-y-3">
+                                            <div key={proj.id} className="group/item relative p-3 rounded-2xl bg-(--hover-bg) border border-(--glass-border) hover:border-(--primary-glow) transition-all space-y-3">
                                                 <div className="flex items-start justify-between gap-3">
                                                     <div className="flex items-center gap-3 min-w-0">
                                                         <div className="min-w-0">
-                                                            <p className="text-xs font-black text-white truncate">{proj.project_name}</p>
-                                                            <p className="text-[10px] text-gray-400 font-bold truncate">{proj.project_client}</p>
+                                                            <p className="text-xs font-black text-(--text-main) truncate">{proj.project_name}</p>
+                                                            <p className="text-[10px] text-(--text-muted) font-bold truncate">{proj.project_client}</p>
                                                             {proj.remarks && (
-                                                                <p className="text-[9px] text-amber-500 font-extrabold italic mt-1 bg-amber-500/10 px-1.5 py-0.5 rounded-md w-fit">
+                                                                <p className="text-[9px] text-(--primary) font-extrabold italic mt-1 bg-(--primary-glow) px-1.5 py-0.5 rounded-md w-fit">
                                                                     {proj.remarks}
                                                                 </p>
                                                             )}
                                                         </div>
                                                     </div>
                                                     <div className="flex flex-col items-end gap-1 shrink-0">
-                                                        <span className="text-emerald-500 font-black text-xs md:text-sm">{proj.allocation_hours}h</span>
+                                                        <span className="text-(--success) font-black text-xs md:text-sm">{proj.allocation_hours}h</span>
                                                         <div className="flex items-center gap-1.5 pt-1">
                                                             <button
                                                                 onClick={(e) => {
@@ -143,7 +143,7 @@ const ProjectListTab = ({
                                                                     });
                                                                     setIsEditModalOpen(true);
                                                                 }}
-                                                                className="p-1.5 text-gray-500 hover:text-white hover:bg-white/10 rounded-lg transition-all"
+                                                                className="p-1.5 text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) rounded-lg transition-all"
                                                             >
                                                                 <IoPencilOutline size={12} />
                                                             </button>
@@ -152,14 +152,14 @@ const ProjectListTab = ({
                                                                     e.stopPropagation();
                                                                     handleDeleteClick(proj);
                                                                 }}
-                                                                className="p-1.5 text-gray-500 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all"
+                                                                className="p-1.5 text-(--text-muted) hover:text-(--rose) hover:bg-(--rose)/10 rounded-lg transition-all"
                                                             >
                                                                 <IoTrashOutline size={12} />
                                                             </button>
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-2 text-[9px] font-bold text-gray-500 bg-white/5 px-2 py-1.5 rounded-lg w-full justify-between">
+                                                <div className="flex items-center gap-2 text-[9px] font-bold text-(--text-muted) bg-(--hover-bg) px-2 py-1.5 rounded-lg w-full justify-between">
                                                     <div className="flex items-center gap-1.5">
                                                         <IoCalendarOutline size={10} />
                                                         <span>{new Date(proj.start_date).toLocaleDateString()}</span>
@@ -172,13 +172,13 @@ const ProjectListTab = ({
                                             </div>
                                         ))
                                     ) : (
-                                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/2 border border-dashed border-white/10 opacity-50 h-[58px]">
-                                            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/5 flex items-center justify-center text-gray-600">
+                                        <div className="flex items-center gap-3 p-3 rounded-2xl bg-(--hover-bg) border border-dashed border-(--glass-border) opacity-50 h-[58px]">
+                                            <div className="w-8 h-8 rounded-lg bg-(--hover-bg) border border-(--glass-border) flex items-center justify-center text-(--text-muted)">
                                                 <IoLayersOutline size={14} />
                                             </div>
                                             <div>
-                                                <p className="text-[10px] font-black text-gray-500 uppercase tracking-wider">No Projects Assigned</p>
-                                                <p className="text-[9px] text-gray-600 font-bold italic">Click card to log hrs</p>
+                                                <p className="text-[10px] font-black text-(--text-muted) uppercase tracking-wider">No Projects Assigned</p>
+                                                <p className="text-[9px] text-(--text-muted) font-bold italic">Click card to log hrs</p>
                                             </div>
                                         </div>
                                     )}
@@ -222,9 +222,9 @@ const ProjectListTab = ({
                                                 ...user.activeProjects,
                                                 ...(user.displayAllocation < parseInt(allocationThreshold) ? [{ project_category: 'FREE' }] : [])
                                             ].map((entry, index) => {
-                                                if (entry.project_category === 'FREE') return <Cell key="cell-free" fill="#3B3B3B" opacity={0.3} />;
+                                                if (entry.project_category === 'FREE') return <Cell key="cell-free" fill="var(--glass-border)" opacity={0.3} />;
                                                 const isLeave = entry.project_category === 'PTO' || entry.project_name === 'Leave';
-                                                return <Cell key={`cell-${index}`} fill={isLeave ? '#3B82F6' : COLORS[index % COLORS.length]} />;
+                                                return <Cell key={`cell-${index}`} fill={isLeave ? 'var(--secondary)' : COLORS[index % COLORS.length]} />;
                                             })}
                                         </Pie>
                                         {user.displayAllocation > 0 && (
@@ -234,17 +234,17 @@ const ProjectListTab = ({
                                                     return [`${percentage}%`, 'Allocation'];
                                                 }}
                                                 contentStyle={{
-                                                    backgroundColor: '#D3D3D3',
-                                                    border: 'none',
+                                                    backgroundColor: 'var(--tooltip-bg)',
+                                                    border: '1px solid var(--glass-border)',
                                                     borderRadius: '12px',
                                                     fontSize: '10px',
                                                     fontWeight: '900',
-                                                    color: '#000000',
+                                                    color: 'var(--text-main)',
                                                     boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.3)',
                                                     zIndex: 1000
                                                 }}
                                                 itemStyle={{
-                                                    color: '#000000',
+                                                    color: 'var(--text-main)',
                                                     textTransform: 'uppercase',
                                                     letterSpacing: '0.05em'
                                                 }}
@@ -256,8 +256,8 @@ const ProjectListTab = ({
                                     id={`load-info-${user.user_id}`}
                                     className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none z-0 transition-opacity duration-300"
                                 >
-                                    <span className="text-[10px] font-black text-gray-500 uppercase">Load %</span>
-                                    <span className={`text-lg font-black ${user.displayAllocation > parseInt(allocationThreshold) ? 'text-red-500' : 'text-white'}`}>
+                                    <span className="text-[10px] font-black text-(--text-muted) uppercase">Load %</span>
+                                    <span className={`text-lg font-black ${user.displayAllocation > parseInt(allocationThreshold) ? 'text-(--rose)' : 'text-(--text-main)'}`}>
                                         {Math.round((user.displayAllocation / parseInt(allocationThreshold)) * 100)}%
                                     </span>
                                 </div>

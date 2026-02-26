@@ -115,19 +115,7 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
     }
   }, [user]);
 
-  const toggleTheme = () => {
-    if (theme === 'system') setTheme('light');
-    else if (theme === 'light') setTheme('dark');
-    else setTheme('system');
-  };
 
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'light': return <IoSunnyOutline className="w-5 h-5" />;
-      case 'dark': return <IoMoonOutline className="w-5 h-5" />;
-      default: return <IoDesktopOutline className="w-5 h-5" />;
-    }
-  };
 
   const handleSearch = (e) => {
     if (e.key === 'Enter') {
@@ -138,12 +126,12 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
 
   return (
     <>
-      <header className="sticky top-0 z-40 h-16 sm:h-20 px-4 sm:px-8 flex items-center justify-between border-b transition-all duration-300 border-white/5 backdrop-blur-xl bg-zinc-950/80 shadow-sm">
+      <header className="sticky top-0 z-40 h-16 sm:h-20 px-4 sm:px-8 flex items-center justify-between border-b transition-all duration-300 border-(--glass-border) backdrop-blur-xl bg-(--app-bg)/80 shadow-sm">
         <div className="flex items-center gap-4">
           <button
             onClick={onMenuClick}
             className="lg:hidden p-2 -ml-2 rounded-lg transition-colors 
-              text-gray-400 hover:bg-white/5 hover:text-white"
+              text-gray-400 hover:bg-(--hover-bg) hover:text-(--text-main)"
           >
             <IoMenu className="w-6 h-6" />
           </button>
@@ -152,7 +140,7 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
           <button
             onClick={onCollapseToggle}
             className="hidden lg:flex p-2 -ml-2 rounded-lg transition-colors 
-              text-gray-400 hover:bg-white/5 hover:text-white border border-transparent hover:border-white/10"
+              text-gray-400 hover:bg-(--hover-bg) hover:text-(--text-main) border border-transparent hover:border-(--glass-border)"
           >
             <motion.div
               animate={{ rotate: isCollapsed ? 180 : 0 }}
@@ -168,7 +156,7 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
               <span className="opacity-20">/</span>
               <span className="text-amber-500">{getPageTitle()}</span>
             </nav>
-            <h2 className="text-xl font-black tracking-tight text-white transition-colors uppercase leading-none">{getPageTitle()}</h2>
+            <h2 className="text-xl font-black tracking-tight text-(--text-main) transition-colors uppercase leading-none">{getPageTitle()}</h2>
           </div>
         </div>
 
@@ -190,16 +178,7 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
             />
           </div> */}
 
-          {/* Theme Toggle */}
-          {/* <button 
-            onClick={toggleTheme}
-            className="p-2.5 rounded-full transition-colors
-              text-slate-500 hover:bg-slate-100 hover:text-indigo-600
-              dark:text-slate-400 dark:hover:bg-white/5 dark:hover:text-white"
-            title={`Theme: ${theme.charAt(0).toUpperCase() + theme.slice(1)}`}
-          >
-            {getThemeIcon()}
-          </button> */}
+
 
           {/* Notifications */}
           <div className="relative">
@@ -208,7 +187,7 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
               className="relative p-2.5 rounded-xl transition-all duration-200 text-gray-500 hover:bg-amber-500/10 hover:text-amber-500 border border-transparent hover:border-amber-500/20">
               <IoNotificationsOutline className="w-5 h-5" />
               {notifications.some(n => n.type === 'warning') && (
-                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full box-content border-2 border-zinc-900" />
+                <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full box-content border-2 border-(--app-bg)" />
               )}
             </button>
             <AnimatePresence>
@@ -220,10 +199,10 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
                     animate={{ opacity: 1, y: 0, scale: 1 }}
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     className="absolute right-0 sm:right-0 top-full mt-2 w-80 max-sm:fixed max-sm:inset-x-4 max-sm:mx-auto max-sm:top-20 max-sm:w-auto rounded-2xl shadow-xl z-20 border overflow-hidden
-                      bg-zinc-900 border-white/10 shadow-black/50"
+                      bg-(--app-bg) border-(--glass-border)"
                   >
-                    <div className="px-4 py-3 border-b border-white/5 bg-white/5 flex justify-between items-center">
-                      <span className="font-semibold text-sm text-white">Notifications</span>
+                    <div className="px-4 py-3 border-b border-(--glass-border) bg-(--hover-bg) flex justify-between items-center">
+                      <span className="font-semibold text-sm text-(--text-main)">Notifications</span>
                       <span className="text-[10px] bg-amber-500/20 text-amber-500 px-2 py-0.5 rounded-full font-bold">{notifications.length} New</span>
                     </div>
                     <div className="max-h-[300px] overflow-y-auto">
@@ -231,13 +210,13 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
                         <div className="p-8 text-center text-gray-500 text-sm">No new notifications</div>
                       ) : (
                         notifications.map(n => (
-                          <div key={n.id} className="p-4 border-b border-white/5 hover:bg-white/5 transition-colors">
+                          <div key={n.id} className="p-4 border-b border-(--glass-border) hover:bg-(--hover-bg) transition-colors">
                             <div className="flex gap-3">
                               <div className={`mt-0.5 shrink-0 ${n.type === 'warning' ? 'text-red-500' : 'text-emerald-500'}`}>
                                 {n.type === 'warning' ? <IoWarningOutline size={18} /> : <IoCheckmarkCircleOutline size={18} />}
                               </div>
                               <div>
-                                <h4 className="text-sm font-semibold text-gray-200 line-clamp-1">{n.title}</h4>
+                                <h4 className="text-sm font-semibold text-(--text-main) line-clamp-1">{n.title}</h4>
                                 <p className="text-xs text-gray-400 mt-1">{n.message}</p>
                                 <p className="text-[10px] text-gray-600 mt-2">{n.time}</p>
                               </div>
@@ -256,15 +235,15 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
           <div className="relative">
             <button
               onClick={() => setUserMenuOpen(!userMenuOpen)}
-              className="flex items-center gap-3 pl-2 pr-2 py-1.5 rounded-xl transition-all duration-200 border border-white/5 hover:bg-white/5 hover:border-white/10 shadow-sm"
+              className="flex items-center gap-3 pl-2 pr-2 py-1.5 rounded-xl transition-all duration-200 border border-(--glass-border) hover:bg-(--hover-bg) hover:border-(--glass-border) shadow-sm"
             >
               <UserAvatar
                 name={user?.name}
                 email={user?.email}
                 size="sm"
-                className="rounded-lg shadow-md border border-white/5"
+                className="rounded-lg shadow-md border border-(--glass-border)"
               />
-              <span className="hidden md:block text-sm font-bold text-gray-200">{user?.name}</span>
+              <span className="hidden md:block text-sm font-bold text-(--text-main)">{user?.name || 'User'}</span>
               <IoChevronDown className={`w-4 h-4 transition-transform duration-300 ${userMenuOpen ? 'rotate-180' : ''} text-gray-500`} />
             </button>
 
@@ -281,18 +260,18 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
                     exit={{ opacity: 0, y: 10, scale: 0.95 }}
                     transition={{ duration: 0.2 }}
                     className="absolute right-0 top-full mt-2 w-56 p-2 rounded-2xl shadow-xl z-20 border
-                      bg-zinc-900 border-white/10 shadow-black/50"
+                      bg-(--app-bg) border-(--glass-border)"
                   >
-                    <div className="px-3 py-2 border-b mb-1 border-white/5">
-                      <p className="text-sm font-semibold text-white">{user?.name}</p>
-                      <p className="text-xs text-gray-500 text-truncate">{user?.email}</p>
+                    <div className="px-3 py-2 border-b mb-1 border-(--glass-border)">
+                      <p className="text-sm font-semibold text-(--text-main)">{user?.name || 'User'}</p>
+                      <p className="text-xs text-gray-500 text-truncate">{user?.email || 'No Email'}</p>
                     </div>
 
                     {user?.is_manager && (
                       <button
                         onClick={() => { setUserMenuOpen(false); setShowCreateUserModal(true); }}
                         className="w-full flex items-center gap-2 px-3 py-2 text-sm rounded-lg transition-colors
-                          text-gray-400 hover:bg-white/5 hover:text-white"
+                          text-gray-400 hover:bg-(--hover-bg) hover:text-(--text-main)"
                       >
                         <IoPersonAddOutline className="w-4 h-4" />
                         Add New User

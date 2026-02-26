@@ -1,11 +1,19 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
-import { IoArrowBack, IoSearch, IoFilter, IoChevronBack, IoChevronForward, IoTime } from 'react-icons/io5';
+import { IoArrowBack, IoSearch, IoFilter, IoChevronBack, IoChevronForward, IoTime, IoChevronDown } from 'react-icons/io5';
 import { useNavigate } from 'react-router-dom';
 import ComplianceTable from '../components/ComplianceTable';
 import MultiSelect from '../components/MultiSelect';
 import { toast } from 'react-toastify';
+
+const normalizeDateStr = (date) => {
+    const d = new Date(date);
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+};
 
 export default function TeamCompliancePage() {
     const server = import.meta.env.VITE_SERVER_ADDRESS;
@@ -39,22 +47,16 @@ export default function TeamCompliancePage() {
     // Calculate week days
     const weekDays = useMemo(() => {
         const days = [];
-        const start = new Date(currentWeekStart);
+        const [y, m, d_] = normalizeDateStr(currentWeekStart).split('-').map(Number);
+        const start = new Date(Date.UTC(y, m - 1, d_));
         for (let i = 0; i < 7; i++) {
             const d = new Date(start);
-            d.setDate(start.getDate() + i);
+            d.setUTCDate(start.getUTCDate() + i);
             days.push(d);
         }
         return days;
     }, [currentWeekStart]);
 
-    const normalizeDateStr = (date) => {
-        const d = new Date(date);
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, "0");
-        const day = String(d.getDate()).padStart(2, "0");
-        return `${year}-${month}-${day}`;
-    };
 
     useEffect(() => {
         fetchTeamCompliance();
@@ -135,52 +137,52 @@ export default function TeamCompliancePage() {
     };
 
     return (
-        <div className="p-4 sm:p-6 md:p-8 space-y-8 min-h-screen bg-black text-white font-sans selection:bg-amber-500/30">
+        <div className="p-4 sm:p-6 md:p-8 space-y-8 min-h-screen bg-(--app-bg) text-(--text-main) selection:bg-(--primary-glow)">
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => navigate('/approvals')}
-                        className="p-2 rounded-xl bg-zinc-900 border border-white/5 text-gray-400 hover:text-white hover:bg-zinc-800 transition-all active:scale-95"
+                        className="p-2 rounded-xl bg-(--hover-bg) border border-(--glass-border) text-(--text-muted) hover:text-(--text-main) hover:bg-(--glass-surface) transition-all active:scale-95"
                     >
                         <IoArrowBack size={20} />
                     </button>
                     <div className="min-w-0">
-                        <nav className="flex items-center gap-2 text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">
+                        <nav className="flex items-center gap-2 text-[10px] font-black text-(--text-muted) uppercase tracking-[0.2em] mb-1">
                             <span>Approvals</span>
                             <span className="opacity-30">/</span>
-                            <span className="text-amber-500">Team Compliance</span>
+                            <span className="text-(--primary)">Team Compliance</span>
                         </nav>
-                        <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-white truncate">
+                        <h1 className="text-xl sm:text-2xl md:text-3xl font-black tracking-tight text-(--text-main) truncate">
                             My Team's Hours
                         </h1>
-                        <p className="text-gray-500 font-bold text-[10px] sm:text-sm">
+                        <p className="text-(--text-muted) font-bold text-[10px] sm:text-sm">
                             Tracking submissions for your direct reports
                         </p>
                     </div>
                 </div>
 
                 <div className="flex flex-wrap items-center gap-3">
-                    <div className="flex w-full sm:w-auto bg-zinc-900 border border-white/5 rounded-xl p-1 shadow-inner">
-                        <button onClick={() => navigateWeek(-1)} className="flex-1 sm:flex-none px-3 py-2 hover:bg-zinc-800 rounded-lg text-xs sm:text-sm text-gray-400 hover:text-white font-bold transition-colors">Prev</button>
-                        <button onClick={() => setCurrentWeekStart(new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1 - 7)))} className="flex-2 sm:flex-none px-3 py-2 hover:bg-zinc-800 rounded-lg text-xs sm:text-sm text-amber-500 font-bold transition-colors whitespace-nowrap">
+                    <div className="flex w-full sm:w-auto bg-(--hover-bg) border border-(--glass-border) rounded-xl p-1 shadow-inner">
+                        <button onClick={() => navigateWeek(-1)} className="flex-1 sm:flex-none px-3 py-2 hover:bg-(--glass-surface) rounded-lg text-xs sm:text-sm text-(--text-muted) hover:text-(--text-main) font-bold transition-colors">Prev</button>
+                        <button onClick={() => setCurrentWeekStart(new Date(new Date().setDate(new Date().getDate() - new Date().getDay() + 1 - 7)))} className="flex-2 sm:flex-none px-3 py-2 hover:bg-(--glass-surface) rounded-lg text-xs sm:text-sm text-(--primary) font-bold transition-colors whitespace-nowrap">
                             {weekDays[0].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </button>
-                        <button onClick={() => navigateWeek(1)} className="flex-1 sm:flex-none px-3 py-2 hover:bg-zinc-800 rounded-lg text-xs sm:text-sm text-gray-400 hover:text-white font-bold transition-colors">Next</button>
+                        <button onClick={() => navigateWeek(1)} className="flex-1 sm:flex-none px-3 py-2 hover:bg-(--glass-surface) rounded-lg text-xs sm:text-sm text-(--text-muted) hover:text-(--text-main) font-bold transition-colors">Next</button>
                     </div>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:flex lg:items-center gap-4 bg-zinc-900/50 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:flex lg:items-center gap-4 bg-(--glass-surface)/95 p-4 rounded-2xl border border-(--glass-border) backdrop-blur-xl">
                 <div className="relative flex-1 group">
-                    <IoSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500 group-focus-within:text-amber-500 transition-colors" size={16} />
+                    <IoSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-(--text-muted) group-focus-within:text-(--primary) transition-colors" size={16} />
                     <input
                         type="text"
                         placeholder="Search team members..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full bg-black/20 border border-white/10 rounded-xl py-2 pl-11 pr-4 text-[13px] font-bold text-white focus:outline-none focus:ring-4 focus:ring-amber-500/10 focus:border-amber-500/50 transition-all placeholder-gray-500 shadow-sm"
+                        className="w-full bg-(--input-bg) border border-(--input-border) rounded-xl py-2 pl-11 pr-4 text-[13px] font-bold text-(--text-main) focus:outline-none focus:ring-4 focus:ring-(--primary-glow) focus:border-(--primary) transition-all placeholder-(--text-muted) shadow-sm"
                     />
                 </div>
 
@@ -197,23 +199,26 @@ export default function TeamCompliancePage() {
                 )}
 
                 <div className="relative w-full md:w-56">
-                    <IoFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" />
+                    <IoFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-(--text-muted)" />
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
-                        className="w-full appearance-none bg-black/20 border border-white/10 rounded-xl py-2 pl-10 pr-8 text-[13px] font-bold text-white focus:outline-none focus:border-amber-500/50 transition-colors cursor-pointer"
+                        className="w-full appearance-none bg-(--input-bg) border border-(--input-border) rounded-xl py-2 pl-10 pr-10 text-[13px] font-bold text-(--text-main) focus:outline-none focus:border-(--primary) transition-colors cursor-pointer"
                     >
-                        <option value="All" className="bg-zinc-900">All Submissions</option>
-                        <option value="pending" className="bg-zinc-900">Pending Approval</option>
-                        <option value="not_submitted" className="bg-zinc-900">Not Submitted</option>
-                        <option value="approved" className="bg-zinc-900">Approved</option>
-                        <option value="rejected" className="bg-zinc-900">Rejected</option>
+                        <option value="All" className="bg-(--app-bg)">All Submissions</option>
+                        <option value="pending" className="bg-(--app-bg)">Pending Approval</option>
+                        <option value="not_submitted" className="bg-(--app-bg)">Not Submitted</option>
+                        <option value="approved" className="bg-(--app-bg)">Approved</option>
+                        <option value="rejected" className="bg-(--app-bg)">Rejected</option>
                     </select>
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-(--primary)">
+                        <IoChevronDown size={14} />
+                    </div>
                 </div>
 
                 <button
                     onClick={fetchTeamCompliance}
-                    className="p-2 bg-zinc-900 border border-white/5 rounded-xl text-gray-400 hover:text-white transition-all active:scale-95 flex items-center justify-center shrink-0 w-10 h-10"
+                    className="p-2 bg-(--hover-bg) border border-(--glass-border) rounded-xl text-(--text-muted) hover:text-(--text-main) transition-all active:scale-95 flex items-center justify-center shrink-0 w-10 h-10"
                     title="Refresh"
                 >
                     <IoTime size={20} className={loading ? 'animate-spin' : ''} />
@@ -221,14 +226,14 @@ export default function TeamCompliancePage() {
             </div>
 
             {/* Tables */}
-            <div className="bg-zinc-900/40 border border-white/5 rounded-2xl overflow-hidden shadow-2xl flex flex-col min-h-[500px]">
+            <div className="bg-(--glass-surface) border border-(--glass-border) rounded-2xl overflow-hidden shadow-2xl flex flex-col min-h-[500px]">
                 <div className="flex-1">
                     {loading ? (
                         <div className="flex items-center justify-center h-[400px]">
-                            <div className="animate-spin w-8 h-8 border-2 border-amber-500 border-t-transparent rounded-full" />
+                            <div className="animate-spin w-8 h-8 border-2 border-(--primary) border-t-transparent rounded-full" />
                         </div>
                     ) : paginatedData.length === 0 ? (
-                        <div className="flex flex-col items-center justify-center h-[400px] text-gray-500 space-y-2">
+                        <div className="flex flex-col items-center justify-center h-[400px] text-(--text-muted) space-y-2">
                             <p className="font-bold">No records found for this period.</p>
                             <p className="text-xs italic">Try adjusting your filters or navigating to a different week.</p>
                         </div>
@@ -250,15 +255,15 @@ export default function TeamCompliancePage() {
 
                 {/* Pagination Controls */}
                 {!loading && totalPages > 1 && (
-                    <div className="px-6 py-4 border-t border-white/5 bg-black/20 flex items-center justify-between">
-                        <p className="text-xs text-gray-500 font-bold">
-                            Showing <span className="text-white">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-white">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of <span className="text-white">{filteredData.length}</span> members
+                    <div className="px-6 py-4 border-t border-(--glass-border) bg-(--hover-bg) flex items-center justify-between">
+                        <p className="text-xs text-(--text-muted) font-bold">
+                            Showing <span className="text-(--text-main)">{(currentPage - 1) * itemsPerPage + 1}</span> to <span className="text-(--text-main)">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> of <span className="text-(--text-main)">{filteredData.length}</span> members
                         </p>
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                                 disabled={currentPage === 1}
-                                className="p-2 rounded-lg bg-zinc-900 border border-white/5 text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:text-gray-400 transition-all overflow-hidden"
+                                className="p-2 rounded-lg bg-(--hover-bg) border border-(--glass-border) text-(--text-muted) hover:text-(--text-main) disabled:opacity-30 disabled:hover:text-(--text-muted) transition-all overflow-hidden"
                             >
                                 <IoChevronBack size={16} />
                             </button>
@@ -268,8 +273,8 @@ export default function TeamCompliancePage() {
                                         key={i + 1}
                                         onClick={() => setCurrentPage(i + 1)}
                                         className={`w-8 h-8 rounded-lg text-xs font-black transition-all ${currentPage === i + 1
-                                            ? "bg-amber-500 text-black shadow-lg shadow-amber-500/20"
-                                            : "text-gray-500 hover:text-white hover:bg-white/5"
+                                            ? "bg-(--primary) text-(--text-inverse) shadow-lg shadow-(--primary-glow)"
+                                            : "text-(--text-muted) hover:text-(--text-main) hover:bg-white/5"
                                             }`}
                                     >
                                         {i + 1}
@@ -279,7 +284,7 @@ export default function TeamCompliancePage() {
                             <button
                                 onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                                 disabled={currentPage === totalPages}
-                                className="p-2 rounded-lg bg-zinc-900 border border-white/5 text-gray-400 hover:text-white disabled:opacity-30 disabled:hover:text-gray-400 transition-all overflow-hidden"
+                                className="p-2 rounded-lg bg-(--hover-bg) border border-(--glass-border) text-(--text-muted) hover:text-(--text-main) disabled:opacity-30 disabled:hover:text-(--text-muted) transition-all overflow-hidden"
                             >
                                 <IoChevronForward size={16} />
                             </button>

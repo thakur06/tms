@@ -87,27 +87,27 @@ export default function TicketModal({ isOpen, onClose, onSuccess, projects, user
                         initial={{ opacity: 0, scale: 0.98, y: 10 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.98, y: 10 }}
-                        className="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-zinc-950 border border-white/10 rounded-3xl shadow-2xl overflow-hidden"
+                        className="relative w-full max-w-lg max-h-[90vh] flex flex-col bg-(--app-bg) border border-(--glass-border) rounded-3xl shadow-2xl overflow-hidden"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Header - Compact */}
-                        <div className="bg-linear-to-r from-zinc-900 via-amber-900/5 to-zinc-900 border-b border-white/5 p-4 flex items-center justify-between shrink-0">
+                        <div className="bg-(--glass-surface) border-(--glass-border) p-4 flex items-center justify-between shrink-0">
                             <div className="flex items-center gap-3">
-                                <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500 shadow-inner">
+                                <div className="w-8 h-8 rounded-lg bg-(--primary-glow) border border-(--primary-glow) flex items-center justify-center text-(--primary) shadow-inner">
                                     <IoInformationCircleOutline size={18} />
                                 </div>
                                 <div>
-                                    <h2 className="text-sm font-black text-white leading-tight">
+                                    <h2 className="text-sm font-black text-(--text-main) leading-tight">
                                         {ticket ? 'Edit Ticket' : 'New Ticket'}
                                     </h2>
-                                    <p className="text-[9px] font-bold text-gray-500 uppercase tracking-widest leading-none">
+                                    <p className="text-[9px] font-bold text-(--text-muted) uppercase tracking-widest leading-none">
                                         {ticket ? `#${ticket.id}` : 'Create a new issue'}
                                     </p>
                                 </div>
                             </div>
                             <button
                                 onClick={onClose}
-                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:text-white hover:bg-white/10 transition-all border border-white/5"
+                                className="w-7 h-7 flex items-center justify-center rounded-lg bg-(--hover-bg) text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) transition-all border border-(--glass-border)"
                             >
                                 <IoCloseOutline size={18} />
                             </button>
@@ -116,10 +116,10 @@ export default function TicketModal({ isOpen, onClose, onSuccess, projects, user
                         {/* Body - Optimized Spacing */}
                         <form onSubmit={handleSubmit} className="p-4 space-y-4 overflow-y-auto custom-scrollbar">
                             <div className="space-y-1">
-                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest px-0.5">Title</label>
+                                <label className="text-[9px] font-black text-(--text-muted) uppercase tracking-widest px-0.5">Title</label>
                                 <input
                                     type="text"
-                                    className="ui-input py-2 text-xs bg-zinc-900/50 border-white/5 focus:border-amber-500/50"
+                                    className="ui-input py-2 text-xs bg-(--app-bg) border-(--glass-border) focus:border-(--primary)"
                                     placeholder="Brief summary..."
                                     required
                                     value={formData.title}
@@ -186,37 +186,37 @@ export default function TicketModal({ isOpen, onClose, onSuccess, projects, user
                             />
 
                             <div className="space-y-1">
-                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest px-0.5">Est. Completion Date</label>
+                                <label className="text-[9px] font-black text-(--text-muted) uppercase tracking-widest px-0.5">Est. Completion Date</label>
                                 <input
                                     type="date"
-                                    className="ui-input py-2 text-xs bg-zinc-900/50 border-white/5 focus:border-amber-500/50 scheme-dark"
+                                    className="ui-input py-2 text-xs h-20 bg-(--input-bg) border-(--input-border) focus:border-(--primary)"
                                     value={formData.estimated_date}
                                     onChange={e => setFormData({ ...formData, estimated_date: e.target.value })}
                                 />
                             </div>
 
                             <div className="space-y-1">
-                                <label className="text-[9px] font-black text-gray-500 uppercase tracking-widest px-0.5">Description</label>
+                                <label className="text-[9px] font-black text-(--text-muted) uppercase tracking-widest px-0.5">Description</label>
                                 <textarea
-                                    className="ui-input min-h-[80px] resize-y py-2 text-xs bg-zinc-900/50 border-white/5 focus:border-amber-500/50"
+                                    className="ui-input min-h-[80px] resize-y py-2 text-xs bg-(--input-bg) border border-(--input-border) focus:border-(--primary)"
                                     placeholder="Detailed description..."
                                     value={formData.description}
                                     onChange={e => setFormData({ ...formData, description: e.target.value })}
                                 />
                             </div>
 
-                            <div className="flex justify-end gap-2 pt-4 border-t border-white/5">
+                            <div className="flex justify-end gap-2 pt-4 border-t border-(--glass-border)">
                                 <button
                                     type="button"
                                     onClick={onClose}
-                                    className="h-8 px-4 text-[9px] font-black uppercase tracking-wider text-gray-400 hover:text-white bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 transition-all"
+                                    className="h-8 px-4 text-[9px] font-black uppercase tracking-wider text-(--text-muted) hover:text-(--text-main) bg-(--hover-bg) hover:bg-(--hover-bg) rounded-lg border border-(--glass-border) transition-all"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="h-8 px-4 text-[9px] font-black uppercase tracking-wider bg-amber-500 hover:bg-amber-400 text-zinc-950 rounded-lg shadow-lg shadow-amber-500/20 flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
+                                    className="h-8 px-4 text-[9px] font-black uppercase tracking-wider bg-(--primary) text-(--text-inverse) rounded-lg shadow-lg shadow-(--primary-glow) flex items-center justify-center gap-1.5 transition-all disabled:opacity-50"
                                 >
                                     {loading ? 'Saving...' : 'Save'}
                                 </button>

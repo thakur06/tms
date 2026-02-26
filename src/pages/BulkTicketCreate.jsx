@@ -117,20 +117,20 @@ export default function BulkTicketCreate() {
             {/* Header */}
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6">
                 <div>
-                    <nav className="flex items-center gap-2 text-xs font-black text-gray-400 uppercase tracking-widest mb-2">
+                    <nav className="flex items-center gap-2 text-xs font-black text-(--text-muted) uppercase tracking-[0.2em] mb-2">
                         <span>Workspace</span>
                         <span className="opacity-30">/</span>
-                        <span className="text-amber-500">Tickets</span>
+                        <span className="text-(--primary)">Tickets</span>
                     </nav>
                     <div className="flex items-center gap-4">
-                        <div className="p-3 bg-amber-500/10 rounded-xl border border-amber-500/20 text-amber-500 shrink-0">
+                        <div className="p-3 bg-(--primary-glow) rounded-xl border border-(--primary-glow) text-(--primary) shrink-0">
                             <IoTicketOutline size={24} />
                         </div>
                         <div>
-                            <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight uppercase leading-tight">
+                            <h1 className="text-2xl md:text-3xl font-black text-(--text-main) tracking-tight uppercase leading-tight">
                                 Bulk Ticket Entry
                             </h1>
-                            <p className="text-gray-500 font-bold text-xs md:text-sm mt-1">
+                            <p className="text-(--text-muted) font-bold text-xs md:text-sm mt-1">
                                 Quickly add multiple tasks to your projects using the grid below.
                             </p>
                         </div>
@@ -140,7 +140,7 @@ export default function BulkTicketCreate() {
                 <div className="flex items-center gap-3">
                     <button
                         onClick={handleAddRow}
-                        className="flex items-center gap-2 px-5 py-3 rounded-xl border border-dashed border-white/20 text-gray-400 hover:text-white hover:border-amber-500 hover:bg-amber-500/5 transition-all group font-black uppercase tracking-widest text-xs"
+                        className="flex items-center gap-2 px-5 py-3 rounded-xl border border-dashed border-(--glass-border) text-(--text-muted) hover:text-(--text-main) hover:border-(--primary) hover:bg-(--primary-glow) transition-all group font-black uppercase tracking-widest text-xs"
                     >
                         <IoAdd className="group-hover:scale-110 transition-transform" />
                         <span>Add Row</span>
@@ -149,8 +149,8 @@ export default function BulkTicketCreate() {
                         onClick={handleSave}
                         disabled={loading}
                         className={`flex items-center gap-2 px-6 py-3 rounded-xl font-black uppercase tracking-widest text-xs transition-all shadow-lg ${loading
-                            ? 'bg-zinc-800 text-gray-500 cursor-not-allowed'
-                            : 'bg-emerald-500 hover:bg-emerald-400 text-white shadow-emerald-500/20 active:scale-95'}`}
+                            ? 'bg-(--hover-bg) text-(--text-muted) cursor-not-allowed border-(--glass-border)'
+                            : 'bg-(--success) hover:bg-(--success) text-(--text-inverse) shadow-(--success-glow) active:scale-95'}`}
                     >
                         {loading ? 'Saving...' : (
                             <>
@@ -163,23 +163,23 @@ export default function BulkTicketCreate() {
             </div>
 
             {/* Grid Container */}
-            <div className="bg-zinc-900 border border-white/5 rounded-2xl shadow-xl overflow-hidden">
+            <div className="bg-(--app-bg) border border-(--glass-border) rounded-2xl shadow-xl overflow-hidden">
                 <div className="overflow-x-auto min-h-[400px]">
                     <table className="w-full text-left border-collapse">
                         <thead>
-                            <tr className="bg-zinc-950/50 border-b border-white/5">
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-12 text-center">#</th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[200px]">Project <span className="text-red-500">*</span></th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[220px]">Task Name <span className="text-red-500">*</span></th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-64">Priority</th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-64">Status</th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-48">Est. Date</th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[200px]">Reviewer</th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 min-w-[220px]">Remarks (Desc)</th>
-                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-gray-500 w-12 text-center">Action</th>
+                            <tr className="bg-(--hover-bg) border-b border-(--glass-border)">
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-(--text-muted) w-12 text-center">#</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-(--text-muted) min-w-[200px]">Project <span className="text-(--rose)">*</span></th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-(--text-muted) min-w-[220px]">Task Name <span className="text-(--rose)">*</span></th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-(--text-muted) w-64">Priority</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-(--text-muted) w-64">Status</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-(--text-muted) w-48">Est. Date</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-(--text-muted) min-w-[200px]">Reviewer</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-(--text-muted) min-w-[220px]">Remarks (Desc)</th>
+                                <th className="p-2 text-[10px] font-black uppercase tracking-widest text-(--text-muted) w-12 text-center">Action</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-white/5">
+                        <tbody className="divide-y divide-(--glass-border)">
                             <AnimatePresence initial={false}>
                                 {rows.map((row, index) => (
                                     <motion.tr
@@ -187,9 +187,9 @@ export default function BulkTicketCreate() {
                                         initial={{ opacity: 0, y: 10 }}
                                         animate={{ opacity: 1, y: 0 }}
                                         exit={{ opacity: 0, x: -10 }}
-                                        className="group bg-zinc-900 hover:bg-zinc-800/50 transition-colors"
+                                        className="group bg-(--app-bg) hover:bg-(--hover-bg) transition-colors"
                                     >
-                                        <td className="p-3 text-center text-xs font-mono text-gray-600">
+                                        <td className="p-3 text-center text-xs font-mono text-(--text-muted)">
                                             {index + 1}
                                         </td>
                                         <td className="p-2">
@@ -209,7 +209,7 @@ export default function BulkTicketCreate() {
                                                 value={row.title}
                                                 onChange={(e) => handleChange(row.id, 'title', e.target.value)}
                                                 placeholder="Enter task name..."
-                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-2 py-1.5 text-[11px] text-white focus:outline-none focus:border-amber-500/50 placeholder-gray-700 font-medium transition-all uppercase"
+                                                className="w-full bg-(--input-bg) border border-(--glass-border) rounded-xl px-2 py-1.5 text-[11px] text-(--text-main) focus:outline-none focus:border-(--primary) placeholder-(--text-muted) font-medium transition-all uppercase"
                                             />
                                         </td>
                                         <td className="p-2">
@@ -237,7 +237,7 @@ export default function BulkTicketCreate() {
                                                 type="date"
                                                 value={row.estimated_date}
                                                 onChange={(e) => handleChange(row.id, 'estimated_date', e.target.value)}
-                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-2 py-1 text-[10px] font-black text-amber-500 focus:outline-none focus:border-amber-500/50 scheme-dark"
+                                                className="w-full bg-(--input-bg) border border-(--glass-border) rounded-xl px-2 py-1 text-[10px] font-black text-(--primary) focus:outline-none focus:border-(--primary)"
                                             />
                                         </td>
                                         <td className="p-2">
@@ -257,13 +257,13 @@ export default function BulkTicketCreate() {
                                                 value={row.description}
                                                 onChange={(e) => handleChange(row.id, 'description', e.target.value)}
                                                 placeholder="Add remarks..."
-                                                className="w-full bg-black/20 border border-white/5 rounded-xl px-3 py-1.5 text-[10px] text-gray-400 focus:text-white focus:outline-none transition-all placeholder:italic"
+                                                className="w-full bg-(--input-bg) border border-(--glass-border) rounded-xl px-3 py-1.5 text-[10px] text-(--text-muted) focus:text-(--text-main) focus:outline-none transition-all placeholder:italic"
                                             />
                                         </td>
                                         <td className="p-2 text-center">
                                             <button
                                                 onClick={() => handleDeleteRow(row.id)}
-                                                className="p-2 text-gray-600 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-colors"
+                                                className="p-2 text-(--text-muted) hover:text-(--rose) hover:bg-(--rose-glow) rounded-lg transition-colors"
                                                 title="Delete Row"
                                             >
                                                 <IoTrash size={14} />
@@ -278,7 +278,7 @@ export default function BulkTicketCreate() {
 
             </div>
 
-            <div className="flex items-start gap-3 p-4 bg-blue-500/10 border border-blue-500/20 rounded-xl text-blue-400 text-xs leading-relaxed max-w-3xl mx-auto">
+            <div className="flex items-start gap-3 p-4 bg-(--secondary-glow) border border-(--secondary-glow) rounded-xl text-(--secondary) text-xs leading-relaxed max-w-3xl mx-auto">
                 <IoInformationCircle size={20} className="shrink-0 mt-0.5" />
                 <p>
                     <strong>Tip:</strong> You can add multiple tasks quickly here.

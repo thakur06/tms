@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { 
-  IoAddCircle, IoClose, IoLocationOutline, 
-  IoDocumentTextOutline, IoCodeSlash, IoRocketOutline 
+import {
+  IoAddCircle, IoClose, IoLocationOutline,
+  IoDocumentTextOutline, IoCodeSlash, IoRocketOutline
 } from 'react-icons/io5'
 import { toast } from 'react-toastify'
 
@@ -33,7 +33,7 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject, p
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     // Validations
     if (!formData.name.trim() || !formData.location.trim() || !formData.client.trim()) {
       toast.error('Please fill in all required fields')
@@ -64,25 +64,25 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject, p
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-        className="ui-card w-full max-w-md p-0 overflow-hidden shadow-2xl border-white/10 bg-zinc-900"
+        className="ui-card w-full max-w-md p-0 overflow-hidden shadow-2xl border-(--glass-border) bg-(--app-bg)"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header Section */}
-        <div className="relative px-8 pt-8 pb-6 border-b border-white/5 bg-white/5">
+        <div className="relative px-8 pt-8 pb-6 border-b border-(--glass-border) bg-(--hover-bg)">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 bg-amber-500/10 rounded-2xl flex items-center justify-center border border-amber-500/20 shadow-lg shadow-amber-500/10">
-                <IoRocketOutline className="w-6 h-6 text-amber-500" />
+              <div className="w-12 h-12 bg-(--primary-glow) rounded-2xl flex items-center justify-center border border-(--primary-glow) shadow-(--primary-glow)">
+                <IoRocketOutline className="w-6 h-6 text-(--primary)" />
               </div>
               <div>
-                <h2 className="text-2xl font-black text-white tracking-tight">
+                <h2 className="text-2xl font-black text-(--text-main) tracking-tight">
                   {projectToEdit ? 'Edit Project' : 'New Project'}
                 </h2>
-                <p className="text-sm font-bold text-gray-400">
+                <p className="text-sm font-bold text-(--text-muted)">
                   {projectToEdit ? 'Update project details' : 'Expand your production portfolio'}
                 </p>
               </div>
@@ -98,18 +98,18 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject, p
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-8 space-y-6">
-          
+
           {/* Project Name */}
           <div className="space-y-2">
-            <label className="ui-label flex items-center gap-2 text-gray-400">
-              <IoDocumentTextOutline size={14} className="text-amber-500" />
+            <label className="ui-label flex items-center gap-2 text-(--text-muted)">
+              <IoDocumentTextOutline size={14} className="text-(--primary)" />
               Project Title
             </label>
             <input
               type="text"
               value={formData.name}
               onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              className="ui-input w-full bg-zinc-950 border-white/10 text-white focus:border-amber-500 focus:ring-amber-500/20"
+              className="ui-input w-full bg-zinc-950 border-white/10 text-white focus:border-(--primary) focus:ring-(--primary-glow)"
               placeholder="e.g. Global Expansion Phase I"
               disabled={isLoading}
               autoFocus
@@ -119,15 +119,15 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject, p
           <div className="grid grid-cols-2 gap-4">
             {/* Client */}
             <div className="space-y-2">
-              <label className="ui-label flex items-center gap-2 text-gray-400">
-                <IoDocumentTextOutline size={14} className="text-amber-500" />
+              <label className="ui-label flex items-center gap-2 text-(--text-muted)">
+                <IoDocumentTextOutline size={14} className="text-(--primary)" />
                 Client
               </label>
               <input
                 type="text"
                 value={formData.client}
                 onChange={(e) => setFormData({ ...formData, client: e.target.value })}
-                className="ui-input w-full bg-zinc-950 border-white/10 text-white focus:border-amber-500 focus:ring-amber-500/20"
+                className="ui-input w-full bg-(--input-bg) border-(--glass-border) text-(--text-main) focus:border-(--primary) focus:ring-(--primary-glow)"
                 placeholder="Client Name"
                 disabled={isLoading}
               />
@@ -135,30 +135,30 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject, p
 
             {/* Location */}
             <div className="space-y-2">
-              <label className="ui-label flex items-center gap-2 text-gray-400">
-                <IoLocationOutline size={14} className="text-amber-500" />
+              <label className="ui-label flex items-center gap-2 text-(--text-muted)">
+                <IoLocationOutline size={14} className="text-(--primary)" />
                 Region
               </label>
               <input
                 type="text"
                 value={formData.location}
                 onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="ui-input w-full bg-zinc-950 border-white/10 text-white focus:border-amber-500 focus:ring-amber-500/20"
+                className="ui-input w-full bg-(--input-bg) border-(--glass-border) text-(--text-main) focus:border-(--primary) focus:ring-(--primary-glow)"
                 placeholder="London, UK"
                 disabled={isLoading}
               />
             </div>
-            
+
             {/* Status */}
             <div className="space-y-2 col-span-2 sm:col-span-1">
-              <label className="ui-label flex items-center gap-2 text-gray-400">
-                <IoRocketOutline size={14} className="text-amber-500" />
+              <label className="ui-label flex items-center gap-2 text-(--text-muted)">
+                <IoRocketOutline size={14} className="text-(--primary)" />
                 Status
               </label>
               <select
                 value={formData.status}
                 onChange={(e) => setFormData({ ...formData, status: e.target.value })}
-                className="ui-input w-full bg-zinc-950 border-white/10 text-white focus:border-amber-500 focus:ring-amber-500/20"
+                className="ui-input w-full bg-(--input-bg) border-(--glass-border) text-(--text-main) focus:border-(--primary) focus:ring-(--primary-glow)"
                 disabled={isLoading}
               >
                 <option value="Active">Active</option>
@@ -174,7 +174,7 @@ export default function CreateProjectModal({ isOpen, onClose, onCreateProject, p
             <button
               type="submit"
               disabled={isLoading || !formData.name || !formData.client || !formData.location}
-              className="ui-btn w-full h-14 justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed bg-amber-500 hover:bg-amber-400 text-zinc-950 font-black shadow-lg shadow-amber-500/20"
+              className="ui-btn w-full h-14 justify-center gap-3 disabled:opacity-50 disabled:grayscale disabled:cursor-not-allowed bg-(--primary) hover:bg-(--primary-light) text-(--text-inverse) font-black shadow-(--primary-glow)"
             >
               {isLoading ? (
                 <div className="w-5 h-5 border-2 border-zinc-900/30 border-t-zinc-900 rounded-full animate-spin" />

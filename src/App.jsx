@@ -23,6 +23,7 @@ import PublicRoute from "./security/PublicRoute";
 import AdminRoute from "./security/AdminRoute";
 import AdminOrManagerRoute from "./security/AdminOrManagerRoute";
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { ToastContainer, Zoom } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
@@ -98,24 +99,36 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <AppContent />
-        <ToastContainer
-          position="top-center"
-          autoClose={2000}
-          hideProgressBar={true}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable={false}
-          pauseOnHover
-          theme="dark"
-          limit={1}
-          closeButton={false}
-          transition={Zoom}
-        />
+        <ThemeProvider>
+          <AppWithTheme />
+        </ThemeProvider>
       </AuthProvider>
     </BrowserRouter>
+  );
+}
+
+function AppWithTheme() {
+  const { theme } = useTheme();
+
+  return (
+    <>
+      <AppContent />
+      <ToastContainer
+        position="top-center"
+        autoClose={2000}
+        hideProgressBar={true}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable={false}
+        pauseOnHover
+        theme={theme === 'system' ? 'auto' : theme}
+        limit={1}
+        closeButton={false}
+        transition={Zoom}
+      />
+    </>
   );
 }
 
