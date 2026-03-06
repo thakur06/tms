@@ -36,11 +36,15 @@
   /* Rose */
   --amber: #fbbf24;
   /* Amber */
+  --hard-pink: #ff1493;
+  /* Deep Pink */
+  --hard-pink-glow: rgba(255, 20, 147, 0.4);
 
   --primary-glow: rgba(129, 140, 248, 0.4);
   --secondary-glow: rgba(168, 85, 247, 0.4);
   --accent-glow: rgba(34, 211, 238, 0.4);
   --rose-glow: rgba(244, 63, 94, 0.4);
+  --pink-glow: rgba(244, 114, 182, 0.4);
   --selection-bg: rgba(129, 140, 248, 0.3);
 
   /* Functional Colors */
@@ -61,6 +65,7 @@
   --gradient-primary: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
   --gradient-vibrant: linear-gradient(135deg, #6366f1 0%, #d946ef 50%, #22d3ee 100%);
   --gradient-rose: linear-gradient(135deg, #f43f5e 0%, #fb923c 100%);
+  --gradient-hard-pink: linear-gradient(135deg, #ff1493 0%, #ff00ff 100%);
 
   /* UI Variables */
   --hover-bg: rgba(255, 255, 255, 0.06);
@@ -86,6 +91,9 @@
   /* Darker Rose */
   --amber: #b45309;
   /* Darker Amber */
+  --hard-pink: #db2777;
+  /* Deep Pink (Light mode) */
+  --hard-pink-glow: rgba(219, 39, 119, 0.35);
 
   --primary-glow: rgba(79, 70, 229, 0.35);
   --secondary-glow: rgba(147, 51, 234, 0.35);
@@ -132,11 +140,8 @@
   --accent: #22d3ee;
   --rose: #f43f5e;
   --amber: #fbbf24;
-
-  --primary-glow: rgba(129, 140, 248, 0.4);
-  --secondary-glow: rgba(168, 85, 247, 0.4);
-  --accent-glow: rgba(34, 211, 238, 0.4);
-  --rose-glow: rgba(244, 63, 94, 0.4);
+  --hard-pink: #ff1493;
+  --hard-pink-glow: rgba(255, 20, 147, 0.5);
   --selection-bg: rgba(129, 140, 248, 0.35);
 
   --text-main: #f1f5f9;

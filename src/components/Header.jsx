@@ -154,7 +154,7 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
             <nav className="flex items-center gap-2 text-[10px] font-black text-gray-500 uppercase tracking-widest mb-1">
               <span>Overview</span>
               <span className="opacity-20">/</span>
-              <span className="text-amber-500">{getPageTitle()}</span>
+              <span className="text-(--hard-pink)">{getPageTitle()}</span>
             </nav>
             <h2 className="text-xl font-black tracking-tight text-(--text-main) transition-colors uppercase leading-none">{getPageTitle()}</h2>
           </div>
@@ -184,7 +184,7 @@ export default function Header({ onMenuClick, isCollapsed, onCollapseToggle }) {
           <div className="relative">
             <button
               onClick={() => setNotifOpen(!notifOpen)}
-              className="relative p-2.5 rounded-xl transition-all duration-200 text-gray-500 hover:bg-amber-500/10 hover:text-amber-500 border border-transparent hover:border-amber-500/20">
+              className="relative p-2.5 rounded-xl transition-all duration-200 text-gray-500 hover:bg-(--hard-pink-glow) hover:text-(--hard-pink) border border-transparent hover:border-(--hard-pink-glow)">
               <IoNotificationsOutline className="w-5 h-5" />
               {notifications.some(n => n.type === 'warning') && (
                 <span className="absolute top-2.5 right-2.5 w-2 h-2 bg-red-500 rounded-full box-content border-2 border-(--app-bg)" />

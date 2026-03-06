@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo, useRef } from "react";
+import { Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   IoChevronBack,
@@ -570,20 +571,18 @@ export default function WeeklyTimeLog({
           <nav className="flex items-center gap-2 text-xs font-black text-(--text-muted) uppercase tracking-widest mb-2">
             <span>Workspace</span>
             <span className="opacity-30">/</span>
-            <span className="text-(--primary)">Weekly Log</span>
+            <Link to="/time-log" className="hover:text-(--hard-pink) transition-colors">Weekly Log</Link>
           </nav>
-          <div className="flex items-center gap-4">
-            <div className="p-3 bg-(--primary-glow) rounded-xl border border-(--primary-glow) text-(--primary) shrink-0">
-              <IoCalendar size={24} />
-            </div>
-            <div>
-              <h1 className="text-2xl md:text-3xl font-black text-(--text-main) tracking-tight uppercase leading-tight">
-                Weekly Timesheet
-              </h1>
-              <p className="text-(--text-muted) font-bold text-xs md:text-sm mt-1">
-                {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
-              </p>
-            </div>
+          <div className="flex items-center gap-2 text-(--hard-pink) bg-(--hard-pink-glow) px-3 py-1.5 rounded-full border border-(--hard-pink-glow)">
+            <IoCalendar size={24} />
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-black text-(--text-main) tracking-tight uppercase leading-tight">
+              Weekly Timesheet
+            </h1>
+            <p className="text-(--text-muted) font-bold text-xs md:text-sm mt-1">
+              {weekDays[0].toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} - {weekDays[6].toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+            </p>
           </div>
         </div>
 
@@ -827,13 +826,13 @@ export default function WeeklyTimeLog({
                 return (
                   <th key={day.toISOString()} className="px-2 py-4 text-center border-b border-(--glass-border) min-w-[80px]">
                     <div className="flex flex-col items-center gap-1">
-                      <span className={`text-[10px] font-bold uppercase tracking-widest ${isToday ? 'text-(--primary)' :
+                      <span className={`text-[10px] font-bold uppercase tracking-widest ${isToday ? 'text-(--pink)' :
                         isWeekend ? 'text-(--rose)' : 'text-(--text-muted)'
                         }`}>
                         {day.toLocaleDateString("en-US", { weekday: "short" })}
                       </span>
                       <div className={`flex flex-col items-center justify-center w-8 h-8 rounded-full border ${isToday
-                        ? 'bg-(--primary) text-(--text-inverse) border-(--primary) shadow-lg shadow-(--primary-glow)'
+                        ? 'bg-(--primary) text-(--text-inverse) border-(--primary) shadow-(--primary-glow)'
                         : isWeekend
                           ? 'bg-(--rose-glow) text-(--rose) border-(--rose-glow)'
                           : 'bg-transparent text-(--text-main) border-transparent'
@@ -1070,7 +1069,7 @@ export default function WeeklyTimeLog({
               particleCount: 150,
               spread: 70,
               origin: { y: 0.6 },
-              colors: ['#4f46e5', '#9333ea', '#22d3ee', '#f43f5e']
+              colors: ['#4f46e5', '#9333ea', '#22d3ee', '#f43f5e', '#ffffff']
             });
             fetchTimesheetStatus(); // Refresh status to lock UI
           } catch (e) {

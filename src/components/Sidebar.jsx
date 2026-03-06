@@ -74,6 +74,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
         { path: '/users', label: 'User Management', icon: IoPersonOutline, activeIcon: IoPerson },
         { path: '/project-assignments', label: 'Project Assignments', icon: IoLayersOutline, activeIcon: IoLayers },
         { path: '/reports-analytics', label: 'Reports & Analytics', icon: IoStatsChartOutline, activeIcon: IoStatsChart },
+        { path: '/pipe-specs', label: 'Pipe Specifications', icon: IoLayersOutline, activeIcon: IoLayers },
       ]
     }
   ];
@@ -139,7 +140,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
                   to={link.path}
                   onClick={() => window.innerWidth < 1024 && onClose()}
                   className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${active
-                    ? 'text-white bg-(--gradient-primary) shadow-lg shadow-(--primary-glow) font-black'
+                    ? 'text-white bg-(--gradient-hard-pink) shadow-(--hard-pink-glow) font-black'
                     : 'text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) font-bold'
                     } ${isCollapsed ? 'lg:justify-center lg:px-0' : ''}`}
                   title={isCollapsed ? link.label : ''}
@@ -179,7 +180,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
                       title={isCollapsed ? group.name : ''}
                     >
                       <div className="flex items-center gap-3">
-                        <GroupIcon className={`w-4 h-4 transition-colors ${isOpen ? 'text-(--primary)' : 'text-(--text-muted)'}`} />
+                        <GroupIcon className={`w-4 h-4 transition-colors ${isOpen ? 'text-(--hard-pink)' : 'text-(--text-muted)'}`} />
                         {!isCollapsed && (
                           <span className={`text-[10px] font-black uppercase tracking-[0.2em] ${isOpen ? 'text-(--text-main)' : 'text-(--text-muted)'}`}>
                             {group.name}
@@ -189,7 +190,7 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
                       {!isCollapsed && (
                         <motion.div
                           animate={{ rotate: isOpen ? 180 : 0 }}
-                          className="text-(--text-muted) group-hover:text-(--primary)"
+                          className="text-(--text-muted) group-hover:text-(--hard-pink)"
                         >
                           <IoChevronDown size={12} />
                         </motion.div>
@@ -220,12 +221,12 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
                                   to={link.path}
                                   onClick={() => window.innerWidth < 1024 && onClose()}
                                   className={`relative flex items-center gap-3 px-4 py-2.5 rounded-xl transition-all duration-200 group ${active
-                                    ? 'text-white bg-(--gradient-primary) shadow-lg shadow-(--primary-glow) font-black'
+                                    ? 'text-white bg-(--gradient-hard-pink) shadow-(--hard-pink-glow) font-black'
                                     : 'text-(--text-muted) hover:text-(--text-main) hover:bg-(--hover-bg) font-bold'
                                     } ${isCollapsed ? 'lg:justify-center lg:px-0' : ''}`}
                                   title={isCollapsed ? link.label : ''}
                                 >
-                                  <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'text-white scale-110' : 'text-(--text-muted) group-hover:text-(--primary) group-hover:scale-110'}`} />
+                                  <Icon className={`w-4 h-4 transition-transform duration-200 ${active ? 'text-white scale-110' : 'text-(--text-muted) group-hover:text-(--hard-pink) group-hover:scale-110'}`} />
                                   {!isCollapsed && <span className="text-[11px] font-bold tracking-tight">{link.label}</span>}
                                   {active && !isCollapsed && (
                                     <motion.div
@@ -247,8 +248,8 @@ export default function Sidebar({ isOpen, onClose, isCollapsed }) {
           </nav>
 
 
-        </div>
-      </aside>
+        </div >
+      </aside >
     </>
   );
 }

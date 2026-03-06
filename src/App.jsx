@@ -18,6 +18,7 @@ import MyTickets from './pages/MyTickets';
 import TicketViewPage from './pages/TicketViewPage';
 import BulkTicketCreate from './pages/BulkTicketCreate';
 import NotFound from './pages/NotFound';
+import PipeSpecs from './pages/PipeSpecs';
 import ProtectedRoutes from "./security/ProtectedRoutes";
 import PublicRoute from "./security/PublicRoute";
 import AdminRoute from "./security/AdminRoute";
@@ -87,6 +88,7 @@ function AppContent() {
             <Analytics />
           </AdminRoute>
         } />
+        <Route path="/pipe-specs" element={<PipeSpecs />} />
       </Route>
 
       {/* 404 Not Found */}

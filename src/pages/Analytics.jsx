@@ -49,10 +49,10 @@ const formatDuration = (hours, minutes) => {
 
 const CustomInput = ({ value, onClick, placeholder, icon: Icon }) => (
   <button
-    className="w-full border rounded-xl px-3 py-2 text-left text-(--text-main) placeholder-(--text-muted) focus:outline-none focus:ring-2 focus:ring-(--primary-glow) focus:border-(--primary) flex items-center gap-2 transition-all shadow-sm bg-(--input-bg) border-(--glass-border)"
+    className="w-full border rounded-xl px-3 py-2 text-left text-(--text-main) placeholder-(--text-muted) focus:outline-none focus:ring-2 focus:ring-(--hard-pink-glow) focus:border-(--hard-pink) flex items-center gap-2 transition-all shadow-sm bg-(--input-bg) border-(--glass-border)"
     onClick={onClick}
   >
-    {Icon && <Icon className="text-(--primary)" size={16} />}
+    {Icon && <Icon className="text-(--hard-pink)" size={16} />}
     <span className={`text-[11px] truncate ${value ? "text-(--text-main) font-bold" : "text-(--text-muted)"}`}>
       {value || placeholder}
     </span>
@@ -721,7 +721,7 @@ export const Analytics = () => {
           <button
             onClick={() => setActiveTab("overview")}
             className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "overview"
-              ? "bg-(--primary) text-(--text-inverse) shadow-(--primary-glow)"
+              ? "bg-(--pink) text-(--text-inverse) shadow-(--pink-glow)"
               : "text-(--text-muted) hover:text-(--text-main)"
               }`}
           >
@@ -730,7 +730,7 @@ export const Analytics = () => {
           <button
             onClick={() => setActiveTab("reports")}
             className={`px-6 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === "reports"
-              ? "bg-(--primary) text-(--text-inverse) shadow-(--primary-glow)"
+              ? "bg-(--pink) text-(--text-inverse) shadow-(--pink-glow)"
               : "text-(--text-muted) hover:text-(--text-main)"
               }`}
           >
@@ -740,12 +740,12 @@ export const Analytics = () => {
       </header>
 
       {/* Filters Section */}
-      <div className="relative z-10 p-4 border border-(--glass-border) shadow-2xl rounded-2xl bg-(--hover-bg) backdrop-blur-md">
-        <div className="flex flex-wrap items-end gap-4 sm:gap-6">
+      <div className="relative z-10 p-5 border border-(--glass-border) shadow-2xl rounded-3xl bg-(--glass-surface) backdrop-blur-xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-end">
 
-          {/* 1. Date Range */}
-          <div className="flex flex-col gap-1.5 min-w-[240px]">
-            <label className="text-[9px] font-black text-(--text-muted) uppercase tracking-widest flex items-center gap-2 px-1">
+          {/* 1. Date Range Group */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-(--text-muted) uppercase tracking-widest flex items-center gap-2 px-1">
               <FiCalendar className="text-(--primary)" /> Date Range
             </label>
             <div className="flex gap-2">
@@ -756,9 +756,7 @@ export const Analytics = () => {
                   selectsStart
                   startDate={startDate}
                   endDate={endDate}
-                  customInput={
-                    <CustomInput placeholder="Start" icon={null} />
-                  }
+                  customInput={<CustomInput placeholder="From" />}
                 />
               </div>
               <div className="relative z-20 flex-1">
@@ -769,72 +767,83 @@ export const Analytics = () => {
                   startDate={startDate}
                   endDate={endDate}
                   minDate={startDate}
-                  customInput={
-                    <CustomInput placeholder="End" icon={null} />
-                  }
+                  customInput={<CustomInput placeholder="To" />}
                 />
               </div>
             </div>
           </div>
 
-          {/* 2. Filters */}
-          <div className="flex flex-wrap items-end gap-3 flex-1">
-            <MultiSelect
-              label="Dept"
-              options={deptsList}
-              selectedValues={tempSelectedDepts}
-              onChange={setTempSelectedDepts}
-              icon={FiLayers}
-            />
-            <MultiSelect
-              label="Location"
-              options={locationsList}
-              selectedValues={tempSelectedLocations}
-              onChange={setTempSelectedLocations}
-              icon={IoLocationOutline}
-            />
-            <MultiSelect
-              label="User"
-              options={filteredUsersForFilter.map((u) => u.name)}
-              selectedValues={tempSelectedUsers}
-              onChange={setTempSelectedUsers}
-              icon={FiUsers}
-            />
-            <MultiSelect
-              label="Project"
-              options={projectsList.map(p => p.name)}
-              selectedValues={tempSelectedProjects}
-              onChange={setTempSelectedProjects}
-              icon={IoFolderOutline}
-            />
+          {/* 2. Organizations Group */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-(--text-muted) uppercase tracking-widest flex items-center gap-2 px-1">
+              <MdBusiness className="text-(--primary)" /> Organization
+            </label>
+            <div className="flex gap-2">
+              <MultiSelect
+                label="Dept"
+                options={deptsList}
+                selectedValues={tempSelectedDepts}
+                onChange={setTempSelectedDepts}
+                icon={FiLayers}
+              />
+              <MultiSelect
+                label="Location"
+                options={locationsList}
+                selectedValues={tempSelectedLocations}
+                onChange={setTempSelectedLocations}
+                icon={IoLocationOutline}
+              />
+            </div>
           </div>
 
-          {/* 3. Actions */}
-          <div className="flex items-center gap-2 shrink-0">
+          {/* 3. Entities Group */}
+          <div className="space-y-2">
+            <label className="text-[10px] font-black text-(--text-muted) uppercase tracking-widest flex items-center gap-2 px-1">
+              <FiUsers className="text-(--hard-pink)" /> Entities
+            </label>
+            <div className="flex gap-2">
+              <MultiSelect
+                label="User"
+                options={filteredUsersForFilter.map((u) => u.name)}
+                selectedValues={tempSelectedUsers}
+                onChange={setTempSelectedUsers}
+                icon={IoPeopleOutline}
+              />
+              <MultiSelect
+                label="Project"
+                options={projectsList.map(p => p.name)}
+                selectedValues={tempSelectedProjects}
+                onChange={setTempSelectedProjects}
+                icon={IoFolderOutline}
+              />
+            </div>
+          </div>
+
+          {/* 4. Actions Group */}
+          <div className="flex items-center flex-wrap gap-2">
             <button
               onClick={handleApplyFilters}
-              className="h-10 px-6 bg-(--primary) text-(--text-inverse) rounded-xl flex items-center gap-2 text-[11px] font-black uppercase tracking-widest hover:bg-(--primary-light) hover:scale-105 active:scale-95 transition-all shadow-(--primary-glow)"
+              className="flex-1 h-10 px-4 bg-(--hard-pink) text-(--text-inverse) rounded-xl flex items-center justify-center gap-2 text-[10px] font-black uppercase tracking-widest hover:scale-[1.02] active:scale-95 transition-all shadow-(--hard-pink-glow)"
             >
               <IoFilter size={14} />
-              Apply Results
+              Filter Results
             </button>
             <button
               onClick={handleClearFilters}
               className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 border border-(--glass-border) text-(--text-muted) hover:border-red-500/50 hover:text-red-500 hover:bg-red-500/5 transition-all"
-              title="Reset All"
+              title="Reset"
             >
               <IoClose size={18} />
             </button>
-            <div className="w-px h-6 bg-white/10 mx-1" />
             <button
               onClick={handleExportExcel}
-              className="h-10 px-4 flex items-center justify-center gap-2 rounded-xl border border-emerald-500/20 bg-emerald-500/10 text-emerald-500 font-black text-[10px] uppercase tracking-widest hover:bg-emerald-500/20 transition-all"
+              className="w-10 h-10 flex items-center justify-center rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/20 transition-all"
               title="Export Excel"
             >
               <IoArrowUp size={14} className="rotate-45" />
-              Excel
             </button>
           </div>
+
 
         </div>
       </div>
@@ -1052,6 +1061,6 @@ export const Analytics = () => {
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </div >
   );
 };

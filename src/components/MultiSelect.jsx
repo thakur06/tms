@@ -31,7 +31,7 @@ const MultiSelect = ({
   );
 
   return (
-    <div className={`multiselect-container flex-1 min-w-[140px] max-w-[200px] ${showLabel ? 'space-y-1.5' : ''} ${className}`}>
+    <div className={`multiselect-container flex-1 min-w-[80px] max-w-[240px] ${showLabel ? 'space-y-1.5' : ''} ${className}`}>
       {showLabel && (
         <label className="text-[9px] font-black text-gray-500 flex items-center justify-between uppercase tracking-widest px-1">
           <div className="flex items-center gap-1.5">
